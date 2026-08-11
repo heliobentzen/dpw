@@ -52,7 +52,7 @@ Use como ponto de partida — adapte ao seu contexto, não copie.
 | Local de uso sem internet | M | A | **Verificar presencialmente** na semana 14 | Repensar o modo de uso (offline-first ou uso administrativo) |
 | Perda de dados / código | B | A | Push diário; backup automático do banco | Restaurar do remoto/backup |
 | Usuários não adotam o sistema | M | A | Protótipo validado; teste com usuário real; capacitação | Ajustar fluxo; simplificar |
-| Vazamento de dados pessoais | B | A | Mapa de dados; minimização; controle de acesso testado | Plano de resposta a incidente (M11) |
+| Vazamento de dados pessoais | B | A | Mapa de dados; minimização; controle de acesso testado | Plano de resposta a incidente (M13) |
 | Apresentação sem internet no auditório | M | M | Vídeo de demonstração gravado | Rodar local com dados de exemplo |
 
 ---

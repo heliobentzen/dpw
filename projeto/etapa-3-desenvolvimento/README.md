@@ -23,10 +23,14 @@ O sistema funcionando, testado e **no ar** — a maior entrega da disciplina.
 
 | Sprint | Semanas | Foco sugerido |
 |---|---|---|
-| S1 | 12–13 | Models, migrações, admin, dados de exemplo |
-| S2 | 14–15 | CRUD principal, views, templates, autenticação |
-| S3 | 16–17 | Regras de negócio, relatórios, testes, deploy |
-| S4 | 18 | Ajustes com a organização parceira, polimento, documentação |
+| S1 | 12–13 | 🔵 Models, migrações, admin, dados de exemplo, **contrato de API** |
+| S2 | 14–15 | 🔵 API completa (serializers, validação, filtros) · 🟣 telas de leitura |
+| S3 | 16–17 | ⚪ Autenticação ponta a ponta, formulários, testes, **deploy** |
+| S4 | 18 | Ajustes com a organização parceira, acessibilidade, documentação |
+
+> **A ordem não é negociável:** o contrato de API na S1 e a API funcionando na S2 são o que
+> permite o frontend avançar. Equipe que começa as duas camadas em paralelo, sem contrato,
+> retrabalha a integração inteira.
 
 ### Rituais (curtos e obrigatórios)
 
@@ -88,7 +92,10 @@ Layout do celular precisa de ajuste — issue #23.
 - [ ] Regra de negócio está no model/service, não espalhada na view?
 - [ ] Alguma consulta N+1? (`select_related`/`prefetch_related`)
 - [ ] Controle de acesso: a view filtra o queryset por usuário?
-- [ ] Alguma URL literal, `|safe` indevido ou `fields = "__all__"`?
+- [ ] Alguma URL literal, `fields = "__all__"` ou `dangerouslySetInnerHTML`?
+- [ ] 🟣 `queryKey` inclui todos os filtros? A mutação invalida o cache certo?
+- [ ] 🟣 Os quatro estados estão tratados nesta tela?
+- [ ] 🟣 Componente acessível: label, foco, papel semântico correto?
 - [ ] Nomes claros? Dá para entender daqui a seis meses?
 - [ ] Alguma credencial ou dado real de pessoa no diff?
 
@@ -99,46 +106,64 @@ Revisão é sobre o código, nunca sobre a pessoa. Comentário útil sugere alte
 
 ## 3. Requisitos técnicos mínimos (verificados na rubrica)
 
-### Modelagem
+### 🔵 Backend — modelagem
 - [ ] 5+ models com relações 1-N **e** N-N
 - [ ] `on_delete` justificado em cada FK
-- [ ] Ao menos 2 restrições de integridade (`CheckConstraint`/`UniqueConstraint`)
+- [ ] 2+ restrições de integridade (`CheckConstraint`/`UniqueConstraint`)
 - [ ] Migrações versionadas, sem conflitos pendentes
 
-### Funcionalidades
-- [ ] CRUD completo em ao menos 2 entidades
-- [ ] Busca com múltiplos filtros e paginação
-- [ ] Ao menos 1 relatório com agregação
-- [ ] Ao menos 1 regra de negócio não trivial, implementada no model/service
+### 🔵 Backend — API
+- [ ] CRUD completo em 2+ recursos, via ViewSet
+- [ ] Serializers separados para leitura e escrita, com `fields` explícito
+- [ ] Validação de servidor: 3+ `validate_<campo>` e 1 `validate()`
+- [ ] Filtros, busca, ordenação (com `ordering_fields`) e paginação
+- [ ] 2+ ações customizadas (`@action`)
+- [ ] 1+ relatório com agregação
+- [ ] Nenhuma consulta N+1 (medido)
+- [ ] Documentação OpenAPI em `/api/docs/`
 
-### Interface
-- [ ] Layout base com herança de templates
-- [ ] Responsiva (funciona em 360px)
-- [ ] Estados vazios tratados em toda listagem
-- [ ] Mensagens de feedback em toda ação
-- [ ] Acessibilidade: labels, foco visível, contraste, navegação por teclado
+### 🟣 Frontend — interface
+- [ ] 5+ rotas, com layout compartilhado e página 404
+- [ ] Estado da busca (termo, filtros, ordenação, página) **na URL**
+- [ ] Design system próprio: 6+ componentes base em `components/ui/`
+- [ ] Responsiva: funciona em 360px sem rolagem horizontal
+- [ ] Acessibilidade: labels associados, foco visível, contraste ≥ 4.5:1,
+      navegação por teclado, nenhuma informação só por cor
+- [ ] **Os quatro estados** (carregando, vazio, conteúdo, erro) em todas as telas
+- [ ] Erros diferenciados: rede, 401, 403, 404, 500
 
-### Segurança e acesso
-- [ ] Autenticação com 2+ papéis
+### 🟣 Frontend — dados
+- [ ] TanStack Query para todo dado do servidor (nenhum `useEffect` buscando dados)
+- [ ] `queryKey` incluindo todos os filtros
+- [ ] Mutações com `invalidateQueries`
+- [ ] Formulários com React Hook Form + Zod
+- [ ] Erros 400 do DRF mapeados campo a campo
+- [ ] Tipos gerados do OpenAPI (`schema.d.ts`)
+
+### ⚪ Segurança e acesso
+- [ ] Autenticação com 2+ papéis, ponta a ponta
 - [ ] Autorização por permissão **e** por objeto (sem IDOR)
+- [ ] **Evidência de que a API recusa o que a interface esconde** (saída de `curl`)
 - [ ] `check --deploy` sem avisos
-- [ ] Nenhum segredo no repositório
-- [ ] Mapa de dados pessoais preenchido (M11)
+- [ ] Nenhum segredo no repositório **nem no bundle** (`grep` no `dist/`)
+- [ ] CORS com lista explícita, ou dispensado por *same-site*
+- [ ] Mapa de dados pessoais preenchido
 
-### Qualidade
-- [ ] 20+ testes automatizados
-- [ ] Matriz de acesso testada
-- [ ] Cobertura ≥ 60% (≥ 90% nas regras de negócio)
-- [ ] CI verde, `main` protegida
+### ⚪ Qualidade
+- [ ] 15+ testes no backend (regra, acesso, validação)
+- [ ] 6+ testes no frontend, incluindo erro do servidor no formulário
+- [ ] Matriz de acesso automatizada
+- [ ] Cobertura ≥ 60% no backend
+- [ ] Teste de contrato no CI (tipos sincronizados)
+- [ ] CI verde nos dois jobs; `main` protegida
 
-### Operação
-- [ ] Implantado, com URL pública e HTTPS
-- [ ] PostgreSQL gerenciado
-- [ ] Backup configurado
+### ⚪ Operação
+- [ ] API e SPA no ar, mesmo site, HTTPS
+- [ ] **F5 numa rota interna funciona** (fallback configurado)
+- [ ] PostgreSQL gerenciado, com backup
 - [ ] Healthcheck e logs funcionando
-- [ ] `README.md` que permite rodar o projeto em ≤ 5 comandos
-
----
+- [ ] `README.md` que sobe os dois projetos em ≤ 8 comandos
+- [ ] `docs/deploy.md` reproduzível
 
 ## 4. Plano de teste
 
