@@ -101,7 +101,7 @@ Diagrama entidade-relacionamento (Mermaid), com:
 
 - todas as entidades e atributos principais;
 - cardinalidades;
-- a política de `on_delete` de cada relação, **justificada** (M03);
+- a política de `on_delete` de cada relação, **justificada** (M04);
 - as restrições de integridade que expressam as regras de negócio.
 
 ````markdown

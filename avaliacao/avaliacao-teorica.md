@@ -8,10 +8,13 @@
 
 | Bloco | Módulos | Peso |
 |---|---|---:|
-| Fundamentos da web e HTTP | M01 | 30% |
-| Model, ORM e migrações | M03, M04, M05 | 35% |
-| Views, URLs e formulários | M06, M07 | 25% |
-| Arquitetura do framework | M02 | 10% |
+| Fundamentos da web e HTTP | M01 | 25% |
+| Arquitetura desacoplada e contrato de API | M02 | 15% |
+| Model, ORM e migrações | M04, M05, M06 | 35% |
+| API: URLs, views e serializers | M07 | 25% |
+
+> A prova acontece na semana 10, quando o frontend mal começou. React e Tailwind **não**
+> são cobrados aqui — são avaliados no portfólio (E4) e na Etapa 3.
 
 ## Formato
 
@@ -110,10 +113,31 @@ def perfil(request, user_id):
 
 ### Discursiva (15 pontos)
 
-> Descreva o ciclo completo de uma requisição `POST /obras/nova/` numa aplicação Django,
-> desde o clique no botão até a página de confirmação aparecer. Cite: as camadas
-> atravessadas, onde a validação acontece, o papel do token CSRF, o que é gravado no banco
-> e por que a resposta é um redirecionamento e não um HTML.
+> Descreva o ciclo completo de um `POST /api/obras/` numa arquitetura desacoplada, desde o
+> clique no botão da SPA até a tela mostrar a obra criada. Cite: as camadas atravessadas,
+> onde cada validação acontece e para que serve, o papel do token CSRF, o que é gravado no
+> banco, qual o status de sucesso e como o cliente sabe que precisa atualizar a listagem.
+
+---
+
+### Objetiva com justificativa (5 pontos)
+
+> Uma equipe colocou a chave da API de um serviço de pagamento em
+> `VITE_PAGAMENTO_SECRET` e afirma que "está segura porque fica no `.env`, que não vai para
+> o Git".
+>
+> **(a)** A afirmação está correta? **(b)** Como você provaria o contrário em 30 segundos?
+> **(c)** Qual o desenho correto?
+
+---
+
+### Objetiva com justificativa (5 pontos)
+
+> Um sistema esconde o botão "Excluir" para usuários comuns, com
+> `{usuario.eh_admin && <BotaoExcluir />}`, e não declara `permission_classes` no ViewSet.
+>
+> **(a)** O sistema está protegido? **(b)** Descreva o passo a passo de um ataque.
+> **(c)** Onde a proteção deveria estar?
 
 ---
 

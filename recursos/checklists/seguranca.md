@@ -38,6 +38,24 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 - [ ] Campos sensíveis definidos no servidor, nunca vindos do cliente
 - [ ] Matriz de acesso testada (papel × rota) e automatizada em teste
 
+## Específico de arquitetura desacoplada 🟣
+
+- [ ] `CORS_ALLOWED_ORIGINS` com lista explícita (nunca `CORS_ALLOW_ALL_ORIGINS`)
+- [ ] **Jamais** `CORS_ALLOW_ALL_ORIGINS = True` junto com `CORS_ALLOW_CREDENTIALS = True`
+- [ ] Melhor ainda: SPA e API sob o **mesmo site**, dispensando CORS
+- [ ] Nenhum segredo em variável `VITE_*` — comprovado com `grep -r "<segredo>" dist/`
+- [ ] `sourcemap: false` no build de produção
+- [ ] Nenhum `dangerouslySetInnerHTML` com dado do usuário
+- [ ] `href`/`src` vindos do usuário têm o esquema validado (só http/https)
+- [ ] `rel="noopener noreferrer"` em todo `target="_blank"`
+- [ ] Token de sessão **não** está em `localStorage` nem `sessionStorage`
+- [ ] Cookie de sessão `HttpOnly`; cookie CSRF legível (papéis diferentes, ver M12)
+- [ ] `X-CSRFToken` enviado em toda escrita
+- [ ] Cache do TanStack Query limpo no logout (`queryClient.clear()`)
+- [ ] CSP com `connect-src` restrito
+- [ ] Serializers minimizados: a API não devolve campo que a tela não usa
+- [ ] Controle de acesso **não** depende de `RotaProtegida` — provado com `curl`
+
 ## Entrada e saída
 
 - [ ] Nenhum SQL montado com f-string/concatenação
@@ -74,7 +92,8 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 ## Dependências e operação
 
 - [ ] `pip-audit` sem vulnerabilidades críticas ou altas
-- [ ] Dependências com versão fixada (`requirements.txt` ou lock)
+- [ ] `pnpm audit` sem vulnerabilidades críticas ou altas
+- [ ] Dependências fixadas nos dois projetos (`requirements.txt` e `pnpm-lock.yaml`)
 - [ ] `detect-secrets scan` limpo, inclusive no histórico do Git
 - [ ] Backup automatizado do banco **e restauração testada**
 - [ ] Logs de segurança (login, falha, acesso negado, erro 5xx) sendo gravados
@@ -84,8 +103,17 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 ## Verificação final
 
 ```bash
+# backend
+cd backend
 DEBUG=False python manage.py check --deploy
 pip-audit
+
+# frontend
+cd ../frontend
+pnpm audit
+pnpm build && grep -rEi "secret|password|api[_-]?key|AKIA" dist/ || echo "nenhum segredo no bundle"
+
+# geral
 detect-secrets scan
 curl -I https://seu-dominio/ | grep -iE "strict-transport|x-frame|x-content|referrer|content-security"
 ```
@@ -98,6 +126,8 @@ Depois, tente, **no seu próprio sistema**:
 4. Enviar `' OR '1'='1` em cada campo de busca.
 5. Acessar cada rota administrativa como usuário comum.
 6. Enviar um arquivo `.php` renomeado para `.jpg`.
+7. Chamar um endpoint administrativo com `curl`, logado como usuário comum.
+8. Procurar segredos no `dist/` publicado.
 
 Se algum funcionou, você acabou de encontrar um bug de segurança antes que outra pessoa o
 encontrasse. Corrija, escreva um teste de regressão e siga.

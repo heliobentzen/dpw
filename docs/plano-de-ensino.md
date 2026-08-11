@@ -10,8 +10,10 @@
 | Carga horária prática | 60 horas |
 | Carga horária extensionista | 10 horas (creditadas dentro da CH total) |
 | Modalidade sugerida | Presencial ou híbrida, com laboratório de informática |
-| Pré-requisitos | Lógica de programação; programação orientada a objetos; banco de dados relacional (modelagem e SQL básico) |
-| Stack de referência | Python 3.12+, Django 5.x, PostgreSQL 16, Git/GitHub, Docker, HTML/CSS |
+| Pré-requisitos | Lógica de programação; POO; banco de dados relacional; **JavaScript moderno** (atendido — ver §11) |
+| Stack — backend | Python 3.12, Django 5, Django REST Framework, PostgreSQL 16 |
+| Stack — frontend | React 19, TypeScript, Vite, Tailwind CSS 4, React Router, TanStack Query |
+| Stack — comum | Git/GitHub, Docker, GitHub Actions, deploy em PaaS |
 
 ## 2. Ementa (oficial)
 
@@ -27,105 +29,116 @@
 
 ## 3. Rastreabilidade ementa → módulos
 
-Toda a ementa está coberta; nada foi acrescentado sem função clara.
+| Item da ementa | Onde é tratado | Camada |
+|---|---|---|
+| Introdução a aplicações web: como funcionam | M01, M02 | — |
+| Protocolo HTTP: métodos POST e GET | M01 (+ M07 na prática da API) | — |
+| Model: classes que geram o banco automaticamente | M04 | 🔵 |
+| Atualização do banco a partir das alterações nas classes | M05 (migrações) | 🔵 |
+| Consultas ao BD e CRUD pela API do framework | M06 (ORM) + M07 (ViewSets) | 🔵 |
+| Views: mapeamento de URLs | M07 (`urls.py`, `DefaultRouter`) + M10 (React Router) | 🔵🟣 |
+| Views: classes/métodos/funções de processamento de requisições | M07 (FBV, `APIView`, `ViewSet`) | 🔵 |
+| **Templates: interfaces com o usuário** | **M08, M09, M11 (componentes React + Tailwind)** ⚠️ | 🟣 |
+| Segurança | M13 (transversal em M07, M12, M16) | 🔵🟣 |
+| Gestão de usuários | M12 | 🔵🟣 |
+| Implantação (deploy) | M16 (+ M17 pós-deploy) | 🔵🟣 |
+| Atividades extensionistas | `projeto/extensao/` | — |
 
-| Item da ementa | Onde é tratado |
-|---|---|
-| Introdução a aplicações web: como funcionam | M01 |
-| Protocolo HTTP: métodos POST e GET | M01 (+ M06 na prática de views) |
-| Model: classes que geram o banco automaticamente | M03 |
-| Atualização do banco a partir de alterações nas classes | M04 (migrações) |
-| Consultas ao BD e CRUD pela API do framework | M05 (+ M07 via forms) |
-| Views: mapeamento de URLs | M06 |
-| Views: classes/métodos/funções de processamento de requisições | M06 (FBV e CBV) |
-| Templates: interfaces com o usuário | M08 (+ M07 renderização de formulários) |
-| Segurança | M11 (transversal em M06, M07, M10, M14) |
-| Gestão de usuários | M10 |
-| Implantação (deploy) | M14 (+ M15 pós-deploy) |
-| Atividades extensionistas | `projeto/extensao/` |
+> ⚠️ **Ressalva sobre "Templates".** Nesta arquitetura não há templates Django: a interface
+> é feita com componentes React. A leitura adotada é que o objetivo pedagógico do item —
+> *criar a interface com o usuário usando o framework escolhido* — está cumprido, com JSX
+> no lugar do DTL. Se a coordenação exigir leitura estrita, adote o **modo híbrido**
+> (ADR-04 em [`decisoes-tecnicas.md`](decisoes-tecnicas.md)), que mantém templates Django
+> estilizados com Tailwind e usa React apenas em ilhas de interatividade. A decisão é
+> institucional; o material suporta as duas.
 
-Conteúdos **complementares e não obrigatórios pela ementa**, incluídos por demanda de
-mercado e claramente sinalizados: M00 (ambiente), M02 (bootstrap do projeto),
-M09 (Admin), M12 (testes), M13 (APIs). Podem ser comprimidos se a instituição exigir
-aderência estrita — ver [`guia-do-docente.md`](guia-do-docente.md#compressão-do-conteúdo).
+Conteúdos **complementares** (não exigidos pela ementa, incluídos por demanda de mercado):
+M00 (ambiente), M03 (bootstrap), M14 (testes), M15 (Admin), M17 (observabilidade). Podem
+ser comprimidos — ver [`guia-do-docente.md`](guia-do-docente.md#compressão-do-conteúdo).
 
 ## 4. Objetivo geral
 
 Capacitar o estudante a **projetar, construir, testar e implantar** uma aplicação web
-completa, orientada a dados, utilizando um framework MVC/MTV, aplicando boas práticas de
-segurança e de trabalho em equipe, e a **aplicar essa capacidade em uma demanda real de
-uma organização parceira** (dimensão extensionista).
+completa em arquitetura desacoplada — API REST e interface em SPA —, aplicando boas
+práticas de segurança e de trabalho em equipe, e a **aplicar essa capacidade em uma demanda
+real de uma organização parceira** (dimensão extensionista).
 
 ## 5. Objetivos específicos
 
 Ao final da disciplina, o estudante será capaz de:
 
-1. Explicar o ciclo requisição–resposta de uma aplicação web e o papel do HTTP, incluindo
-   a diferença semântica e prática entre GET e POST.
-2. Modelar um domínio em classes e gerar/evoluir o esquema do banco de dados por meio de
-   migrações versionadas.
-3. Implementar as quatro operações CRUD usando a API do ORM, com consultas filtradas,
-   ordenadas, agregadas e otimizadas.
-4. Mapear URLs para views (funções e classes) e processar requisições com tratamento de
-   parâmetros, validação e redirecionamentos.
-5. Construir interfaces de usuário com sistema de templates, herança de layout, formulários
-   e mensagens de feedback.
-6. Implementar autenticação, autorização por papéis e fluxo completo de gestão de usuários.
-7. Identificar e mitigar as vulnerabilidades web mais comuns (OWASP Top 10 aplicado ao
-   framework).
-8. Escrever testes automatizados para modelos, views e regras de negócio.
-9. Implantar a aplicação em ambiente de produção com configuração segura, banco gerenciado,
-   arquivos estáticos e HTTPS.
-10. Trabalhar em equipe com fluxo Git, revisão de código e documentação técnica.
-11. Interagir com uma comunidade/organização externa, levantar sua necessidade, entregar
-    solução e registrar o impacto.
+1. Explicar o ciclo requisição–resposta e o papel do HTTP, incluindo a diferença semântica
+   e prática entre GET e POST, e como ela se manifesta numa API REST.
+2. Justificar a escolha entre renderização no servidor e SPA a partir de requisitos, e
+   definir o **contrato** entre cliente e servidor.
+3. Modelar um domínio em classes e evoluir o esquema do banco por meio de migrações
+   versionadas.
+4. Implementar CRUD com a API do ORM, com consultas filtradas, agregadas e otimizadas.
+5. Expor esse CRUD como API REST versionada, validada, paginada e documentada (OpenAPI).
+6. Mapear URLs para views no servidor **e** rotas para telas no cliente.
+7. Construir interfaces com componentes React, TypeScript e Tailwind, responsivas e
+   acessíveis.
+8. Gerenciar estado de servidor com cache e revalidação, e formulários com validação em
+   duas camadas.
+9. Implementar autenticação e autorização por papéis ponta a ponta, escolhendo o mecanismo
+   pelo modelo de ameaça.
+10. Identificar e mitigar as vulnerabilidades web mais comuns, inclusive as específicas de
+    arquitetura desacoplada (CORS, exposição de segredo em bundle, roubo de token).
+11. Escrever testes automatizados nas duas camadas.
+12. Implantar dois artefatos em produção, com HTTPS, banco gerenciado e CI/CD.
+13. Trabalhar em equipe com fluxo Git, revisão de código e documentação técnica.
+14. Interagir com uma organização parceira, levantar sua necessidade, entregar solução e
+    registrar o impacto.
 
 ## 6. Competências e alinhamento com o mercado
 
-| Competência | Evidência avaliável | Relação com vagas |
+| Competência | Evidência avaliável | Como aparece em vagas |
 |---|---|---|
-| Modelagem de dados com ORM | Modelo do projeto + migrações limpas | "Django/ActiveRecord/Hibernate", "modelagem relacional" |
-| CRUD e regras de negócio | Módulos funcionais do projeto | Todo backend júnior |
-| HTTP e arquitetura web | Prova teórica + debug de requisições | Entrevistas técnicas |
-| Versionamento colaborativo | Histórico de commits/PRs da equipe | "Git", "code review" |
+| Modelagem com ORM | Modelo do projeto + migrações limpas | "Django", "ORM", "modelagem relacional" |
+| Construção de API REST | API documentada em OpenAPI | "REST", "DRF", "API design" |
+| React + TypeScript | Interface do projeto | "React", "TypeScript", "SPA" |
+| CSS utilitário | Interface responsiva e acessível | "Tailwind", "responsivo", "acessibilidade" |
+| Estado e cache no cliente | Listagens com carregamento e erro tratados | "TanStack Query", "state management" |
+| Integração entre camadas | Sistema funcionando ponta a ponta | "full stack" |
+| Versionamento colaborativo | Histórico de commits/PRs | "Git", "code review" |
 | Segurança aplicada | Checklist OWASP do projeto | "OWASP", "LGPD" |
-| Testes automatizados | Suíte de testes verde no CI | "testes unitários", "pytest/JUnit" |
-| Deploy e configuração | URL pública funcionando | "CI/CD", "cloud", "12-factor" |
+| Testes automatizados | Suíte verde no CI | "pytest", "Vitest", "Testing Library" |
+| Deploy e configuração | Dois artefatos no ar | "CI/CD", "cloud", "12-factor" |
 | Comunicação técnica | Relatório + apresentação | Toda vaga |
 
 ## 7. Metodologia
 
-- **Aula expositiva dialogada** para os blocos teóricos (40h), sempre ancorada em um
-  problema concreto do estudo de caso.
-- **Laboratório guiado** (roteiros passo a passo) e **laboratório aberto** (exercícios sem
-  passo a passo) para a carga prática (60h).
-- **Aprendizagem baseada em projeto (PBL)**: cada módulo entrega uma peça reutilizável no
-  projeto da equipe.
+- **Aula expositiva dialogada** (40h), sempre ancorada num problema do estudo de caso.
+- **Laboratório guiado** e **laboratório aberto** (60h).
+- **Aprendizagem baseada em projeto**: cada módulo entrega uma peça reutilizável.
 - **Pair programming** e **revisão por pares** obrigatórios na Etapa 3.
 - **Extensão**: interação dialógica com organização parceira, do diagnóstico à entrega.
 
-Regra de ouro do material: **nenhum módulo termina sem código rodando**.
+Regras de ouro do material: **nenhum módulo termina sem código rodando**, e **o frontend
+só entra depois que existe uma API real** (semana 8, após o M07).
 
 ## 8. Recursos necessários
 
-- Laboratório com Python 3.12+, Git, editor (VS Code / PyCharm) e acesso à internet.
+- Laboratório com Python 3.12+, **Node.js 20+**, Git, editor e acesso à internet.
+- ⚠️ Acesso liberado ao registro npm e ao PyPI. Proxy corporativo bloqueando `npm install`
+  é a falha logística nº 1 desta disciplina.
 - Conta GitHub por estudante; organização GitHub para as equipes.
-- Conta em PaaS gratuita/estudantil para deploy (Render, Railway, Fly.io ou similar).
-- Docker Desktop (opcional, mas recomendado para PostgreSQL local).
-- Projetor/quadro para as aulas teóricas.
+- Conta em PaaS para deploy (Render, Railway, Fly.io ou similar) — **dois serviços** por
+  equipe (API e SPA) ou um serviço servindo os dois.
+- Docker Desktop (recomendado para PostgreSQL local).
 
 ## 9. Avaliação
 
-Detalhamento completo em [`../avaliacao/README.md`](../avaliacao/README.md).
+Detalhamento em [`../avaliacao/README.md`](../avaliacao/README.md).
 
 | Instrumento | Peso | Momento |
 |---|---:|---|
-| Atividades práticas dos módulos (portfólio) | 20% | Contínuo |
-| Avaliação teórica (HTTP, ORM, segurança) | 15% | Semana 10 |
-| Projeto — Etapa 1 (tema) e Etapa 2 (planejamento) | 15% | Semanas 6 e 8 |
+| Atividades práticas dos módulos (portfólio E0–E8) | 20% | Contínuo |
+| Avaliação teórica | 15% | Semana 10 |
+| Projeto — Etapa 1 (tema) e Etapa 2 (planejamento) | 15% | Semanas 8 e 11 |
 | Projeto — Etapa 3 (sistema desenvolvido e implantado) | 30% | Semana 18 |
 | Projeto — Etapa 4 (relatório técnico + apresentação) | 10% | Semana 20 |
-| Atividades extensionistas (execução + evidências) | 10% | Semanas 12–20 |
+| Atividades extensionistas | 10% | Semanas 15–20 |
 
 **Aprovação:** média ponderada ≥ 6,0 **e** frequência conforme regimento **e** entrega
 obrigatória das Etapas 3 e 4 e das atividades extensionistas (itens eliminatórios).
@@ -134,27 +147,44 @@ obrigatória das Etapas 3 e 4 e das atividades extensionistas (itens eliminatór
 
 ### Básica
 
-1. DJANGO SOFTWARE FOUNDATION. *Django Documentation* (versão 5.x). Disponível em
-   <https://docs.djangoproject.com/pt-br/5.0/>.
-2. MELÉ, Antonio. **Django 5 By Example**. 5. ed. Birmingham: Packt Publishing, 2024.
-3. GRINBERG, Miguel; **Flask Web Development** / equivalente de referência para
-   comparação de arquiteturas web. 2. ed. O'Reilly, 2018.
+1. DJANGO SOFTWARE FOUNDATION. *Django Documentation* (5.x). <https://docs.djangoproject.com/pt-br/5.0/>
+2. ENCODE. *Django REST Framework Documentation*. <https://www.django-rest-framework.org/>
+3. META PLATFORMS. *React Documentation*. <https://react.dev/>
+4. MELÉ, Antonio. **Django 5 By Example**. 5. ed. Birmingham: Packt, 2024.
 
 ### Complementar
 
-4. VINCENT, William S. **Django for Professionals**. 5. ed. WelcomeToCode, 2024.
-5. GREENFELD, Daniel R.; GREENFELD, Audrey R. **Two Scoops of Django 3.x**. Two Scoops
-   Press, 2020.
-6. MOZILLA. *MDN Web Docs — HTTP*. Disponível em
-   <https://developer.mozilla.org/pt-BR/docs/Web/HTTP>.
-7. OWASP FOUNDATION. *OWASP Top 10:2021*. Disponível em <https://owasp.org/Top10/>.
-8. BRASIL. **Lei nº 13.709/2018 (LGPD)**.
-9. FORCIER, Jeff; BISSEX, Paul; CHUN, Wesley. **Python Web Development with Django**.
-   Addison-Wesley.
-10. WIGGINS, Adam. *The Twelve-Factor App*. Disponível em <https://12factor.net/pt_br/>.
+5. TAILWIND LABS. *Tailwind CSS Documentation*. <https://tailwindcss.com/docs>
+6. BANKS, Alex; PORCELLO, Eve. **Learning React**. 2. ed. O'Reilly, 2020.
+7. VINCENT, William S. **Django for APIs**. WelcomeToCode, 2024.
+8. MOZILLA. *MDN Web Docs — HTTP*. <https://developer.mozilla.org/pt-BR/docs/Web/HTTP>
+9. OWASP FOUNDATION. *OWASP Top 10:2021*. <https://owasp.org/Top10/>
+10. BRASIL. **Lei nº 13.709/2018 (LGPD)**.
+11. WIGGINS, Adam. *The Twelve-Factor App*. <https://12factor.net/pt_br/>
+12. W3C. *WCAG 2.2*. <https://www.w3.org/Translations/WCAG22-pt-br/>
 
 ### Sobre extensão
 
-11. BRASIL. **Resolução CNE/CES nº 7/2018** — Diretrizes para a Extensão na Educação
-    Superior Brasileira.
-12. FORPROEX. **Política Nacional de Extensão Universitária**. 2012.
+13. BRASIL. **Resolução CNE/CES nº 7/2018** — Diretrizes para a Extensão na Educação Superior.
+14. FORPROEX. **Política Nacional de Extensão Universitária**, 2012.
+15. FREIRE, Paulo. **Extensão ou comunicação?** Rio de Janeiro: Paz e Terra, 1977.
+
+## 11. Nota sobre o pré-requisito de JavaScript
+
+Os módulos 08–11 (15h) assumem JavaScript moderno. **Este pré-requisito está atendido** pela
+turma a que o material se destina, o que sustenta a alocação de 15h para o bloco de
+frontend — ela pressupõe que o tempo seja gasto com o modelo mental do React (estado,
+efeitos, imutabilidade, cache), e não com sintaxe de JavaScript.
+
+O que ainda vale fazer:
+
+1. **Confirmar na semana 1**, com o diagnóstico de 20 minutos de
+   [`../recursos/js-para-react.md`](../recursos/js-para-react.md). Não é para decidir o
+   cronograma — é para identificar **quem individualmente** chega com lacuna e direcionar
+   monitoria, antes da semana 8.
+2. Manter o mesmo material como referência de consulta (ponte Python→JavaScript) durante os
+   módulos 08–11.
+
+**Para outras turmas ou instituições que adotem este material** e não tenham o
+pré-requisito, as saídas continuam documentadas: 4h de nivelamento retiradas de M06 e M15,
+ou o modo híbrido do ADR-04.

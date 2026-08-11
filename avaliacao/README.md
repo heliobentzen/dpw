@@ -4,7 +4,7 @@
 
 | Instrumento | Peso | Momento | Tipo |
 |---|---:|---|---|
-| Portfólio de atividades práticas (E0–E7) | 20% | Contínuo | Individual |
+| Portfólio de atividades práticas (E0–E8) | 20% | Contínuo | Individual |
 | Avaliação teórica | 15% | Semana 10 | Individual |
 | Projeto — Etapa 1 (tema) | 7,5% | Semana 8 | Equipe |
 | Projeto — Etapa 2 (planejamento) | 7,5% | Semana 11 | Equipe |
@@ -51,7 +51,7 @@ decisão. O fator nunca é aplicado sem que o estudante saiba o motivo.
 
 | Instrumento | Rubrica |
 |---|---|
-| Portfólio (E0–E7) | [`rubrica-portfolio.md`](rubrica-portfolio.md) |
+| Portfólio (E0–E8) | [`rubrica-portfolio.md`](rubrica-portfolio.md) |
 | Avaliação teórica | [`avaliacao-teorica.md`](avaliacao-teorica.md) |
 | Etapa 1 | [`rubrica-etapa-1.md`](rubrica-etapa-1.md) |
 | Etapa 2 | [`rubrica-etapa-2.md`](rubrica-etapa-2.md) |
@@ -96,13 +96,17 @@ Conforme o regimento da instituição. Sugestão de política:
 - **Avaliação teórica:** prova substitutiva na semana 19 para quem obteve < 6,0.
 - **Etapas 1 e 2:** correção mediante devolutiva, até 1 semana após o feedback.
 - **Etapas 3 e 4 e extensão:** não há recuperação — dependem do processo, não do produto.
-  Por isso o acompanhamento é semanal, com marcos E0–E7: equipe em risco é identificada
+  Por isso o acompanhamento é semanal, com marcos E0–E8: equipe em risco é identificada
   na semana 12, não na 18.
 
 ## 8. Integridade acadêmica
 
 **Permitido e incentivado:** consultar documentação, fóruns, colegas e assistentes de IA;
 usar bibliotecas e código aberto com atribuição.
+
+> Isso vale especialmente para o frontend, onde a tentação de colar componentes prontos é
+> maior. Colar é permitido; **não saber explicar o que colou** é o que a arguição
+> individual detecta.
 
 **Obrigatório:** declarar o uso de ferramentas de IA no relatório (Apêndice H) e **saber
 explicar cada linha entregue**.

@@ -1,6 +1,8 @@
 """
 Verificação do ambiente da disciplina DPW — material de apoio do M00.
 
+Confere as DUAS camadas: Python/Django/DRF (backend) e Node/pnpm (frontend).
+
 Rode com o ambiente virtual ativo:
 
     python verifica_ambiente.py
@@ -78,13 +80,39 @@ try:
 except ImportError:
     check("Django instalado", False, "pip install 'django>=5.0,<6.0'")
 
-# --- python-dotenv --------------------------------------------------------
+# --- DRF e python-dotenv --------------------------------------------------
+try:
+    import rest_framework
+
+    check("Django REST Framework", True, "")
+    info(f"DRF {rest_framework.VERSION}")
+except ImportError:
+    check("Django REST Framework", False, "pip install djangorestframework")
+
 try:
     import dotenv  # noqa: F401
 
     check("python-dotenv instalado", True, "")
 except ImportError:
     check("python-dotenv instalado", False, "pip install python-dotenv")
+
+# --- Node e pnpm (frontend) ----------------------------------------------
+node = shutil.which("node")
+check("Node.js instalado", node is not None, "Instale o Node 20 LTS (https://nodejs.org)")
+
+if node:
+    versao = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout.strip()
+    info(f"Node {versao}")
+    try:
+        maior = int(versao.lstrip("v").split(".")[0])
+        check("Node >= 20", maior >= 20, "Atualize para o Node 20 LTS (use fnm ou nvm)")
+    except ValueError:
+        check("Node >= 20", False, "Não foi possível ler a versão do Node")
+
+pnpm = shutil.which("pnpm")
+check("pnpm instalado", pnpm is not None, "corepack enable && corepack prepare pnpm@latest --activate")
+if pnpm:
+    info(f"pnpm {subprocess.run(['pnpm', '--version'], capture_output=True, text=True).stdout.strip()}")
 
 # --- Docker (opcional até o M04) -----------------------------------------
 if shutil.which("docker"):

@@ -88,7 +88,7 @@ A partir do `servidor_minimo.py` do roteiro prático, implemente:
 4. Escape do conteúdo do recado com `html.escape()`. **Antes** de implementar, envie o
    recado `<script>alert('xss')</script>` e observe o que acontece. Depois, compare.
 
-O item 4 é a primeira experiência prática com XSS — retomada no M11.
+O item 4 é a primeira experiência prática com XSS — retomada no M13.
 
 ---
 

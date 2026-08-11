@@ -1,34 +1,62 @@
 # Setup do ambiente de desenvolvimento
 
-Guia único de instalação. Siga na ordem; ao final, rode a **verificação** da seção 7.
+Guia único de instalação. Siga na ordem; ao final, rode a **verificação** da seção 8.
+
+> São **dois** ambientes: Python (backend) e Node (frontend). Eles são independentes —
+> cada um com seu gerenciador de pacotes, seu arquivo de dependências e seu diretório.
 
 ## 1. O que será instalado
 
-| Ferramenta | Versão mínima | Para quê |
-|---|---|---|
-| Python | 3.12 | Linguagem do framework |
-| pip / venv | (vem com Python) | Dependências e isolamento |
-| Git | 2.40 | Versionamento |
-| VS Code (ou PyCharm) | atual | Editor |
-| Docker Desktop | atual | PostgreSQL local (opcional no início) |
-| PostgreSQL | 16 | Banco de produção-like (a partir do M04) |
+| Ferramenta | Versão mínima | Camada | Para quê |
+|---|---|---|---|
+| Python | 3.12 | 🔵 | Linguagem do backend |
+| pip / venv | (vem com Python) | 🔵 | Dependências e isolamento |
+| **Node.js** | **20 LTS** | 🟣 | Runtime do frontend |
+| **pnpm** | 9 | 🟣 | Gerenciador de pacotes |
+| Git | 2.40 | ambos | Versionamento |
+| VS Code (ou PyCharm/WebStorm) | atual | ambos | Editor |
+| Docker Desktop | atual | 🔵 | PostgreSQL local (a partir do M05) |
+| PostgreSQL | 16 | 🔵 | Banco de produção-like |
 
-> Até o M03 usamos **SQLite** (embutido, zero instalação). PostgreSQL entra no M04, para
+> Até o M04 usamos **SQLite** (embutido, zero instalação). PostgreSQL entra no M05, para
 > que a diferença entre "banco de brinquedo" e "banco de verdade" seja sentida na prática.
 
-## 2. Python
+## 2. Estrutura do repositório
+
+```
+bibliocom/
+├── backend/            projeto Django + DRF
+│   ├── .venv/          ambiente virtual Python (fora do Git)
+│   ├── config/
+│   ├── acervo/
+│   ├── manage.py
+│   ├── requirements.txt
+│   └── .env
+├── frontend/           projeto React + Vite
+│   ├── node_modules/   (fora do Git)
+│   ├── src/
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   └── .env
+├── docker-compose.yml
+├── .gitignore
+└── README.md
+```
+
+**Um repositório, dois projetos** (*monorepo*). Para uma equipe de 4 pessoas numa
+disciplina, isso é mais simples que dois repositórios: um único PR mostra a mudança
+completa (campo novo no model → serializer → tipo no cliente → tela), e não há
+dessincronização entre repositórios.
+
+---
+
+## 3. Python (backend)
 
 ### Windows
 
 1. Baixe em <https://www.python.org/downloads/> a versão 3.12+.
-2. Na primeira tela do instalador, **marque "Add python.exe to PATH"**. Esse é o erro nº 1
-   da turma toda semestre.
-3. Verifique no PowerShell:
-
-```powershell
-python --version
-py -3.12 --version
-```
+2. Na primeira tela, **marque "Add python.exe to PATH"**. É o erro nº 1 da turma.
+3. Verifique no PowerShell: `python --version`
 
 ### macOS
 
@@ -45,7 +73,74 @@ sudo apt install -y python3.12 python3.12-venv python3-pip
 python3 --version
 ```
 
-## 3. Git e GitHub
+### Ambiente virtual e dependências
+
+```bash
+mkdir -p bibliocom/backend && cd bibliocom/backend
+python3 -m venv .venv
+
+source .venv/bin/activate        # Linux/macOS
+.venv\Scripts\Activate.ps1       # Windows PowerShell
+
+python -m pip install --upgrade pip
+pip install "django>=5.0,<6.0" djangorestframework django-cors-headers \
+            python-dotenv dj-database-url drf-spectacular
+pip freeze > requirements.txt
+```
+
+O prompt passa a mostrar `(.venv)`. Se não mostrar, o ambiente **não** está ativo e tudo
+que você instalar vai para o lugar errado. Para sair: `deactivate`.
+
+---
+
+## 4. Node.js e pnpm (frontend)
+
+### Instalação recomendada: via `fnm` (gerencia versões)
+
+```bash
+# Linux/macOS
+curl -fsSL https://fnm.vercel.app/install | bash
+exec $SHELL
+fnm install 20 && fnm use 20
+
+# Windows (PowerShell, com winget)
+winget install Schniz.fnm
+fnm install 20; fnm use 20
+```
+
+Alternativa simples: instalador oficial em <https://nodejs.org> (escolha **LTS**).
+
+```bash
+node --version    # v20.x ou superior
+npm --version
+```
+
+### pnpm
+
+```bash
+corepack enable
+corepack prepare pnpm@latest --activate
+pnpm --version
+```
+
+> **Por que pnpm e não npm?** Instala mais rápido e usa muito menos disco (links para um
+> armazém compartilhado) — diferença sentida num laboratório com 40 máquinas e projetos de
+> vários semestres. Tudo neste material funciona com `npm` trocando `pnpm` por `npm`; só o
+> `pnpm dlx` vira `npx`.
+
+### Criar o projeto React (feito no M03; aqui só para conferir a instalação)
+
+```bash
+cd bibliocom
+pnpm create vite@latest frontend -- --template react-ts
+cd frontend
+pnpm install
+pnpm dev            # abre em http://localhost:5173
+```
+
+---
+
+## 5. Git e GitHub
 
 ```bash
 git --version
@@ -55,77 +150,51 @@ git config --global init.defaultBranch main
 git config --global pull.rebase false
 ```
 
-Crie uma chave SSH e cadastre no GitHub (evita digitar senha/token a cada push):
+Chave SSH (evita digitar token a cada push):
 
 ```bash
 ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
-cat ~/.ssh/id_ed25519.pub   # copie e cole em github.com > Settings > SSH and GPG keys
+cat ~/.ssh/id_ed25519.pub   # cole em github.com > Settings > SSH and GPG keys
 ssh -T git@github.com       # deve responder "Hi <usuario>!"
 ```
 
-## 4. Ambiente virtual e Django
+---
 
-**Sempre** um ambiente virtual por projeto. Instalar pacotes no Python global é fonte
-garantida de conflito de versões.
-
-```bash
-mkdir bibliocom && cd bibliocom
-python3 -m venv .venv
-
-# ativar:
-source .venv/bin/activate        # Linux/macOS
-.venv\Scripts\Activate.ps1       # Windows PowerShell
-
-python -m pip install --upgrade pip
-pip install "django>=5.0,<6.0" python-dotenv
-pip freeze > requirements.txt
-```
-
-O prompt passa a mostrar `(.venv)`. Se não mostrar, o ambiente **não** está ativo e tudo
-que você instalar vai para o lugar errado.
-
-Para sair: `deactivate`.
-
-### Alternativa moderna: `uv`
-
-`uv` é um gerenciador de pacotes/ambientes 10–100× mais rápido, já dominante em projetos
-Python novos. Se a turma tiver maturidade, use-o:
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh   # Linux/macOS
-uv init bibliocom && cd bibliocom
-uv add django python-dotenv
-uv run python manage.py runserver
-```
-
-## 5. VS Code
+## 6. VS Code
 
 Extensões recomendadas:
 
-- **Python** (Microsoft) — interpretador, debug, lint
-- **Django** (Baptiste Darthenay) — realce de sintaxe de templates
-- **Ruff** (Astral) — lint e formatação
-- **SQLite Viewer** — inspecionar o `db.sqlite3`
-- **GitLens** — histórico e blame
+| Extensão | Camada | Para quê |
+|---|---|---|
+| **Python** (Microsoft) | 🔵 | Interpretador, debug |
+| **Ruff** (Astral) | 🔵 | Lint e formatação Python |
+| **ESLint** | 🟣 | Lint JavaScript/TypeScript |
+| **Prettier** | 🟣 | Formatação |
+| **Tailwind CSS IntelliSense** | 🟣 | Autocomplete de classes — praticamente obrigatória |
+| **ES7+ React snippets** | 🟣 | Atalhos de componente |
+| **SQLite Viewer** | 🔵 | Inspecionar `db.sqlite3` |
+| **GitLens** | ambos | Histórico e blame |
 
-Selecione o interpretador do venv: `Ctrl+Shift+P` → *Python: Select Interpreter* →
-`./.venv/bin/python`.
-
-Arquivo `.vscode/settings.json` sugerido:
+`.vscode/settings.json` sugerido:
 
 ```json
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
   "editor.formatOnSave": true,
   "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },
-  "files.exclude": { "**/__pycache__": true, "**/*.pyc": true },
-  "emmet.includeLanguages": { "django-html": "html" }
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "tailwindCSS.experimental.classRegex": [["cn\\(([^)]*)\\)", "'([^']*)'"]],
+  "files.exclude": { "**/__pycache__": true, "**/*.pyc": true, "**/node_modules": true }
 }
 ```
 
-## 6. PostgreSQL via Docker (a partir do M04)
+---
 
-`docker-compose.yml` na raiz do projeto:
+## 7. PostgreSQL via Docker (a partir do M05)
+
+`docker-compose.yml` na raiz:
 
 ```yaml
 services:
@@ -154,50 +223,53 @@ docker compose ps          # deve estar "healthy"
 pip install "psycopg[binary]"
 ```
 
-## 7. Verificação do ambiente
+---
 
-Salve como `verifica_ambiente.py` e rode com o venv ativo:
+## 8. Verificação do ambiente
 
-```python
-"""Verificação do ambiente da disciplina DPW. Rode: python verifica_ambiente.py"""
-import shutil
-import subprocess
-import sys
+Rode o script de [`../recursos/codigo/verifica_ambiente.py`](../recursos/codigo/verifica_ambiente.py):
 
-ok = True
-
-
-def check(nome, condicao, dica):
-    global ok
-    print(f"[{'OK ' if condicao else 'FALHA'}] {nome}")
-    if not condicao:
-        print(f"        -> {dica}")
-        ok = False
-
-
-check("Python >= 3.12", sys.version_info >= (3, 12), "Instale Python 3.12+ e recrie o venv")
-check("Ambiente virtual ativo", sys.prefix != sys.base_prefix, "Ative o venv (source .venv/bin/activate)")
-check("Git instalado", shutil.which("git") is not None, "Instale o Git")
-
-try:
-    import django
-
-    check("Django >= 5.0", django.VERSION >= (5, 0), "pip install 'django>=5.0,<6.0'")
-    print(f"        Django {django.get_version()}")
-except ImportError:
-    check("Django instalado", False, "pip install 'django>=5.0,<6.0'")
-
-if shutil.which("docker"):
-    r = subprocess.run(["docker", "info"], capture_output=True)
-    check("Docker rodando", r.returncode == 0, "Abra o Docker Desktop (opcional até o M04)")
-else:
-    print("[INFO ] Docker não instalado (opcional até o M04)")
-
-print("\n" + ("Ambiente pronto. Bom curso!" if ok else "Corrija os itens acima antes da aula."))
-sys.exit(0 if ok else 1)
+```bash
+python recursos/codigo/verifica_ambiente.py
 ```
 
-## 8. `.gitignore` do projeto
+Ele confere Python, venv, Django, DRF, **Node, pnpm**, Git e Docker. **Só avance com todos
+os itens em OK.**
+
+---
+
+## 9. Rodar o sistema completo (dois terminais)
+
+```bash
+# terminal 1 — backend
+cd backend && source .venv/bin/activate
+python manage.py runserver          # http://localhost:8000
+
+# terminal 2 — frontend
+cd frontend
+pnpm dev                            # http://localhost:5173
+```
+
+O Vite é configurado (M03) para encaminhar `/api` ao Django, de modo que o navegador veja
+tudo na mesma origem — o que evita CORS em desenvolvimento e reproduz a topologia de
+produção:
+
+```ts
+// frontend/vite.config.ts
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      "/api": { target: "http://localhost:8000", changeOrigin: true },
+      "/admin": { target: "http://localhost:8000", changeOrigin: true },
+    },
+  },
+});
+```
+
+---
+
+## 10. `.gitignore` do repositório
 
 ```gitignore
 # Python
@@ -210,8 +282,14 @@ venv/
 *.log
 db.sqlite3
 db.sqlite3-journal
-/media/
-/staticfiles/
+/backend/media/
+/backend/staticfiles/
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
 
 # Ambiente
 .env
@@ -224,17 +302,29 @@ db.sqlite3-journal
 .DS_Store
 ```
 
-> **Nunca** comite `.env`, `db.sqlite3` ou `SECRET_KEY`. Segredo que entra no histórico do
-> Git é segredo vazado — mesmo depois de removido, ele continua nos commits anteriores.
+> **Nunca** comite `.env`, `db.sqlite3`, `node_modules/` ou `SECRET_KEY`. Segredo que entra
+> no histórico do Git é segredo vazado — mesmo depois de removido, continua nos commits
+> anteriores.
 
-## 9. Problemas frequentes
+**Atenção ao `.env` do frontend:** ele **não** é secreto (é embutido no bundle em tempo de
+build e qualquer pessoa lê no DevTools), mas segue fora do Git porque muda por ambiente.
+Nunca coloque chave de API nele. Detalhado no M13.
+
+---
+
+## 11. Problemas frequentes
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
 | `python: command not found` (Windows) | PATH não configurado | Reinstale marcando "Add to PATH", ou use `py` |
-| `Activate.ps1 cannot be loaded` | Política de execução do PowerShell | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| `ModuleNotFoundError: django` | venv não ativo ou pacote no Python global | Ative o venv e reinstale |
-| `port 5432 already in use` | PostgreSQL local já rodando | Pare o serviço ou mude a porta para `5433:5432` |
-| `pg_config executable not found` | Falta binário do psycopg | Use `psycopg[binary]`, não `psycopg2` compilado |
+| `Activate.ps1 cannot be loaded` | Política do PowerShell | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
+| `ModuleNotFoundError: django` | venv não ativo | Ative o venv e reinstale |
+| `pnpm: command not found` | Corepack não habilitado | `corepack enable` |
+| `EACCES` ao instalar pacote global | Permissão | Use `fnm`/`corepack`, nunca `sudo npm -g` |
+| `npm ERR! network` no laboratório | Proxy/firewall | `npm config set proxy http://...` e libere `registry.npmjs.org` |
+| `Cannot find module 'react'` | Faltou `pnpm install` | Rode na pasta `frontend/` |
+| `port 5173 already in use` | Outro Vite rodando | `pnpm dev --port 5174` |
+| `port 5432 already in use` | PostgreSQL local ativo | Pare o serviço ou use `5433:5432` |
+| Requisição do front dá **CORS error** | Chamou `localhost:8000` direto | Use o caminho `/api` (proxy do Vite) |
 
 Mais casos em [`faq-troubleshooting.md`](faq-troubleshooting.md).

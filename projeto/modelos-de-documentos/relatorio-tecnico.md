@@ -89,7 +89,7 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 ## 9. Segurança e proteção de dados (1 página)
 
 - Medidas adotadas (autenticação, autorização, cabeçalhos, validação)
-- Resultado do `check --deploy` e das verificações do M11
+- Resultado do `check --deploy` e das verificações do M13
 - **Mapa de dados pessoais** (dado, finalidade, base legal, retenção)
 - Aviso de privacidade
 - Como o sistema atende aos direitos do titular

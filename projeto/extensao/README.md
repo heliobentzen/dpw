@@ -138,7 +138,7 @@ Corrija o que aparecer. **Este retorno é o que separa entrega de abandono.**
 
 > **Cuidado com dados pessoais nas evidências.** Prints com nome, telefone ou endereço de
 > terceiros precisam ser anonimizados. Autorização de imagem por escrito para toda foto
-> com pessoas identificáveis. É aplicação direta do M11.
+> com pessoas identificáveis. É aplicação direta do M13.
 
 ---
 

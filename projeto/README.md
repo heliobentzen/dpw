@@ -24,7 +24,7 @@ extensionista.
 
 ```
 Semana:  1   3   5   6   8   9  11  12  13  14  15  16  17  18  19  20
-Módulos: M00─M02─M04─M05─M06─M07─M09─M10─M11─M12─M13─M14─M15
+Módulos: M00─M03─M05─M06─M07─M07─M15─M12─M13─M14─M07─M16─M17
 Projeto:              ├E1──E1/E2──E2────────────────────E3──E3──────E4
 Extensão:                                 ├X1──X1──────────────X2───X3
 ```
@@ -38,9 +38,12 @@ descoberta.
 ### Escopo
 
 - **MVP obrigatório:** 3 a 5 funcionalidades que resolvam o problema central.
-- **Mínimo técnico:** 5+ models com relações 1-N e N-N; CRUD completo em ao menos 2
-  entidades; autenticação com 2+ papéis; busca com filtros; ao menos 1 relatório;
-  20+ testes; sistema implantado com URL pública.
+- **Mínimo técnico:** 🔵 5+ models com relações 1-N e N-N; API REST com CRUD completo em
+  2+ recursos, validação, filtros e paginação; 🟣 SPA com 5+ rotas, design system próprio,
+  formulários validados e os quatro estados de tela; ⚪ autenticação com 2+ papéis ponta a
+  ponta; 15+ testes no backend e 6+ no frontend; **os dois artefatos implantados** com URL
+  pública. Lista completa em
+  [`etapa-3-desenvolvimento/`](etapa-3-desenvolvimento/#3-requisitos-técnicos-mínimos-verificados-na-rubrica).
 - **Fora do escopo:** app mobile nativo, integração com meio de pagamento, IA/ML. Se a
   equipe quiser, faz depois da disciplina.
 
@@ -95,6 +98,7 @@ a rubrica avalia.
 | [Backlog e histórias](modelos-de-documentos/backlog-e-historias.md) | 2 |
 | [Matriz de riscos](modelos-de-documentos/matriz-de-riscos.md) | 2 |
 | [ADR](modelos-de-documentos/adr.md) | 2–3 |
+| **Contrato de API** (ver M02) | 2 |
 | [Ata de reunião](modelos-de-documentos/ata-de-reuniao.md) | todas |
 | [Plano de teste](modelos-de-documentos/plano-de-teste.md) | 3 |
 | [Relatório técnico](modelos-de-documentos/relatorio-tecnico.md) | 4 |

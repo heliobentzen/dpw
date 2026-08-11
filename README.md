@@ -4,12 +4,15 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 (**40h teóricas + 60h práticas**), com projeto integrador em equipe e **atividades
 extensionistas** curricularizadas.
 
-> **Stack adotada:** Python 3.12+ · Django 5.x · PostgreSQL · HTML/CSS · Git/GitHub · Docker · Deploy em PaaS.
-> A ementa fala em "framework escolhido"; este material adota **Django** por cobrir
-> literalmente todos os itens da ementa (classes que geram o banco, migrações,
-> ORM/CRUD, mapeamento de URLs, views, templates, autenticação, segurança e deploy).
-> Ver [`docs/decisoes-tecnicas.md`](docs/decisoes-tecnicas.md) para a justificativa e
-> para o caminho de adaptação a outros frameworks (Laravel, Rails, Spring Boot, Next.js).
+> **Stack:** arquitetura desacoplada.
+> **Backend** — Python 3.12 · Django 5 · Django REST Framework · PostgreSQL 16
+> **Frontend** — React 19 · TypeScript · Vite · Tailwind CSS 4 · React Router · TanStack Query
+> **Comum** — Git/GitHub · Docker · CI (GitHub Actions) · deploy em PaaS
+>
+> A ementa fala em "framework escolhido". Ver
+> [`docs/decisoes-tecnicas.md`](docs/decisoes-tecnicas.md) para a justificativa completa,
+> a **ressalva sobre o item "Templates"** e o **modo híbrido** (Django + templates +
+> Tailwind + ilhas de React), caso sua instituição exija leitura estrita da ementa.
 
 ---
 
@@ -17,11 +20,11 @@ extensionistas** curricularizadas.
 
 | Pasta | O que contém |
 |---|---|
-| [`docs/`](docs/) | Plano de ensino, cronograma, setup de ambiente, decisões técnicas, glossário, troubleshooting |
-| [`modulos/`](modulos/) | 16 módulos de conteúdo (70h), cada um com teoria, roteiro prático, exercícios e checklist |
+| [`docs/`](docs/) | Plano de ensino, cronograma, setup, decisões técnicas, glossário, troubleshooting |
+| [`modulos/`](modulos/) | 18 módulos de conteúdo (69h), cada um com teoria, roteiro prático, exercícios e checklist |
 | [`projeto/`](projeto/) | Projeto integrador em 4 etapas (20h) + trilha extensionista (10h) |
 | [`avaliacao/`](avaliacao/) | Rubricas, pesos, política de recuperação e critérios de correção |
-| [`recursos/`](recursos/) | Código de apoio, snippets, checklists imprimíveis |
+| [`recursos/`](recursos/) | Código de apoio, nivelamento de JS, checklists imprimíveis |
 
 **Comece por aqui:**
 
@@ -31,26 +34,41 @@ extensionistas** curricularizadas.
 
 ---
 
-## Trilha de módulos (70h)
+## Trilha de módulos (69h)
 
+### Fundamentos — 10h
 | # | Módulo | CH | T | P |
 |---|---|---:|---:|---:|
 | 00 | [Ambiente e ferramentas](modulos/00-ambiente-e-ferramentas/) | 3 | 1 | 2 |
-| 01 | [Fundamentos da web e HTTP](modulos/01-fundamentos-web-http/) | 6 | 4 | 2 |
-| 02 | [Django: primeiros passos](modulos/02-django-primeiros-passos/) | 4 | 1 | 3 |
-| 03 | [Model: classes que geram o banco](modulos/03-models-orm/) | 6 | 3 | 3 |
-| 04 | [Migrações: evoluir o banco](modulos/04-migracoes/) | 3 | 1 | 2 |
-| 05 | [ORM: consultas e CRUD](modulos/05-orm-consultas-crud/) | 6 | 2 | 4 |
-| 06 | [URLs e Views](modulos/06-urls-e-views/) | 6 | 3 | 3 |
-| 07 | [Forms e validação](modulos/07-forms-e-validacao/) | 4 | 2 | 2 |
-| 08 | [Templates e interface](modulos/08-templates/) | 6 | 3 | 3 |
-| 09 | [Django Admin](modulos/09-django-admin/) | 2 | 1 | 1 |
-| 10 | [Autenticação e gestão de usuários](modulos/10-autenticacao-usuarios/) | 5 | 2 | 3 |
-| 11 | [Segurança de aplicações web](modulos/11-seguranca/) | 5 | 3 | 2 |
-| 12 | [Testes e qualidade](modulos/12-testes-e-qualidade/) | 4 | 2 | 2 |
-| 13 | [APIs e integrações](modulos/13-apis-e-integracoes/) | 2 | 1 | 1 |
-| 14 | [Deploy / implantação](modulos/14-deploy/) | 5 | 2 | 3 |
-| 15 | [Observabilidade e manutenção](modulos/15-observabilidade-e-manutencao/) | 2 | 1 | 1 |
+| 01 | [Fundamentos da web e HTTP](modulos/01-fundamentos-web-http/) | 5 | 3 | 2 |
+| 02 | [Arquitetura desacoplada e contrato de API](modulos/02-arquitetura-desacoplada/) | 2 | 2 | 0 |
+
+### Backend — 23h
+| # | Módulo | CH | T | P |
+|---|---|---:|---:|---:|
+| 03 | [Django + DRF: primeiros passos](modulos/03-django-drf-primeiros-passos/) | 3 | 1 | 2 |
+| 04 | [Model: classes que geram o banco](modulos/04-models-orm/) | 6 | 3 | 3 |
+| 05 | [Migrações](modulos/05-migracoes/) | 3 | 1 | 2 |
+| 06 | [ORM: consultas e CRUD](modulos/06-orm-consultas-crud/) | 5 | 2 | 3 |
+| 07 | [API: URLs, views e serializers](modulos/07-api-urls-views-serializers/) | 6 | 3 | 3 |
+
+### Frontend — 15h
+| # | Módulo | CH | T | P |
+|---|---|---:|---:|---:|
+| 08 | [React: fundamentos](modulos/08-react-fundamentos/) | 5 | 2 | 3 |
+| 09 | [Tailwind e construção de interfaces](modulos/09-tailwind-e-interface/) | 4 | 1 | 3 |
+| 10 | [Rotas e navegação](modulos/10-rotas-e-navegacao/) | 2 | 1 | 1 |
+| 11 | [Dados e formulários no cliente](modulos/11-dados-e-formularios/) | 4 | 2 | 2 |
+
+### Transversais e produção — 21h
+| # | Módulo | CH | T | P |
+|---|---|---:|---:|---:|
+| 12 | [Autenticação e gestão de usuários](modulos/12-autenticacao-usuarios/) | 5 | 2 | 3 |
+| 13 | [Segurança](modulos/13-seguranca/) | 5 | 3 | 2 |
+| 14 | [Testes e qualidade](modulos/14-testes-e-qualidade/) | 3 | 1 | 2 |
+| 15 | [Django Admin (back-office)](modulos/15-django-admin/) | 2 | 1 | 1 |
+| 16 | [Deploy dos dois artefatos](modulos/16-deploy/) | 4 | 2 | 2 |
+| 17 | [Observabilidade e manutenção](modulos/17-observabilidade-e-manutencao/) | 2 | 1 | 1 |
 | — | Avaliação teórica integrada (semana 10) | 1 | 1 | 0 |
 | | **Subtotal** | **70** | **33** | **37** |
 
@@ -76,13 +94,18 @@ Todos os módulos evoluem **um mesmo sistema**, construído incrementalmente:
 > **BiblioCom** — sistema de gestão para uma **biblioteca comunitária**: cadastro de
 > acervo, associados, empréstimos, devoluções, reservas e relatórios.
 
-Esse recorte foi escolhido porque (a) exercita todos os itens da ementa, (b) tem
-modelagem rica o suficiente (relações 1-N e N-N, regras de negócio, permissões) e
-(c) é um caso real de **extensão universitária** — bibliotecas comunitárias,
-associações de moradores e ONGs costumam controlar acervo em papel ou planilha.
+```
+bibliocom/
+├── backend/          Django + DRF + PostgreSQL     (M03–M07, M15)
+└── frontend/         React + TS + Vite + Tailwind  (M08–M11)
+```
 
-O projeto da equipe é **outro sistema**, de tema livre, definido na Etapa 1. O
-BiblioCom é referência de código, não o entregável.
+O domínio é o mesmo nas duas camadas: quando a turma troca de linguagem na semana 8, o
+único elemento novo é a tecnologia — as entidades e as regras já são conhecidas. Essa
+continuidade é intencional e é o principal amortecedor da transição backend→frontend.
+
+O projeto da equipe é **outro sistema**, de tema livre, definido na Etapa 1. O BiblioCom é
+referência de código, não o entregável.
 
 ---
 
@@ -91,10 +114,23 @@ BiblioCom é referência de código, não o entregável.
 - 🎯 **Objetivos** — o que você deve saber fazer ao final.
 - 📖 **Teoria** — conceito, com o "porquê" antes do "como".
 - 🛠️ **Roteiro prático** — passo a passo executável, comando a comando.
-- 🧪 **Exercícios** — atividades individuais com gabarito de verificação.
+- 🧪 **Exercícios** — atividades individuais com critérios de verificação.
 - ⚠️ **Erros comuns** — o que quebra na prática e como diagnosticar.
 - ✅ **Checklist de saída** — critério objetivo de conclusão do módulo.
 - 💼 **No mercado** — como o assunto aparece em vagas, code reviews e produção.
+- 🔵 **Backend** / 🟣 **Frontend** — camada tratada no trecho.
+
+## Pré-requisito de JavaScript
+
+Os módulos 08–11 assumem **JavaScript moderno** (`const/let`, arrow functions,
+destructuring, *spread*, `map`/`filter`, módulos ES, Promises e `async/await`) — pré-requisito
+atendido pela turma a que este material se destina.
+
+Para apoio individual de quem chegar com lacunas, e para outras turmas que venham a usar
+este material, há uma referência de ponte Python→JavaScript em
+[`recursos/js-para-react.md`](recursos/js-para-react.md), com um diagnóstico de 20 minutos
+e a compensação de carga prevista em
+[`docs/cronograma.md`](docs/cronograma.md#6-variações-de-calendário).
 
 ## Licença
 
