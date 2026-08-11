@@ -294,9 +294,9 @@ crianças) exigem base legal específica e cuidado redobrado. Regra prática par
 
 ### Passo 1 — Aplicação vulnerável: encontre e corrija (60 min) ⭐
 
-Este código está em [`vulneravel.py`](../../recursos/codigo/vulneravel.py). **Cada view
-tem pelo menos uma vulnerabilidade.** Trabalhe em duplas: uma pessoa ataca, a outra
-corrige.
+O laboratório completo está em [`vulneravel.py`](../../recursos/codigo/vulneravel.py), com
+**10 casos** — os 8 reproduzidos abaixo e mais dois no arquivo. **Cada um tem pelo menos
+uma vulnerabilidade.** Trabalhe em duplas: uma pessoa ataca, a outra corrige.
 
 ```python
 # 1
@@ -346,8 +346,9 @@ def relatorio(request):
         return render(request, "relatorio_completo.html", {...})
 ```
 
-Para cada item, entregue: **vulnerabilidade** (nome OWASP), **exploração** (payload/URL
-concreto que demonstra), **correção** (código) e **por que a correção funciona**.
+Para cada um dos **10 casos**, entregue: **vulnerabilidade** (nome OWASP), **exploração**
+(payload/URL concreto que demonstra), **correção** (código) e **por que a correção
+funciona**. O gabarito está comentado no fim do arquivo — não leia antes de tentar.
 
 ### Passo 2 — `check --deploy` (20 min)
 
@@ -415,7 +416,7 @@ só então trate da remoção do histórico.
 
 ## ✅ Checklist de saída
 
-- [ ] As 8 vulnerabilidades do Passo 1 identificadas, exploradas e corrigidas
+- [ ] Os 10 casos do laboratório de vulnerabilidades identificados, explorados e corrigidos
 - [ ] `check --deploy` sem avisos
 - [ ] Cabeçalhos de segurança configurados
 - [ ] `pip-audit` sem vulnerabilidades críticas
@@ -427,7 +428,7 @@ só então trate da remoção do histórico.
 
 Documento com:
 
-1. Tabela das 8 vulnerabilidades: nome, exploração, correção, commit.
+1. Tabela dos 10 casos de vulnerabilidade: nome, exploração, correção, commit.
 2. Saída de `check --deploy` antes e depois.
 3. Cabeçalhos de segurança configurados e o porquê de cada um.
 4. **Mapa de dados pessoais** do projeto da equipe:
