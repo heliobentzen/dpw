@@ -1,529 +1,505 @@
-# M06 — Views: mapeamento de URLs e processamento de requisições
+# M07 — API: mapeamento de URLs, views e serializers
 
-> **CH:** 6h (3h teóricas · 3h práticas) · **Semanas 7–8** · **Pré-requisitos:** M05
+> **CH:** 6h (3h teóricas · 3h práticas) · **Semanas 6–7** · **Pré-requisitos:** M02, M06
 > **Ementa:** *Views: Mapeamento de URLs; Criação de classes / métodos / funções para
-> processamento de requisições.*
+> processamento de requisições.* (+ *operações CRUD a partir da API do framework*)
+
+O módulo que fecha o backend. Ao final dele existe uma API real, documentada e testável —
+que é o **pré-requisito para o frontend começar** na semana 8.
 
 ## 🎯 Objetivos
 
-1. Mapear URLs para views com parâmetros tipados, prefixos e namespaces.
-2. Escrever views como **função** (FBV) e como **classe** (CBV), sabendo quando usar cada uma.
-3. Processar GET e POST corretamente, aplicando o padrão PRG.
-4. Devolver respostas adequadas: HTML, redirecionamento, JSON, arquivo, 404.
-5. Nunca escrever URL na mão — usar `reverse()` / `{% url %}` / `get_absolute_url()`.
+1. Mapear URLs para views com parâmetros tipados, prefixos, namespaces e routers.
+2. Escrever views como **função**, como **classe** (`APIView`) e como **ViewSet**, sabendo
+   quando usar cada uma.
+3. Serializar e **validar** dados com `Serializer` e `ModelSerializer`.
+4. Implementar filtros, busca, ordenação e paginação.
+5. Gerar documentação OpenAPI e tipos TypeScript a partir do código.
 
 ---
 
 ## 📖 Teoria (3h)
 
-### 1. Mapeamento de URLs (45 min)
+### 1. Mapeamento de URLs (30 min)
 
 #### O grafo de URLconfs
 
 ```
-config/urls.py                      (raiz, apontada por ROOT_URLCONF)
+config/urls.py                                (raiz, apontada por ROOT_URLCONF)
 ├── path("admin/", admin.site.urls)
-├── path("", include("acervo.urls"))              -> /obras/, /obras/42/
-└── path("emprestimos/", include("emprestimos.urls"))
-```
-
-```python
-# config/urls.py
-from django.contrib import admin
-from django.urls import include, path
-
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("acervo.urls")),
-    path("emprestimos/", include("emprestimos.urls")),
-]
+├── path("api/", include("acervo.urls"))      -> /api/obras/, /api/obras/42/
+└── path("api/schema/", SpectacularAPIView)   -> OpenAPI
 ```
 
 ```python
 # acervo/urls.py
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
 from . import views
 
-app_name = "acervo"          # habilita o namespace 'acervo:'
+router = DefaultRouter()
+router.register("obras", views.ObraViewSet, basename="obra")
+router.register("autores", views.AutorViewSet, basename="autor")
+router.register("emprestimos", views.EmprestimoViewSet, basename="emprestimo")
+
+app_name = "acervo"
 
 urlpatterns = [
-    path("", views.home, name="home"),
-    path("obras/", views.ObraListView.as_view(), name="obra_list"),
-    path("obras/nova/", views.ObraCreateView.as_view(), name="obra_create"),
-    path("obras/<int:pk>/", views.ObraDetailView.as_view(), name="obra_detail"),
-    path("obras/<int:pk>/editar/", views.ObraUpdateView.as_view(), name="obra_update"),
-    path("obras/<int:pk>/excluir/", views.ObraDeleteView.as_view(), name="obra_delete"),
-    path("autores/<slug:slug>/", views.autor_detail, name="autor_detail"),
+    path("", include(router.urls)),
+    path("relatorios/acervo/", views.relatorio_acervo, name="relatorio_acervo"),
 ]
 ```
 
-O Django testa os padrões **na ordem** e usa o primeiro que casar. Padrão genérico antes
-de específico esconde o específico:
+**Uma linha de `router.register` gera seis rotas:**
 
-```python
-# ❌ /obras/nova/ nunca é alcançada: <str:slug> casa antes
-path("obras/<str:slug>/", ...),
-path("obras/nova/", ...),
+| Rota | Método | Ação do ViewSet | Status |
+|---|---|---|---|
+| `/api/obras/` | GET | `list` | 200 |
+| `/api/obras/` | POST | `create` | 201 |
+| `/api/obras/{id}/` | GET | `retrieve` | 200 |
+| `/api/obras/{id}/` | PUT | `update` | 200 |
+| `/api/obras/{id}/` | PATCH | `partial_update` | 200 |
+| `/api/obras/{id}/` | DELETE | `destroy` | 204 |
 
-# ✅ específico primeiro
-path("obras/nova/", ...),
-path("obras/<str:slug>/", ...),
-```
+É o contrato do M02 materializado — e é por isso que o contrato vem antes: o router
+**impõe** a convenção de recurso + método, e desvios ficam evidentes.
 
-#### Converters
+#### Converters (rotas fora do router)
 
 | Converter | Casa com | Exemplo |
 |---|---|---|
-| `str` | Qualquer texto **exceto** `/` | `<str:nome>` |
-| `int` | Dígitos (≥ 0) | `<int:pk>` |
-| `slug` | Letras, números, `-` e `_` | `<slug:slug>` |
-| `uuid` | UUID formatado | `<uuid:id>` |
-| `path` | Qualquer texto **inclusive** `/` | `<path:arquivo>` |
+| `str` | Texto sem `/` | `<str:slug>` |
+| `int` | Dígitos | `<int:pk>` |
+| `slug` | `a-z0-9-_` | `<slug:slug>` |
+| `uuid` | UUID | `<uuid:id>` |
+| `path` | Texto **com** `/` | `<path:arquivo>` |
 
-Converter customizado, quando o padrão precisa de validação própria:
-
-```python
-# acervo/converters.py
-class AnoConverter:
-    regex = r"(18|19|20)\d{2}"
-
-    def to_python(self, value):
-        return int(value)
-
-    def to_url(self, value):
-        return str(value)
-```
+O Django testa os padrões **na ordem**; padrão genérico antes de específico esconde o
+específico:
 
 ```python
-from django.urls import register_converter
-from . import converters
+# ❌ /api/obras/destaques/ nunca é alcançada
+path("obras/<str:slug>/", ...),
+path("obras/destaques/", ...),
 
-register_converter(converters.AnoConverter, "ano")
-urlpatterns = [path("acervo/<ano:ano>/", views.por_ano, name="por_ano")]
+# ✅ literal primeiro
+path("obras/destaques/", ...),
+path("obras/<str:slug>/", ...),
 ```
 
 #### Nomear e reverter
 
-**Nunca escreva URL literal no código ou no template.** Se a rota mudar, tudo quebra
-silenciosamente.
-
 ```python
-from django.urls import reverse, reverse_lazy
-
-reverse("acervo:obra_detail", kwargs={"pk": 42})       # -> "/obras/42/"
-reverse("acervo:obra_list")                            # -> "/obras/"
+from django.urls import reverse
+reverse("acervo:obra-detail", kwargs={"pk": 42})    # -> "/api/obras/42/"
 ```
 
-```html
-<a href="{% url 'acervo:obra_detail' obra.pk %}">{{ obra.titulo }}</a>
-```
+O router nomeia as rotas como `<basename>-list` e `<basename>-detail`. Use `reverse()` nos
+testes (M14) — nunca escreva a URL literal.
+
+### 2. Views: três níveis de abstração (45 min) ⭐
+
+O DRF oferece três formas de processar uma requisição. A ementa pede as três: *classes /
+métodos / funções*.
+
+#### Nível 1 — função (`@api_view`)
 
 ```python
-class Obra(models.Model):
-    def get_absolute_url(self):
-        return reverse("acervo:obra_detail", kwargs={"pk": self.pk})
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def relatorio_acervo(request):
+    """Tudo explícito: nenhuma convenção escondida."""
+    dados = Obra.objects.aggregate(
+        total_obras=Count("id"),
+        total_exemplares=Count("exemplares"),
+    )
+    return Response(dados)
 ```
 
-Com `get_absolute_url`, o admin ganha o botão "Ver no site" e as CBVs de criação/edição
-sabem para onde redirecionar sozinhas.
+**Use quando:** o endpoint não é um CRUD sobre um model — relatórios, ações de domínio,
+integrações.
 
-> `reverse_lazy` é a versão preguiçosa, necessária em atributos de classe e em
-> `settings.py`, avaliados antes do carregamento das URLs.
-
-### 2. Views baseadas em função (45 min)
+#### Nível 2 — classe (`APIView`)
 
 ```python
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
-
-from .models import Obra
+from rest_framework.views import APIView
 
 
-def obra_list(request):
-    termo = request.GET.get("q", "").strip()
-    obras = Obra.objects.select_related("autor")
-    if termo:
-        obras = obras.filter(titulo__icontains=termo)
-    return render(request, "acervo/obra_list.html", {"obras": obras, "termo": termo})
+class ObraListAPIView(APIView):
+    def get(self, request):
+        obras = Obra.objects.select_related("autor")
+        return Response(ObraSerializer(obras, many=True).data)
 
-
-def obra_detail(request, pk):
-    obra = get_object_or_404(Obra.objects.select_related("autor", "editora"), pk=pk)
-    return render(request, "acervo/obra_detail.html", {"obra": obra})
+    def post(self, request):
+        serializer = ObraCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)     # 400 automático com os erros
+        obra = serializer.save()
+        return Response(ObraSerializer(obra).data, status=201)
 ```
 
-#### Tratando GET e POST na mesma view
+Organiza por **método HTTP**: um método Python por verbo. **Use quando:** o fluxo é
+específico demais para um ViewSet, mas ainda é um recurso.
+
+#### Nível 3 — `ModelViewSet`
 
 ```python
-def obra_create(request):
-    if request.method == "POST":
-        form = ObraForm(request.POST)
-        if form.is_valid():
-            obra = form.save()
-            messages.success(request, f"Obra '{obra.titulo}' cadastrada.")
-            return redirect("acervo:obra_detail", pk=obra.pk)   # PRG
-        messages.error(request, "Corrija os erros abaixo.")
-    else:
-        form = ObraForm()
-    return render(request, "acervo/obra_form.html", {"form": form})
-```
-
-Este é **o** esqueleto de view com formulário. Guarde-o. Note:
-
-- POST inválido **não** redireciona: re-renderiza o formulário com os erros e os dados.
-- POST válido **sempre** redireciona (PRG).
-- GET só monta o formulário vazio.
-
-#### Restringir métodos
-
-```python
-from django.views.decorators.http import require_GET, require_POST, require_http_methods
-
-@require_POST
-def obra_delete(request, pk):
-    obra = get_object_or_404(Obra, pk=pk)
-    obra.delete()
-    messages.success(request, "Obra excluída.")
-    return redirect("acervo:obra_list")
-```
-
-Uma requisição GET a essa rota recebe `405 Method Not Allowed` — exatamente o que se quer
-para uma operação destrutiva (lembre do M01: bots seguem links GET).
-
-#### Objetos de resposta
-
-```python
-from django.http import (FileResponse, Http404, HttpResponse, HttpResponseNotFound,
-                         JsonResponse, HttpResponseRedirect)
-from django.shortcuts import redirect, render
-
-render(request, "template.html", contexto)               # HTML
-redirect("acervo:obra_list")                             # 302 por nome de rota
-redirect(obra)                                           # usa get_absolute_url()
-redirect("/caminho/", permanent=True)                    # 301
-JsonResponse({"ok": True})                               # application/json
-FileResponse(open("relatorio.pdf", "rb"))                # download
-HttpResponse(status=204)                                 # sem conteúdo
-raise Http404("Obra não encontrada")                     # 404
-```
-
-### 3. Views baseadas em classe (45 min)
-
-CBVs organizam por **método HTTP** e trazem comportamento pronto por herança.
-
-```python
-from django.views import View
+from rest_framework import viewsets
 
 
-class ObraView(View):
-    def get(self, request, pk):
-        ...
-    def post(self, request, pk):
-        ...
-```
-
-#### Genéricas de CRUD
-
-```python
-from django.urls import reverse_lazy
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView, UpdateView)
-
-from .models import Obra
-
-
-class ObraListView(ListView):
-    model = Obra
-    paginate_by = 20
-    # template: acervo/obra_list.html | contexto: object_list e obra_list
-
-    def get_queryset(self):
-        qs = super().get_queryset().select_related("autor")
-        termo = self.request.GET.get("q", "").strip()
-        if termo:
-            qs = qs.filter(titulo__icontains=termo)
-        return qs
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["termo"] = self.request.GET.get("q", "")
-        return ctx
-
-
-class ObraDetailView(DetailView):
-    model = Obra
+class ObraViewSet(viewsets.ModelViewSet):
     queryset = Obra.objects.select_related("autor", "editora").prefetch_related("categorias")
-    # template: acervo/obra_detail.html | contexto: object e obra
-
-
-class ObraCreateView(CreateView):
-    model = Obra
-    form_class = ObraForm
-    # template: acervo/obra_form.html
-    # sucesso: get_absolute_url() do objeto criado
-
-
-class ObraUpdateView(UpdateView):
-    model = Obra
-    form_class = ObraForm
-
-
-class ObraDeleteView(DeleteView):
-    model = Obra
-    success_url = reverse_lazy("acervo:obra_list")
-    # template: acervo/obra_confirm_delete.html
+    serializer_class = ObraSerializer
 ```
 
-**Convenções que a CBV assume (e que confundem no começo):**
+Duas linhas úteis, seis rotas, paginação, validação e documentação. **Use quando:** é CRUD
+padrão sobre um model — o caso da maioria dos recursos.
 
-| CBV | Template padrão | Nome no contexto |
-|---|---|---|
-| `ListView` | `<app>/<model>_list.html` | `object_list`, `<model>_list` |
-| `DetailView` | `<app>/<model>_detail.html` | `object`, `<model>` |
-| `CreateView`/`UpdateView` | `<app>/<model>_form.html` | `form`, `object` |
-| `DeleteView` | `<app>/<model>_confirm_delete.html` | `object` |
-
-Sobrescreva com `template_name`, `context_object_name`, `success_url`.
-
-#### Pontos de extensão mais usados
-
-```python
-class ObraCreateView(CreateView):
-    def get_queryset(self): ...          # que objetos esta view enxerga
-    def get_context_data(self, **kw): ...# dados extras para o template
-    def get_form_kwargs(self): ...       # passa o request/usuário ao form
-    def form_valid(self, form): ...      # o que fazer quando validar
-    def form_invalid(self, form): ...    # quando não validar
-    def get_success_url(self): ...       # para onde ir depois
-    def dispatch(self, request, *a, **kw): ...  # antes de tudo (permissões)
-```
-
-```python
-class ObraCreateView(CreateView):
-    model = Obra
-    form_class = ObraForm
-
-    def form_valid(self, form):
-        form.instance.cadastrada_por = self.request.user
-        messages.success(self.request, "Obra cadastrada com sucesso.")
-        return super().form_valid(form)
-```
-
-#### FBV ou CBV?
+#### Como escolher
 
 | Situação | Escolha |
 |---|---|
-| CRUD padrão de um model | **CBV genérica** — menos código, comportamento testado |
-| Lógica de negócio complexa e específica | **FBV** — fluxo explícito, fácil de ler |
-| Precisa reaproveitar comportamento entre views | **CBV + mixins** |
-| Está aprendendo | **FBV primeiro** — nada é implícito |
-| A equipe passa mais tempo lendo a documentação da CBV que escrevendo a lógica | **FBV** |
+| CRUD padrão de um model | **`ModelViewSet`** |
+| CRUD com regras muito próprias | `ModelViewSet` + sobrescrever os métodos |
+| Recurso sem model, ou fluxo peculiar | `APIView` |
+| Relatório, ação, integração, healthcheck | **`@api_view`** |
+| Está aprendendo o mecanismo | `@api_view` primeiro — nada é implícito |
 
-Não existe resposta única. O critério honesto: *qual das duas fica mais fácil de entender
-daqui a seis meses?* Consulte [ccbv.co.uk](https://ccbv.co.uk/) para ver o que cada CBV faz.
+> A regra honesta: use a abstração mais alta **que você consegue explicar**. `ModelViewSet`
+> que a equipe não entende vira caixa-preta na primeira exceção. Consulte
+> [cdrf.co](https://www.cdrf.co/) para ver o que cada classe realmente faz.
 
-### 4. O objeto `request` (25 min)
-
-```python
-request.method              # "GET", "POST", ...
-request.path                # "/obras/42/"
-request.get_full_path()     # "/obras/42/?ordem=titulo"
-request.GET                 # QueryDict da query string
-request.POST                # QueryDict do corpo do formulário
-request.FILES               # arquivos enviados
-request.body                # corpo cru (JSON, por exemplo)
-request.headers["User-Agent"]
-request.COOKIES
-request.session             # dict persistente por usuário
-request.user                # usuário autenticado ou AnonymousUser
-request.META["REMOTE_ADDR"]
-request.is_secure()
-```
-
-`QueryDict` é imutável e aceita chaves repetidas:
+#### Pontos de extensão do ViewSet
 
 ```python
-request.GET.get("q", "")            # valor único, com default
-request.GET.getlist("categoria")    # ["romance", "conto"]
+class ObraViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):          # QUE objetos esta view enxerga (controle de acesso!)
+        ...
+    def get_serializer_class(self):  # serializer diferente para leitura e escrita
+        ...
+    def perform_create(self, serializer):   # o que fazer ao salvar
+        serializer.save(cadastrada_por=self.request.user)
+    def get_permissions(self):       # permissões por ação
+        ...
 ```
 
-**Sessão:**
+#### Ações customizadas
 
 ```python
-request.session["ultima_busca"] = termo
-request.session.get("ultima_busca", "")
-del request.session["ultima_busca"]
-request.session.set_expiry(3600)
+from rest_framework.decorators import action
+
+
+class EmprestimoViewSet(viewsets.ModelViewSet):
+    @action(detail=True, methods=["post"])
+    def devolver(self, request, pk=None):
+        """POST /api/emprestimos/42/devolver/"""
+        emprestimo = self.get_object()
+        if emprestimo.devolvido_em:
+            return Response({"detail": "Empréstimo já devolvido."}, status=409)
+        emprestimo.devolver()
+        return Response(EmprestimoSerializer(emprestimo).data)
+
+    @action(detail=False, methods=["get"])
+    def atrasados(self, request):
+        """GET /api/emprestimos/atrasados/"""
+        qs = self.get_queryset().filter(
+            devolvido_em__isnull=True, previsao_devolucao__lt=timezone.localdate()
+        )
+        return Response(self.get_serializer(qs, many=True).data)
 ```
 
-### 5. Middleware: o que roda antes e depois (20 min)
+`detail=True` gera `/{id}/acao/`; `detail=False` gera `/acao/`.
+
+### 3. Serializers (50 min) ⭐
+
+O serializer faz **três** coisas: converte objeto → JSON, converte JSON → objeto e
+**valida**. É o `Form` do Django, adaptado a API.
 
 ```python
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-]
+from rest_framework import serializers
+
+from .models import Obra
+
+
+class AutorResumoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Autor
+        fields = ["id", "nome"]
+
+
+class ObraSerializer(serializers.ModelSerializer):
+    """Leitura: relações aninhadas, campos calculados."""
+
+    autor = AutorResumoSerializer(read_only=True)
+    exemplares_total = serializers.IntegerField(read_only=True)
+    exemplares_disponiveis = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Obra
+        fields = ["id", "titulo", "subtitulo", "autor", "editora", "ano_publicacao",
+                  "isbn", "sinopse", "exemplares_total", "exemplares_disponiveis"]
+
+
+class ObraCreateSerializer(serializers.ModelSerializer):
+    """Escrita: só ids, e só o que o cliente pode definir."""
+
+    class Meta:
+        model = Obra
+        fields = ["titulo", "subtitulo", "autor", "editora", "categorias",
+                  "ano_publicacao", "isbn", "sinopse"]
 ```
 
-A ordem importa: cada um envolve os seguintes, como camadas de cebola. `request.user` só
-existe porque o `AuthenticationMiddleware` rodou antes da sua view.
-
-Middleware próprio:
+> **Aninhe na leitura, use id na escrita** — a decisão do contrato (M02) implementada. A
+> tela quer `autor.nome` sem uma segunda requisição; o formulário só precisa mandar
+> `autor: 7`.
 
 ```python
-# acervo/middleware.py
-import logging
-import time
-
-logger = logging.getLogger(__name__)
-
-
-class TempoDeRespostaMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response          # roda uma vez, na inicialização
-
-    def __call__(self, request):
-        inicio = time.monotonic()
-        response = self.get_response(request)     # chama a view (ou o próximo middleware)
-        duracao = (time.monotonic() - inicio) * 1000
-        response["X-Tempo-ms"] = f"{duracao:.1f}"
-        if duracao > 500:
-            logger.warning("Resposta lenta: %s %s (%.0f ms)", request.method, request.path, duracao)
-        return response
+class ObraViewSet(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action in {"create", "update", "partial_update"}:
+            return ObraCreateSerializer
+        return ObraSerializer
 ```
+
+> ⚠️ **Nunca use `fields = "__all__"`.** Quando alguém adicionar `aprovada_por_admin` ao
+> model, o campo aparece na API pública sem ninguém perceber. É *mass assignment* (M13).
+
+#### Validação
+
+O DRF valida em três níveis, na mesma ordem do `Form` do Django:
+
+```python
+class ObraCreateSerializer(serializers.ModelSerializer):
+
+    # 1. por campo
+    def validate_isbn(self, valor):
+        limpo = valor.replace("-", "").replace(" ", "")
+        if limpo and (not limpo.isdigit() or len(limpo) not in (10, 13)):
+            raise serializers.ValidationError("O ISBN deve ter 10 ou 13 dígitos.")
+        return limpo                      # SEMPRE retorne o valor (limpo)
+
+    def validate_ano_publicacao(self, valor):
+        atual = timezone.localdate().year
+        if valor and valor > atual:
+            raise serializers.ValidationError(f"O ano não pode ser maior que {atual}.")
+        return valor
+
+    # 2. entre campos
+    def validate(self, attrs):
+        if attrs.get("subtitulo") and not attrs.get("titulo"):
+            raise serializers.ValidationError(
+                {"titulo": "Informe o título antes do subtítulo."}
+            )
+        return attrs
+```
+
+Erro de validação vira, automaticamente, uma resposta **400** no formato do contrato:
+
+```json
+{
+  "isbn": ["O ISBN deve ter 10 ou 13 dígitos."],
+  "ano_publicacao": ["O ano não pode ser maior que 2026."]
+}
+```
+
+**Validação de unicidade ao editar** — a pegadinha clássica:
+
+```python
+class Meta:
+    validators = [
+        serializers.UniqueTogetherValidator(
+            queryset=Obra.objects.all(), fields=["titulo", "autor"],
+            message="Já existe uma obra com este título para este autor.",
+        )
+    ]
+```
+
+O DRF exclui a própria instância automaticamente na edição — ao contrário do `Form`, onde
+era preciso lembrar do `exclude(pk=self.instance.pk)`.
+
+#### Serializer com regra de negócio
+
+```python
+class EmprestimoCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Emprestimo
+        fields = ["exemplar", "associado"]
+
+    def validate_exemplar(self, exemplar):
+        if not exemplar.disponivel:
+            raise serializers.ValidationError("Este exemplar já está emprestado.")
+        return exemplar
+
+    def validate_associado(self, associado):
+        if not associado.pode_pegar_emprestado:
+            raise serializers.ValidationError("Associado inativo ou no limite de empréstimos.")
+        return associado
+```
+
+> A regra continua vivendo no **model** (M04); o serializer apenas a consulta e traduz para
+> uma mensagem. Isso mantém a regra válida também no admin, no shell e nos comandos.
+
+### 4. Filtros, busca, ordenação e paginação (30 min)
+
+```bash
+pip install django-filter
+```
+
+```python
+# settings.py
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+}
+```
+
+```python
+class ObraViewSet(viewsets.ModelViewSet):
+    filterset_fields = ["autor", "editora", "ano_publicacao", "categorias"]
+    search_fields = ["titulo", "subtitulo", "isbn", "autor__nome"]
+    ordering_fields = ["titulo", "ano_publicacao", "criado_em"]
+    ordering = ["titulo"]
+```
+
+```
+GET /api/obras/?search=casmurro&autor=7&ordering=-ano_publicacao&page=2
+```
+
+> `ordering_fields` explícito é **controle de acesso**, não estética: sem ele, o cliente
+> ordena por qualquer campo, inclusive de relações, e vaza a existência e a ordem de dados
+> que não deveria ver (M13).
+
+**Paginação nunca é opcional.** Um endpoint sem paginação funciona com 50 registros e
+derruba o servidor com 50.000.
+
+### 5. Documentação e tipos (25 min) ⭐
+
+```python
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+
+
+class ObraViewSet(viewsets.ModelViewSet):
+    @extend_schema(
+        summary="Lista as obras do acervo",
+        parameters=[OpenApiParameter("search", str, description="Busca em título e autor")],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+```
+
+```bash
+python manage.py spectacular --file schema.yml     # gera o OpenAPI
+```
+
+E, no frontend, os tipos saem do mesmo schema:
+
+```bash
+cd frontend
+pnpm add -D openapi-typescript
+pnpm dlx openapi-typescript ../backend/schema.yml -o src/api/schema.d.ts
+```
+
+```ts
+import type { components } from "./api/schema";
+
+type Obra = components["schemas"]["Obra"];    // sempre sincronizado com o backend
+```
+
+**Por que isso importa:** renomear `titulo` no serializer muda o schema, que muda o tipo,
+que faz o TypeScript **falhar na compilação**. É a defesa concreta contra o contrato
+quebrado em silêncio, descrito no M02. Coloque a geração no CI (M14).
 
 ---
 
 ## 🛠️ Roteiro prático (3h)
 
-### Passo 1 — Rotas do acervo (30 min)
+### Passo 1 — CRUD de Obra com ViewSet (50 min)
 
-Implemente em `acervo/urls.py` as 7 rotas listadas na teoria e, em `views.py`, versões
-provisórias que devolvem `HttpResponse` com o nome da rota. Verifique todas no navegador
-antes de escrever qualquer lógica.
-
-### Passo 2 — FBVs de listagem, detalhe e busca (50 min)
-
-```python
-# acervo/views.py
-from django.core.paginator import Paginator
-from django.db.models import Count, Q
-from django.shortcuts import get_object_or_404, render
-
-from .models import Obra
-
-
-def obra_list(request):
-    termo = request.GET.get("q", "").strip()
-    categoria = request.GET.get("categoria", "")
-
-    obras = (
-        Obra.objects.select_related("autor", "editora")
-        .prefetch_related("categorias")
-        .annotate(total_exemplares=Count("exemplares", distinct=True))
-    )
-
-    if termo:
-        obras = obras.filter(
-            Q(titulo__icontains=termo)
-            | Q(subtitulo__icontains=termo)
-            | Q(autor__nome__icontains=termo)
-        ).distinct()
-
-    if categoria:
-        obras = obras.filter(categorias__slug=categoria)
-
-    paginator = Paginator(obras, 12)
-    pagina = paginator.get_page(request.GET.get("page"))
-
-    return render(request, "acervo/obra_list.html", {
-        "pagina": pagina,
-        "obras": pagina.object_list,
-        "termo": termo,
-        "categoria": categoria,
-    })
-
-
-def obra_detail(request, pk):
-    obra = get_object_or_404(
-        Obra.objects.select_related("autor", "editora").prefetch_related("categorias", "exemplares"),
-        pk=pk,
-    )
-    return render(request, "acervo/obra_detail.html", {"obra": obra})
-```
-
-Teste: `/obras/?q=cidade&page=2`. Observe que os filtros **se preservam** entre páginas se
-o template repassar os parâmetros (você fará isso no M08).
-
-### Passo 3 — Ação com POST e PRG (40 min)
-
-```python
-# emprestimos/views.py
-from django.contrib import messages
-from django.core.exceptions import ValidationError
-from django.shortcuts import get_object_or_404, redirect
-from django.views.decorators.http import require_POST
-
-from acervo.models import Associado, Exemplar
-from acervo.services import registrar_emprestimo
-
-
-@require_POST
-def emprestar(request, exemplar_pk):
-    exemplar = get_object_or_404(Exemplar, pk=exemplar_pk)
-    associado = get_object_or_404(Associado, pk=request.POST.get("associado"))
-    try:
-        emprestimo = registrar_emprestimo(exemplar, associado)
-    except ValidationError as e:
-        messages.error(request, e.message)
-        return redirect("acervo:obra_detail", pk=exemplar.obra_id)
-
-    messages.success(
-        request,
-        f"Empréstimo registrado. Devolver até {emprestimo.previsao_devolucao:%d/%m/%Y}.",
-    )
-    return redirect("emprestimos:detail", pk=emprestimo.pk)
-
-
-@require_POST
-def devolver(request, pk):
-    emprestimo = get_object_or_404(Emprestimo, pk=pk, devolvido_em__isnull=True)
-    emprestimo.devolver()
-    messages.success(request, "Devolução registrada.")
-    return redirect("emprestimos:list")
-```
-
-Teste com `curl` que GET nessas rotas devolve **405**:
+Implemente `ObraSerializer`, `ObraCreateSerializer` e `ObraViewSet` conforme a teoria,
+registre no router e teste **todas** as seis rotas:
 
 ```bash
-curl -i http://localhost:8000/emprestimos/1/devolver/
+curl http://localhost:8000/api/obras/
+curl http://localhost:8000/api/obras/1/
+curl -X POST http://localhost:8000/api/obras/ \
+     -H "Content-Type: application/json" \
+     -d '{"titulo":"Memórias Póstumas","autor":1,"ano_publicacao":1881}'
+curl -X PATCH http://localhost:8000/api/obras/1/ \
+     -H "Content-Type: application/json" -d '{"ano_publicacao":1899}'
+curl -X DELETE http://localhost:8000/api/obras/1/ -i
 ```
 
-### Passo 4 — Converter para CBV (40 min)
+Confira o status de cada uma contra o contrato que você escreveu no M02.
 
-Reescreva `obra_list` e `obra_detail` como `ListView` e `DetailView`, mantendo o mesmo
-comportamento (busca, filtro, paginação, otimização de consultas). Depois compare:
+### Passo 2 — Anotações e desempenho (30 min)
 
-| Critério | FBV | CBV |
-|---|---|---|
-| Linhas de código | | |
-| O que está explícito | | |
-| O que está implícito | | |
-| Facilidade para adicionar "só bibliotecários acessam" | | |
-| Legibilidade para quem nunca viu Django | | |
+`exemplares_total` e `exemplares_disponiveis` não podem ser propriedades Python: isso é
+N+1 (M06). Anote no queryset:
 
-Escreva sua conclusão em 5 linhas. **Não existe resposta certa** — existe justificativa.
+```python
+class ObraViewSet(viewsets.ModelViewSet):
+    queryset = (
+        Obra.objects.select_related("autor", "editora")
+        .prefetch_related("categorias")
+        .annotate(
+            exemplares_total=Count("exemplares", distinct=True),
+            exemplares_disponiveis=Count(
+                "exemplares",
+                filter=Q(exemplares__emprestimos__devolvido_em__isnull=True),
+                distinct=True,
+            ),
+        )
+        .order_by("titulo")
+    )
+```
 
-### Passo 5 — Middleware de tempo de resposta (20 min)
+Meça com o Debug Toolbar ou `CaptureQueriesContext`: quantas consultas a listagem de 20
+obras faz **antes** e **depois**? Registre.
 
-Implemente o `TempoDeRespostaMiddleware` da teoria, registre-o em `settings.MIDDLEWARE` e
-confirme com `curl -I` que o cabeçalho `X-Tempo-ms` aparece. Provoque uma resposta lenta
-(`time.sleep(0.6)` numa view) e veja o log de aviso.
+### Passo 3 — Validação (40 min)
+
+Implemente todas as validações da teoria e prove cada uma com `curl`:
+
+| Teste | Esperado |
+|---|---|
+| `titulo` vazio | 400, `{"titulo": ["Este campo não pode ser em branco."]}` |
+| `isbn: "abc"` | 400, mensagem do `validate_isbn` |
+| `ano_publicacao: 2999` | 400 |
+| `autor: 99999` | 400, chave estrangeira inválida |
+| Campo inexistente no corpo | Ignorado silenciosamente — **por quê?** |
+| `id` enviado no POST | Ignorado (`read_only`) — **por quê isso importa?** |
+
+As duas últimas linhas são as importantes: elas mostram que o serializer é uma **lista de
+permissões**, não uma peneira.
+
+### Passo 4 — Filtros e ação customizada (30 min)
+
+1. Configure `filterset_fields`, `search_fields` e `ordering_fields`.
+2. Implemente `EmprestimoViewSet` com as ações `devolver` (detail) e `atrasados` (list).
+3. Teste combinações: `?search=&ordering=&page=`.
+4. Tente ordenar por um campo **fora** de `ordering_fields`. O que acontece?
+
+### Passo 5 — Documentar e gerar tipos (30 min)
+
+1. Anote os endpoints com `@extend_schema`.
+2. Abra `/api/docs/` e navegue: os exemplos batem com a realidade?
+3. Gere `schema.yml` e, no frontend, `src/api/schema.d.ts`.
+4. Compare o schema gerado com o `docs/contrato-api.md` que você escreveu no M02.
+   **Onde divergiram?** Corrija o que estiver errado — pode ser o contrato, pode ser o
+   código.
+
+O passo 4 é o fechamento do bloco de backend: o contrato projetado encontra o contrato
+implementado.
 
 ---
 
@@ -531,27 +507,35 @@ confirme com `curl -I` que o cabeçalho `X-Tempo-ms` aparece. Provoque uma respo
 
 | Erro | Correção |
 |---|---|
-| URL literal no template | `{% url 'app:nome' %}` |
-| Padrão genérico antes do específico | Reordene o `urlpatterns` |
-| `Obra.objects.get()` sem tratamento | `get_object_or_404()` |
-| Não redirecionar após POST | Aplique PRG |
-| Alterar dados em GET | Use POST + `@require_POST` |
-| Regra de negócio na view | Model ou `services.py` |
-| Esquecer `select_related` na view de lista | N+1 na página inteira |
-| `reverse()` em atributo de classe | Use `reverse_lazy` |
-| View retornando `None` | Falta `return` |
-| Confiar em `request.GET` sem validar | Toda entrada externa é suspeita (M11) |
+| `fields = "__all__"` | Lista explícita (*mass assignment*) |
+| Propriedade Python no serializer | N+1; use `annotate` no queryset |
+| Endpoint sem paginação | Configure `PAGE_SIZE` |
+| `ordering` livre pelo cliente | Declare `ordering_fields` |
+| `get_queryset` sem filtro por usuário | IDOR (M13) |
+| `validate_<campo>` sem `return` | O valor vira `None` silenciosamente |
+| Mesmo serializer para leitura e escrita | Expõe campos demais ou obriga aninhamento na escrita |
+| Status 200 para criação | Use 201 e devolva o objeto criado |
+| Regra de negócio só no serializer | Coloque no model; o serializer traduz |
+| Documentação escrita à mão | Desatualiza em uma semana; gere do código |
 
 ## ✅ Checklist de saída
 
-- [ ] URLs com namespace, todas nomeadas
-- [ ] Ao menos uma view com `int`, uma com `slug` e uma sem parâmetro
-- [ ] Mesma funcionalidade implementada como FBV e como CBV, com comparação escrita
-- [ ] Busca com filtros combinados e paginação funcionando
-- [ ] Ação de escrita apenas por POST, com PRG e mensagem de feedback
-- [ ] `get_absolute_url()` implementado nos models principais
-- [ ] Nenhuma URL literal no código ou nos templates
-- [ ] Middleware próprio funcionando
+- [ ] CRUD completo de ao menos 2 recursos via `ModelViewSet`
+- [ ] Ao menos 1 `APIView` e 1 `@api_view` implementados e justificados
+- [ ] Serializers separados para leitura e escrita, com `fields` explícito
+- [ ] Validação por campo e entre campos, testada com `curl`
+- [ ] Ao menos 2 ações customizadas (`@action`)
+- [ ] Filtros, busca, ordenação e paginação funcionando
+- [ ] Nenhuma consulta N+1 (medido)
+- [ ] `/api/docs/` navegável e coerente
+- [ ] `schema.d.ts` gerado no frontend
+- [ ] Contrato do M02 confrontado com a implementação, e divergências resolvidas
+
+## 📦 Entrega E3 — API documentada
+
+API do BiblioCom no ar (local) com: 2+ recursos em CRUD completo, validação de servidor,
+filtros e paginação, 2 ações customizadas, documentação OpenAPI e o comparativo
+contrato-projetado × contrato-implementado.
 
 ## 🧪 Exercícios
 
@@ -559,7 +543,9 @@ Ver [`exercicios.md`](exercicios.md) · Referência rápida em [`cheatsheet.md`]
 
 ## 📚 Para aprofundar
 
+- [DRF — Serializers](https://www.django-rest-framework.org/api-guide/serializers/)
+- [DRF — ViewSets](https://www.django-rest-framework.org/api-guide/viewsets/)
+- [DRF — Filtering](https://www.django-rest-framework.org/api-guide/filtering/)
+- [Classy DRF](https://www.cdrf.co/) — o que cada classe do DRF realmente faz
+- [drf-spectacular](https://drf-spectacular.readthedocs.io/)
 - [Django — Despachante de URLs](https://docs.djangoproject.com/pt-br/5.0/topics/http/urls/)
-- [Django — Views](https://docs.djangoproject.com/pt-br/5.0/topics/http/views/)
-- [Django — Class-based views](https://docs.djangoproject.com/en/5.0/topics/class-based-views/)
-- [Classy Class-Based Views](https://ccbv.co.uk/) — o que cada CBV realmente faz

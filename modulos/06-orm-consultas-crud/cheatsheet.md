@@ -1,4 +1,4 @@
-# M05 — Cheatsheet: ORM
+# M06 — Cheatsheet: ORM
 
 ## CRUD
 
@@ -169,7 +169,7 @@ with connection.cursor() as cur:
     linhas = cur.fetchall()
 ```
 
-⚠️ **Nunca** use f-string/concatenação para montar SQL — é injeção de SQL (M11).
+⚠️ **Nunca** use f-string/concatenação para montar SQL — é injeção de SQL (M13).
 
 ## Anti-padrões
 

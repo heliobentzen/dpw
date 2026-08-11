@@ -1,118 +1,126 @@
-# M02 — Exercícios
+# M03 — Exercícios
 
-## E02.1 — Mapear o ciclo no seu código (individual)
+## E03.1 — Mapear o ciclo nos seus dois projetos (individual)
 
-Desenhe (à mão ou em ferramenta digital) o ciclo de uma requisição a
-`/saudacao/joao/` no **seu** BiblioCom, indicando, para cada etapa, o **arquivo e a
-linha** do seu repositório:
+Desenhe o ciclo de uma requisição a `/api/ping/?q=teste`, indicando **arquivo e linha** do
+seu repositório para cada etapa:
 
-1. Onde a URL é reconhecida
-2. Onde o parâmetro `nome` é extraído
-3. Onde a função é chamada
-4. Onde o contexto é montado
-5. Onde o HTML é gerado
-6. Onde a resposta é devolvida
+1. Onde o React dispara a requisição
+2. Onde o proxy do Vite a reescreve
+3. Onde o Django reconhece a URL
+4. Onde a função da view é chamada
+5. Onde os parâmetros da query string são lidos
+6. Onde o dicionário vira JSON
+7. Onde o React recebe e guarda o resultado
+8. Onde a tela é montada
 
-**Entrega:** imagem + a lista `arquivo:linha`.
+**Entrega:** diagrama + lista `arquivo:linha`.
 
 ---
 
-## E02.2 — Três rotas novas (individual)
+## E03.2 — Três endpoints (individual)
 
-Implemente no app `acervo`:
+Implemente no backend, todos com `AllowAny`:
 
-| Rota | Comportamento |
+| Rota | Devolve |
 |---|---|
-| `/sobre/` | Página estática com a descrição do sistema e os integrantes da equipe |
-| `/contato/` | Exibe telefone/e-mail fictícios da biblioteca |
-| `/calcular/<int:a>/<int:b>/` | Mostra soma, subtração, produto e divisão de `a` e `b` |
+| `GET /api/sobre/` | Nome do sistema, descrição e integrantes da equipe |
+| `GET /api/saudacao/<str:nome>/` | `{"mensagem": "Olá, <nome>!"}`, com 400 se o nome tiver menos de 2 letras |
+| `GET /api/calcular/?a=<n>&b=<n>` | Soma, subtração, produto e divisão; **400** com mensagem clara se `b=0` ou se `a`/`b` não forem números |
 
-Requisitos:
-- Todas usando `render()` e template próprio.
-- Todas com `name=` e acessadas entre si com `{% url %}` (nunca URL escrita à mão).
-- Em `/calcular/`, tratar divisão por zero **sem** deixar o erro 500 aparecer.
+Requisitos: status HTTP correto em cada caso; formato de erro **igual** nos três; todos
+testados com `curl` e visíveis em `/api/docs/`.
 
 ---
 
-## E02.3 — Converters de URL (individual)
+## E03.3 — Consumir os três no React (individual)
 
-Crie uma rota para cada converter e descubra na prática o que cada um aceita:
+Crie um componente para cada endpoint do E03.2, tratando os **quatro estados** (carregando,
+vazio, erro, conteúdo). No caso de `/api/calcular/`, o erro 400 precisa exibir a mensagem
+vinda do servidor, não uma mensagem genérica.
 
-```python
-path("teste/int/<int:valor>/", ...)
-path("teste/str/<str:valor>/", ...)
-path("teste/slug/<slug:valor>/", ...)
-path("teste/uuid/<uuid:valor>/", ...)
-path("teste/path/<path:valor>/", ...)
-```
-
-Preencha a tabela testando cada URL:
-
-| URL testada | int | str | slug | uuid | path |
-|---|:---:|:---:|:---:|:---:|:---:|
-| `/teste/X/42/` | | | | | |
-| `/teste/X/abc/` | | | | | |
-| `/teste/X/meu-titulo-legal/` | | | | | |
-| `/teste/X/a/b/c/` | | | | | |
-| `/teste/X/550e8400-e29b-41d4-a716-446655440000/` | | | | | |
-
-Marque ✅ (casou) ou ❌ (404). Responda: **qual a diferença prática entre `str` e `path`?**
-E por que isso é relevante para segurança?
+Responda: **por que o tratamento de erro precisa distinguir "a rede falhou" de "o servidor
+respondeu 400"?** O que o usuário deveria fazer em cada caso?
 
 ---
 
-## E02.4 — Query string na view (individual)
+## E03.4 — Provar que o proxy importa (individual) ⭐
 
-Crie `/eco/` que exiba, em uma tabela HTML:
+1. Troque `fetch("/api/ping/")` por `fetch("http://localhost:8000/api/ping/")`.
+2. Recarregue e abra o Console. Capture a mensagem de erro **completa**.
+3. Vá à aba Network: a requisição saiu? Qual o status? Houve uma requisição `OPTIONS` antes?
+4. Agora adicione `http://localhost:5173` ao `CORS_ALLOWED_ORIGINS` e teste de novo.
+5. Volte para `/api/ping/` (com proxy).
 
-- todos os pares chave/valor da query string (`request.GET`);
-- o método;
-- o `User-Agent`;
-- o `Content-Type` da requisição.
+**Entrega:** as evidências dos passos 2, 3 e 4 + respostas:
 
-Teste com `/eco/?nome=ana&curso=ads&curso=si`. Responda: **por que `curso` aparece duas
-vezes e como você obteria os dois valores?** (dica: `request.GET.getlist`)
+- Quem bloqueou a requisição: o navegador ou o servidor?
+- O que é a requisição `OPTIONS` de *preflight* e quando ela acontece?
+- Por que o `curl` funciona sem nenhuma configuração de CORS?
+- Por que o material prefere o proxy a configurar CORS no desenvolvimento?
 
----
-
-## E02.5 — Segundo app (individual) ⭐
-
-Crie o app `emprestimos` com:
-
-- `startapp emprestimos` + registro no `INSTALLED_APPS`
-- `emprestimos/urls.py` com `app_name = "emprestimos"`
-- inclusão em `config/urls.py` sob o prefixo `/emprestimos/`
-- uma rota `/emprestimos/` que lista empréstimos fictícios (lista Python, ainda sem banco)
-- link recíproco entre a home do `acervo` e a lista de `emprestimos`, usando `{% url %}`
-
-Responda em 3 linhas: **quando vale a pena criar um novo app em vez de crescer o existente?**
+Este exercício antecipa o M13. CORS é a fonte nº 1 de frustração em arquitetura
+desacoplada, e quase sempre por não se entender **quem** está bloqueando.
 
 ---
 
-## E02.6 — Quebre de propósito (individual)
+## E03.5 — Negar por padrão (individual)
+
+1. Remova `@permission_classes([AllowAny])` do `ping`.
+2. Chame com `curl`. Qual status? Qual o corpo da resposta?
+3. Chame pelo navegador estando logado no `/admin/`. Mudou? Por quê?
+4. Explique em 3 linhas por que `DEFAULT_PERMISSION_CLASSES = [IsAuthenticated]` é uma
+   escolha de segurança melhor que `AllowAny`, mesmo dando mais trabalho.
+
+---
+
+## E03.6 — Quebre de propósito (individual)
 
 Provoque cada erro, capture a mensagem e explique a causa em uma linha:
 
 | # | Como provocar | Erro esperado |
 |---|---|---|
-| 1 | Remover `acervo` do `INSTALLED_APPS` e acessar a home | |
-| 2 | Renomear `home.html` e acessar a home | |
-| 3 | Esquecer o `return` na view | |
-| 4 | Usar `{% url 'home' %}` sem namespace | |
-| 5 | Apagar `SECRET_KEY` do `.env` | |
-| 6 | Colocar `DEBUG=False` sem `ALLOWED_HOSTS` | |
+| 1 | Remover `rest_framework` do `INSTALLED_APPS` | |
+| 2 | Remover `acervo` do `INSTALLED_APPS` | |
+| 3 | Apagar `SECRET_KEY` do `.env` | |
+| 4 | Esquecer o `return` na view | |
+| 5 | Parar o `runserver` e recarregar o React | |
+| 6 | Remover o bloco `proxy` do `vite.config.ts` | |
+| 7 | Remover `@import "tailwindcss"` do `index.css` | |
+| 8 | Devolver `Response(objeto_python_nao_serializavel)` | |
 
-Ler mensagens de erro com calma é a habilidade técnica de maior retorno da disciplina.
+Ler mensagens de erro com calma é a habilidade de maior retorno da disciplina — e agora são
+**dois** lugares para procurar: o terminal do Django e o Console do navegador.
 
 ---
 
-## Critérios de verificação
+## E03.7 — Comparar com o servidor mínimo (individual, discursivo)
 
-| Exercício | Evidência |
-|---|---|
-| E02.1 | Diagrama + lista `arquivo:linha` |
-| E02.2 | 3 rotas funcionando + prints |
-| E02.3 | Tabela preenchida + resposta escrita |
-| E02.4 | Print de `/eco/?nome=ana&curso=ads&curso=si` |
-| E02.5 | Commit criando o app + navegação entre apps |
-| E02.6 | 6 mensagens de erro + explicações |
+Compare o `servidor_minimo.py` do M01 com o que você montou aqui. Para cada
+responsabilidade, diga **quem** a assume agora e **quantas linhas** você escreveu:
+
+| Responsabilidade | No servidor mínimo | No Django+DRF | Linhas que escrevi |
+|---|---|---|---|
+| Roteamento | `if self.path == ...` | | |
+| Ler query string | `parse_qs` | | |
+| Gerar JSON | `json.dumps` + headers | | |
+| Definir status | `send_response(200)` | | |
+| Documentar a API | não existia | | |
+| Validar entrada | não existia | | |
+
+Responda: **o que você ganhou e o que você perdeu** ao adotar o framework? (a segunda parte
+tem resposta real: controle explícito e transparência sobre o que acontece)
+
+---
+
+## Gabarito parcial
+
+**E03.4** — Quem bloqueia é o **navegador**, não o servidor: a resposta chega, e o navegador
+se recusa a entregá-la ao JavaScript porque falta o cabeçalho
+`Access-Control-Allow-Origin`. Por isso o `curl` funciona — ele não implementa a política de
+mesma origem. O *preflight* `OPTIONS` acontece quando a requisição não é "simples" (método
+diferente de GET/POST/HEAD, ou cabeçalho customizado como `Content-Type: application/json`).
+
+**E03.5 (2)** — `401 Unauthorized` com `{"detail": "As credenciais de autenticação não foram
+fornecidas."}`. No passo 3 funciona porque o cookie de sessão criado no login do admin é
+enviado junto — o mesmo mecanismo que o M12 vai usar.

@@ -1,6 +1,6 @@
-# M14 — Implantação (deploy) do sistema
+# M16 — Implantação (deploy) do sistema
 
-> **CH:** 5h (2h teóricas · 3h práticas) · **Semana 16** · **Pré-requisitos:** M11, M12
+> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 16** · **Pré-requisitos:** M13, M14
 > **Ementa:** *Tópicos relevantes: Implantação (deploy) do sistema.*
 
 O módulo em que o projeto deixa de ser um exercício e passa a ser um sistema. Regra do
@@ -159,7 +159,7 @@ WhiteNoise dá conta do volume de um projeto como este. Para tráfego alto, use 
 5. Se falhar: reverter o código; e o banco?
 ```
 
-O passo 5 é o difícil, e é por isso que o M04 insistiu em **expandir → migrar → contrair**:
+O passo 5 é o difícil, e é por isso que o M05 insistiu em **expandir → migrar → contrair**:
 com migrações compatíveis para trás, o código antigo continua funcionando com o esquema
 novo, e reverter o deploy é seguro.
 
@@ -186,7 +186,7 @@ novo, e reverter o deploy é seguro.
 
 ---
 
-## 🛠️ Roteiro prático (3h)
+## 🛠️ Roteiro prático (2h)
 
 ### Passo 1 — Preparar a aplicação (40 min)
 
@@ -284,7 +284,7 @@ Checklist obrigatório:
 
 ### Passo 4 — Deploy contínuo (25 min)
 
-Ative *Auto-Deploy* a partir da branch `main`. Combinado com o CI do M12 e a branch
+Ative *Auto-Deploy* a partir da branch `main`. Combinado com o CI do M14 e a branch
 protegida:
 
 ```

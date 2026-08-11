@@ -1,4 +1,4 @@
-# M04 — Exercícios
+# M05 — Exercícios
 
 ## E04.1 — Diário de migrações (individual)
 
@@ -108,7 +108,7 @@ Escreva um script/comando que a equipe rodará antes de todo deploy, verificando
 2. Existe migração gerada e não aplicada? (`showmigrations --plan`)
 3. Todas as migrações têm `reverse_code` quando usam `RunPython`?
 
-Integre ao CI no M12.
+Integre ao CI no M14.
 
 ```bash
 # esqueleto

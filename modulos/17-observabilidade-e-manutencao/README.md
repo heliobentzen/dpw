@@ -1,6 +1,6 @@
-# M15 — Observabilidade e manutenção
+# M17 — Observabilidade e manutenção
 
-> **CH:** 2h (1h teórica · 1h prática) · **Semana 17** · **Pré-requisito:** M14
+> **CH:** 2h (1h teórica · 1h prática) · **Semana 17** · **Pré-requisito:** M16
 > Módulo complementar. Responde à pergunta que a organização parceira **vai** fazer na
 > Etapa 4: *"e depois que vocês entregarem, quem cuida disso?"*
 

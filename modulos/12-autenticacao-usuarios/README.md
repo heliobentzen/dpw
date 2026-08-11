@@ -1,6 +1,6 @@
-# M10 — Autenticação e gestão de usuários
+# M12 — Autenticação e gestão de usuários
 
-> **CH:** 5h (2h teóricas · 3h práticas) · **Semana 12** · **Pré-requisitos:** M06, M07, M08
+> **CH:** 5h (2h teóricas · 3h práticas) · **Semana 12** · **Pré-requisitos:** M07, M10, M11
 > **Ementa:** *Tópicos relevantes: Gestão de usuários.*
 
 ## 🎯 Objetivos
@@ -309,7 +309,7 @@ class EmprestimoDetailView(LoginRequiredMixin, DetailView):
 ```
 
 Resultado: quem tenta `/emprestimos/999/` de outra pessoa recebe **404**, não 403 — e
-assim nem descobre que o registro existe. Esta é a defesa contra **IDOR** (M11).
+assim nem descobre que o registro existe. Esta é a defesa contra **IDOR** (M13).
 
 ### 7. Sessão e política de acesso (15 min)
 
@@ -426,7 +426,7 @@ Preencha executando cada combinação. Toda célula deve ser verificada de fato.
 | `/relatorios/` | 302→login | 403 | 403 | 200 |
 | `/admin/` | 302→login | 302→login | 302 ou 200 | 200 |
 
-Esta matriz vira teste automatizado no M12 e item de rubrica na Etapa 3.
+Esta matriz vira teste automatizado no M14 e item de rubrica na Etapa 3.
 
 ---
 

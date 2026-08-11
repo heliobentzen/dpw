@@ -1,6 +1,6 @@
-# M12 — Testes e qualidade de código
+# M14 — Testes e qualidade de código
 
-> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 14** · **Pré-requisitos:** M05–M10
+> **CH:** 3h (1h teórica · 2h práticas) · **Semana 14** · **Pré-requisitos:** M06–M12
 > Módulo complementar à ementa, exigido pela realidade: a Etapa 3 do projeto pede
 > *"realização dos testes"*.
 
@@ -14,7 +14,7 @@
 
 ---
 
-## 📖 Teoria (2h)
+## 📖 Teoria (1h)
 
 ### 1. Por que testar (20 min)
 
@@ -166,7 +166,7 @@ class TestEmprestimo:
             Emprestimo.objects.create(exemplar=exemplar, associado=associado)
 ```
 
-O último teste verifica a `UniqueConstraint` do M03 — testar a **restrição do banco**, e
+O último teste verifica a `UniqueConstraint` do M04 — testar a **restrição do banco**, e
 não só a validação do form, é o que garante que a regra vale para toda escrita.
 
 #### View — status, contexto e efeito
@@ -228,7 +228,7 @@ def test_validacao_de_isbn(autor, isbn, valido):
 
 `parametrize` transforma 5 testes quase idênticos em um. É onde o pytest brilha.
 
-#### Controle de acesso — a matriz do M10 virando teste
+#### Controle de acesso — a matriz do M12 virando teste
 
 ```python
 @pytest.mark.django_db
@@ -354,7 +354,7 @@ Escreva ao menos 10 testes cobrindo:
 - POST inválido não cria e devolve 200 com erros
 - exclusão só por POST (GET devolve 405)
 - **IDOR:** associado A não acessa empréstimo de B (404)
-- a matriz de acesso parametrizada do M10
+- a matriz de acesso parametrizada do M12
 
 ### Passo 4 — CI no GitHub Actions (20 min)
 

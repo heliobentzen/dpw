@@ -1,4 +1,4 @@
-# M05 — Exercícios
+# M06 — Exercícios
 
 Todos os exercícios usam o banco populado pelo comando `popular` do roteiro prático.
 

@@ -1,6 +1,6 @@
-# M03 — Model: classes que geram o banco de dados
+# M04 — Model: classes que geram o banco de dados
 
-> **CH:** 6h (3h teóricas · 3h práticas) · **Semanas 3–4** · **Pré-requisitos:** M02
+> **CH:** 6h (3h teóricas · 3h práticas) · **Semanas 3–4** · **Pré-requisitos:** M03
 > **Ementa:** *Model: Utilização de classes para geração automática do banco de dados.*
 
 ## 🎯 Objetivos
@@ -38,7 +38,7 @@ SQLite, PostgreSQL, MySQL ou Oracle; (c) o esquema é **derivado** do código, e
 mantido em paralelo (é isso que a ementa chama de *geração automática do banco*).
 
 **Custo:** o ORM esconde o SQL. Consulta escrita sem atenção vira 500 consultas (problema
-N+1, tratado no M05). Regra: **use o ORM, mas saiba ler o SQL que ele gera.**
+N+1, tratado no M06). Regra: **use o ORM, mas saiba ler o SQL que ele gera.**
 
 💼 **No mercado:** entrevistas de backend perguntam "o que este código faz no banco?".
 Quem só sabe a API do ORM trava; quem sabe traduzir para SQL passa.
@@ -235,7 +235,7 @@ class PerfilAssociado(models.Model):
     telefone = models.CharField(max_length=20, blank=True)
 ```
 
-Padrão clássico para estender o usuário sem trocar o model de autenticação (M10).
+Padrão clássico para estender o usuário sem trocar o model de autenticação (M12).
 
 #### Referência por string e `self`
 

@@ -1,4 +1,4 @@
-# M12 — Exercícios
+# M14 — Exercícios
 
 ## E12.1 — Escrever o teste que falta (individual)
 
@@ -38,7 +38,7 @@ Depois acrescente 4 casos de borda que você não tinha pensado.
 
 ## E12.3 — Teste de controle de acesso (individual) ⭐
 
-Transforme a matriz de acesso do M10 em teste parametrizado que cubra **todas** as
+Transforme a matriz de acesso do M12 em teste parametrizado que cubra **todas** as
 combinações papel × rota × método.
 
 Requisitos:

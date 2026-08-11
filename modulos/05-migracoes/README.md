@@ -1,6 +1,6 @@
-# M04 — Migrações: atualizar o banco a partir das classes
+# M05 — Migrações: atualizar o banco a partir das classes
 
-> **CH:** 3h (1h teórica · 2h práticas) · **Semanas 4–5** · **Pré-requisito:** M03
+> **CH:** 3h (1h teórica · 2h práticas) · **Semanas 4–5** · **Pré-requisito:** M04
 > **Ementa:** *Atualização do banco de dados a partir das alterações nas classes geradoras.*
 
 Este módulo trata do que separa um projeto de laboratório de um sistema em produção: como
@@ -324,7 +324,7 @@ DATABASES = {
 
 ```bash
 python manage.py migrate                       # cria tudo do zero no PostgreSQL
-python manage.py loaddata exemplo              # recarrega a fixture do M03
+python manage.py loaddata exemplo              # recarrega a fixture do M04
 python manage.py runserver
 ```
 

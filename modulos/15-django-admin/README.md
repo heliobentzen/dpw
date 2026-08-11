@@ -1,6 +1,6 @@
-# M09 — Django Admin
+# M15 — Django Admin
 
-> **CH:** 2h (1h teórica · 1h prática) · **Semana 11** · **Pré-requisitos:** M03, M07
+> **CH:** 2h (1h teórica · 1h prática) · **Semana 15** · **Pré-requisitos:** M04, M07
 > Módulo complementar (não exigido pela ementa), mas de altíssimo retorno: entrega um
 > back-office funcional em minutos e é o que viabiliza o projeto extensionista sair do
 > papel dentro da carga horária.
@@ -28,7 +28,7 @@ model fica visível a quem tem acesso, e a granularidade de permissões é por m
 registro (a menos que você programe isso).
 
 > No BiblioCom: a **coordenação** usa o admin para cadastrar categorias, editoras e
-> corrigir dados. O **balcão** usa as telas do M06–M08, que aplicam as regras de
+> corrigir dados. O **balcão** usa as telas do M07–M09, que aplicam as regras de
 > empréstimo. Confundir os dois papéis é o erro de projeto mais comum.
 
 ### 2. Registro básico
@@ -205,8 +205,8 @@ sem `list_select_related` e quantas faz depois?
 | Listagem lenta | `list_select_related` e `list_per_page` |
 | `<select>` com milhares de itens | `autocomplete_fields` |
 | `mark_safe` com dado do usuário | `format_html` |
-| Dar `is_staff` a todo mundo | Permissões por grupo (M10) |
-| Deixar `/admin/` na URL padrão em produção | Mude o caminho e restrinja acesso (M11) |
+| Dar `is_staff` a todo mundo | Permissões por grupo (M12) |
+| Deixar `/admin/` na URL padrão em produção | Mude o caminho e restrinja acesso (M13) |
 
 ## ✅ Checklist de saída
 

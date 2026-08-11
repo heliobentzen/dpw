@@ -1,6 +1,6 @@
-# M05 — ORM: consultas ao banco e operações CRUD
+# M06 — ORM: consultas ao banco e operações CRUD
 
-> **CH:** 6h (2h teóricas · 4h práticas) · **Semanas 5–6** · **Pré-requisitos:** M03, M04
+> **CH:** 5h (2h teóricas · 3h práticas) · **Semanas 5–6** · **Pré-requisitos:** M04, M05
 > **Ementa:** *Geração de consultas ao BD e operações CRUD a partir da API do framework.*
 
 ## 🎯 Objetivos
@@ -270,7 +270,7 @@ envolver mais de uma escrita que precisam ser consistentes entre si.
 
 ---
 
-## 🛠️ Roteiro prático (4h)
+## 🛠️ Roteiro prático (3h)
 
 ### Passo 1 — Preparar dados de volume (30 min)
 
@@ -490,7 +490,7 @@ Confirme que nada foi gravado nos casos de erro.
 | `update()` esperando que `save()` seja chamado | `update()` não chama `save()` nem sinais |
 | Filtro N-N sem `distinct()` | Resultados duplicados |
 | `x += 1` em Python e depois `save()` | Condição de corrida; use `F()` |
-| Escrever SQL com f-string | Injeção de SQL — ver M11 |
+| Escrever SQL com f-string | Injeção de SQL — ver M13 |
 
 ## ✅ Checklist de saída
 

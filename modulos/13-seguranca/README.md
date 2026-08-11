@@ -1,6 +1,6 @@
-# M11 — Segurança de aplicações web
+# M13 — Segurança de aplicações web
 
-> **CH:** 5h (3h teóricas · 2h práticas) · **Semana 13** · **Pré-requisitos:** M06, M07, M10
+> **CH:** 5h (3h teóricas · 2h práticas) · **Semana 13** · **Pré-requisitos:** M07, M11, M12
 > **Ementa:** *Tópicos relevantes: Segurança.*
 
 O módulo é organizado sobre o **OWASP Top 10:2021**, com a pergunta prática: *o que o
@@ -29,7 +29,7 @@ Django já faz por mim, o que ele faz se eu configurar, e o que só eu posso faz
 
 ### 1. A01 — Quebra de controle de acesso (30 min)
 
-A campeã do Top 10. Já vista no M10; aqui, os padrões de ataque.
+A campeã do Top 10. Já vista no M12; aqui, os padrões de ataque.
 
 #### IDOR — referência direta insegura a objeto
 
@@ -181,7 +181,7 @@ fetch(url, {
 
 > ⚠️ `@csrf_exempt` é quase sempre um erro. Se você precisou dele, o problema está em
 > outro lugar — quase sempre em uma rota de API que deveria usar autenticação por token
-> (M13), não por sessão.
+> (M07), não por sessão.
 
 Isso explica também por que **GET nunca pode alterar dados**: um `<img src="/excluir/42/">`
 no site atacante dispensa formulário e não é coberto por proteção CSRF.
@@ -379,7 +379,7 @@ CONTENT_SECURITY_POLICY = {
 }
 ```
 
-Teste com [securityheaders.com](https://securityheaders.com) (após o deploy, no M14). Meta:
+Teste com [securityheaders.com](https://securityheaders.com) (após o deploy, no M16). Meta:
 nota **A**.
 
 ### Passo 4 — Dependências e segredos (20 min)

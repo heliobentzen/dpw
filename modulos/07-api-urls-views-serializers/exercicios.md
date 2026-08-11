@@ -1,144 +1,162 @@
-# M06 — Exercícios
+# M07 — Exercícios
 
-## E06.1 — Projetar o mapa de URLs (individual)
+## E07.1 — Projetar o mapa de rotas (individual)
 
-Projete o `urlpatterns` completo do BiblioCom. Para cada rota: caminho, método(s)
-aceito(s), view, nome e quem pode acessar.
+Projete a API completa do BiblioCom. Para cada rota: caminho, método, view responsável,
+quem pode acessar e status de sucesso.
 
-| Caminho | Métodos | View | `name` | Acesso |
+| Caminho | Método | View | Quem pode | Sucesso |
 |---|---|---|---|---|
-| `/` | GET | `home` | `acervo:home` | público |
-| `/obras/` | | | | |
-| `/obras/nova/` | | | | |
-| `/obras/<pk>/` | | | | |
-| `/obras/<pk>/editar/` | | | | |
-| `/obras/<pk>/excluir/` | | | | |
-| `/obras/<pk>/exemplares/` | | | | |
-| `/autores/` | | | | |
-| `/autores/<slug>/` | | | | |
-| `/categorias/<slug>/` | | | | |
-| `/associados/` | | | | |
-| `/emprestimos/` | | | | |
-| `/emprestimos/novo/` | | | | |
-| `/emprestimos/<pk>/devolver/` | | | | |
-| `/emprestimos/atrasados/` | | | | |
-| `/relatorios/mensal/<ano>/<mes>/` | | | | |
+| `/api/obras/` | GET | `ObraViewSet.list` | público | 200 |
+| `/api/obras/` | POST | | | |
+| `/api/obras/{id}/` | GET | | | |
+| `/api/obras/{id}/` | PATCH | | | |
+| `/api/obras/{id}/` | DELETE | | | |
+| `/api/obras/{id}/exemplares/` | GET | | | |
+| `/api/autores/` | GET | | | |
+| `/api/emprestimos/` | GET | | | |
+| `/api/emprestimos/` | POST | | | |
+| `/api/emprestimos/{id}/devolver/` | POST | | | |
+| `/api/emprestimos/{id}/renovar/` | POST | | | |
+| `/api/emprestimos/em-atraso/` | GET | | | |
+| `/api/relatorios/acervo/` | GET | | | |
+| `/api/relatorios/mensal/` | GET | | | |
 
-Critérios de avaliação: coerência (recursos no plural, hierarquia), métodos corretos
-(nada que altere dados em GET) e nomes previsíveis.
+Critérios: recursos no plural, nenhum verbo na URL (exceto ações legítimas), nada que
+altere dados em GET, e nomes previsíveis.
 
 ---
 
-## E06.2 — Ordem dos padrões (individual)
+## E07.2 — Os três níveis (individual) ⭐
 
-Descubra por que este `urlpatterns` está errado, prove no navegador e corrija:
+Implemente `/api/relatorios/acervo/` **três vezes**: como `@api_view`, como `APIView` e
+como `@action` num ViewSet.
 
-```python
-urlpatterns = [
-    path("obras/<str:slug>/", views.obra_por_slug, name="obra_slug"),
-    path("obras/nova/", views.obra_create, name="obra_create"),
-    path("obras/<int:pk>/", views.obra_detail, name="obra_detail"),
-    path("obras/atrasadas/", views.obras_atrasadas, name="obras_atrasadas"),
-]
-```
+Depois preencha:
 
-Responda: quais das 4 rotas ficam inalcançáveis? Qual view responde a `/obras/42/`?
+| Critério | `@api_view` | `APIView` | `@action` |
+|---|---|---|---|
+| Linhas de código | | | |
+| O que está explícito | | | |
+| O que está implícito | | | |
+| Esforço para adicionar permissão | | | |
+| Aparece bem no `/api/docs/`? | | | |
+| Legibilidade para quem nunca viu DRF | | | |
 
----
-
-## E06.3 — FBV completa (individual)
-
-Implemente `autor_detail(request, slug)` que mostra:
-
-- dados do autor;
-- todas as obras dele, **paginadas** (10 por página);
-- total de obras e total de exemplares;
-- quantas obras estão emprestadas no momento;
-- 404 se o slug não existir.
-
-Requisito: no máximo **3 consultas** ao banco (prove com `CaptureQueriesContext`).
+Escreva sua recomendação para o projeto da equipe, em 5 linhas. **Não existe resposta
+certa** — existe justificativa.
 
 ---
 
-## E06.4 — Mesma view, dois estilos (individual) ⭐
+## E07.3 — Leitura × escrita (individual)
 
-Implemente a listagem de empréstimos em atraso **duas vezes**:
+Implemente `ObraSerializer` e `ObraCreateSerializer` e demonstre com `curl`:
 
-- `/emprestimos/atrasados/` como FBV
-- `/emprestimos/atrasados-cbv/` como `ListView`
+1. `GET /api/obras/1/` devolve `autor` como **objeto** com `id` e `nome`.
+2. `POST /api/obras/` aceita `autor` como **id**.
+3. Enviar `"id": 999` no POST **não** define o id. Por quê?
+4. Enviar `"exemplares_disponiveis": 50` no POST é ignorado. Por quê?
+5. Enviar um campo que não existe no serializer é ignorado. Por quê isso é seguro?
+6. Adicione um campo `aprovada` ao model **sem** adicioná-lo ao serializer. Ele aparece na
+   API? E se você usasse `fields = "__all__"`?
 
-Ambas com: filtro opcional por associado, ordenação por dias de atraso (decrescente),
-paginação de 25 e o total de dias de atraso somado.
-
-**Entrega:** o código das duas + tabela comparativa (linhas, o que é explícito, o que é
-implícito, esforço para adicionar controle de acesso) + sua recomendação justificada para
-o projeto da equipe.
-
----
-
-## E06.5 — POST, PRG e 405 (individual)
-
-Implemente `/emprestimos/<pk>/renovar/` que estende a previsão de devolução em 14 dias,
-com estas regras:
-
-- só aceita POST (GET deve devolver **405**);
-- recusa se o empréstimo já foi devolvido;
-- recusa se já houve 2 renovações (adicione o campo `renovacoes`);
-- recusa se o empréstimo está em atraso;
-- em qualquer recusa: mensagem de erro e redirect de volta;
-- em sucesso: mensagem com a nova data e redirect.
-
-**Entrega:** código + 5 comandos `curl` demonstrando cada caminho, com o status de cada.
+O item 6 é uma demonstração de *mass assignment* no seu próprio código.
 
 ---
 
-## E06.6 — Middleware de auditoria (individual)
+## E07.4 — Validação completa (individual)
 
-Escreva um middleware que registre, para toda requisição **que altera dados** (POST, PUT,
-PATCH, DELETE):
+Implemente e prove com `curl` (guarde a saída de cada um):
 
-```
-2026-08-11 14:32:07 | ana.souza | POST /emprestimos/novo/ | 302 | 45ms
-```
+| # | Regra | Onde | Status esperado |
+|---|---|---|---|
+| 1 | ISBN com 10 ou 13 dígitos, aceitando hífens | `validate_isbn` | 400 |
+| 2 | Ano entre 1400 e o ano atual | `validate_ano_publicacao` | 400 |
+| 3 | Título não pode ser só espaços | `validate_titulo` | 400 |
+| 4 | Tombo do exemplar no formato `NNNNN-N` | validator do model | 400 |
+| 5 | Exemplar precisa estar disponível para emprestar | `validate_exemplar` | 400 |
+| 6 | Associado precisa estar ativo e abaixo do limite | `validate_associado` | 400 |
+| 7 | ISBN único, **inclusive ao editar** | `UniqueValidator` | 400 |
+| 8 | Devolver um empréstimo já devolvido | `@action` | 409 |
 
-Requisitos: não registrar GET; não registrar dados do corpo (senhas!); usar o módulo
-`logging`, não `print`; funcionar com usuário anônimo.
-
-Responda: **por que não registrar o corpo da requisição?** Cite dois riscos.
-
----
-
-## E06.7 — Páginas de erro (individual)
-
-Crie templates de 404, 403 e 500 com a identidade visual do BiblioCom. Teste com
-`DEBUG=False` e `ALLOWED_HOSTS=["localhost"]`.
-
-Cuidado: o template de 500 **não pode** usar context processors nem acessar o banco — se
-o banco caiu, a página de erro precisa continuar funcionando. Explique por quê.
+O item 7 é a pegadinha: verifique que editar uma obra **sem mudar o ISBN** continua
+funcionando.
 
 ---
 
-## E06.8 — Desafio: busca com estado na URL (individual)
+## E07.5 — Caçada ao N+1 na API (individual) ⭐
 
-Implemente `/obras/` de forma que **todo** o estado da busca esteja na URL:
+1. Implemente `exemplares_disponiveis` como `SerializerMethodField` que consulta o banco.
+2. Meça quantas consultas `GET /api/obras/` faz com 20 obras.
+3. Reimplemente com `annotate` + `IntegerField(read_only=True)`.
+4. Meça de novo.
 
-- termo, categoria, faixa de anos, disponibilidade, ordenação e página;
-- ao mudar de página, os filtros se mantêm;
-- ao mudar um filtro, a paginação volta para a página 1;
-- a URL é copiável e compartilhável e reproduz exatamente a mesma tela;
-- entradas inválidas (`?page=abc`, `?ordenar=;DROP TABLE`) não quebram nada.
+| Versão | Consultas | Tempo |
+|---|---|---|
+| `SerializerMethodField` | | |
+| `annotate` | | |
 
-Responda: **por que este é o caso de uso canônico de GET?** Relacione com *safe*,
-idempotência e cache do M01.
+Responda: **por que o `SerializerMethodField` é uma armadilha tão comum?** (dica: ele
+funciona perfeitamente no teste com 3 registros)
+
+---
+
+## E07.6 — Contrato projetado × implementado (em equipe) ⭐
+
+Compare o `docs/contrato-api.md` que a equipe escreveu no M02 com o `schema.yml` gerado
+agora:
+
+| Item | No contrato | Na implementação | Quem estava certo? | O que fizemos |
+|---|---|---|---|---|
+| Nome do campo X | | | | |
+| Formato da data | | | | |
+| Estrutura da paginação | | | | |
+| Formato do erro | | | | |
+| Status de criação | | | | |
+
+Para cada divergência, decidam: corrigir o código ou corrigir o contrato? Registrem a
+decisão. Este exercício é o fechamento do bloco de backend.
+
+---
+
+## E07.7 — Ordenação como falha de segurança (individual)
+
+1. Remova `ordering_fields` do `ObraViewSet` (deixando o `OrderingFilter` ativo).
+2. Tente: `?ordering=cadastrada_por__email`, `?ordering=cadastrada_por__password`.
+3. O que a ordem dos resultados revela, mesmo sem exibir o campo?
+4. Restaure `ordering_fields` e teste de novo.
+
+Escreva 5 linhas explicando por que uma lista de permissões é melhor que uma lista de
+proibições — aqui e em geral.
+
+---
+
+## E07.8 — Desafio: paginação por cursor
+
+A paginação por página (`?page=3`) tem um problema com dados que mudam: se um registro é
+inserido enquanto o usuário navega, ele vê itens repetidos ou pulados.
+
+1. Implemente `CursorPagination` em `EmprestimoViewSet`.
+2. Demonstre o problema com `PageNumberPagination`: abra a página 2, insira um registro no
+   topo pelo admin, avance para a página 3 e observe.
+3. Repita com `CursorPagination`.
+4. Compare: o que se ganha e o que se perde? (dica: dá para pular direto para a página 7?)
 
 ---
 
 ## Gabarito parcial
 
-**E06.2** — `<str:slug>` casa com `nova`, `atrasadas` e até com `42`. Só a primeira rota é
-alcançável. Correção: rotas literais primeiro, depois `<int:pk>`, depois `<slug:slug>`.
+**E07.3 (3, 4)** — `id` é `read_only` por padrão em `ModelSerializer`, e
+`exemplares_disponiveis` foi declarado `read_only=True`. Campos somente-leitura são
+**ignorados na entrada**, não rejeitados. Isso é intencional: o serializer é uma lista de
+permissões do que o cliente pode escrever.
 
-**E06.7** — Com `DEBUG=False`, o template de 500 é renderizado com um contexto vazio,
-justamente porque a causa provável do erro é a indisponibilidade de alguma dependência
-(banco, cache). Um template que consulta o banco na página de erro produz um segundo erro
-e o usuário vê a página branca do servidor.
+**E07.5** — O `SerializerMethodField` dispara uma consulta **por objeto serializado**. Com
+3 registros no teste, são 4 consultas e ninguém percebe; com 20 por página em produção, são
+21; e o problema cresce linearmente com o `page_size`. O `annotate` resolve no banco, numa
+consulta só.
+
+**E07.7** — Ordenar por `cadastrada_por__email` revela a ordem alfabética dos e-mails
+associados aos registros, mesmo sem exibi-los: comparando duas ordenações, dá para inferir
+informação sobre um campo que a API nunca devolve. É vazamento por canal lateral, e a
+defesa é declarar explicitamente o que **pode** ser ordenado.
