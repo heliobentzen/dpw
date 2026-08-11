@@ -99,9 +99,10 @@ paradigma e de ferramenta ao mesmo tempo. Três decisões do material reduzem es
 **Semestre de 15 semanas (~6,7h/semana):** una as semanas 3+4, 5+6, 9+10 e 14+15. **Não**
 comprima as semanas 16–20 (deploy, projeto e extensão).
 
-**Turma sem base de JavaScript:** acrescente 4h de pré-requisito (JS moderno: `const/let`,
-arrow functions, destructuring, `map/filter`, módulos ES, `async/await`, Promises) antes
-da semana 8, retirando 2h de M06 e 2h de M15. Um material de nivelamento está em
+**Base de JavaScript.** O cronograma padrão assume o pré-requisito atendido — é o caso da
+turma a que este material se destina. Para turmas sem essa base, acrescente 4h de
+nivelamento (`const/let`, arrow functions, destructuring, *spread*, `map`/`filter`, módulos
+ES, Promises, `async/await`) antes da semana 8, retirando 2h de M06 e 2h de M15; material em
 [`../recursos/js-para-react.md`](../recursos/js-para-react.md).
 
 **Formato intensivo (5 semanas × 20h):** semana 1 = M00–M06; semana 2 = M07 + Etapa 1;

@@ -5,12 +5,15 @@
 > escolhido* — aqui, componentes React no lugar de templates. Ver a
 > [ressalva no plano de ensino](../../docs/plano-de-ensino.md#3-rastreabilidade-ementa--módulos).
 
-A semana mais difícil do curso: muda a linguagem, o paradigma e a ferramenta ao mesmo
-tempo. Dois amortecedores: a **API já existe** (M07) e o **domínio é o mesmo** (BiblioCom).
+A semana de maior mudança do curso: trocam-se a linguagem, o paradigma e a ferramenta. Três
+amortecedores: o **pré-requisito de JavaScript está atendido**, a **API já existe** (M07) e
+o **domínio é o mesmo** (BiblioCom).
 
-> ⚠️ **Pré-requisito real:** JavaScript moderno. Se `map`, destructuring, *spread* e
-> `async/await` não forem familiares, faça o nivelamento de
-> [`../../recursos/js-para-react.md`](../../recursos/js-para-react.md) **antes** desta aula.
+> **O que isso significa para o ritmo.** Como a turma já programa em JavaScript, este módulo
+> **não gasta tempo com sintaxe**. As 5h vão para o que é genuinamente novo e é onde os bugs
+> nascem: o modelo declarativo, imutabilidade do estado, o array de dependências do
+> `useEffect` e as chaves de lista. Quem precisar de uma ponte Python→JS para consulta tem
+> [`../../recursos/js-para-react.md`](../../recursos/js-para-react.md).
 
 ## 🎯 Objetivos
 

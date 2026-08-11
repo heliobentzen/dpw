@@ -95,5 +95,10 @@ Todos os módulos constroem o mesmo sistema, incrementalmente.
 
 Os módulos 08–11 assumem JS moderno (`const/let`, arrow functions, destructuring,
 `map`/`filter`/`reduce`, módulos ES, Promises, `async/await`, *spread*, encadeamento
-opcional). Faça o diagnóstico na **semana 1**, não na semana 8 — material de nivelamento em
+opcional) — **pré-requisito atendido**.
+
+As 15h do bloco de frontend foram dimensionadas com essa premissa: elas são para o modelo
+mental do React (estado, efeitos, imutabilidade, cache, contrato), não para sintaxe. Se a
+turma travar em `map` ou destructuring, o problema não é o módulo — é o pré-requisito, e a
+referência de consulta está em
 [`../recursos/js-para-react.md`](../recursos/js-para-react.md).

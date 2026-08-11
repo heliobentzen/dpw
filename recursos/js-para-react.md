@@ -1,16 +1,23 @@
-# JavaScript moderno para React — nivelamento (4h)
+# JavaScript moderno para React — ponte Python → JS
 
-> Material de nivelamento para turmas sem base de JavaScript. Aplicar **antes da semana 8**,
-> compensando a carga com 2h de M06 e 2h de M15 (ver
-> [`../docs/cronograma.md`](../docs/cronograma.md#6-variações-de-calendário)).
+> **Como usar este material, nesta oferta.** O pré-requisito de JavaScript **está
+> atendido**: a turma já programa em JS, e os módulos M08–M11 foram dimensionados com essa
+> premissa. Aqui, este arquivo serve para três coisas:
+>
+> 1. **Diagnóstico da semana 1** (abaixo) — para localizar quem individualmente chega com
+>    lacuna e direcionar monitoria, **não** para decidir o cronograma.
+> 2. **Referência de consulta** durante os módulos 08–11, especialmente a tabela
+>    Python↔JavaScript e a seção 5 (imutabilidade), que é onde o React realmente cobra.
+> 3. **Nivelamento de 4h** para outras turmas ou instituições que adotem o material sem o
+>    pré-requisito, retirando 2h de M06 e 2h de M15 (ver
+>    [`../docs/cronograma.md`](../docs/cronograma.md#6-variações-de-calendário)).
 >
 > Escopo deliberadamente estreito: **só o JavaScript que os módulos M08–M11 usam.** Não é
-> um curso de JS — é uma ponte. Cada seção mostra o equivalente em Python, porque a turma
-> já sabe Python.
+> um curso de JS — é uma ponte, apoiada no Python que a turma já sabe.
 
 ## Diagnóstico (20 min, semana 1)
 
-Aplique antes de decidir se o nivelamento é necessário. Sem consulta, 20 minutos.
+Sem consulta, 20 minutos.
 
 ```js
 // 1. O que imprime?
@@ -38,8 +45,23 @@ console.log([1, 2, 3].length && "tem itens");
 console.log([].length && "tem itens");
 ```
 
-**Correção:** 4–5 acertos → cronograma padrão. 2–3 → nivelamento de 4h. 0–1 na turma toda →
-modo híbrido ([ADR-04](../docs/decisoes-tecnicas.md#adr-04--modo-híbrido-como-alternativa-documentada)).
+**Leitura do resultado, por pessoa:**
+
+| Acertos | O que significa | Ação |
+|---:|---|---|
+| 4–5 | Pré-requisito confirmado | Segue normalmente |
+| 2–3 | Lacunas pontuais | Indicar as seções específicas deste material; monitoria nas semanas 6–7 |
+| 0–1 | Sem base efetiva | Monitoria dirigida **antes** da semana 8; acompanhar de perto no M08 |
+
+**Leitura do resultado, pela turma:** se mais de 20% ficar em 0–1, reavalie o cronograma —
+4h de nivelamento (retiradas de M06 e M15) ou o modo híbrido
+([ADR-04](../docs/decisoes-tecnicas.md#adr-04--modo-híbrido-como-alternativa-documentada)).
+Numa turma com o pré-requisito atendido, o esperado é encontrar 2 ou 3 casos isolados —
+e encontrá-los agora custa uma monitoria; encontrá-los na semana 8 custa o bloco de
+frontend dessas pessoas.
+
+> **Priorize as seções 3, 4, 5 e 6** ao indicar leitura. Métodos de array, destructuring,
+> imutabilidade e assincronia são o que o React usa o tempo todo; o resto é contexto.
 
 ---
 
@@ -306,7 +328,7 @@ E evite `any` — se não souber o tipo, use `unknown` e estreite depois.
 
 ---
 
-## Exercícios do nivelamento
+## Exercícios (nivelamento ou monitoria)
 
 ### N1 — Traduzir de Python (individual)
 

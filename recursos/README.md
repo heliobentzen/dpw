@@ -19,11 +19,11 @@
 > ⚠️ `vulneravel.py` e `vulneravel.tsx` são **deliberadamente inseguros** e servem apenas
 > para estudo. Nunca use nada deles em produção.
 
-## Nivelamento
+## Ponte Python → JavaScript
 
 | Arquivo | Quando usar |
 |---|---|
-| [`js-para-react.md`](js-para-react.md) | 4h de nivelamento de JavaScript antes da semana 8, para turmas sem base. Inclui o **diagnóstico de 20 minutos** a aplicar na semana 1. |
+| [`js-para-react.md`](js-para-react.md) | **Referência de consulta** durante os módulos 08–11 e **apoio individual** a quem chegar com lacunas. Inclui o **diagnóstico de 20 minutos** a aplicar na semana 1 — que, com o pré-requisito atendido, serve para localizar casos isolados, não para decidir o cronograma. Também é o material de nivelamento (4h) para turmas que não tenham a base. |
 
 ## Checklists
 

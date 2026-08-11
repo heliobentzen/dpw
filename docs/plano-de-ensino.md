@@ -10,7 +10,7 @@
 | Carga horária prática | 60 horas |
 | Carga horária extensionista | 10 horas (creditadas dentro da CH total) |
 | Modalidade sugerida | Presencial ou híbrida, com laboratório de informática |
-| Pré-requisitos | Lógica de programação; POO; banco de dados relacional; **JavaScript moderno** (ver §11) |
+| Pré-requisitos | Lógica de programação; POO; banco de dados relacional; **JavaScript moderno** (atendido — ver §11) |
 | Stack — backend | Python 3.12, Django 5, Django REST Framework, PostgreSQL 16 |
 | Stack — frontend | React 19, TypeScript, Vite, Tailwind CSS 4, React Router, TanStack Query |
 | Stack — comum | Git/GitHub, Docker, GitHub Actions, deploy em PaaS |
@@ -171,13 +171,20 @@ obrigatória das Etapas 3 e 4 e das atividades extensionistas (itens eliminatór
 
 ## 11. Nota sobre o pré-requisito de JavaScript
 
-Os módulos 08–11 (15h) assumem JavaScript moderno. **Turma sem essa base não cabe em 100h**
-— é aritmética, não opinião. Duas saídas previstas:
+Os módulos 08–11 (15h) assumem JavaScript moderno. **Este pré-requisito está atendido** pela
+turma a que o material se destina, o que sustenta a alocação de 15h para o bloco de
+frontend — ela pressupõe que o tempo seja gasto com o modelo mental do React (estado,
+efeitos, imutabilidade, cache), e não com sintaxe de JavaScript.
 
-1. **Nivelamento de 4h** antes da semana 8, retiradas de M06 (2h) e M15 (2h). Material em
-   [`../recursos/js-para-react.md`](../recursos/js-para-react.md).
-2. **Modo híbrido** (ADR-04): Django com templates estilizados com Tailwind e React apenas
-   em ilhas de interatividade, liberando ~8h.
+O que ainda vale fazer:
 
-Diagnostique a turma na semana 1, não na semana 8. Um exercício de 20 minutos com `map`,
-`filter`, destructuring e `async/await` já separa os dois cenários.
+1. **Confirmar na semana 1**, com o diagnóstico de 20 minutos de
+   [`../recursos/js-para-react.md`](../recursos/js-para-react.md). Não é para decidir o
+   cronograma — é para identificar **quem individualmente** chega com lacuna e direcionar
+   monitoria, antes da semana 8.
+2. Manter o mesmo material como referência de consulta (ponte Python→JavaScript) durante os
+   módulos 08–11.
+
+**Para outras turmas ou instituições que adotem este material** e não tenham o
+pré-requisito, as saídas continuam documentadas: 4h de nivelamento retiradas de M06 e M15,
+ou o modo híbrido do ADR-04.

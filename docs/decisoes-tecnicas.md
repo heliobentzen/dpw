@@ -81,14 +81,18 @@ rubricas; troque os comandos e os trechos de código.
 **Contexto.** Nem toda instituição aceita que a interface saia do framework do backend, e
 nem toda turma tem base de JavaScript para absorver React em 15h.
 
+> **Nesta oferta:** o pré-requisito de JavaScript **está atendido**, então a segunda razão
+> não se aplica. O modo híbrido permanece documentado por causa da primeira — leitura
+> estrita da ementa — e para outras instituições que adotem o material.
+
 **Decisão.** Documentar o **modo híbrido** como caminho alternativo, sem material próprio:
 Django com templates DTL renderizando as telas de CRUD, Tailwind via CLI para o estilo, e
 React montado apenas em "ilhas" de interatividade (busca com filtros, painel de
 indicadores), consumindo a API do M07.
 
-**Quando escolher o híbrido:** turma sem base de JS; leitura estrita da ementa; menos de
+**Quando escolher o híbrido:** leitura estrita da ementa; turma sem base de JS; menos de
 15h disponíveis para frontend; projeto extensionista cujo parceiro precisa de algo simples
-e durável.
+e durável de manter por terceiros.
 
 **O que muda:** M08 cai para 3h (React só como ilha), M09 vira "Tailwind + templates
 Django" e M10/M11 saem, liberando ~8h. Os módulos de backend não mudam.
@@ -210,9 +214,11 @@ Django Admin mantido em 2h e deploy reduzido de 5h para 4h.
   React. O material assume que a profundidade vem depois, no projeto e fora da disciplina.
 - **Testes ficaram apertados** (3h para pytest *e* Vitest). O módulo prioriza teste de
   regra de negócio no backend e teste de componente crítico no frontend; e2e vira leitura.
-- Turma sem base de JavaScript **não** cabe em 100h. Isso não é opinião: é aritmética. Para
-  esses casos, o cronograma prevê 4h de nivelamento (retiradas de M06 e M15) ou o modo
-  híbrido do ADR-04.
+- Turma sem base de JavaScript **não** cabe em 100h. Isso não é opinião: é aritmética.
+  **Esta oferta tem o pré-requisito atendido**, e é isso que torna a alocação de 15h para o
+  bloco de frontend viável — elas são para o modelo mental do React, não para sintaxe. Para
+  turmas sem a base, o cronograma prevê 4h de nivelamento (retiradas de M06 e M15) ou o
+  modo híbrido do ADR-04.
 - O deploy ficou mais complexo (dois artefatos, CORS, variáveis de build) com menos tempo.
   Mitigação: o M16 traz um roteiro único, testado, em vez de comparar plataformas.
 

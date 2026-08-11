@@ -18,19 +18,31 @@ Como conduzir a disciplina com este material.
 > bloqueando `pip` ou `npm`, antivírus bloqueando o `runserver`, ou parceria extensionista
 > fechada tarde demais. Resolva isso antes da aula 1.
 
-### Diagnóstico de JavaScript — semana 1, não semana 8
+### Diagnóstico de JavaScript — semana 1
 
-Os módulos M08–M11 (15h) assumem JS moderno. Aplique um exercício de 20 minutos na
-**primeira aula**: `map`/`filter`, destructuring, *spread*, arrow functions e
-`async/await`. O resultado define o caminho:
+O pré-requisito de JS **está atendido** por esta turma, e o cronograma padrão assume isso.
+Ainda assim, aplique o exercício de 20 minutos de
+[`../recursos/js-para-react.md`](../recursos/js-para-react.md) na primeira aula — o
+objetivo mudou:
 
-| Resultado da turma | Ação |
+| Antes servia para | Agora serve para |
 |---|---|
-| Maioria confortável | Siga o cronograma padrão |
-| Maioria insegura | 4h de nivelamento antes da semana 8 (retire de M06 e M15) |
-| Maioria sem base nenhuma | **Modo híbrido** ([ADR-04](decisoes-tecnicas.md#adr-04--modo-híbrido-como-alternativa-documentada)) |
+| Decidir o cronograma | **Identificar quem individualmente chega com lacuna** |
+| Escolher entre nivelamento e modo híbrido | Direcionar monitoria antes da semana 8 |
 
-Descobrir isso na semana 8 custa o bloco de frontend inteiro.
+Uma turma "com base" costuma ter 2 ou 3 pessoas que na prática não têm. Encontrá-las na
+semana 1 custa uma monitoria; encontrá-las na semana 8 custa o bloco de frontend delas.
+
+**O que fazer com o pré-requisito atendido:** não acelere o M08 achando que sobra tempo.
+As 5h já foram dimensionadas para o que é difícil em React mesmo para quem sabe JS —
+imutabilidade do estado, array de dependências do `useEffect` e chaves de lista. Gaste-as
+ali, não em sintaxe.
+
+| Resultado do diagnóstico | Ação |
+|---|---|
+| Turma confortável (esperado) | Cronograma padrão; monitoria pontual para casos isolados |
+| 20%+ com dificuldade | Monitoria dirigida nas semanas 6–7, sem mexer no cronograma |
+| Maioria com dificuldade | Reavalie: 4h de nivelamento (retire de M06 e M15) ou modo híbrido |
 
 ## 2. Ritmo sugerido de uma aula de 5h
 
@@ -85,7 +97,8 @@ Se precisar reduzir a carga sem ferir a ementa, corte nesta ordem:
 5. M10 Rotas (2h) — pode ser absorvido pelo M11, com perda
 
 **Antes de cortar, considere o modo híbrido** ([ADR-04](decisoes-tecnicas.md#adr-04--modo-híbrido-como-alternativa-documentada)):
-ele libera ~8h de uma vez, e é a saída certa para turma sem base de JavaScript.
+ele libera ~8h de uma vez. Com o pré-requisito de JS atendido, porém, a única razão que
+resta para adotá-lo é a **leitura estrita da ementa** — não a capacidade da turma.
 
 **Nunca corte:** M01, M02, M04, M05, M06, M07, M08, M09, M12, M13, M16 — são itens
 explícitos da ementa (ou pré-requisito direto deles). E não corte as etapas do projeto nem
@@ -104,7 +117,8 @@ a extensão: são eliminatórias.
 | Começar o frontend antes da API existir | Trabalha-se contra dados falsos e retrabalha-se | M08 só depois do M07 (semana 8) |
 | Deixar a equipe se dividir em "front" e "back" | Metade sai sem saber a outra camada | Portfólio individual cobre as duas; papéis rotativos |
 | Pular o contrato de API (M02) | Integração retrabalhada na Etapa 3 | Contrato escrito é entrega da Etapa 2 |
-| Ensinar React sem base de JS | A turma decora sintaxe | Diagnóstico na semana 1 |
+| Gastar as horas de React ensinando JavaScript | Perde-se o modelo mental, que é o difícil | Pré-requisito atendido; monitoria para casos isolados |
+| Achar que "a turma sabe JS" dispensa o M08 | React não é JavaScript; o modelo declarativo é novo | As 5h vão para estado, efeitos e imutabilidade |
 
 ## 7. Correção eficiente
 

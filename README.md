@@ -122,11 +122,15 @@ referência de código, não o entregável.
 
 ## Pré-requisito de JavaScript
 
-Os módulos 08–11 assumem JavaScript moderno (`const/let`, arrow functions, destructuring,
-`map`/`filter`, módulos ES, Promises e `async/await`). Turmas sem essa base precisam de
-**4h de nivelamento** antes da semana 8 — material em
-[`recursos/js-para-react.md`](recursos/js-para-react.md), com a compensação de carga
-horária prevista em [`docs/cronograma.md`](docs/cronograma.md#6-variações-de-calendário).
+Os módulos 08–11 assumem **JavaScript moderno** (`const/let`, arrow functions,
+destructuring, *spread*, `map`/`filter`, módulos ES, Promises e `async/await`) — pré-requisito
+atendido pela turma a que este material se destina.
+
+Para apoio individual de quem chegar com lacunas, e para outras turmas que venham a usar
+este material, há uma referência de ponte Python→JavaScript em
+[`recursos/js-para-react.md`](recursos/js-para-react.md), com um diagnóstico de 20 minutos
+e a compensação de carga prevista em
+[`docs/cronograma.md`](docs/cronograma.md#6-variações-de-calendário).
 
 ## Licença
 
