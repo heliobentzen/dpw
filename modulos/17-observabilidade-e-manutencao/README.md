@@ -71,6 +71,13 @@ Quatro perguntas, quatro instrumentos:
 | Está dando erro? | Rastreador de exceções (Sentry, GlitchTip) |
 | Está lento? | Métricas de tempo de resposta / APM |
 | Alguém está atacando? | Log de segurança + alerta de picos de 4xx |
+| **A SPA quebrou no navegador?** | **Rastreador de erros no cliente** |
+
+> **A pergunta extra desta arquitetura.** Um erro de JavaScript não aparece em nenhum log
+> do servidor: a API responde 200, e a tela fica branca. Sem um rastreador no cliente,
+> você só descobre quando alguém reclama. Configure o Sentry **nas duas camadas** — e
+> lembre de `send_default_pii=False` também no frontend, onde a URL pode carregar dados
+> pessoais em parâmetros de busca.
 
 Healthcheck:
 

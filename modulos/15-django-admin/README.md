@@ -27,9 +27,14 @@ negócio, nem lugar para expor dados sensíveis a quem não deveria vê-los. Tod
 model fica visível a quem tem acesso, e a granularidade de permissões é por model, não por
 registro (a menos que você programe isso).
 
-> No BiblioCom: a **coordenação** usa o admin para cadastrar categorias, editoras e
-> corrigir dados. O **balcão** usa as telas do M07–M09, que aplicam as regras de
-> empréstimo. Confundir os dois papéis é o erro de projeto mais comum.
+> No BiblioCom: a **coordenação** usa o admin (`/admin/`) para cadastrar categorias,
+> editoras e corrigir dados. O **balcão** usa a SPA (M08–M11), que aplica as regras de
+> empréstimo e foi desenhada para o celular. Confundir os dois papéis é o erro de projeto
+> mais comum — e, numa arquitetura desacoplada, o mais caro.
+
+**Consequência de segurança:** o admin fica no mesmo domínio da SPA e usa a mesma sessão.
+Um usuário com `is_staff` acessa dados que a API talvez não exponha. Trate `is_staff` como
+privilégio real, não como "acesso ao painel" (M13).
 
 ### 2. Registro básico
 

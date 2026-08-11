@@ -3,79 +3,83 @@
 > **CH:** 5h (2h teóricas · 3h práticas) · **Semana 12** · **Pré-requisitos:** M07, M10, M11
 > **Ementa:** *Tópicos relevantes: Gestão de usuários.*
 
+Primeiro módulo genuinamente **ponta a ponta**: a mesma funcionalidade atravessa banco,
+API, cache do cliente, roteamento e interface.
+
 ## 🎯 Objetivos
 
-1. Distinguir autenticação de autorização e implementar as duas.
-2. Usar e estender o sistema de usuários do framework, escolhendo a estratégia certa.
-3. Implementar cadastro, login, logout, troca e recuperação de senha.
+1. Distinguir autenticação de autorização e implementar as duas nas duas camadas.
+2. Escolher o mecanismo de autenticação **pelo modelo de ameaça**, não pela moda.
+3. Estender o model de usuário e implementar o fluxo completo de gestão.
 4. Modelar papéis com grupos e permissões, incluindo autorização por objeto.
-5. Aplicar boas práticas de armazenamento de senha e política de acesso.
+5. Proteger rotas no cliente sabendo que isso **não** é segurança.
 
 ---
 
 ## 📖 Teoria (2h)
 
-### 1. Autenticação × autorização (15 min)
+### 1. Autenticação × autorização (10 min)
 
 | | Autenticação | Autorização |
 |---|---|---|
 | Pergunta | *Quem é você?* | *O que você pode fazer?* |
 | Falha | `401` | `403` |
-| Django | `authenticate()`, `login()`, sessão | permissões, grupos, `test_func` |
+| Backend | `authenticate()`, sessão | `permission_classes`, `get_queryset` |
+| Frontend | Tela de login, contexto de sessão | Esconder o que não pode usar |
 
-Fluxo do BiblioCom:
-
-```
-anônimo          → vê o catálogo público
-associado        → vê o próprio histórico, faz reserva
-bibliotecário    → registra empréstimo/devolução, cadastra obras
-coordenação      → tudo + relatórios + gestão de usuários
-```
-
-### 2. Como o Django guarda senhas (20 min)
-
-Senha **nunca** é armazenada. Guarda-se o resultado de uma função de hash lenta, com sal:
+Papéis do BiblioCom:
 
 ```
-pbkdf2_sha256$720000$k3Jd8xQ2vN1p$Ax9f2...
-└─── algoritmo ──┘ └iterações┘ └─ sal ─┘ └─ hash ─┘
+anônimo        → consulta o catálogo público
+associado      → vê o próprio histórico, faz reserva
+bibliotecário  → registra empréstimo/devolução, cadastra obras
+coordenação    → tudo + relatórios + gestão de usuários
 ```
 
-Propriedades: **sal** (impede tabelas pré-computadas), **iterações altas** (torna a força
-bruta cara), **migração automática** (ao logar, o Django re-hasheia se o padrão mudou).
+### 2. Sessão × token: a decisão (35 min) ⭐
 
-```python
-user.set_password("nova")     # ✅ hasheia
-user.password = "nova"        # ❌ grava texto puro — nunca faça isso
-user.check_password("nova")   # comparação em tempo constante
-```
+Este é o ponto do curso em que uma decisão de arquitetura tem consequência direta de
+segurança. Três opções reais:
 
-Para reforçar (Argon2 é o padrão recomendado hoje):
+| | Sessão + cookie `HttpOnly` | JWT em `localStorage` | JWT em cookie `HttpOnly` |
+|---|---|---|---|
+| Onde fica o segredo | No servidor; o cookie é só um id | No navegador, legível por JS | No navegador, ilegível por JS |
+| **XSS rouba a sessão?** | ❌ Não | ✅ **Sim, trivialmente** | ❌ Não |
+| Precisa de CSRF? | ✅ Sim | ❌ Não | ✅ Sim |
+| Revogar acesso agora | ✅ Apagar a sessão | ❌ Difícil (só com lista de revogação) | ❌ Difícil |
+| Funciona entre domínios | Com CORS + credenciais | ✅ Naturalmente | Com CORS + credenciais |
+| Serve app mobile | Desajeitado | ✅ Sim | Desajeitado |
+| Complexidade | Baixa (nativo do Django) | Média (refresh, expiração) | Alta |
 
-```python
-# settings.py
-PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.Argon2PasswordHasher",
-    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
-]
-```
-```bash
-pip install "django[argon2]"
-```
+**A escolha do material: sessão com cookie `HttpOnly`**, com SPA e API sob o **mesmo site**
+([ADR-07](../../docs/decisoes-tecnicas.md#adr-07--autenticação-por-sessão-com-cookie-não-jwt-em-localstorage)).
 
-### 3. Estendendo o usuário: três estratégias (30 min) ⭐
+O raciocínio, que é o que importa aprender:
+
+> A maioria dos tutoriais ensina JWT em `localStorage` porque é o mais fácil de fazer
+> funcionar. Mas `localStorage` é legível por **qualquer** JavaScript que rode na página —
+> inclusive o de um XSS, ou o de uma dependência do npm comprometida. Um cookie `HttpOnly`
+> não é. Como o BiblioCom não tem app mobile nem consumidor de outro domínio, o argumento
+> a favor do JWT ("stateless", "escala") não se aplica, e o custo (roubo de sessão via XSS,
+> revogação difícil) é real.
+>
+> **JWT é a escolha certa quando há app mobile ou cliente de outro domínio.** Aí o
+> *trade-off* muda, e a mitigação passa a ser: expiração curta, *refresh token* em cookie
+> `HttpOnly` e lista de revogação.
+
+Decidir pelo modelo de ameaça — e não pelo que é mais comum no YouTube — é a competência
+que este módulo quer instalar.
+
+### 3. Estendendo o usuário (20 min)
 
 | Estratégia | Quando | Custo |
 |---|---|---|
-| **Perfil `OneToOne`** | Projeto já em produção; só faltam campos extras | Baixo; exige `select_related` |
-| **`AbstractUser`** | Projeto novo; quer campos extras e manter tudo do padrão | Baixo, **se feito antes da 1ª migração** |
-| **`AbstractBaseUser`** | Login por e-mail/CPF, requisitos incomuns | Alto; reimplementa gerenciador e permissões |
+| Perfil `OneToOne` | Projeto já em produção | Baixo; exige `select_related` |
+| **`AbstractUser`** | **Projeto novo** | Baixo, **se feito antes da 1ª migração** |
+| `AbstractBaseUser` | Login por e-mail/CPF, requisitos incomuns | Alto |
 
-> ⚠️ **Decida antes da primeira migração.** Trocar `AUTH_USER_MODEL` com o banco já criado
-> é uma das operações mais dolorosas do Django. Se o projeto da equipe pode vir a precisar
-> de campos no usuário, comece com `AbstractUser` — o custo hoje é zero.
-
-**Recomendação do material:** `AbstractUser` desde o dia 1.
+> ⚠️ **Decida antes da primeira migração.** Trocar `AUTH_USER_MODEL` com o banco criado é
+> uma das operações mais dolorosas do Django.
 
 ```python
 # contas/models.py
@@ -91,216 +95,153 @@ class Usuario(AbstractUser):
 
     papel = models.CharField(max_length=15, choices=Papel.choices, default=Papel.ASSOCIADO)
     telefone = models.CharField(max_length=20, blank=True)
-    email = models.EmailField("e-mail", unique=True)     # e-mail único: quase sempre desejável
+    email = models.EmailField("e-mail", unique=True)
 
     def __str__(self):
         return self.get_full_name() or self.username
 
     @property
-    def eh_equipe(self):
+    def eh_equipe(self) -> bool:
         return self.papel in {self.Papel.BIBLIOTECARIO, self.Papel.COORDENACAO}
 ```
 
 ```python
-# settings.py
 AUTH_USER_MODEL = "contas.Usuario"
 ```
 
-No código, **nunca** importe `User` diretamente:
+No código, **nunca** importe `User` direto: use `settings.AUTH_USER_MODEL` em models e
+`get_user_model()` em views e scripts.
+
+**Senhas** nunca são armazenadas — guarda-se um hash lento com sal:
 
 ```python
-from django.conf import settings
-from django.contrib.auth import get_user_model
-
-autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)  # em models
-Usuario = get_user_model()                                                      # em views/scripts
-```
-
-### 4. Views de autenticação prontas (25 min)
-
-```python
-# config/urls.py
-from django.urls import include, path
-
-urlpatterns = [
-    path("contas/", include("django.contrib.auth.urls")),
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
 ]
 ```
+```python
+user.set_password("nova")     # ✅ hasheia
+user.password = "nova"        # ❌ grava texto puro — nunca
+```
 
-Isso cria, de uma vez:
-
-| URL | Nome | Função |
-|---|---|---|
-| `contas/login/` | `login` | Entrar |
-| `contas/logout/` | `logout` | Sair (**POST**) |
-| `contas/password_change/` | `password_change` | Trocar senha |
-| `contas/password_reset/` | `password_reset` | Solicitar recuperação |
-| `contas/reset/<uidb64>/<token>/` | `password_reset_confirm` | Definir nova senha |
-
-Templates esperados em `templates/registration/`: `login.html`,
-`password_change_form.html`, `password_reset_form.html`, `password_reset_email.html`,
-`password_reset_confirm.html`, `password_reset_done.html`, `password_reset_complete.html`.
+### 4. Endpoints de sessão (25 min)
 
 ```python
-# settings.py
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "acervo:home"
-LOGOUT_REDIRECT_URL = "acervo:home"
+# contas/api.py
+from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def login_view(request):
+    usuario = authenticate(
+        request,
+        username=request.data.get("username"),
+        password=request.data.get("password"),
+    )
+    if usuario is None:
+        # mensagem única: revelar "usuário não existe" permite enumerar contas
+        return Response({"detail": "Credenciais inválidas."}, status=401)
+
+    login(request, usuario)        # rotaciona a sessão (defesa contra session fixation)
+    return Response(UsuarioSerializer(usuario).data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    logout(request)
+    return Response(status=204)
+
+
+@ensure_csrf_cookie
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def eu_view(request):
+    """Quem é o usuário atual? Também entrega o cookie CSRF ao carregar a SPA."""
+    if not request.user.is_authenticated:
+        return Response({"detail": "Não autenticado."}, status=401)
+    return Response(UsuarioSerializer(request.user).data)
 ```
 
-> **Logout é POST desde o Django 5.0.** Um `<a href="/contas/logout/">` deixa de funcionar
-> — e isso é correto: logout altera estado no servidor. Volte ao M01.
+**O CSRF na SPA.** Com autenticação por sessão, o CSRF continua necessário (M13). O fluxo:
 
-### 5. Cadastro de usuário (15 min)
+1. A SPA chama `GET /api/auth/eu/` ao iniciar → o servidor devolve o cookie `csrftoken`.
+2. Em toda escrita, o cliente lê esse cookie e o envia no cabeçalho `X-CSRFToken`.
+
+```ts
+// src/api/client.ts
+function lerCookie(nome: string): string | null {
+  return document.cookie.split("; ").find((c) => c.startsWith(`${nome}=`))?.split("=")[1] ?? null;
+}
+
+export async function api<T>(caminho: string, init?: RequestInit): Promise<T> {
+  const metodo = (init?.method ?? "GET").toUpperCase();
+  const precisaCsrf = !["GET", "HEAD", "OPTIONS"].includes(metodo);
+
+  const r = await fetch(`/api${caminho}`, {
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      ...(precisaCsrf ? { "X-CSRFToken": lerCookie("csrftoken") ?? "" } : {}),
+      ...init?.headers,
+    },
+    ...init,
+  });
+
+  if (!r.ok) throw new ApiError(r.status, await r.json().catch(() => null));
+  return r.status === 204 ? (null as T) : r.json();
+}
+```
+
+> Note que o cookie `csrftoken` **não** é `HttpOnly` — ele precisa ser lido pelo JS. Isso é
+> seguro porque ele não autentica ninguém sozinho: a autenticação está no `sessionid`, que
+> **é** `HttpOnly`. Os dois cookies têm papéis diferentes.
+
+### 5. Autorização em quatro níveis (25 min)
+
+#### Nível 1 — exigir autenticação
 
 ```python
-# contas/forms.py
-from django.contrib.auth.forms import UserCreationForm
-
-from .models import Usuario
-
-
-class CadastroForm(UserCreationForm):
-    class Meta:
-        model = Usuario
-        fields = ["username", "first_name", "last_name", "email", "telefone"]
-
-
-# contas/views.py
-from django.contrib.auth import login
-from django.views.generic import CreateView
-
-
-class CadastroView(CreateView):
-    form_class = CadastroForm
-    template_name = "registration/cadastro.html"
-
-    def form_valid(self, form):
-        resposta = super().form_valid(form)
-        login(self.request, self.object)          # já entra logo após cadastrar
-        return resposta
-
-    def get_success_url(self):
-        return reverse("acervo:home")
+class ObraViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
 ```
 
-Validadores de senha (ative todos):
+#### Nível 2 — permissões por papel
 
 ```python
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-     "OPTIONS": {"min_length": 10}},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
-]
+class EhEquipeOuSomenteLeitura(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user.is_authenticated and request.user.eh_equipe
 ```
 
-### 6. Autorização (30 min)
-
-#### Nível 1 — exigir login
-
-```python
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-
-
-@login_required
-def meus_emprestimos(request): ...
-
-
-class MinhaView(LoginRequiredMixin, ListView): ...
-```
-
-#### Nível 2 — permissões
-
-O Django cria 4 permissões por model: `add_`, `change_`, `delete_`, `view_`.
-
-```python
-from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.mixins import PermissionRequiredMixin
-
-
-@permission_required("acervo.add_obra", raise_exception=True)
-def obra_create(request): ...
-
-
-class ObraCreateView(PermissionRequiredMixin, CreateView):
-    permission_required = "acervo.add_obra"
-    raise_exception = True        # 403 em vez de redirecionar para o login
-```
-
-```django
-{% if perms.acervo.add_obra %}
-  <a href="{% url 'acervo:obra_create' %}">Nova obra</a>
-{% endif %}
-```
-
-Permissões customizadas:
-
-```python
-class Emprestimo(models.Model):
-    class Meta:
-        permissions = [
-            ("registrar_devolucao", "Pode registrar devolução"),
-            ("ver_relatorios", "Pode ver relatórios gerenciais"),
-        ]
-```
-
-#### Nível 3 — grupos (papéis)
+#### Nível 3 — permissões do Django, por grupo
 
 ```python
 # contas/management/commands/criar_grupos.py
-from django.contrib.auth.models import Group, Permission
-from django.core.management.base import BaseCommand
-
 PAPEIS = {
     "Associado": ["view_obra", "view_exemplar"],
-    "Bibliotecario": ["view_obra", "add_obra", "change_obra", "view_exemplar",
-                      "add_exemplar", "change_exemplar", "add_emprestimo",
+    "Bibliotecario": ["view_obra", "add_obra", "change_obra", "add_emprestimo",
                       "registrar_devolucao", "view_associado", "add_associado"],
     "Coordenacao": "__all__",
 }
-
-
-class Command(BaseCommand):
-    help = "Cria os grupos de papéis do BiblioCom com suas permissões."
-
-    def handle(self, *args, **options):
-        for nome, codigos in PAPEIS.items():
-            grupo, _ = Group.objects.get_or_create(name=nome)
-            if codigos == "__all__":
-                grupo.permissions.set(Permission.objects.all())
-            else:
-                grupo.permissions.set(Permission.objects.filter(codename__in=codigos))
-            self.stdout.write(self.style.SUCCESS(f"Grupo '{nome}' configurado."))
 ```
 
-Comando versionado > cliques no admin: reprodutível em qualquer ambiente, inclusive em
-produção e no CI.
+Comando versionado > cliques no admin: reprodutível em qualquer ambiente e no CI.
 
 #### Nível 4 — autorização por objeto ⭐
 
 Permissão de model diz "pode ver empréstimos". Não diz "pode ver **este** empréstimo".
 
 ```python
-from django.contrib.auth.mixins import UserPassesTestMixin
-
-
-class EmprestimoDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    model = Emprestimo
-
-    def test_func(self):
-        emprestimo = self.get_object()
-        u = self.request.user
-        return u.eh_equipe or emprestimo.associado.user_id == u.id
-```
-
-Alternativa mais robusta — **filtrar o queryset**, para que o objeto sequer exista para
-quem não pode vê-lo:
-
-```python
-class EmprestimoDetailView(LoginRequiredMixin, DetailView):
+class EmprestimoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = Emprestimo.objects.select_related("exemplar__obra", "associado")
         if self.request.user.eh_equipe:
@@ -308,125 +249,182 @@ class EmprestimoDetailView(LoginRequiredMixin, DetailView):
         return qs.filter(associado__user=self.request.user)
 ```
 
-Resultado: quem tenta `/emprestimos/999/` de outra pessoa recebe **404**, não 403 — e
-assim nem descobre que o registro existe. Esta é a defesa contra **IDOR** (M13).
+**Filtrar o queryset** é melhor que checar depois: quem tenta `/api/emprestimos/999/` de
+outra pessoa recebe **404**, e não descobre nem que o registro existe. É a defesa contra
+**IDOR** (M13).
 
-### 7. Sessão e política de acesso (15 min)
+### 6. Sessão no cliente (25 min)
 
-```python
-# settings.py
-SESSION_COOKIE_AGE = 60 * 60 * 8              # 8 horas
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = "Lax"
-SESSION_COOKIE_SECURE = not DEBUG             # exige HTTPS em produção
+```tsx
+// src/auth/AuthContext.tsx
+import { createContext, useContext } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+type Usuario = { id: number; username: string; papel: string; eh_equipe: boolean };
+
+const AuthContext = createContext<{
+  usuario: Usuario | null;
+  carregando: boolean;
+  entrar: (c: { username: string; password: string }) => Promise<void>;
+  sair: () => Promise<void>;
+} | null>(null);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
+
+  const { data: usuario, isPending } = useQuery({
+    queryKey: ["eu"],
+    queryFn: () => api<Usuario>("/auth/eu/"),
+    retry: false,                                  // 401 não é para repetir
+    staleTime: 5 * 60_000,
+  });
+
+  const entrarMut = useMutation({
+    mutationFn: (c: { username: string; password: string }) =>
+      api<Usuario>("/auth/login/", { method: "POST", body: JSON.stringify(c) }),
+    onSuccess: (u) => queryClient.setQueryData(["eu"], u),
+  });
+
+  const sairMut = useMutation({
+    mutationFn: () => api<null>("/auth/logout/", { method: "POST" }),
+    onSuccess: () => queryClient.clear(),          // limpa TODO o cache: dados de outra pessoa
+  });
+
+  return (
+    <AuthContext.Provider
+      value={{
+        usuario: usuario ?? null,
+        carregando: isPending,
+        entrar: async (c) => { await entrarMut.mutateAsync(c); },
+        sair: async () => { await sairMut.mutateAsync(); },
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth precisa estar dentro de <AuthProvider>");
+  return ctx;
+}
 ```
 
-```python
-request.session.cycle_key()      # rotaciona o id da sessão (o login() já faz)
+> `queryClient.clear()` no logout **não é detalhe**. Sem ele, o cache continua com os dados
+> da pessoa anterior — e o próximo login num computador compartilhado (balcão da
+> biblioteca!) exibe informações que não deveria.
+
+```tsx
+// src/auth/RotaProtegida.tsx
+import { Navigate, Outlet, useLocation } from "react-router";
+
+export function RotaProtegida({ papeis }: { papeis?: string[] }) {
+  const { usuario, carregando } = useAuth();
+  const local = useLocation();
+
+  if (carregando) return <Carregando />;          // não pisca o login para quem está logado
+  if (!usuario) return <Navigate to="/login" state={{ de: local.pathname }} replace />;
+  if (papeis && !papeis.includes(usuario.papel)) return <SemPermissao />;
+
+  return <Outlet />;
+}
 ```
 
-Rotacionar a sessão no login evita **session fixation**: um atacante que plantou um id de
-sessão no navegador da vítima não fica com a sessão autenticada.
+> ⚠️ **`RotaProtegida` não é segurança.** O código está no *bundle* que qualquer pessoa
+> baixa, e a API pode ser chamada por `curl`. Ela é **experiência do usuário**: evita
+> mostrar telas que resultariam em 403. A proteção real está nas `permission_classes` e no
+> `get_queryset` do DRF. Prove isso no roteiro prático.
 
 ---
 
 ## 🛠️ Roteiro prático (3h)
 
-### Passo 1 — App `contas` com `AbstractUser` (40 min)
+### Passo 1 — Model de usuário e grupos (40 min)
 
-> Se o projeto já tem migrações aplicadas, o caminho de menor dor em ambiente de
-> **desenvolvimento** é: criar o app, definir `AUTH_USER_MODEL`, apagar o banco e as
-> migrações dos apps próprios, e migrar do zero. Faça isso agora — não em produção.
+> Se o projeto já tem migrações, o caminho de menor dor **em desenvolvimento** é: criar o
+> app, definir `AUTH_USER_MODEL`, apagar o banco e as migrações dos apps próprios, migrar
+> do zero. Faça agora — não em produção.
 
 ```bash
-python manage.py startapp contas
+cd backend && python manage.py startapp contas
 ```
 
-Implemente o model `Usuario` da teoria, configure `AUTH_USER_MODEL`, migre e crie o
-superusuário. Ajuste `Associado.user` para `settings.AUTH_USER_MODEL`.
+Implemente `Usuario`, configure `AUTH_USER_MODEL`, migre, crie o superusuário e o comando
+`criar_grupos`. Crie 3 usuários de teste, um por papel.
 
-### Passo 2 — Login, logout e templates (40 min)
+### Passo 2 — Endpoints de sessão (40 min)
 
-```python
-# config/urls.py
-path("contas/", include("django.contrib.auth.urls")),
-path("contas/cadastro/", CadastroView.as_view(), name="cadastro"),
+Implemente `login`, `logout` e `eu` conforme a teoria. Teste com `curl`, guardando cookies:
+
+```bash
+# obtém o cookie CSRF
+curl -c cookies.txt http://localhost:8000/api/auth/eu/ -i
+
+# login (precisa do cabeçalho CSRF)
+CSRF=$(grep csrftoken cookies.txt | awk '{print $7}')
+curl -b cookies.txt -c cookies.txt -X POST http://localhost:8000/api/auth/login/ \
+     -H "Content-Type: application/json" -H "X-CSRFToken: $CSRF" \
+     -d '{"username":"bib","password":"senha-de-teste-123"}' -i
+
+# agora autenticado
+curl -b cookies.txt http://localhost:8000/api/auth/eu/
+
+# logout
+curl -b cookies.txt -X POST http://localhost:8000/api/auth/logout/ -H "X-CSRFToken: $CSRF" -i
 ```
 
-```django
-{# templates/registration/login.html #}
-{% extends "base.html" %}
-{% block titulo %}Entrar — BiblioCom{% endblock %}
-{% block conteudo %}
-  <h1>Entrar</h1>
+Teste também: senha errada, usuário inexistente (**a mensagem é a mesma?**) e POST sem
+`X-CSRFToken` (deve dar 403).
 
-  {% if form.errors %}
-    <div class="alerta alerta--erro" role="alert">
-      Usuário ou senha incorretos.
-    </div>
-  {% endif %}
+### Passo 3 — Autorização no backend (40 min)
 
-  <form method="post">
-    {% csrf_token %}
-    {% include "acervo/_form.html" with form=form %}
-    <button type="submit">Entrar</button>
-    <input type="hidden" name="next" value="{{ next }}">
-  </form>
+Aplique os quatro níveis:
 
-  <p><a href="{% url 'password_reset' %}">Esqueci minha senha</a></p>
-  <p><a href="{% url 'cadastro' %}">Criar conta</a></p>
-{% endblock %}
-```
+| Recurso | Regra |
+|---|---|
+| `GET /api/obras/` | público |
+| `POST/PATCH/DELETE /api/obras/` | só equipe |
+| `GET /api/emprestimos/` | equipe vê tudo; associado vê só os seus |
+| `GET /api/emprestimos/{id}/` | **404** se não for seu |
+| `POST /api/emprestimos/` | só equipe |
+| `GET /api/relatorios/` | só coordenação |
 
-> **Mensagem genérica de propósito.** "Usuário não existe" versus "senha incorreta"
-> permite enumerar contas válidas. Uma única mensagem para os dois casos.
+### Passo 4 — Sessão no cliente (40 min)
 
-### Passo 3 — Recuperação de senha (30 min)
+Implemente `AuthProvider`, `useAuth`, `RotaProtegida` e a página de login (com React Hook
+Form + Zod, do M11). Requisitos:
 
-```python
-# settings.py — em desenvolvimento, o e-mail vai para o terminal
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "nao-responda@bibliocom.exemplo.org"
-```
+- ao entrar, volta para a rota pretendida (`state.de`)
+- o cabeçalho mostra o nome e o botão "Sair"
+- links de ações que a pessoa não pode fazer não aparecem
+- o logout limpa o cache e volta para o início
 
-Crie os templates de reset e percorra o fluxo inteiro: solicitar → copiar o link do
-terminal → definir nova senha → entrar com ela.
+### Passo 5 — Matriz de acesso, verificada nas duas camadas (20 min) ⭐
 
-Observe o token na URL e responda: por que ele expira? O que acontece se você usá-lo duas
-vezes?
-
-### Passo 4 — Grupos e permissões (40 min)
-
-1. Implemente o comando `criar_grupos` e execute-o.
-2. Crie 3 usuários de teste, um por papel.
-3. Proteja as views:
-   - catálogo: público
-   - detalhe do próprio empréstimo: `LoginRequiredMixin` + queryset filtrado
-   - cadastro/edição de obra: `permission_required("acervo.add_obra")`
-   - registro de empréstimo: `permission_required("acervo.add_emprestimo")`
-   - relatórios: `permission_required("acervo.ver_relatorios")`
-4. No template, esconda os links que a pessoa não pode usar (`{% if perms... %}`).
-
-> Esconder o link **não** é controle de acesso — é usabilidade. A proteção real está na
-> view. Prove: pegue a URL de cadastro de obra e acesse logada como associado. Deve dar
-> 403.
-
-### Passo 5 — Teste de matriz de acesso (30 min) ⭐
-
-Preencha executando cada combinação. Toda célula deve ser verificada de fato.
+Preencha executando **cada** célula. Duas colunas por caso: o que a **interface** faz e o
+que a **API** responde.
 
 | Rota | Anônimo | Associado | Bibliotecário | Coordenação |
 |---|---|---|---|---|
-| `/obras/` | 200 | 200 | 200 | 200 |
-| `/obras/nova/` | 302→login | 403 | 200 | 200 |
-| `/emprestimos/` | 302→login | só os próprios | todos | todos |
-| `/emprestimos/<id-de-outro>/` | 302→login | **404** | 200 | 200 |
-| `/emprestimos/novo/` | 302→login | 403 | 200 | 200 |
-| `/relatorios/` | 302→login | 403 | 403 | 200 |
-| `/admin/` | 302→login | 302→login | 302 ou 200 | 200 |
+| `GET /api/obras/` | 200 | 200 | 200 | 200 |
+| `POST /api/obras/` | 401 | 403 | 201 | 201 |
+| `GET /api/emprestimos/` | 401 | só os seus | todos | todos |
+| `GET /api/emprestimos/{de-outro}/` | 401 | **404** | 200 | 200 |
+| `POST /api/emprestimos/` | 401 | 403 | 201 | 201 |
+| `GET /api/relatorios/` | 401 | 403 | 403 | 200 |
 
-Esta matriz vira teste automatizado no M14 e item de rubrica na Etapa 3.
+**Agora o teste que fecha o módulo:** logado como associado, chame `POST /api/obras/` com
+`curl`, ignorando completamente a interface.
+
+```bash
+curl -b cookies-associado.txt -X POST http://localhost:8000/api/obras/ \
+     -H "Content-Type: application/json" -H "X-CSRFToken: $CSRF" \
+     -d '{"titulo":"Invasão"}' -i
+```
+
+Se vier **403**, sua segurança está no lugar certo. Se vier **201**, você estava confiando
+no `RotaProtegida` — e acabou de descobrir por que ele não é segurança.
 
 ---
 
@@ -435,30 +433,35 @@ Esta matriz vira teste automatizado no M14 e item de rubrica na Etapa 3.
 | Erro | Correção |
 |---|---|
 | `user.password = "x"` | `user.set_password("x")` |
-| `from django.contrib.auth.models import User` | `settings.AUTH_USER_MODEL` / `get_user_model()` |
-| Trocar `AUTH_USER_MODEL` depois da 1ª migração | Decida antes |
-| Só esconder o link no template | Proteja a view |
+| Trocar `AUTH_USER_MODEL` após a 1ª migração | Decida antes |
+| JWT em `localStorage` "porque é mais fácil" | Decida pelo modelo de ameaça |
 | Mensagem de login que revela se o usuário existe | Mensagem única |
+| Só esconder o link no React | Proteja a API |
 | Permissão de model sem checagem de objeto | Filtre o queryset (IDOR) |
-| Logout por link `<a>` | Formulário POST |
-| `SESSION_COOKIE_SECURE=True` em dev HTTP | Condicione ao `DEBUG` |
-| Guardar dados sensíveis na sessão | A sessão é referenciada por um cookie que pode vazar |
+| Logout sem `queryClient.clear()` | Cache com dados da pessoa anterior |
+| `retry` na query `/auth/eu/` | Repete o 401 três vezes |
+| Faltou `X-CSRFToken` na escrita | 403 em todo POST |
+| `credentials` ausente no `fetch` | O cookie não é enviado |
+| Piscar a tela de login para quem está logado | Trate o estado `carregando` |
 
 ## ✅ Checklist de saída
 
 - [ ] `AUTH_USER_MODEL` customizado, migrado desde o início
-- [ ] Cadastro, login, logout, troca e recuperação de senha funcionando
-- [ ] Templates de autenticação integrados ao layout do sistema
+- [ ] Argon2 configurado; nenhuma senha em texto puro
+- [ ] `login`, `logout` e `eu` funcionando, testados com `curl`
+- [ ] CSRF funcionando na SPA (cookie lido, cabeçalho enviado)
 - [ ] 3 grupos criados por comando versionado
-- [ ] Views protegidas nos 4 níveis (login, permissão, papel, objeto)
-- [ ] Matriz de acesso preenchida e verificada
-- [ ] Argon2 configurado
-- [ ] Nenhuma senha em texto puro em lugar nenhum
+- [ ] Autorização nos 4 níveis, com queryset filtrado por usuário
+- [ ] `AuthProvider`, `RotaProtegida` e página de login funcionando
+- [ ] Logout limpa o cache do Query
+- [ ] Matriz de acesso verificada nas duas camadas
+- [ ] **Provei com `curl` que a API recusa o que a interface esconde**
 
-## 📦 Entrega E4 — Área autenticada
+## 📦 Entrega E5 — Autenticação ponta a ponta
 
-Sistema com autenticação completa, 3 papéis funcionando e a matriz de acesso verificada
-(com prints ou saída de `curl` de cada célula).
+Sistema com login, 3 papéis, rotas protegidas no cliente, autorização real no servidor e a
+matriz de acesso verificada — incluindo a evidência do teste com `curl` ignorando a
+interface.
 
 ## 🧪 Exercícios
 
@@ -466,7 +469,8 @@ Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [Django — Autenticação de usuários](https://docs.djangoproject.com/pt-br/5.0/topics/auth/)
+- [Django — Autenticação](https://docs.djangoproject.com/pt-br/5.0/topics/auth/)
 - [Django — Customizando autenticação](https://docs.djangoproject.com/en/5.0/topics/auth/customizing/)
+- [DRF — Authentication](https://www.django-rest-framework.org/api-guide/authentication/)
 - [OWASP — Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
-- [django-allauth](https://docs.allauth.org/) — login social, verificação de e-mail, MFA
+- [OWASP — JWT for Java (o raciocínio vale para qualquer stack)](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html)

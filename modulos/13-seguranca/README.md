@@ -3,399 +3,345 @@
 > **CH:** 5h (3h teóricas · 2h práticas) · **Semana 13** · **Pré-requisitos:** M07, M11, M12
 > **Ementa:** *Tópicos relevantes: Segurança.*
 
-O módulo é organizado sobre o **OWASP Top 10:2021**, com a pergunta prática: *o que o
-Django já faz por mim, o que ele faz se eu configurar, e o que só eu posso fazer?*
+Organizado sobre o **OWASP Top 10:2021**, com uma pergunta a mais que a versão monolítica
+tinha: **quais riscos a arquitetura desacoplada acrescenta?**
 
 ## 🎯 Objetivos
 
-1. Explicar as principais classes de vulnerabilidade web e como se manifestam.
-2. Identificar código vulnerável e corrigi-lo.
-3. Configurar o framework para produção segura.
-4. Aplicar princípios de proteção de dados pessoais (LGPD) ao projeto.
-5. Executar uma revisão de segurança e produzir um relatório.
+1. Explicar as principais classes de vulnerabilidade e como se manifestam nas duas camadas.
+2. Identificar código vulnerável e corrigi-lo, no Django e no React.
+3. Configurar CORS, CSP e cabeçalhos de segurança corretamente.
+4. Reconhecer os riscos específicos de SPA: segredo no *bundle*, XSS em React, CORS
+   permissivo, roubo de token.
+5. Aplicar minimização de dados e LGPD ao projeto.
 
 ---
 
 ## 📖 Teoria (3h)
 
-### 0. Três princípios que organizam tudo (10 min)
+### 0. Três princípios e uma constatação (10 min)
 
-1. **Nunca confie na entrada.** Tudo que vem do cliente — formulário, URL, cabeçalho,
-   cookie, arquivo, JSON — pode ter sido forjado.
-2. **Defesa em profundidade.** Nenhuma camada é suficiente sozinha: navegador, aplicação e
-   banco.
-3. **Menor privilégio.** Cada pessoa, processo e credencial recebe o mínimo necessário,
-   pelo menor tempo necessário.
+1. **Nunca confie na entrada.** Formulário, URL, cabeçalho, cookie, arquivo, JSON.
+2. **Defesa em profundidade.** Nenhuma camada basta sozinha.
+3. **Menor privilégio.** O mínimo necessário, pelo menor tempo.
+
+E a constatação que organiza o módulo:
+
+> **Todo o código do frontend é público.** O *bundle* está no navegador de qualquer pessoa,
+> pode ser lido, modificado e ignorado. Segurança acontece **exclusivamente** no servidor.
+> O React contribui com higiene (não vazar segredo, não injetar HTML), nunca com proteção.
 
 ### 1. A01 — Quebra de controle de acesso (30 min)
 
-A campeã do Top 10. Já vista no M12; aqui, os padrões de ataque.
+Campeã do Top 10. Já implementada no M12; aqui, os padrões de ataque.
 
-#### IDOR — referência direta insegura a objeto
+#### IDOR
 
 ```python
-# ❌ qualquer pessoa logada vê o empréstimo de qualquer outra
-def emprestimo_detail(request, pk):
-    emprestimo = get_object_or_404(Emprestimo, pk=pk)
-    return render(request, "...", {"emprestimo": emprestimo})
+# ❌ qualquer pessoa autenticada vê o empréstimo de qualquer outra
+class EmprestimoViewSet(viewsets.ModelViewSet):
+    queryset = Emprestimo.objects.all()
 
 # ✅ o filtro faz parte da consulta
-def emprestimo_detail(request, pk):
-    qs = Emprestimo.objects.all() if request.user.eh_equipe else \
-         Emprestimo.objects.filter(associado__user=request.user)
-    emprestimo = get_object_or_404(qs, pk=pk)
-    return render(request, "...", {"emprestimo": emprestimo})
+    def get_queryset(self):
+        qs = Emprestimo.objects.select_related("exemplar__obra")
+        return qs if self.request.user.eh_equipe else qs.filter(associado__user=self.request.user)
 ```
 
 #### Mass assignment
 
 ```python
-# ❌ um POST com papel=COORDENACAO promove o usuário
-class PerfilForm(forms.ModelForm):
-    class Meta:
-        model = Usuario
-        fields = "__all__"
-
-# ✅
-        fields = ["first_name", "last_name", "email", "telefone"]
+class Meta:
+    fields = "__all__"                     # ❌ expõe qualquer campo futuro
+    fields = ["titulo", "autor", "isbn"]   # ✅
 ```
 
-#### Escalada por parâmetro oculto
-
-Campos `hidden` e `disabled` no HTML **não** protegem nada — o cliente controla o corpo da
-requisição. Qualquer decisão sensível é tomada no servidor:
+#### Autorização decidida pelo cliente
 
 ```python
-def form_valid(self, form):
-    form.instance.registrado_por = self.request.user     # servidor decide, não o cliente
-    return super().form_valid(form)
+# ❌ o cliente escolhe o próprio papel
+usuario.papel = request.data["papel"]
+
+# ✅ o servidor decide
+def perform_create(self, serializer):
+    serializer.save(cadastrada_por=self.request.user)
 ```
 
-#### Checklist A01
+#### O erro específico de SPA
 
-- [ ] Toda view que acessa objeto de usuário filtra o queryset
-- [ ] `fields` explícito em todo form
-- [ ] Nada sensível decidido a partir de campo do cliente
-- [ ] Rotas de escrita exigem POST e permissão
-- [ ] Negar por padrão: público é exceção declarada, não o contrário
+```tsx
+// ❌ "protegido" só no cliente
+{usuario.eh_equipe && <BotaoExcluir />}
+```
 
-### 2. A03 — Injeção (30 min)
+Esconder o botão é UX. Sem `permission_classes` no ViewSet, um `curl` faz a exclusão. A
+regra: **cada tela escondida no cliente precisa de uma permissão correspondente no
+servidor**, e a matriz do M12 é o instrumento que verifica isso.
+
+### 2. A03 — Injeção (35 min)
 
 #### SQL
 
 ```python
-# ❌ injeção clássica
-nome = request.GET["nome"]
-Obra.objects.raw(f"SELECT * FROM acervo_obra WHERE titulo = '{nome}'")
-# entrada: ' OR '1'='1  ->  devolve tudo
-# entrada: '; DROP TABLE acervo_obra; --  ->  catástrofe
-
-# ✅ ORM (parametrizado por construção)
-Obra.objects.filter(titulo=nome)
-
-# ✅ raw parametrizado, quando realmente necessário
-Obra.objects.raw("SELECT * FROM acervo_obra WHERE titulo = %s", [nome])
+Obra.objects.raw(f"SELECT * FROM acervo_obra WHERE titulo = '{nome}'")   # ❌
+Obra.objects.filter(titulo=nome)                                          # ✅ ORM
+Obra.objects.raw("SELECT * FROM acervo_obra WHERE titulo = %s", [nome])   # ✅ parametrizado
 ```
 
-A regra é simples: **dados nunca são concatenados em comandos**. Vale para SQL, para shell
-(`subprocess` com lista, nunca `shell=True` com string) e para caminhos de arquivo.
+Dados nunca são concatenados em comandos — vale para SQL, shell e caminhos de arquivo.
 
-#### XSS — Cross-Site Scripting
+#### XSS em React ⭐
 
-O Django escapa por padrão. Você desliga a proteção quando:
+React **escapa por padrão**: `{textoDoUsuario}` nunca vira HTML. Você desliga a proteção em
+três lugares, e só três:
 
-```django
-{{ comentario|safe }}                     ❌ com dado do usuário
-{% autoescape off %}{{ x }}{% endautoescape %}   ❌
+```tsx
+// ❌ o nome do método é literalmente um aviso
+<div dangerouslySetInnerHTML={{ __html: obra.sinopse }} />
+
+// ❌ href com valor do usuário: aceita javascript:alert(1)
+<a href={obra.link_externo}>Saiba mais</a>
+
+// ❌ injeção via style ou atributos montados dinamicamente
+<div style={{ background: `url(${entradaDoUsuario})` }} />
 ```
+
+Correções:
+
+```tsx
+// 1. não injete HTML; se precisar, sanitize na ESCRITA (backend, com nh3/bleach)
+<p className="whitespace-pre-line">{obra.sinopse}</p>
+
+// 2. valide o esquema da URL
+function urlSegura(url: string): string | undefined {
+  try {
+    const u = new URL(url);
+    return ["http:", "https:"].includes(u.protocol) ? u.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+<a href={urlSegura(obra.link_externo)} rel="noopener noreferrer" target="_blank">
+```
+
+> `rel="noopener"` impede que a página aberta acesse `window.opener` e redirecione a sua —
+> o ataque de *tabnabbing*.
+
+#### Injeção de comando e path traversal
 
 ```python
-mark_safe(f"<b>{nome_do_usuario}</b>")    ❌
-format_html("<b>{}</b>", nome_do_usuario) ✅  (escapa os argumentos)
+os.system(f"convert {nome} saida.png")                    # ❌
+subprocess.run(["convert", nome, "saida.png"], check=True) # ✅ lista, sem shell
+
+os.path.join(MEDIA_ROOT, request.GET["arquivo"])          # ❌ ../../etc/passwd
+safe_join(MEDIA_ROOT, nome_validado)                       # ✅
 ```
 
-Onde o escape **não** protege sozinho: dentro de `<script>`, em atributos de evento
-(`onclick`), em `href="javascript:..."` e em CSS. Nesses contextos, o escape de HTML não é
-o escape certo.
+### 3. CORS e CSRF numa SPA (30 min) ⭐
 
-```django
-{# ❌ #} <a href="{{ url_informada }}">          {# javascript:alert(1) #}
-{# ✅ #} <a href="{{ url_informada|urlize }}">   {# ou valide o esquema no servidor #}
+Duas coisas diferentes que a turma sempre confunde.
 
-{# para passar dados a JS: #}
-{{ dados|json_script:"dados-obra" }}
-<script>const dados = JSON.parse(document.getElementById("dados-obra").textContent);</script>
-```
+| | CORS | CSRF |
+|---|---|---|
+| O que é | Política do **navegador** sobre ler respostas de outra origem | Ataque em que outro site dispara ação autenticada no seu |
+| Quem aplica | O navegador | Você, com um token |
+| Protege quem | O **usuário do outro site** | O **seu** usuário |
+| Erro típico | "blocked by CORS policy" no console | 403 em todo POST |
 
-Quando o usuário precisa mesmo enviar HTML formatado, **sanitize na escrita** com lista de
-permissões (`nh3`, `bleach`) — não confie em filtrar na exibição.
-
-#### Path traversal e injeção de comando
+**CORS não é segurança da sua API.** Ele impede que o JavaScript de `site-malicioso.com`
+**leia** a resposta da sua API. Ele não impede `curl`, nem Postman, nem um servidor. Se sua
+API precisa de proteção, ela precisa de **autenticação e autorização** — CORS é irrelevante
+para isso.
 
 ```python
-# ❌
-caminho = os.path.join(MEDIA_ROOT, request.GET["arquivo"])   # ../../etc/passwd
-os.system(f"convert {nome_arquivo} saida.png")               # ; rm -rf /
+# ✅ lista explícita
+CORS_ALLOWED_ORIGINS = ["https://bibliocom.org"]
+CORS_ALLOW_CREDENTIALS = True
 
-# ✅
-from django.utils._os import safe_join
-caminho = safe_join(MEDIA_ROOT, nome_validado)
-subprocess.run(["convert", nome_arquivo, "saida.png"], check=True)   # lista, sem shell
+# ❌ nunca
+CORS_ALLOW_ALL_ORIGINS = True         # com credenciais, expõe sessões
+CORS_ALLOWED_ORIGINS = ["*"]
 ```
 
-### 3. CSRF — Cross-Site Request Forgery (25 min)
+> A combinação `CORS_ALLOW_ALL_ORIGINS = True` **com** `CORS_ALLOW_CREDENTIALS = True` é a
+> falha de configuração mais comum em API de projeto acadêmico: qualquer site passa a poder
+> fazer requisições autenticadas em nome do seu usuário logado e **ler** as respostas.
+>
+> Melhor ainda: **evite CORS**. Servindo SPA e API no mesmo site (ADR-07, M16), a
+> requisição é *same-origin* e o problema não existe.
 
-**O ataque:** você está logada no BiblioCom. Visita `site-malicioso.com`, que contém:
+CSRF continua necessário com autenticação por sessão — implementado no M12.
 
-```html
-<form action="https://bibliocom.org/obras/42/excluir/" method="post" id="f">
-</form>
-<script>document.getElementById("f").submit()</script>
-```
-
-O navegador envia seu cookie de sessão junto. Sem proteção, a obra é excluída.
-
-**A defesa:** um token secreto, por sessão, que o site atacante não consegue ler
-(política de mesma origem) nem adivinhar.
-
-```django
-<form method="post">{% csrf_token %}...</form>
-```
-
-```python
-MIDDLEWARE = [..., "django.middleware.csrf.CsrfViewMiddleware", ...]
-CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SAMESITE = "Lax"
-CSRF_TRUSTED_ORIGINS = ["https://bibliocom.exemplo.org"]
-```
-
-Para requisições AJAX:
-
-```javascript
-fetch(url, {
-  method: "POST",
-  headers: {"X-CSRFToken": getCookie("csrftoken"), "Content-Type": "application/json"},
-  body: JSON.stringify(dados),
-});
-```
-
-> ⚠️ `@csrf_exempt` é quase sempre um erro. Se você precisou dele, o problema está em
-> outro lugar — quase sempre em uma rota de API que deveria usar autenticação por token
-> (M07), não por sessão.
-
-Isso explica também por que **GET nunca pode alterar dados**: um `<img src="/excluir/42/">`
-no site atacante dispensa formulário e não é coberto por proteção CSRF.
-
-### 4. A02 — Falhas criptográficas e segredos (25 min)
+### 4. A02 — Segredos, e o risco específico de SPA (25 min) ⭐
 
 | Item | Regra |
 |---|---|
-| `SECRET_KEY` | Variável de ambiente; nunca no Git; ≥ 50 caracteres aleatórios |
-| Senhas | Hash com Argon2/PBKDF2; nunca texto puro, nunca criptografia reversível |
-| Trânsito | HTTPS obrigatório, HSTS ativado |
-| Dados sensíveis | Criptografe em repouso ou, melhor, **não colete** |
-| Tokens | `secrets.token_urlsafe()`; guarde o hash, não o token |
-| Logs | Nunca registre senha, token, CPF completo ou cartão |
+| `SECRET_KEY` | Variável de ambiente; nunca no Git |
+| Senhas | Hash Argon2/PBKDF2 |
+| Trânsito | HTTPS + HSTS |
+| Tokens | `secrets.token_urlsafe()`; guarde o hash |
+| Logs | Nunca senha, token, CPF completo, cookie |
 
-```python
-# produção
-DEBUG = False
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = "DENY"
-SECURE_REFERRER_POLICY = "same-origin"
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")   # atrás de proxy
+**E o risco que só existe aqui:**
+
+```bash
+# frontend/.env
+VITE_API_URL=https://bibliocom.org/api          # ✅ público, tudo bem
+VITE_SENTRY_DSN=https://...                     # ✅ desenhado para ser público
+VITE_AWS_SECRET_KEY=AKIA...                     # ❌❌❌ CATÁSTROFE
 ```
 
-**Vazou a `SECRET_KEY`?** Ela assina sessões, tokens de reset de senha e mensagens. Vazou
-= todas as sessões forjáveis. Gere outra, faça deploy, e todos os usuários serão
-deslogados — que é o comportamento desejado.
+Toda variável `VITE_*` é **substituída pelo valor literal em tempo de build** e vai para o
+arquivo JavaScript que qualquer pessoa baixa. Prove:
+
+```bash
+pnpm build
+grep -r "AKIA" dist/          # o segredo está lá, em texto puro
+```
+
+Regra sem exceção: **chave que precisa ser secreta não passa pelo frontend.** Se o
+navegador precisa de um serviço que exige chave secreta, o backend faz a chamada e o
+frontend chama o backend.
 
 ### 5. A05 — Configuração insegura (20 min)
 
 ```python
-DEBUG = True         # em produção: expõe código-fonte, settings, SQL e variáveis
-ALLOWED_HOSTS = ["*"]  # aceita qualquer Host: habilita envenenamento de cache e de links
+DEBUG = True            # ❌ em produção: expõe código, settings, SQL e variáveis
+ALLOWED_HOSTS = ["*"]   # ❌ envenenamento de cache e de links
 ```
-
-A página de erro do Django com `DEBUG=True` mostra o traceback, o conteúdo de `settings`
-(exceto o que ele consegue mascarar), as variáveis locais de cada frame e as consultas
-recentes. É a falha de configuração mais explorada em aplicações Django expostas.
 
 ```bash
-python manage.py check --deploy       # rode antes de todo deploy
+python manage.py check --deploy      # antes de todo deploy
 ```
 
-Outros itens: `/admin/` em caminho previsível, mensagens de erro detalhadas ao usuário,
-diretório de mídia servindo arquivos executáveis, dependências desatualizadas.
+**No frontend:**
 
-### 6. A07 — Falhas de identificação e autenticação (20 min)
+```ts
+// vite.config.ts
+export default defineConfig({
+  build: {
+    sourcemap: false,      // não publique o código-fonte original em produção
+  },
+});
+```
+
+E o *source map* é apenas conveniência do atacante — o *bundle* já é legível. Não confunda
+com proteção: **ofuscação não é segurança**.
+
+### 6. A07 — Falhas de autenticação (20 min)
 
 | Falha | Mitigação |
 |---|---|
-| Senha fraca | `AUTH_PASSWORD_VALIDATORS`, mínimo 12 caracteres |
-| Força bruta | Bloqueio progressivo por usuário+IP; `django-axes` |
-| Enumeração de usuários | Mensagem genérica; tempo de resposta uniforme |
-| Session fixation | `login()` rotaciona a sessão (padrão do Django) |
-| Sessão eterna | `SESSION_COOKIE_AGE`; logout explícito |
-| Token de reset reutilizável | Uso único, expiração curta |
-| Sem segundo fator | MFA em contas administrativas |
+| Senha fraca | `AUTH_PASSWORD_VALIDATORS`, mínimo 12 |
+| Força bruta | Bloqueio por usuário+IP (M12) |
+| Enumeração de usuários | Mensagem única |
+| Session fixation | `login()` rotaciona a sessão |
+| Token em `localStorage` | Cookie `HttpOnly` (ADR-07) |
+| Cache não limpo no logout | `queryClient.clear()` |
+| Sessão eterna | `SESSION_COOKIE_AGE` |
 
-### 7. A09 — Falhas de log e monitoramento (15 min)
-
-Não detectar é tão grave quanto não prevenir. Registre: login (sucesso e falha), alteração
-de permissão, acesso negado, operações destrutivas, erros 5xx.
-
-**Nunca registre:** senha, token, cookie de sessão, dado pessoal sensível, corpo completo
-de requisição de autenticação.
+### 7. Cabeçalhos e CSP (20 min)
 
 ```python
-logger.warning("acesso negado: usuario=%s rota=%s ip=%s",
-               request.user.pk, request.path, obter_ip(request))
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_HSTS_SECONDS = 31_536_000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+    SECURE_REFERRER_POLICY = "same-origin"
 ```
 
-Note: `usuario=%s` com o **id**, não com o nome — minimização de dados no log.
+**CSP numa SPA** exige atenção: o Vite injeta estilos e o React não precisa de
+`unsafe-inline` para scripts, mas bibliotecas de CSS-in-JS precisam. Comece restritivo:
 
-### 8. LGPD aplicada ao projeto (25 min)
+```
+default-src 'self';
+script-src 'self';
+style-src 'self' 'unsafe-inline';
+img-src 'self' data: https:;
+connect-src 'self';
+frame-ancestors 'none';
+base-uri 'self';
+```
 
-A Lei 13.709/2018 se aplica a qualquer tratamento de dados pessoais — inclusive num
-projeto de extensão universitária com uma biblioteca comunitária.
+> `connect-src 'self'` é a diretiva que mais importa numa SPA: ela limita para onde o
+> JavaScript pode fazer requisições. Com ela, um script injetado não consegue enviar os
+> dados roubados para o servidor do atacante.
 
-| Princípio | Como se traduz em código |
+### 8. LGPD aplicada (20 min)
+
+| Princípio | Em código |
 |---|---|
-| **Finalidade** | Cada campo coletado tem um motivo declarado. Sem "vai que precisa" |
-| **Necessidade / minimização** | Precisa mesmo do CPF para emprestar um livro? |
-| **Transparência** | Aviso de privacidade acessível, em linguagem simples |
-| **Segurança** | Controle de acesso, criptografia em trânsito, log de acesso |
-| **Qualidade** | O titular pode corrigir seus dados |
-| **Não discriminação** | Sem uso dos dados para excluir pessoas do serviço |
+| **Finalidade** | Cada campo tem um motivo declarado |
+| **Minimização** | Precisa mesmo do CPF para emprestar um livro? |
+| **Transparência** | Aviso de privacidade em linguagem simples |
+| **Segurança** | Controle de acesso, HTTPS, log de acesso |
+| **Qualidade** | O titular corrige seus dados |
 
-Direitos do titular a implementar (ou, no mínimo, documentar como atender):
+Direitos a implementar (ou documentar como atender): acesso, correção, eliminação,
+portabilidade, informação.
 
-- **Acesso** — exportar os próprios dados
-- **Correção** — editar o perfil
-- **Eliminação** — excluir a conta (e o que fazer com o histórico de empréstimos? há base
-  legal de guarda; documente a decisão)
-- **Portabilidade** — exportar em formato legível por máquina
-- **Informação** — quem mais tem acesso
+**Riscos específicos da arquitetura desacoplada:**
 
-**Dados sensíveis** (art. 5º, II — saúde, origem racial, religião, biometria, dados de
-crianças) exigem base legal específica e cuidado redobrado. Regra prática para o projeto:
-**se não é essencial, não colete**. O dado que você não tem não vaza.
+- A API devolve **todos** os campos do serializer, inclusive os que a tela não mostra.
+  Alguém abre a aba Network e lê. **Minimize no serializer, não na tela.**
+- Serviços de monitoramento no frontend (Sentry, analytics) capturam URLs, o que pode
+  incluir dados pessoais em parâmetros. Configure `send_default_pii=False` (M17).
+- Cache do TanStack Query guarda dados na memória do navegador — daí a limpeza no logout.
+
+Regra prática: **se não é essencial, não colete.** O dado que você não tem não vaza.
 
 ---
 
 ## 🛠️ Roteiro prático (2h)
 
-### Passo 1 — Aplicação vulnerável: encontre e corrija (60 min) ⭐
+### Passo 1 — Laboratório de vulnerabilidades (60 min) ⭐
 
-O laboratório completo está em [`vulneravel.py`](../../recursos/codigo/vulneravel.py), com
-**10 casos** — os 8 reproduzidos abaixo e mais dois no arquivo. **Cada um tem pelo menos
-uma vulnerabilidade.** Trabalhe em duplas: uma pessoa ataca, a outra corrige.
+O laboratório tem **duas partes**, uma por camada:
 
-```python
-# 1
-def busca(request):
-    termo = request.GET.get("q", "")
-    obras = Obra.objects.raw(f"SELECT * FROM acervo_obra WHERE titulo LIKE '%{termo}%'")
-    return render(request, "busca.html", {"obras": obras})
+- Backend: [`vulneravel.py`](../../recursos/codigo/vulneravel.py) — 10 casos
+- Frontend: [`vulneravel.tsx`](../../recursos/codigo/vulneravel.tsx) — 8 casos
 
-# 2
-def perfil(request, user_id):
-    usuario = get_object_or_404(Usuario, pk=user_id)
-    return render(request, "perfil.html", {"usuario": usuario})
+Trabalhe em duplas: uma pessoa ataca, a outra corrige; depois trocam. Para **cada** caso,
+entregue: vulnerabilidade (nome OWASP), impacto de negócio, exploração concreta
+(payload/URL/comando), correção e por que a correção funciona.
 
-# 3
-@csrf_exempt
-def excluir_obra(request, pk):
-    Obra.objects.filter(pk=pk).delete()
-    return redirect("acervo:obra_list")
+Os gabaritos estão comentados no fim de cada arquivo. Não leia antes de tentar.
 
-# 4  (template)
-#    <div class="sinopse">{{ obra.sinopse|safe }}</div>
-
-# 5
-def download(request):
-    nome = request.GET["arquivo"]
-    return FileResponse(open(f"/var/media/{nome}", "rb"))
-
-# 6
-def login_view(request):
-    u = Usuario.objects.filter(username=request.POST["usuario"]).first()
-    if not u:
-        return render(request, "login.html", {"erro": "Usuário não encontrado"})
-    if u.password != request.POST["senha"]:
-        return render(request, "login.html", {"erro": "Senha incorreta"})
-    request.session["user_id"] = u.id
-    return redirect("acervo:home")
-
-# 7
-class ObraForm(forms.ModelForm):
-    class Meta:
-        model = Obra
-        fields = "__all__"
-
-# 8
-def relatorio(request):
-    if request.GET.get("admin") == "1":
-        return render(request, "relatorio_completo.html", {...})
-```
-
-Para cada um dos **10 casos**, entregue: **vulnerabilidade** (nome OWASP), **exploração**
-(payload/URL concreto que demonstra), **correção** (código) e **por que a correção
-funciona**. O gabarito está comentado no fim do arquivo — não leia antes de tentar.
-
-### Passo 2 — `check --deploy` (20 min)
+### Passo 2 — `check --deploy` e cabeçalhos (25 min)
 
 ```bash
-DEBUG=False python manage.py check --deploy
+cd backend && DEBUG=False python manage.py check --deploy
 ```
 
-Resolva **todos** os avisos e documente cada configuração adicionada, explicando o que ela
-previne. Guarde a saída limpa como evidência.
-
-### Passo 3 — Cabeçalhos de segurança (20 min)
+Resolva **todos** os avisos e documente o que cada configuração previne. Depois:
 
 ```bash
-curl -I https://sua-aplicacao/ | grep -iE "strict-transport|x-frame|x-content|referrer|content-security"
+curl -I http://localhost:8000/api/obras/ | grep -iE "x-frame|x-content|referrer|strict-transport"
 ```
 
-Configure os que faltarem. Para CSP, use `django-csp`:
+### Passo 3 — CORS: entender antes de configurar (20 min)
 
-```python
-CONTENT_SECURITY_POLICY = {
-    "DIRECTIVES": {
-        "default-src": ["'self'"],
-        "script-src": ["'self'"],
-        "style-src": ["'self'"],
-        "img-src": ["'self'", "data:"],
-        "frame-ancestors": ["'none'"],
-    }
-}
-```
+1. Com `CORS_ALLOWED_ORIGINS` vazio, chame a API de `localhost:5173` **sem** o proxy.
+   Capture o erro.
+2. Na aba Network, encontre a requisição `OPTIONS` de *preflight*.
+3. Confirme que o `curl` funciona sem nenhuma configuração. **Quem estava bloqueando?**
+4. Configure `CORS_ALLOW_ALL_ORIGINS = True` com `CORS_ALLOW_CREDENTIALS = True`.
+5. Escreva o cenário de ataque que isso viabiliza.
+6. Corrija para a lista explícita.
 
-Teste com [securityheaders.com](https://securityheaders.com) (após o deploy, no M16). Meta:
-nota **A**.
+### Passo 4 — Segredo no bundle (15 min)
 
-### Passo 4 — Dependências e segredos (20 min)
-
-```bash
-pip install pip-audit
-pip-audit                       # vulnerabilidades conhecidas nas dependências
-
-pip install detect-secrets
-detect-secrets scan             # segredos no repositório
-
-git log -p | grep -iE "SECRET_KEY|password|token|api[_-]key"   # e no histórico
-```
-
-Se encontrar segredo no histórico: **considere-o comprometido**, rotacione a credencial, e
-só então trate da remoção do histórico.
+1. Adicione `VITE_CHAVE_SECRETA=super-secreta-123` ao `frontend/.env`.
+2. Use em algum componente.
+3. `pnpm build && grep -r "super-secreta-123" dist/`
+4. Capture a saída. Onde o segredo apareceu?
+5. Remova e escreva a regra em uma frase.
 
 ---
 
@@ -403,50 +349,55 @@ só então trate da remoção do histórico.
 
 | Erro | Consequência |
 |---|---|
-| `DEBUG=True` em produção | Vazamento de código, configuração e dados |
-| `@csrf_exempt` para "resolver" 403 | Abre CSRF |
-| `|safe` em dado do usuário | XSS armazenado |
-| f-string em SQL | Injeção de SQL |
+| `DEBUG=True` em produção | Vazamento de código e configuração |
+| `CORS_ALLOW_ALL_ORIGINS` com credenciais | Qualquer site age em nome do seu usuário |
+| Achar que CORS protege a API | `curl` ignora CORS por completo |
+| Segredo em `VITE_*` | Publicado no bundle |
+| `dangerouslySetInnerHTML` com dado do usuário | XSS armazenado |
+| `href` do usuário sem validar esquema | `javascript:` executa |
+| Token em `localStorage` | Qualquer XSS rouba a sessão |
 | `fields = "__all__"` | Mass assignment |
-| Validar só no cliente | Nenhuma validação |
-| `.env` no Git | Credenciais vazadas |
-| `ALLOWED_HOSTS = ["*"]` | Host header poisoning |
-| Confiar em `X-Forwarded-For` sem proxy confiável | Falsificação de IP no log e no rate limit |
+| f-string em SQL | Injeção |
+| Proteção só no `RotaProtegida` | A API fica aberta |
+| Serializer devolvendo campo que a tela não mostra | Vazamento pela aba Network |
 | Coletar dado "porque pode ser útil" | Violação de minimização (LGPD) |
 
 ## ✅ Checklist de saída
 
-- [ ] Os 10 casos do laboratório de vulnerabilidades identificados, explorados e corrigidos
+- [ ] Os 18 casos do laboratório identificados, explorados e corrigidos
 - [ ] `check --deploy` sem avisos
-- [ ] Cabeçalhos de segurança configurados
-- [ ] `pip-audit` sem vulnerabilidades críticas
-- [ ] Nenhum segredo no repositório, nem no histórico
-- [ ] Mapa de dados pessoais do projeto preenchido
+- [ ] CORS com lista explícita (ou dispensado por *same-site*)
+- [ ] Sei explicar por que CORS não protege a API
+- [ ] Cabeçalhos de segurança e CSP configurados
+- [ ] Nenhum segredo no repositório, no histórico ou no bundle
+- [ ] `pip-audit` e `pnpm audit` sem alertas críticos
+- [ ] Mapa de dados pessoais preenchido
 - [ ] Aviso de privacidade redigido
+- [ ] Serializers minimizados (não devolvem o que a tela não usa)
 
-## 📦 Entrega E5 — Relatório de segurança
+## 📦 Entrega E6 — Relatório de segurança
 
-Documento com:
+1. Tabela dos 18 casos: nome, exploração, correção, commit.
+2. `check --deploy` antes e depois.
+3. Cabeçalhos e CSP configurados, com justificativa.
+4. Evidência do experimento do segredo no bundle.
+5. **Mapa de dados pessoais** do projeto da equipe:
 
-1. Tabela dos 10 casos de vulnerabilidade: nome, exploração, correção, commit.
-2. Saída de `check --deploy` antes e depois.
-3. Cabeçalhos de segurança configurados e o porquê de cada um.
-4. **Mapa de dados pessoais** do projeto da equipe:
+| Dado | Por que coletamos | Base legal | Quem acessa | Retenção | Como protegemos | É necessário? |
+|---|---|---|---|---|---|---|
 
-| Dado | Por que coletamos | Base legal | Quem acessa | Por quanto tempo | Como protegemos |
-|---|---|---|---|---|---|
-
-5. Aviso de privacidade em linguagem simples (máx. 1 página).
+6. Aviso de privacidade (máx. 1 página).
 
 ## 🧪 Exercícios
 
-Ver [`exercicios.md`](exercicios.md) · Checklist operacional em
+Ver [`exercicios.md`](exercicios.md) · Checklist em
 [`../../recursos/checklists/seguranca.md`](../../recursos/checklists/seguranca.md).
 
 ## 📚 Para aprofundar
 
-- [OWASP Top 10:2021](https://owasp.org/Top10/pt_BR/)
+- [OWASP Top 10:2021 (pt-BR)](https://owasp.org/Top10/pt_BR/)
 - [Django — Segurança](https://docs.djangoproject.com/pt-br/5.0/topics/security/)
-- [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
-- [LGPD — texto da Lei 13.709/2018](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)
-- [ANPD — guias orientativos](https://www.gov.br/anpd/pt-br)
+- [OWASP — Cross-Site Scripting Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
+- [MDN — CORS](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/CORS)
+- [React — dangerouslySetInnerHTML](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
+- [LGPD — Lei 13.709/2018](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)

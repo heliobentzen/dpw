@@ -1,76 +1,56 @@
-# M14 — Testes e qualidade de código
+# M14 — Testes e qualidade
 
-> **CH:** 3h (1h teórica · 2h práticas) · **Semana 14** · **Pré-requisitos:** M06–M12
-> Módulo complementar à ementa, exigido pela realidade: a Etapa 3 do projeto pede
-> *"realização dos testes"*.
+> **CH:** 3h (1h teórica · 2h práticas) · **Semana 14** · **Pré-requisitos:** M07, M11, M12
+> Módulo complementar à ementa, exigido pela realidade: a Etapa 3 pede *"realização dos
+> testes"*.
+
+Três horas para duas suítes. O módulo é deliberadamente seletivo: cobre o que **quebra o
+projeto quando falha**, e trata o resto como leitura. Ver
+[ADR-09](../../docs/decisoes-tecnicas.md#adr-09--o-custo-em-carga-horária).
 
 ## 🎯 Objetivos
 
-1. Escrever testes de model, view, form e regra de negócio.
-2. Usar `pytest-django` com fixtures e parametrização.
-3. Medir cobertura e interpretá-la sem cair na armadilha da métrica.
-4. Configurar lint, formatação e integração contínua.
-5. Transformar bug em teste de regressão.
+1. Priorizar o que testar quando o tempo é escasso.
+2. Testar model, serializer, permissões e API com `pytest-django`.
+3. Testar componentes e formulários com Vitest + Testing Library.
+4. Garantir o **contrato** entre as camadas no CI.
+5. Configurar lint, formatação e integração contínua para os dois projetos.
 
 ---
 
 ## 📖 Teoria (1h)
 
-### 1. Por que testar (20 min)
+### 1. O que testar quando o tempo é curto (15 min)
 
-O argumento honesto não é "qualidade": é **velocidade sustentada**. Sem testes, cada
-alteração exige reverificar tudo à mão, e o custo de mudar cresce até o projeto travar.
-Com testes, a equipe altera código com confiança.
+O argumento não é "qualidade": é **velocidade sustentada**. Com quatro pessoas mexendo no
+mesmo sistema, sem testes cada alteração exige reverificar tudo à mão — e a equipe descobre
+o que quebrou na apresentação.
 
-Na Etapa 3, o efeito é imediato: quatro pessoas mexendo no mesmo sistema, sem testes,
-quebram o trabalho uma da outra e só descobrem na apresentação.
+Prioridade, nesta ordem:
 
-**Pirâmide (adaptada a este projeto):**
+| # | O que | Por quê | Camada |
+|---|---|---|---|
+| 1 | **Regra de negócio** | É o que o sistema faz de único | 🔵 model |
+| 2 | **Controle de acesso** | Falha aqui é incidente, não bug | 🔵 API |
+| 3 | **Validação** | Protege a integridade dos dados | 🔵 serializer |
+| 4 | **Contrato** | Divergência silenciosa entre camadas | ⚪ CI |
+| 5 | Componente com lógica | Formulário, filtro, estado | 🟣 |
+| 6 | Fluxo completo (e2e) | Caro e frágil; 1 ou 2 no máximo | ⚪ |
 
-```
-        /\        e2e (2–3)      fluxo completo pelo navegador — lentos, frágeis
-       /  \
-      /----\      integração (10–20)  view + banco + template
-     /      \
-    /--------\    unitários (30–50)   model, regra de negócio, form — rápidos
-```
+**Não teste:** o framework (o Django já é testado), componentes puramente visuais,
+`getters` triviais.
 
-Priorize: (1) regra de negócio, (2) controle de acesso, (3) fluxo principal. Não teste o
-framework — ele já é testado.
+> Numa arquitetura desacoplada, o item 4 é o que mais dá prejuízo e o que menos gente
+> testa: os dois lados passam nos próprios testes e o sistema não funciona.
 
-### 2. Anatomia de um teste (25 min)
-
-Padrão **AAA**: *Arrange, Act, Assert*.
-
-```python
-# acervo/tests/test_models.py
-import pytest
-from django.utils import timezone
-
-from acervo.models import Emprestimo
-
-
-@pytest.mark.django_db
-def test_emprestimo_calcula_previsao_de_devolucao(exemplar, associado):
-    # Arrange / Act
-    emprestimo = Emprestimo.objects.create(exemplar=exemplar, associado=associado)
-
-    # Assert
-    esperado = emprestimo.emprestado_em + timezone.timedelta(days=Emprestimo.PRAZO_DIAS)
-    assert emprestimo.previsao_devolucao == esperado
-```
-
-O nome do teste é documentação: descreva **o comportamento**, não o método.
-`test_emprestimo_calcula_previsao_de_devolucao` > `test_save`.
-
-### 3. `pytest-django` (25 min)
+### 2. Backend com `pytest-django` (20 min)
 
 ```bash
 pip install pytest pytest-django pytest-cov model-bakery
 ```
 
 ```ini
-# pytest.ini
+# backend/pytest.ini
 [pytest]
 DJANGO_SETTINGS_MODULE = config.settings
 python_files = test_*.py
@@ -78,341 +58,282 @@ addopts = -v --tb=short --reuse-db
 ```
 
 ```python
-# conftest.py (na raiz)
+# backend/conftest.py
 import pytest
-from django.contrib.auth import get_user_model
-
-from acervo.models import Associado, Autor, Exemplar, Obra
+from rest_framework.test import APIClient
 
 
 @pytest.fixture
-def autor(db):
-    return Autor.objects.create(nome="Machado de Assis")
-
-
-@pytest.fixture
-def obra(db, autor):
-    return Obra.objects.create(titulo="Dom Casmurro", autor=autor, ano_publicacao=1899)
-
-
-@pytest.fixture
-def exemplar(db, obra):
-    return Exemplar.objects.create(obra=obra, tombo="0001")
-
-
-@pytest.fixture
-def associado(db):
-    return Associado.objects.create(nome="Ana Souza", email="ana@exemplo.org")
+def api_client():
+    return APIClient()
 
 
 @pytest.fixture
 def bibliotecario(db, django_user_model):
-    user = django_user_model.objects.create_user(
-        username="bib", password="senha-de-teste-123", papel="BIBLIOTECARIO"
+    return django_user_model.objects.create_user(
+        username="bib", password="senha-de-teste-123", papel="BIBLIOTECARIO",
+        email="bib@exemplo.org",
     )
-    return user
 
 
 @pytest.fixture
-def cliente_bibliotecario(client, bibliotecario):
-    client.force_login(bibliotecario)
-    return client
+def cliente_bib(api_client, bibliotecario):
+    api_client.force_authenticate(bibliotecario)
+    return api_client
 ```
 
-Fixtures compõem: `exemplar` puxa `obra`, que puxa `autor`. Você declara só o que o teste
-precisa.
-
-`model_bakery` gera objetos sem você escrever todos os campos:
-
-```python
-from model_bakery import baker
-
-obra = baker.make("acervo.Obra")                       # tudo preenchido automaticamente
-obras = baker.make("acervo.Obra", _quantity=30)
-obra = baker.make("acervo.Obra", titulo="Específico")  # só o que importa para o teste
-```
-
-### 4. O que testar em cada camada (30 min)
-
-#### Model — regra de negócio
+**Regra de negócio (prioridade 1):**
 
 ```python
 @pytest.mark.django_db
-class TestEmprestimo:
-    def test_nao_esta_atrasado_dentro_do_prazo(self, exemplar, associado):
-        e = Emprestimo.objects.create(exemplar=exemplar, associado=associado)
-        assert e.esta_atrasado is False
-        assert e.dias_de_atraso == 0
-
-    def test_esta_atrasado_apos_o_prazo(self, exemplar, associado):
-        e = Emprestimo.objects.create(
-            exemplar=exemplar,
-            associado=associado,
-            previsao_devolucao=timezone.localdate() - timedelta(days=3),
-        )
-        assert e.esta_atrasado is True
-        assert e.dias_de_atraso == 3
-
-    def test_devolver_marca_data_e_libera_exemplar(self, exemplar, associado):
-        e = Emprestimo.objects.create(exemplar=exemplar, associado=associado)
-        assert exemplar.disponivel is False
-        e.devolver()
-        assert e.devolvido_em == timezone.localdate()
-        assert exemplar.disponivel is True
-
-    def test_exemplar_nao_pode_ter_dois_emprestimos_ativos(self, exemplar, associado):
+def test_exemplar_nao_pode_ter_dois_emprestimos_ativos(exemplar, associado):
+    Emprestimo.objects.create(exemplar=exemplar, associado=associado)
+    with pytest.raises(IntegrityError):
         Emprestimo.objects.create(exemplar=exemplar, associado=associado)
-        with pytest.raises(IntegrityError):
-            Emprestimo.objects.create(exemplar=exemplar, associado=associado)
 ```
 
-O último teste verifica a `UniqueConstraint` do M04 — testar a **restrição do banco**, e
-não só a validação do form, é o que garante que a regra vale para toda escrita.
+Testar a **restrição do banco** (M04), e não só a validação do serializer, garante que a
+regra vale para toda escrita — inclusive pelo admin e por comandos.
 
-#### View — status, contexto e efeito
-
-```python
-# acervo/tests/test_views.py
-from django.urls import reverse
-
-
-@pytest.mark.django_db
-def test_lista_de_obras_responde_200(client, obra):
-    resposta = client.get(reverse("acervo:obra_list"))
-    assert resposta.status_code == 200
-    assert obra.titulo in resposta.content.decode()
-
-
-@pytest.mark.django_db
-def test_busca_filtra_por_titulo(client, obra):
-    baker.make("acervo.Obra", titulo="Outro Livro")
-    resposta = client.get(reverse("acervo:obra_list"), {"q": "Casmurro"})
-    assert list(resposta.context["obras"]) == [obra]
-
-
-@pytest.mark.django_db
-def test_criar_obra_exige_permissao(client, autor):
-    resposta = client.post(reverse("acervo:obra_create"), {"titulo": "X", "autor": autor.pk})
-    assert resposta.status_code in (302, 403)
-    assert not Obra.objects.filter(titulo="X").exists()
-
-
-@pytest.mark.django_db
-def test_bibliotecario_cria_obra(cliente_bibliotecario, autor):
-    resposta = cliente_bibliotecario.post(
-        reverse("acervo:obra_create"),
-        {"titulo": "Nova Obra", "autor": autor.pk, "ano_publicacao": 2020},
-    )
-    assert resposta.status_code == 302                       # PRG
-    assert Obra.objects.filter(titulo="Nova Obra").exists()
-```
-
-#### Form — validação
+**Controle de acesso (prioridade 2)** — a matriz do M12 vira teste parametrizado:
 
 ```python
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "isbn,valido",
+    "papel,metodo,rota,esperado",
     [
-        ("9788535914849", True),
-        ("978-85-359-1484-9", True),
-        ("123", False),
-        ("abcdefghijklm", False),
-        ("", True),                    # opcional
+        (None,            "get",  "obra-list",   200),
+        (None,            "post", "obra-list",   401),
+        ("ASSOCIADO",     "post", "obra-list",   403),
+        ("BIBLIOTECARIO", "post", "obra-list",   201),
+        ("ASSOCIADO",     "get",  "relatorios",  403),
+        ("COORDENACAO",   "get",  "relatorios",  200),
     ],
 )
-def test_validacao_de_isbn(autor, isbn, valido):
-    form = ObraForm({"titulo": "T", "autor": autor.pk, "isbn": isbn})
-    assert form.is_valid() == valido
-```
-
-`parametrize` transforma 5 testes quase idênticos em um. É onde o pytest brilha.
-
-#### Controle de acesso — a matriz do M12 virando teste
-
-```python
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    "papel,rota,esperado",
-    [
-        (None, "acervo:obra_list", 200),
-        (None, "acervo:obra_create", 302),
-        ("ASSOCIADO", "acervo:obra_create", 403),
-        ("BIBLIOTECARIO", "acervo:obra_create", 200),
-        ("ASSOCIADO", "acervo:relatorios", 403),
-        ("COORDENACAO", "acervo:relatorios", 200),
-    ],
-)
-def test_matriz_de_acesso(client, django_user_model, papel, rota, esperado):
+def test_matriz_de_acesso(api_client, django_user_model, autor, papel, metodo, rota, esperado):
     if papel:
-        user = django_user_model.objects.create_user("u", password="x", papel=papel)
-        atribuir_permissoes(user)
-        client.force_login(user)
-    assert client.get(reverse(rota)).status_code == esperado
+        u = django_user_model.objects.create_user("u", password="x", papel=papel)
+        atribuir_permissoes(u)
+        api_client.force_authenticate(u)
+
+    url = reverse(f"acervo:{rota}")
+    dados = {"titulo": "T", "autor": autor.pk} if metodo == "post" else None
+    resposta = getattr(api_client, metodo)(url, dados, format="json")
+
+    assert resposta.status_code == esperado, f"{papel} {metodo} {rota}"
 ```
 
-Uma falha de autorização introduzida por engano passa a quebrar o CI. Este é,
-provavelmente, o teste de maior retorno do projeto inteiro.
+Uma falha de autorização introduzida por engano passa a quebrar o CI. É, provavelmente, o
+teste de maior retorno do projeto inteiro.
 
-### 5. Cobertura: útil e enganosa (10 min)
+**Validação (prioridade 3):**
+
+```python
+@pytest.mark.django_db
+@pytest.mark.parametrize("isbn,valido", [
+    ("9788535914849", True), ("978-85-359-1484-9", True),
+    ("123", False), ("abcdefghijklm", False), ("", True),
+])
+def test_validacao_de_isbn(autor, isbn, valido):
+    s = ObraCreateSerializer(data={"titulo": "T", "autor": autor.pk, "isbn": isbn})
+    assert s.is_valid() == valido
+```
+
+### 3. Frontend com Vitest + Testing Library (20 min)
 
 ```bash
-pytest --cov=. --cov-report=term-missing --cov-report=html
+pnpm add -D vitest @vitest/ui jsdom @testing-library/react \
+            @testing-library/user-event @testing-library/jest-dom msw
 ```
 
-Cobertura mostra o que **nunca foi executado** — e isso é informação valiosa. O que ela
-**não** mostra: se as asserções fazem sentido, se os casos de borda foram considerados, se
-a regra de negócio está certa. 100% de cobertura com `assert True` é 0% de garantia.
+```ts
+// frontend/vite.config.ts
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  test: { environment: "jsdom", setupFiles: "./src/teste/setup.ts", globals: true },
+});
+```
 
-Meta razoável para o projeto: **≥ 60% no geral, ≥ 90% nas regras de negócio e no controle
-de acesso**.
+```ts
+// src/teste/setup.ts
+import "@testing-library/jest-dom/vitest";
+import { server } from "./servidor-mock";
 
-### 6. Lint, formatação e CI (10 min)
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+```
+
+**A regra da Testing Library:** teste o que o **usuário** vê e faz, não a implementação.
+
+```tsx
+// src/components/ObraCard.test.tsx
+import { render, screen } from "@testing-library/react";
+
+test("mostra disponibilidade quando há exemplares livres", () => {
+  render(<ObraCard titulo="Dom Casmurro" autor="Machado" ano={1899} disponiveis={2} />);
+
+  expect(screen.getByRole("heading", { name: "Dom Casmurro" })).toBeInTheDocument();
+  expect(screen.getByText(/2 disponível/i)).toBeInTheDocument();
+});
+
+test("avisa quando todos estão emprestados", () => {
+  render(<ObraCard titulo="X" autor="Y" ano={2000} disponiveis={0} />);
+  expect(screen.getByText(/todos emprestados/i)).toBeInTheDocument();
+});
+```
+
+Prefira `getByRole` a `getByTestId`: se o teste encontra o elemento pelo papel acessível,
+um leitor de tela também encontra. **O teste vira uma verificação de acessibilidade de
+graça.**
+
+**MSW** simula a API sem tocar no backend:
+
+```ts
+// src/teste/servidor-mock.ts
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
+
+export const server = setupServer(
+  http.get("/api/obras/", () =>
+    HttpResponse.json({
+      count: 1, next: null, previous: null,
+      results: [{ id: 1, titulo: "Dom Casmurro", autor: { id: 1, nome: "Machado" },
+                  ano_publicacao: 1899, exemplares_total: 3, exemplares_disponiveis: 2 }],
+    }),
+  ),
+);
+```
+
+```tsx
+test("exibe erro de validação vindo do servidor", async () => {
+  server.use(
+    http.post("/api/obras/", () =>
+      HttpResponse.json({ isbn: ["Já existe uma obra com este ISBN."] }, { status: 400 }),
+    ),
+  );
+
+  const usuario = userEvent.setup();
+  render(<ObraFormPage />, { wrapper: ComProviders });
+
+  await usuario.type(screen.getByLabelText(/título/i), "Teste");
+  await usuario.click(screen.getByRole("button", { name: /salvar/i }));
+
+  expect(await screen.findByText(/já existe uma obra com este isbn/i)).toBeInTheDocument();
+});
+```
+
+Este teste cobre o caminho mais importante do M11: o erro do DRF chegando ao campo certo.
+
+### 4. Teste de contrato (5 min) ⭐
+
+O teste que só existe nesta arquitetura — e o que evita o bug mais caro:
 
 ```bash
-pip install ruff
+# no CI, após rodar os testes das duas camadas
+cd backend && python manage.py spectacular --file ../frontend/schema.yml
+cd ../frontend && pnpm tipos && git diff --exit-code src/api/schema.d.ts
 ```
 
-```toml
-# pyproject.toml
-[tool.ruff]
-line-length = 100
-target-version = "py312"
-exclude = ["migrations"]
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "DJ", "S"]   # erros, imports, upgrades, bugs, django, segurança
-ignore = ["S101"]                                 # assert é normal em testes
-```
-
-```bash
-ruff check .          # lint
-ruff check . --fix
-ruff format .         # formatação
-```
-
-`pre-commit` para não depender de disciplina individual:
-
-```yaml
-# .pre-commit-config.yaml
-repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
-    hooks:
-      - id: ruff
-        args: [--fix]
-      - id: ruff-format
-```
-
-```bash
-pip install pre-commit && pre-commit install
-```
+Se o schema mudou e os tipos não foram regenerados, o CI falha. Combinado com o
+`tsc --noEmit`, um campo renomeado no backend quebra o build do frontend **antes** de
+chegar a produção.
 
 ---
 
 ## 🛠️ Roteiro prático (2h)
 
-### Passo 1 — Configurar o ambiente de testes (20 min)
+### Passo 1 — Backend: as três prioridades (50 min)
 
-Instale as dependências, crie `pytest.ini`, `conftest.py` e a estrutura:
+Configure `pytest.ini` e `conftest.py`, e escreva ao menos 15 testes:
 
-```
-acervo/tests/
-├── __init__.py
-├── test_models.py
-├── test_views.py
-├── test_forms.py
-└── test_permissoes.py
-```
+- 6 de regra de negócio (prazo, limite, disponibilidade, atraso, devolução, constraint)
+- 6 da matriz de acesso (parametrizados, incluindo IDOR)
+- 3 de validação de serializer (parametrizados)
 
 ```bash
-pytest -v
+pytest -v --cov=. --cov-report=term-missing
 ```
 
-### Passo 2 — Testar a regra de negócio (40 min)
+### Passo 2 — Frontend: componente e formulário (40 min)
 
-Escreva ao menos 10 testes cobrindo:
+Configure Vitest, Testing Library e MSW, e escreva ao menos 6 testes:
 
-- cálculo da previsão de devolução
-- `esta_atrasado` (antes, no dia, depois do prazo)
-- `dias_de_atraso`
-- `devolver()` e liberação do exemplar
-- limite de empréstimos por associado
-- associado inativo não pode pegar emprestado
-- exemplar baixado não fica disponível
-- restrição de empréstimo duplicado (`IntegrityError`)
-- `exemplares_disponiveis` da obra
-- transação que desfaz tudo em caso de erro
+| Teste | O que garante |
+|---|---|
+| `ObraCard` mostra os dados | Renderização básica |
+| `ObraCard` com 0 disponíveis | Caminho alternativo |
+| Listagem exibe estado vazio | Estado tratado |
+| Listagem exibe erro de rede | Estado tratado |
+| Formulário valida no cliente (Zod) | Validação local |
+| Formulário exibe erro 400 do servidor no campo | **Integração do contrato** |
 
-### Passo 3 — Testar views e permissões (40 min)
+```bash
+pnpm vitest run
+```
 
-- listagem responde 200 e mostra as obras
-- busca filtra corretamente (inclusive sem resultados)
-- detalhe de obra inexistente devolve 404
-- criação exige permissão (anônimo, associado, bibliotecário)
-- POST válido cria e redireciona (PRG)
-- POST inválido não cria e devolve 200 com erros
-- exclusão só por POST (GET devolve 405)
-- **IDOR:** associado A não acessa empréstimo de B (404)
-- a matriz de acesso parametrizada do M12
-
-### Passo 4 — CI no GitHub Actions (20 min)
+### Passo 3 — CI para os dois projetos (30 min)
 
 ```yaml
 # .github/workflows/ci.yml
 name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
+on: { push: { branches: [main] }, pull_request: }
 
 jobs:
-  testes:
+  backend:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:16
-        env:
-          POSTGRES_DB: test
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
+        env: { POSTGRES_DB: test, POSTGRES_USER: test, POSTGRES_PASSWORD: test }
         ports: ["5432:5432"]
         options: >-
-          --health-cmd pg_isready --health-interval 5s
-          --health-timeout 5s --health-retries 10
-
+          --health-cmd pg_isready --health-interval 5s --health-retries 10
     env:
-      SECRET_KEY: chave-apenas-para-ci-nao-usar-em-producao
+      SECRET_KEY: chave-apenas-para-ci
       DEBUG: "False"
       DATABASE_URL: postgres://test:test@localhost:5432/test
-
+    defaults: { run: { working-directory: backend } }
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-
+        with: { python-version: "3.12", cache: pip }
       - run: pip install -r requirements.txt
+      - run: ruff check .
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py check --deploy
+      - run: pytest --cov=. --cov-fail-under=60
+      - run: python manage.py spectacular --file schema.yml
+      - uses: actions/upload-artifact@v4
+        with: { name: schema, path: backend/schema.yml }
 
-      - name: Lint
-        run: ruff check .
-
-      - name: Migrações sem pendências
-        run: python manage.py makemigrations --check --dry-run
-
-      - name: Verificação de deploy
-        run: python manage.py check --deploy
-
-      - name: Testes
-        run: pytest --cov=. --cov-report=term-missing --cov-fail-under=60
+  frontend:
+    runs-on: ubuntu-latest
+    needs: backend
+    defaults: { run: { working-directory: frontend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm, cache-dependency-path: frontend/pnpm-lock.yaml }
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with: { name: schema, path: frontend }
+      - name: Tipos sincronizados com a API
+        run: |
+          pnpm tipos
+          git diff --exit-code src/api/schema.d.ts
+      - run: pnpm lint
+      - run: pnpm tsc --noEmit
+      - run: pnpm vitest run
+      - run: pnpm build
 ```
 
-Ative a proteção da branch `main` exigindo o CI verde antes do merge. A partir daqui,
-ninguém quebra o trabalho de ninguém sem que o robô avise.
+Proteja a `main` exigindo os dois jobs verdes antes do merge.
+
+O passo "Tipos sincronizados" é o **teste de contrato**: o job do frontend baixa o schema
+gerado pelo backend no mesmo commit e falha se os tipos estiverem defasados.
 
 ---
 
@@ -421,29 +342,33 @@ ninguém quebra o trabalho de ninguém sem que o robô avise.
 | Erro | Correção |
 |---|---|
 | Esquecer `@pytest.mark.django_db` | `Database access not allowed` |
-| Testes dependentes da ordem de execução | Cada teste monta o próprio cenário |
-| Testar o framework (`test_charfield_salva`) | Teste **sua** regra |
-| Asserção só de `status_code` | Verifique também o efeito no banco |
-| Perseguir 100% de cobertura | Cubra o que importa, bem |
-| Teste que depende de rede ou data real | Isole com mock / `freezegun` |
-| Fixture gigante usada por todos | Fixtures pequenas e compostas |
+| Testar o framework | Teste **sua** regra |
+| Só `status_code` na asserção | Verifique também o efeito no banco |
+| `getByTestId` para tudo | `getByRole` — testa acessibilidade junto |
+| Testar estado interno do componente | Teste o que o usuário vê |
+| Frontend chamando o backend real no teste | Use MSW |
+| Testes dependentes da ordem | Cada teste monta o próprio cenário |
+| Perseguir 100% de cobertura | Cubra o que importa |
 | Bug corrigido sem teste | Todo bug vira teste de regressão |
+| CI só no backend | O contrato quebra justamente entre as camadas |
 
 ## ✅ Checklist de saída
 
-- [ ] `pytest` roda verde localmente
-- [ ] ≥ 20 testes, cobrindo model, view, form e permissões
-- [ ] Matriz de acesso automatizada
-- [ ] Cobertura ≥ 60%, com regras de negócio ≥ 90%
-- [ ] `ruff check` sem erros
-- [ ] CI configurado e verde
-- [ ] Branch `main` protegida exigindo CI
+- [ ] ≥ 15 testes no backend (regra, acesso, validação)
+- [ ] Matriz de acesso automatizada e parametrizada
+- [ ] ≥ 6 testes no frontend, incluindo o erro 400 no formulário
+- [ ] MSW simulando a API, sem depender do backend
+- [ ] Cobertura ≥ 60% no backend
+- [ ] `ruff check` e `pnpm lint` sem erros
+- [ ] `tsc --noEmit` sem erros
+- [ ] **Teste de contrato no CI** (tipos sincronizados)
+- [ ] CI verde nos dois jobs; `main` protegida
 - [ ] Ao menos 1 teste de regressão a partir de um bug real
 
-## 📦 Entrega E6 — Suíte de testes
+## 📦 Entrega E7 — Suíte verde nas duas camadas
 
-Repositório com CI verde, badge no README, relatório de cobertura e a lista de testes com
-o que cada um garante.
+Repositório com CI verde, badge no README, relatório de cobertura do backend e a lista de
+testes com o que cada um garante.
 
 ## 🧪 Exercícios
 
@@ -451,7 +376,9 @@ Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [Django — Testes](https://docs.djangoproject.com/pt-br/5.0/topics/testing/)
 - [pytest-django](https://pytest-django.readthedocs.io/)
-- [model_bakery](https://model-bakery.readthedocs.io/)
-- [Ruff](https://docs.astral.sh/ruff/)
+- [DRF — Testing](https://www.django-rest-framework.org/api-guide/testing/)
+- [Vitest](https://vitest.dev/)
+- [Testing Library — princípios](https://testing-library.com/docs/guiding-principles)
+- [MSW](https://mswjs.io/)
+- [Testing Library — queries por prioridade](https://testing-library.com/docs/queries/about#priority) ⭐

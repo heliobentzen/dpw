@@ -1,137 +1,149 @@
 # M12 — Exercícios
 
-## E10.1 — Matriz de acesso completa (individual) ⭐
+## E12.1 — Matriz de acesso completa (individual) ⭐
 
-Estenda a matriz do roteiro prático para **todas** as rotas do BiblioCom (mínimo 15) e
-**todos** os papéis, incluindo o usuário autenticado que tenta acessar o recurso de outra
-pessoa.
+Estenda a matriz do roteiro para **todas** as rotas da API (mínimo 15) e todos os papéis,
+incluindo o caso "usuário autenticado acessando recurso de outra pessoa".
 
-Para cada célula, registre: status HTTP esperado, status obtido, e o comando/URL usado.
-Marque em vermelho as divergências e corrija-as.
+Para cada célula registre: status esperado, status obtido pela **API** (via `curl`) e o que
+a **interface** faz.
+
+| Rota | Método | Anônimo | Associado | Assoc. (recurso de outro) | Bibliotecário | Coordenação |
+|---|---|---|---|---|---|---|
 
 **Este é o exercício mais importante do módulo.** Toda falha de autorização real começa com
 uma célula que ninguém testou.
 
 ---
 
-## E10.2 — Perfil do usuário (individual)
+## E12.2 — Escolher o mecanismo (individual, discursivo)
 
-Implemente `/contas/perfil/`:
+Para cada cenário, escolha entre sessão+cookie, JWT em `localStorage` e JWT em cookie
+`HttpOnly`, justificando pelo modelo de ameaça:
 
-- exibe e permite editar nome, e-mail e telefone;
-- **não** permite editar `papel`, `is_staff`, `is_superuser` (pense em por quê);
-- exige senha atual para trocar o e-mail;
-- mostra histórico de empréstimos do próprio usuário;
-- mostra a data do último acesso.
+| # | Cenário | Escolha | Justificativa |
+|---|---|---|---|
+| 1 | BiblioCom: SPA e API no mesmo domínio | | |
+| 2 | O mesmo sistema + app mobile React Native | | |
+| 3 | API pública consumida por outras prefeituras | | |
+| 4 | SPA em `app.exemplo.org`, API em `api.exemplo.org` | | |
+| 5 | Sistema bancário com exigência de revogação imediata | | |
+| 6 | Integração servidor-a-servidor, sem navegador | | |
 
-Depois, tente enviar `papel=COORDENACAO` por `curl` direto no POST de edição. O que
-acontece? Se funcionar, você acabou de encontrar uma escalada de privilégio no seu próprio
-sistema — corrija e explique a correção.
+Depois responda: **por que a maior parte dos tutoriais ensina a opção mais insegura?**
 
 ---
 
-## E10.3 — Login por e-mail (individual)
+## E12.3 — Provar que o frontend não protege (individual) ⭐
 
-Faça o sistema aceitar login por **e-mail ou username**. Duas abordagens possíveis:
+1. Logue como **associado** na interface.
+2. Confirme que o botão "Nova obra" não aparece e que `/obras/nova` redireciona.
+3. Agora ignore a interface:
 
-**(a)** Backend de autenticação customizado:
-
-```python
-class EmailOuUsernameBackend(ModelBackend):
-    def authenticate(self, request, username=None, password=None, **kwargs):
-        ...
+```bash
+curl -b cookies-associado.txt -X POST http://localhost:8000/api/obras/ \
+     -H "Content-Type: application/json" -H "X-CSRFToken: $CSRF" \
+     -d '{"titulo":"Teste de invasão","autor":1}' -i
 ```
 
-**(b)** `AbstractBaseUser` com `USERNAME_FIELD = "email"`.
+4. Qual o status? Se for **201**, corrija o backend e repita.
+5. Repita para: `PATCH`, `DELETE`, `/api/relatorios/` e `/api/emprestimos/{de-outro}/`.
+6. Abra o DevTools → Sources e **encontre no bundle** o código do `RotaProtegida`.
 
-Implemente **(a)**. Cuidados obrigatórios: e-mail único e case-insensitive; tempo de
-resposta semelhante para usuário existente e inexistente (por quê?); mensagem de erro
-genérica.
-
----
-
-## E10.4 — Política de senha e bloqueio (individual)
-
-1. Configure `min_length=12` e todos os validadores.
-2. Escreva um validador customizado que rejeite senhas contendo o nome da biblioteca.
-3. Implemente bloqueio temporário após 5 tentativas falhas do mesmo usuário em 15 min
-   (use cache ou um model `TentativaLogin`).
-4. Registre em log toda tentativa falha (sem a senha!).
-
-Responda: por que o bloqueio deve ser por **usuário + IP**, e não só por IP? E qual o
-risco de bloquear só por usuário?
+**Entrega:** as 5 saídas de `curl` + o print do passo 6 + 5 linhas explicando por que
+esconder no cliente nunca é proteção.
 
 ---
 
-## E10.5 — Grupos por comando (individual)
-
-Reescreva o comando `criar_grupos` para ser **idempotente e declarativo**:
-
-- rodar duas vezes não duplica nem quebra;
-- remove permissões que saíram da definição;
-- aceita `--dry-run` mostrando o que mudaria;
-- imprime um resumo: grupo, permissões adicionadas, removidas.
-
-Rode em um banco limpo e em um banco já configurado. Compare as saídas.
-
----
-
-## E10.6 — IDOR na prática (em duplas) ⭐
+## E12.4 — IDOR nas duas camadas (em duplas)
 
 1. Crie dois associados (A e B), cada um com empréstimos.
-2. Logado como A, descubra o id de um empréstimo de B (dica: a paginação e os ids
-   sequenciais ajudam — e esse é justamente o problema).
-3. Acesse `/emprestimos/<id-de-B>/`. Conseguiu ver?
-4. Se sim, corrija de **duas** maneiras diferentes e compare:
-   - `UserPassesTestMixin` com `test_func`;
-   - filtro no `get_queryset`.
-5. Responda: qual das duas devolve 403 e qual devolve 404? **Qual é preferível e por quê?**
-6. Repita o ataque nos endpoints de edição e exclusão. Eles estavam protegidos?
+2. Logado como A, descubra o id de um empréstimo de B.
+3. Acesse `/emprestimos/<id-de-B>` na interface e `GET /api/emprestimos/<id-de-B>/` na API.
+4. Se conseguiu ver, corrija de **duas** formas e compare:
+   - `has_object_permission` numa `BasePermission`
+   - filtro no `get_queryset`
+5. Qual devolve 403 e qual devolve 404? **Qual é preferível e por quê?**
+6. Repita para edição e exclusão.
 
 ---
 
-## E10.7 — Auditoria de acesso (individual)
+## E12.5 — CSRF na prática (individual)
 
-Implemente registro de eventos de segurança em um model `EventoAcesso`:
+1. Faça um POST pela interface e observe, na aba Network, o cabeçalho `X-CSRFToken`.
+2. Remova o envio do cabeçalho no `api/client.ts` e tente de novo. Qual status?
+3. Descubra onde o cookie `csrftoken` é definido. Ele é `HttpOnly`? E o `sessionid`?
+4. Explique por que os dois cookies têm configurações diferentes de `HttpOnly`.
+5. Simule um ataque CSRF: crie uma página em `localhost:9000` com um formulário que envia
+   POST para `localhost:8000/api/obras/`. Funciona? Por quê?
+6. Teste o efeito de `SESSION_COOKIE_SAMESITE = "Strict"`.
 
-| Campo | Conteúdo |
+---
+
+## E12.6 — Fluxo completo de gestão de usuários (individual)
+
+Implemente:
+
+| Fluxo | Requisitos |
 |---|---|
-| `usuario` | quem (ou nulo se anônimo) |
-| `evento` | LOGIN_OK, LOGIN_FALHA, LOGOUT, SENHA_ALTERADA, ACESSO_NEGADO |
-| `ip` | endereço de origem |
-| `user_agent` | navegador |
-| `criado_em` | quando |
+| Cadastro | Validação de senha forte, e-mail único, papel definido **pelo servidor** |
+| Login | Mensagem genérica, redireciona para a rota pretendida |
+| Logout | POST, limpa o cache do Query |
+| Perfil | Edita nome, e-mail e telefone — **nunca** `papel` ou `is_superuser` |
+| Trocar senha | Exige a senha atual |
+| Recuperar senha | Token de uso único, expiração curta, e-mail no console em dev |
 
-Use os sinais `user_logged_in`, `user_login_failed` e `user_logged_out`.
-
-Regras: **nunca** registrar senha; considerar que o IP pode vir de proxy
-(`X-Forwarded-For` — e por que confiar nesse cabeçalho cegamente é perigoso?); definir
-prazo de retenção dos registros (LGPD).
+Depois, ataque o próprio sistema: envie `{"papel": "COORDENACAO"}` no PATCH do perfil. O
+que acontece? Se funcionar, você encontrou uma escalada de privilégio — corrija e explique
+a correção.
 
 ---
 
-## E10.8 — Desafio: convite em vez de autocadastro (individual)
+## E12.7 — Bloqueio por tentativas (individual)
 
-Numa biblioteca comunitária, o cadastro costuma ser presencial. Implemente:
+Implemente bloqueio após 5 tentativas falhas em 15 minutos:
 
-1. A coordenação cadastra o associado e gera um **convite** com token de uso único e
-   validade de 7 dias.
-2. O link é entregue por e-mail (ou impresso).
-3. Ao abrir o link, a pessoa define a própria senha e ativa a conta.
-4. O token é invalidado após o uso ou após expirar.
+- chave de bloqueio por **usuário + IP** (por que não só por um dos dois?)
+- resposta `429` com cabeçalho `Retry-After`
+- armazenamento no cache do Django, não no banco
+- log de cada tentativa falha, **sem** a senha
+- a interface mostra quanto tempo falta
 
-Cuidados: token criptograficamente aleatório (`secrets.token_urlsafe`), guardado como
-**hash** no banco, comparado em tempo constante, e nunca reutilizável.
+Responda: qual o risco de bloquear só por usuário? E só por IP (pense em NAT
+compartilhado numa escola)?
+
+---
+
+## E12.8 — Desafio: convite em vez de autocadastro
+
+Numa biblioteca comunitária o cadastro costuma ser presencial. Implemente:
+
+1. A coordenação cadastra o associado e gera um **convite** com token de uso único, válido
+   por 7 dias.
+2. O link é entregue por e-mail ou impresso.
+3. Ao abrir, a pessoa define a própria senha e ativa a conta.
+4. O token é invalidado após o uso ou a expiração.
+
+Cuidados: `secrets.token_urlsafe()`, guardar o **hash** do token no banco, comparação em
+tempo constante, e a rota de ativação precisa ser pública mas não enumerável.
 
 ---
 
 ## Gabarito parcial
 
-**E10.2** — Se `papel` estiver no `fields` do form (ou se você usou `fields = "__all__"`),
-o POST manipulado promove o usuário. Correções: `fields` explícito e restrito; nunca
-confiar em campos ocultos ou desabilitados no HTML (`disabled` não impede o envio);
-definir campos sensíveis no servidor, em `form_valid`.
+**E12.2 (1)** — Sessão + cookie. Mesmo site elimina o problema de CORS, `HttpOnly` protege
+contra roubo por XSS e a revogação é imediata. **(2)** — Aparece o app mobile: sessão por
+cookie fica desajeitada, e JWT (com *refresh* em armazenamento seguro do dispositivo) passa
+a se justificar. Note que a API pode aceitar **os dois** mecanismos simultaneamente.
 
-**E10.6 (5)** — `test_func` devolve **403** e, com isso, confirma que o objeto existe.
-Filtrar o queryset devolve **404**: quem não pode ver não descobre nem a existência. Para
-recursos privados, 404 é preferível — não vaza informação por *side channel*.
+**E12.2 (última)** — Porque JWT em `localStorage` é o que funciona mais rápido num tutorial
+de 15 minutos: não exige CSRF, não exige mesmo domínio, não exige entender cookies. O custo
+só aparece quando há um XSS — e aí não aparece no tutorial.
+
+**E12.4 (5)** — `has_object_permission` devolve **403** e, com isso, confirma que o objeto
+existe. Filtrar o queryset devolve **404**: quem não pode ver não descobre nem a
+existência. Para recursos privados, 404 é preferível.
+
+**E12.6** — Se `papel` estiver no serializer de perfil, o PATCH promove o usuário. Correções:
+serializer com `fields` explícito e restrito; campos sensíveis definidos no servidor
+(`perform_update`); e nunca confiar em campo vindo do cliente para decisão de autorização.

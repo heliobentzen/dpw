@@ -1,159 +1,162 @@
 # M13 — Exercícios
 
-> **Regra de conduta.** Toda exploração é feita **exclusivamente** contra o seu próprio
-> ambiente local ou contra sistemas para os quais você tem autorização explícita por
-> escrito. Testar sistemas de terceiros sem autorização é crime (Lei 12.737/2012, art.
-> 154-A do Código Penal). Nesta disciplina, o alvo é sempre o seu próprio código.
+> **Regra de conduta.** Toda exploração é feita **exclusivamente** contra o seu ambiente
+> local ou contra sistemas para os quais você tem autorização explícita por escrito. Testar
+> sistemas de terceiros sem autorização é crime (Lei 12.737/2012, art. 154-A do Código
+> Penal). Nesta disciplina, o alvo é sempre o seu próprio código.
 
 ---
 
-## E11.1 — Laboratório de vulnerabilidades (em duplas) ⭐
+## E13.1 — Laboratório completo (em duplas) ⭐
 
-Trabalhe sobre [`../../recursos/codigo/vulneravel.py`](../../recursos/codigo/vulneravel.py),
-que tem **10 casos**. Para cada um, entregue:
+18 casos, nas duas camadas:
+
+- [`vulneravel.py`](../../recursos/codigo/vulneravel.py) — 10 casos de backend
+- [`vulneravel.tsx`](../../recursos/codigo/vulneravel.tsx) — 8 casos de frontend
+
+Para cada um:
 
 | Campo | Conteúdo |
 |---|---|
 | Vulnerabilidade | Nome e categoria OWASP |
-| Impacto | O que um atacante consegue, em termos de negócio |
-| Exploração | Payload/URL exato que demonstra |
-| Evidência | Print ou saída do `curl` |
-| Correção | Diff do código |
+| Camada | Backend / frontend / ambas |
+| Impacto | O que o atacante consegue, em termos de negócio |
+| Exploração | Payload/URL/comando exato |
+| Evidência | Print ou saída de `curl` |
+| Correção | Diff |
 | Por que funciona | 2–3 linhas |
 
-Divisão sugerida: cada pessoa ataca 5 casos e corrige os outros 5; depois trocam e
-revisam.
+Divisão sugerida: cada pessoa ataca metade e corrige a outra metade; depois revisam
+mutuamente.
 
 ---
 
-## E11.2 — CSRF na prática (em duplas)
+## E13.2 — CORS não é segurança (individual) ⭐
 
-1. Suba o BiblioCom em `localhost:8000` e faça login.
-2. Crie um segundo servidor em `localhost:9000` (basta `python -m http.server 9000`) com
-   uma página contendo o formulário de ataque:
+1. Configure `CORS_ALLOWED_ORIGINS = []` e chame a API de `localhost:5173` sem o proxy.
+   Capture o erro do console.
+2. Faça a **mesma** requisição com `curl`. Funciona? Por quê?
+3. Configure `CORS_ALLOW_ALL_ORIGINS = True` **e** `CORS_ALLOW_CREDENTIALS = True`.
+4. Suba uma página em `localhost:9000` que faz `fetch("http://localhost:8000/api/emprestimos/", {credentials: "include"})` e exibe a resposta.
+5. Estando logado no BiblioCom noutra aba, abra a página maliciosa. O que ela consegue ler?
+6. Corrija para lista explícita e repita o passo 5.
 
-```html
-<h1>Você ganhou um livro grátis!</h1>
-<form action="http://localhost:8000/obras/1/excluir/" method="post" id="f"></form>
-<script>document.getElementById("f").submit()</script>
-```
+**Entrega:** evidências + respostas:
 
-3. Com a proteção CSRF **desligada** (`@csrf_exempt`), abra a página maliciosa. O que
-   aconteceu?
-4. Religue a proteção. Tente de novo. Qual o status agora?
-5. Inspecione o valor de `csrftoken` no cookie e o `csrfmiddlewaretoken` no formulário
-   legítimo. Por que o site atacante não consegue obter esse valor?
-6. Teste o efeito de `SESSION_COOKIE_SAMESITE = "Strict"` no mesmo ataque.
-
-**Entrega:** relato com evidências dos passos 3, 4 e 6.
+- Quem bloqueia a requisição: o navegador ou o servidor?
+- Por que o `curl` nunca é afetado?
+- CORS protege a **sua API** ou o **usuário de outro site**?
+- Por que o material prefere *same-site* a configurar CORS?
 
 ---
 
-## E11.3 — XSS: os três tipos (individual)
+## E13.3 — XSS em React (individual)
 
-Demonstre no BiblioCom, e depois corrija:
+Demonstre e corrija cada tipo:
 
-| Tipo | Como demonstrar |
+| Tipo | Como demonstrar no BiblioCom |
 |---|---|
-| **Refletido** | Payload na query string exibido sem escape na página de busca |
-| **Armazenado** | Payload salvo na sinopse de uma obra, exibido com `|safe` |
-| **Baseado em DOM** | JS que insere `location.hash` com `innerHTML` |
+| Armazenado | Sinopse com payload, renderizada com `dangerouslySetInnerHTML` |
+| Via URL | `href` vindo do usuário com `javascript:alert(1)` |
+| Via atributo | `style` ou `src` montado com entrada do usuário |
 
-Payloads para testar: `<script>alert(1)</script>`, `<img src=x onerror=alert(1)>`,
-`"><svg onload=alert(1)>`, `javascript:alert(1)` (em `href`).
+Payloads: `<img src=x onerror=alert(1)>`, `"><svg onload=alert(1)>`,
+`javascript:alert(document.cookie)`.
 
-Para cada um: por que o escape padrão do Django pegou ou não pegou? Qual a correção
-específica daquele contexto (HTML, atributo, URL, JS)?
-
----
-
-## E11.4 — Injeção de SQL com e sem ORM (individual)
-
-1. Crie uma view de busca com `raw()` e f-string.
-2. Explore com: `' OR '1'='1`, `' UNION SELECT ...`, `'; --`.
-3. Ative o log de SQL e mostre a consulta efetivamente executada.
-4. Corrija de duas formas: com parâmetros `%s` e com o ORM.
-5. Compare o SQL gerado nas duas correções.
-
-Responda: **por que a parametrização resolve, se o valor continua vindo do usuário?**
-(A resposta correta fala sobre a separação entre o comando e os dados no protocolo do
-banco, não sobre "escapar caracteres".)
+Responda: **por que `{textoDoUsuario}` é seguro e `dangerouslySetInnerHTML` não é?** E por
+que o cookie `HttpOnly` reduz — mas não elimina — o impacto de um XSS?
 
 ---
 
-## E11.5 — Hardening do projeto (individual)
+## E13.4 — Segredo no bundle (individual)
 
-Aplique ao **projeto da sua equipe** e documente com o antes/depois:
+1. Adicione `VITE_CHAVE_SECRETA=nao-deveria-vazar-42` ao `.env` do frontend e use-a.
+2. `pnpm build`
+3. `grep -r "nao-deveria-vazar-42" dist/`
+4. Abra o arquivo encontrado e localize o valor.
+5. Agora repita com a variável **sem** o prefixo `VITE_`. Ela aparece? O componente
+   funciona?
+6. Escreva a regra em uma frase, e o desenho correto quando o navegador precisa de um
+   serviço que exige chave secreta.
+
+---
+
+## E13.5 — Hardening completo (individual)
+
+Aplique ao **projeto da equipe** e documente antes/depois:
 
 - [ ] `check --deploy` limpo
-- [ ] Todos os cabeçalhos de segurança
-- [ ] CSP funcional (sem `unsafe-inline`)
-- [ ] `pip-audit` sem alertas críticos
-- [ ] `detect-secrets` limpo, inclusive no histórico
+- [ ] Cabeçalhos de segurança (nota A em securityheaders.com, após o M16)
+- [ ] CSP funcional, sem `unsafe-inline` em `script-src`
+- [ ] `connect-src` restrito
+- [ ] CORS com lista explícita, ou dispensado por *same-site*
+- [ ] `pip-audit` e `pnpm audit` sem alertas críticos ou altos
+- [ ] `detect-secrets scan` limpo, inclusive no histórico
+- [ ] Nenhum segredo no bundle (`grep` no `dist/`)
 - [ ] Rate limit no login
-- [ ] Log de eventos de segurança
-
-**Entrega:** relatório com a saída de cada comando antes e depois.
+- [ ] Serializers minimizados
 
 ---
 
-## E11.6 — Mapa de dados pessoais (em equipe) ⭐
+## E13.6 — Mapa de dados pessoais (em equipe) ⭐
 
-Para o projeto da equipe, preencha:
-
-| Dado coletado | Finalidade | Base legal (art. 7º) | Quem acessa | Retenção | Proteção | É mesmo necessário? |
+| Dado | Finalidade | Base legal (art. 7º) | Quem acessa | Retenção | Proteção | É necessário? |
 |---|---|---|---|---|---|---|
 
 Depois:
 
-1. Risque as linhas em que a última coluna é "não" e **remova os campos do sistema**.
-2. Escreva o aviso de privacidade (máx. 1 página, linguagem de 9º ano).
-3. Descreva como o sistema atende aos direitos de acesso, correção e eliminação.
-4. Escreva o **plano de resposta a incidente**: se vazar, quem faz o quê nas primeiras 24h,
-   e quem precisa ser comunicado (titulares e ANPD).
+1. Risque as linhas com "não" na última coluna e **remova os campos do sistema**.
+2. Confira: a **API** ainda devolve algum campo que a tela não usa? Minimize o serializer.
+3. Escreva o aviso de privacidade (máx. 1 página, linguagem de 9º ano).
+4. Descreva como o sistema atende aos direitos de acesso, correção e eliminação.
+5. Escreva o plano de resposta a incidente: quem faz o quê nas primeiras 24h, e quem
+   precisa ser comunicado (titulares e ANPD).
 
 ---
 
-## E11.7 — Revisão de segurança cruzada (em equipes)
+## E13.7 — Revisão cruzada (em equipes)
 
-Cada equipe revisa o código de **outra** equipe usando o
+Cada equipe revisa **outra** usando o
 [checklist de segurança](../../recursos/checklists/seguranca.md).
 
-Regras: revisar código, não pessoas; toda observação vem com evidência (arquivo:linha) e
-sugestão de correção; nada de exploração fora do ambiente local da equipe revisada, e
+Regras: revisar código, não pessoas; toda observação com evidência (`arquivo:linha`) e
+sugestão de correção; nenhuma exploração fora do ambiente local da equipe revisada, e
 sempre com o conhecimento dela.
 
-**Entrega:** relatório de revisão (máx. 2 páginas) + resposta da equipe revisada dizendo o
-que corrigiu, o que não corrigiu e por quê.
-
-Este exercício vale duplamente: treina revisão de segurança e é o formato exato de um code
-review profissional.
+**Entrega:** relatório (máx. 2 páginas) + resposta da equipe revisada dizendo o que
+corrigiu, o que não corrigiu e por quê.
 
 ---
 
-## E11.8 — Desafio: rate limiting (individual)
+## E13.8 — Desafio: o que o `RotaProtegida` não protege
 
-Implemente limitação de taxa **sem** biblioteca externa:
+Escreva um roteiro de 10 passos que uma pessoa mal-intencionada seguiria para acessar
+funcionalidade administrativa do BiblioCom **tendo apenas uma conta de associado**, usando
+só o navegador e o `curl`.
 
-- 5 tentativas de login por usuário em 15 minutos;
-- 20 buscas por minuto por IP;
-- resposta `429 Too Many Requests` com o cabeçalho `Retry-After`;
-- armazenamento no cache do Django (não no banco);
-- não pode bloquear usuários legítimos atrás de NAT compartilhado (pense em como).
+Para cada passo, indique: o que ela tenta, o que o sistema responde, e **qual controle**
+(no seu código) a impede. Se algum passo funcionar, você encontrou uma falha real — corrija
+antes de entregar.
 
-Depois compare sua implementação com `django-axes` e `django-ratelimit`: o que elas fazem
-que a sua não faz?
+Este exercício é a síntese do módulo: pensar como atacante é o único jeito confiável de
+descobrir o que ficou aberto.
 
 ---
 
 ## Gabarito parcial
 
-**E11.2 (5)** — A política de mesma origem impede que `localhost:9000` leia cookies ou o
-DOM de `localhost:8000`. O atacante consegue **enviar** a requisição (e o navegador anexa o
-cookie de sessão), mas não consegue **ler** o token. É por isso que a defesa CSRF funciona
-com um segredo que precisa ser lido para ser enviado.
+**E13.2** — Quem bloqueia é o **navegador**: a resposta chega, mas ele se recusa a entregá-la
+ao JavaScript por falta de `Access-Control-Allow-Origin`. `curl` não implementa a política
+de mesma origem, então nunca é afetado. Consequência: **CORS não protege a sua API** — ele
+protege o usuário de outro site contra ter suas credenciais usadas para ler dados. Proteger
+a API é papel da autenticação e da autorização.
 
-**E11.4** — Com parâmetros, o driver envia o comando e os dados em canais separados: o
-banco compila o SQL **antes** de conhecer o valor, e nenhum conteúdo do valor pode virar
-sintaxe. Escapar caracteres é uma mitigação frágil, dependente de charset e de contexto;
-parametrizar é estrutural.
+**E13.3** — `{texto}` passa pelo escape automático do React: `<` vira `&lt;` e o navegador
+renderiza caracteres, não marcação. `dangerouslySetInnerHTML` atribui direto ao
+`innerHTML`, e aí a string é interpretada como HTML. `HttpOnly` impede que o script leia o
+cookie, mas o script roda **dentro** da sessão da vítima: ele pode fazer requisições
+autenticadas (criar, excluir, exfiltrar) sem nunca ver o cookie.
+
+**E13.4 (5)** — Variáveis sem o prefixo `VITE_` não são expostas ao código do cliente pelo
+Vite: o componente passa a receber `undefined`. Isso demonstra que o prefixo é justamente o
+mecanismo de "declarar como público" — e por isso ele nunca deve conter segredo.

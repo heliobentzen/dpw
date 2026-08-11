@@ -1,201 +1,180 @@
-# M16 — Implantação (deploy) do sistema
+# M16 — Implantação: dois artefatos em produção
 
 > **CH:** 4h (2h teóricas · 2h práticas) · **Semana 16** · **Pré-requisitos:** M13, M14
 > **Ementa:** *Tópicos relevantes: Implantação (deploy) do sistema.*
 
-O módulo em que o projeto deixa de ser um exercício e passa a ser um sistema. Regra do
-material: ao final desta semana, **todo mundo tem uma URL pública funcionando** — com o
-BiblioCom, não com o projeto da equipe. O projeto vem depois, com o caminho já conhecido.
+O módulo em que o projeto deixa de ser exercício e vira sistema. Regra do material: ao final
+desta semana **todo mundo tem uma URL pública funcionando** — com o BiblioCom, não com o
+projeto da equipe. O projeto vem depois, com o caminho já conhecido.
+
+Numa arquitetura desacoplada, "fazer deploy" significa publicar **dois** artefatos e
+garantir que eles se encontrem.
 
 ## 🎯 Objetivos
 
-1. Explicar a diferença entre `runserver` e uma arquitetura de produção.
-2. Preparar a aplicação seguindo os 12 fatores.
-3. Implantar em PaaS com PostgreSQL gerenciado, HTTPS e arquivos estáticos.
-4. Automatizar o deploy a partir do Git.
+1. Explicar a diferença entre servidor de desenvolvimento e arquitetura de produção.
+2. Preparar os dois projetos seguindo os 12 fatores.
+3. Publicar API e SPA sob o **mesmo site**, com HTTPS e banco gerenciado.
+4. Configurar o *fallback* de rotas da SPA e as variáveis de build.
 5. Executar migrações em produção com segurança e saber reverter.
 
 ---
 
 ## 📖 Teoria (2h)
 
-### 1. Por que `runserver` não serve para produção (20 min)
+### 1. O que muda com dois artefatos (25 min)
 
-| | `runserver` | Produção |
+```
+                        Internet
+                           │ HTTPS
+                           ▼
+              ┌────────────────────────────┐
+              │  Proxy / roteador da PaaS  │   TLS, compressão, cache
+              └────────────┬───────────────┘
+                  /api/*   │   /*
+             ┌─────────────┴─────────────┐
+             ▼                           ▼
+   ┌───────────────────┐       ┌────────────────────┐
+   │ Gunicorn + Django │       │ Arquivos estáticos │
+   │ (N workers)       │       │ index.html + JS/CSS│
+   └─────────┬─────────┘       └────────────────────┘
+             │                     (SPA compilada)
+             ▼
+   ┌──────────────────┐
+   │   PostgreSQL     │  gerenciado, com backup
+   └──────────────────┘
+```
+
+**A decisão central: mesmo site.** SPA em `/` e API em `/api/`, no mesmo domínio.
+
+| | Mesmo site (adotado) | Domínios separados |
 |---|---|---|
-| Concorrência | Um processo, para desenvolvimento | Vários workers |
-| Estáticos | Serve com `DEBUG=True` | Servidor web / CDN |
-| HTTPS | Não | Obrigatório |
-| Recarregamento automático | Sim (custa desempenho) | Não |
-| Robustez a falhas | Nenhuma | Reinício automático, healthcheck |
-| Segurança | Não auditado para exposição pública | Endurecido |
+| CORS | Não existe | Precisa configurar |
+| Cookie de sessão | Funciona naturalmente | `SameSite=None; Secure` + CORS com credenciais |
+| CSRF | Simples | Complicado |
+| Configuração | Um roteamento | Dois serviços + CORS |
 
-A própria documentação do Django diz para nunca usá-lo em produção.
+Isso realiza o [ADR-07](../../docs/decisoes-tecnicas.md#adr-07--autenticação-por-sessão-com-cookie-não-jwt-em-localstorage):
+a escolha de autenticação por sessão **depende** desta topologia.
 
-### 2. Arquitetura de produção (25 min)
+### 2. Dois processos de build (20 min)
+
+| | Backend | Frontend |
+|---|---|---|
+| Artefato | Código Python + dependências | Pasta `dist/` com HTML, JS, CSS |
+| Quando é montado | No deploy | **No build** |
+| Configuração | Lida em **tempo de execução** | Embutida em **tempo de build** |
+| Trocar variável | Reiniciar o processo | **Recompilar** |
+| Roda o quê | Gunicorn | Nada — são arquivos estáticos |
+
+> ⚠️ A terceira linha é a que pega todo mundo. `VITE_API_URL` é substituída pelo valor
+> literal durante `pnpm build`. Mudar a variável na plataforma **não** muda o site: é
+> preciso rodar o build de novo. E, pelo mesmo motivo, ela é pública (M13).
+
+### 3. O *fallback* da SPA (20 min) ⭐
+
+O usuário acessa `https://bibliocom.org/obras/42` diretamente, ou dá F5 nessa rota. O
+servidor recebe `GET /obras/42` — e não existe arquivo com esse nome.
+
+**Sem configuração: 404.** É o bug nº 1 do deploy de SPA, e ele não aparece em
+desenvolvimento porque o Vite já faz o *fallback*.
+
+A regra de roteamento, em ordem:
 
 ```
-Internet
-   │  HTTPS
-   ▼
-[ Proxy reverso / Load balancer ]     TLS, compressão, limites, roteamento
-   │  HTTP interno
-   ▼
-[ Gunicorn — N workers ]              executa o código Python (WSGI)
-   │                    ╲
-   ▼                     ╲
-[ Django ]                [ WhiteNoise ]   serve /static/
-   │
-   ├──▶ [ PostgreSQL ]    dados (gerenciado, com backup)
-   ├──▶ [ Redis ]         cache/sessão/filas (opcional)
-   └──▶ [ S3-compatível ] arquivos de mídia (opcional, mas recomendado)
+1. /api/*      → Django
+2. /admin/*    → Django
+3. /static/*   → arquivos do Django (admin, DRF)
+4. /assets/*   → arquivos da SPA (JS, CSS com hash)
+5. qualquer outra coisa → index.html   ← o fallback
 ```
 
-**Por que mídia fora do disco da aplicação?** Contêineres são efêmeros: a cada deploy o
-disco é recriado, e os uploads dos usuários desaparecem. É a surpresa mais comum do
-primeiro deploy real.
+Configuração por plataforma:
 
-### 3. Os 12 fatores que importam aqui (25 min)
+```
+# Render / Netlify / Vercel — arquivo de redirecionamento
+/api/*   https://bibliocom-api.onrender.com/api/:splat   200
+/*       /index.html                                     200
+```
 
-| Fator | Aplicação prática |
-|---|---|
-| **I. Base de código** | Um repositório, vários ambientes |
-| **II. Dependências** | Declaradas e travadas no `requirements.txt` |
-| **III. Configuração** | Em variáveis de ambiente, nunca no código |
-| **IV. Serviços de apoio** | Banco e cache acessados por URL configurável |
-| **V. Build, release, run** | Etapas separadas |
-| **VI. Processos** | Sem estado: nada guardado em memória local ou disco |
-| **VIII. Concorrência** | Escala adicionando processos |
-| **XI. Logs** | Fluxo de eventos para stdout — não arquivos |
-
-O fator VI explica o item de mídia acima e por que sessão em memória local quebra assim
-que houver mais de uma instância.
-
-### 4. Settings por ambiente (25 min)
-
-Duas abordagens legítimas:
-
-**(a) Um arquivo, tudo por variável de ambiente** — mais simples, recomendado aqui:
-
-```python
-# config/settings.py
-import os
-from pathlib import Path
-
-import dj_database_url
-from dotenv import load_dotenv
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
-
-SECRET_KEY = os.environ["SECRET_KEY"]
-DEBUG = os.getenv("DEBUG", "False") == "True"
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
-
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+```nginx
+# Nginx (VPS)
+location /api/ { proxy_pass http://unix:/run/bibliocom.sock; }
+location /admin/ { proxy_pass http://unix:/run/bibliocom.sock; }
+location / {
+    root /var/www/bibliocom/dist;
+    try_files $uri $uri/ /index.html;     # ← o fallback
 }
-
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-}
-
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = "DENY"
-    CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]
-```
-
-**(b) Módulos separados** — `settings/base.py`, `development.py`, `production.py`, com
-`DJANGO_SETTINGS_MODULE` escolhendo. Melhor quando as diferenças entre ambientes passam de
-umas poucas flags.
-
-### 5. Arquivos estáticos em produção (20 min)
-
-```bash
-pip install whitenoise
 ```
 
 ```python
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",     # logo após o SecurityMiddleware
-    ...
+# Django servindo a SPA (opção de artefato único; ver Passo 4)
+urlpatterns = [
+    path("api/", include("acervo.urls")),
+    path("admin/", admin.site.urls),
+    re_path(r"^(?!api/|admin/|static/).*$", TemplateView.as_view(template_name="index.html")),
 ]
 ```
 
-```bash
-python manage.py collectstatic --noinput
-```
+### 4. Cache e nomes com hash (15 min)
 
-`CompressedManifestStaticFilesStorage` comprime e adiciona um hash ao nome do arquivo
-(`estilo.a3f9c2.css`), o que permite cache eterno no navegador e invalidação automática a
-cada deploy. É o padrão que resolve, de uma vez, "o usuário está vendo o CSS antigo".
-
-WhiteNoise dá conta do volume de um projeto como este. Para tráfego alto, use CDN.
-
-### 6. Migrações em produção (25 min) ⭐
+O Vite gera `index-B7fK2a.js`. O hash muda quando o conteúdo muda, o que permite:
 
 ```
-1. Backup do banco                         ← antes de qualquer coisa
-2. Deploy do código novo
-3. python manage.py migrate --noinput
-4. Verificação (healthcheck, fluxo crítico)
-5. Se falhar: reverter o código; e o banco?
+index.html         → Cache-Control: no-cache        (sempre revalida)
+/assets/*.js|css   → Cache-Control: max-age=31536000, immutable
 ```
 
-O passo 5 é o difícil, e é por isso que o M05 insistiu em **expandir → migrar → contrair**:
-com migrações compatíveis para trás, o código antigo continua funcionando com o esquema
-novo, e reverter o deploy é seguro.
+O `index.html` é pequeno e aponta para os arquivos com hash; os arquivos com hash nunca
+mudam de conteúdo. Resultado: cache eterno **e** deploy que chega ao usuário
+imediatamente. É a solução definitiva para "o usuário está vendo a versão antiga".
 
-| Tipo de migração | Risco | Cuidado |
+### 5. Migrações em produção (20 min)
+
+```
+1. Backup do banco                    ← antes de qualquer coisa
+2. Deploy do backend + migrate
+3. Deploy do frontend (build com a API já atualizada)
+4. Verificação (healthcheck + fluxo crítico)
+5. Se falhar: reverter
+```
+
+**A ordem importa nesta arquitetura.** Backend primeiro, frontend depois: o backend novo
+precisa continuar servindo o frontend antigo durante a janela de deploy. Isso só é possível
+se as mudanças de API forem **compatíveis para trás** — que é o mesmo princípio de
+expandir → migrar → contrair do M05, aplicado ao contrato.
+
+| Mudança na API | Compatível para trás? | Como fazer |
 |---|---|---|
-| Adicionar campo com `null=True` | Baixo | — |
-| Adicionar campo obrigatório | Alto | Padrão expandir/contrair |
-| Remover campo | Alto | Primeiro pare de usar, depois remova (dois deploys) |
-| Renomear | Alto | Adicionar novo → copiar → remover antigo |
-| Adicionar índice em tabela grande | Médio | `CONCURRENTLY` no PostgreSQL |
-| Migração de dados demorada | Médio | Em lotes, fora do deploy |
+| Adicionar campo na resposta | ✅ Sim | Direto |
+| Adicionar campo opcional na entrada | ✅ Sim | Direto |
+| Renomear campo | ❌ Não | Adicionar o novo → migrar o cliente → remover o antigo |
+| Tornar campo obrigatório | ❌ Não | Dois deploys |
+| Remover endpoint | ❌ Não | Depreciar → migrar → remover |
 
-### 7. Onde implantar (20 min)
+### 6. Onde implantar (20 min)
 
 | Opção | Custo | Esforço | Quando |
 |---|---|---|---|
-| **PaaS** (Render, Railway, Fly.io) | Grátis a baixo | Baixo | ✅ Recomendado para o projeto |
-| **VPS** (DigitalOcean, Hetzner, Contabo) | Baixo/médio | Alto | Requisito de contrato ou custo em escala |
-| **Nuvem gerenciada** (AWS, GCP, Azure) | Variável | Muito alto | Empresa com equipe de infraestrutura |
-| **PythonAnywhere** | Grátis a baixo | Muito baixo | Alternativa didática simples |
+| **PaaS** (Render, Railway, Fly.io) | Grátis a baixo | Baixo | ✅ Recomendado |
+| VPS + Nginx | Baixo/médio | Alto | Requisito de contrato ou custo em escala |
+| Nuvem gerenciada | Variável | Muito alto | Empresa com equipe de infra |
 
-> Camadas gratuitas mudam de política com frequência. Verifique antes do semestre e tenha
-> um plano B. Se a instituição tiver servidor próprio, o caminho VPS da seção 9 se aplica.
+> Camadas gratuitas mudam de política. Verifique antes do semestre e tenha plano B.
 
 ---
 
 ## 🛠️ Roteiro prático (2h)
 
-### Passo 1 — Preparar a aplicação (40 min)
+### Passo 1 — Preparar o backend (25 min)
 
 ```bash
+cd backend
 pip install gunicorn whitenoise dj-database-url "psycopg[binary]"
 pip freeze > requirements.txt
 ```
 
-`Procfile` (ou o equivalente da plataforma):
+`Procfile`:
 
 ```
 web: gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3 --timeout 60 --access-logfile -
@@ -207,211 +186,159 @@ release: python manage.py migrate --noinput
 ```bash
 #!/usr/bin/env bash
 set -o errexit
-
 pip install -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py migrate --noinput
 ```
 
-`runtime.txt`:
-
-```
-python-3.12.6
-```
-
-Verifique **localmente** que a configuração de produção funciona:
+Valide **localmente** antes de subir — este passo economiza a maior parte do tempo de
+depuração remota:
 
 ```bash
-DEBUG=False SECRET_KEY=teste ALLOWED_HOSTS=localhost \
-  python manage.py check --deploy
-
+DEBUG=False SECRET_KEY=teste ALLOWED_HOSTS=localhost python manage.py check --deploy
 DEBUG=False python manage.py collectstatic --noinput
-DEBUG=False SECRET_KEY=teste ALLOWED_HOSTS=localhost \
-  gunicorn config.wsgi --bind 0.0.0.0:8000
+DEBUG=False SECRET_KEY=teste ALLOWED_HOSTS=localhost gunicorn config.wsgi --bind 0.0.0.0:8000
 ```
 
-Se não funcionar aqui, não vai funcionar lá. **Este passo economiza a maior parte do tempo
-de depuração remota.**
+### Passo 2 — Preparar o frontend (20 min)
 
-### Passo 2 — Deploy no Render (60 min)
+```bash
+cd frontend
+pnpm build           # gera dist/
+pnpm preview         # serve dist/ localmente, como em produção
+```
 
-1. Envie o código para o GitHub.
-2. Em render.com: **New → PostgreSQL** (plano gratuito). Copie a *Internal Database URL*.
-3. **New → Web Service** → conecte o repositório.
-   - Build Command: `./build.sh`
-   - Start Command: `gunicorn config.wsgi --bind 0.0.0.0:$PORT`
-4. Variáveis de ambiente:
+Abra o `preview` e **teste o F5 numa rota interna** (`/obras/42`). Funciona? O `preview` do
+Vite faz o *fallback*; a plataforma precisa ser configurada para fazer o mesmo.
+
+Inspecione `dist/`:
+
+```bash
+ls -la dist/assets/                              # nomes com hash
+du -sh dist/                                     # tamanho total
+grep -r "VITE_" dist/ | head                     # as variáveis embutidas
+```
+
+### Passo 3 — PostgreSQL e serviço da API (30 min)
+
+1. Na PaaS: **New → PostgreSQL**. Copie a *Internal Database URL*.
+2. **New → Web Service**, apontando para `backend/`:
+   - Build: `./build.sh`
+   - Start: `gunicorn config.wsgi --bind 0.0.0.0:$PORT`
+3. Variáveis:
 
 | Chave | Valor |
 |---|---|
-| `SECRET_KEY` | gere uma **nova**, diferente da de desenvolvimento |
+| `SECRET_KEY` | gere uma **nova**, exclusiva de produção |
 | `DEBUG` | `False` |
-| `ALLOWED_HOSTS` | `seu-app.onrender.com` |
+| `ALLOWED_HOSTS` | `bibliocom.onrender.com` |
 | `DATABASE_URL` | a Internal Database URL |
-| `PYTHON_VERSION` | `3.12.6` |
+| `CSRF_TRUSTED_ORIGINS` | `https://bibliocom.onrender.com` |
 
-5. Deploy. Acompanhe os logs até o fim.
-6. Crie o superusuário pelo Shell da plataforma:
+4. Deploy. Acompanhe os logs até o fim.
+5. Crie o superusuário e os grupos pelo shell da plataforma:
 
 ```bash
 python manage.py createsuperuser
 python manage.py criar_grupos
 ```
 
-7. Acesse a URL pública. Confira: página inicial, CSS carregado, login, criação de registro,
-   e `/admin/`.
+6. Teste: `curl https://sua-api/api/obras/`
 
-**Alternativas equivalentes** (mesma sequência conceitual): Railway (`railway up`),
-Fly.io (`fly launch` + `fly deploy`), PythonAnywhere (interface web).
+### Passo 4 — Publicar a SPA sob o mesmo site (30 min) ⭐
 
-### Passo 3 — Verificação pós-deploy (40 min)
+Duas estratégias; escolha **uma** e documente a escolha.
 
-```bash
-curl -I https://seu-app.onrender.com/
-# esperado: 200, HTTPS, HSTS, X-Frame-Options, X-Content-Type-Options
+**A) Serviço estático + regra de proxy** (mais comum)
+
+- **New → Static Site**, apontando para `frontend/`
+  - Build: `pnpm install && pnpm build`
+  - Publish directory: `dist`
+- Variável de build: `VITE_API_URL=/api`
+- Regras de redirecionamento:
+
+```
+/api/*  https://bibliocom-api.onrender.com/api/:splat  200
+/*      /index.html                                    200
 ```
 
-Checklist obrigatório:
+O status `200` (e não 301/302) é o que faz o proxy servir o conteúdo mantendo a URL — é
+isso que preserva o *same-site* e evita CORS.
 
-- [ ] HTTPS funcionando e HTTP redirecionando para HTTPS
+**B) Django serve a SPA** (artefato único, mais simples de operar)
+
+```python
+# config/settings.py
+TEMPLATES[0]["DIRS"] = [BASE_DIR / "frontend_dist"]
+STATICFILES_DIRS = [BASE_DIR / "frontend_dist" / "assets"]
+```
+
+```bash
+# build.sh
+cd ../frontend && pnpm install && pnpm build
+cp -r dist ../backend/frontend_dist
+cd ../backend && python manage.py collectstatic --noinput
+```
+
+Um serviço, um deploy, zero CORS. Em troca, o build fica mais lento e as camadas ficam
+acopladas na publicação.
+
+### Passo 5 — Verificação pós-deploy (15 min)
+
+- [ ] `https://.../` carrega a SPA
+- [ ] `https://.../api/obras/` responde JSON
+- [ ] **F5 em `/obras/42` funciona** (o *fallback* está configurado)
+- [ ] HTTPS ativo; HTTP redireciona
+- [ ] Login funciona (cookie de sessão + CSRF)
+- [ ] Uma operação de escrita funciona ponta a ponta
+- [ ] `/admin/` acessível só para staff
+- [ ] Erro 500 **não** vaza código nem configuração
+- [ ] Nenhum erro de CORS no console
 - [ ] Nota A em [securityheaders.com](https://securityheaders.com)
-- [ ] CSS e JS carregando (aba Network, sem 404)
-- [ ] Login e uma operação de escrita funcionando
-- [ ] `/admin/` acessível apenas para staff
-- [ ] Página 404 personalizada aparecendo (e **não** o traceback do Django)
-- [ ] Provocar um erro 500 e confirmar que **nada** de código ou configuração vaza
-- [ ] Logs da plataforma mostrando as requisições
-
-### Passo 4 — Deploy contínuo (25 min)
-
-Ative *Auto-Deploy* a partir da branch `main`. Combinado com o CI do M14 e a branch
-protegida:
-
-```
-PR aberto → CI roda testes → revisão → merge em main → deploy automático → produção
-```
-
-Teste o ciclo inteiro: mude o rodapé, abra PR, veja o CI, faça merge, confirme em produção.
-
-### Passo 5 — Migração em produção (15 min)
-
-1. Adicione um campo ao model (`null=True`).
-2. Gere a migração localmente, teste, commite.
-3. Merge → deploy → confirme que a migração rodou (logs do `release`).
-4. Verifique que os dados anteriores continuam íntegros.
-
----
-
-## 8. Deploy com Docker (referência)
-
-```dockerfile
-FROM python:3.12-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-RUN python manage.py collectstatic --noinput
-
-RUN useradd --create-home app && chown -R app /app
-USER app                                   # não rode como root
-
-EXPOSE 8000
-CMD ["gunicorn", "config.wsgi", "--bind", "0.0.0.0:8000", "--workers", "3"]
-```
-
-## 9. Deploy em VPS (referência)
+- [ ] `grep` no `dist/` publicado não revela segredo
 
 ```bash
-# no servidor
-sudo apt update && sudo apt install -y python3.12-venv nginx postgresql certbot python3-certbot-nginx
-
-sudo -u postgres createuser bibliocom -P
-sudo -u postgres createdb bibliocom -O bibliocom
-
-git clone <repo> /opt/bibliocom && cd /opt/bibliocom
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python manage.py migrate && .venv/bin/python manage.py collectstatic --noinput
-```
-
-```ini
-# /etc/systemd/system/bibliocom.service
-[Unit]
-Description=BiblioCom
-After=network.target postgresql.service
-
-[Service]
-User=www-data
-WorkingDirectory=/opt/bibliocom
-EnvironmentFile=/opt/bibliocom/.env
-ExecStart=/opt/bibliocom/.venv/bin/gunicorn config.wsgi --bind unix:/run/bibliocom.sock --workers 3
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```nginx
-server {
-    server_name bibliocom.exemplo.org;
-
-    location /static/ { alias /opt/bibliocom/staticfiles/; expires 30d; }
-    location /media/  { alias /opt/bibliocom/media/; }
-    location / {
-        proxy_pass http://unix:/run/bibliocom.sock;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-```bash
-sudo certbot --nginx -d bibliocom.exemplo.org     # HTTPS gratuito, com renovação automática
+curl -I https://sua-app/
+curl -I https://sua-app/api/obras/
+curl -s -o /dev/null -w "%{http_code}\n" https://sua-app/obras/42     # deve ser 200
 ```
 
 ---
 
 ## ⚠️ Erros comuns
 
-| Erro | Correção |
-|---|---|
-| `DisallowedHost` | Domínio em `ALLOWED_HOSTS` |
-| Site sem CSS | `collectstatic` + WhiteNoise + `STATIC_ROOT` |
-| `Application failed to respond` | Use `$PORT` no bind do Gunicorn |
-| `500` sem detalhes | Comportamento correto: leia os **logs**, não ligue o `DEBUG` |
-| Uploads somem a cada deploy | Disco efêmero: use armazenamento externo |
-| `SECRET_KEY` igual à de desenvolvimento | Gere outra, só para produção |
-| Migração não aplicada | Comando de release |
-| CSRF falha em produção | `CSRF_TRUSTED_ORIGINS` com o domínio https |
-| Redirecionamento infinito | `SECURE_PROXY_SSL_HEADER` atrás de proxy |
-| `.env` comitado | Rotacione tudo que estava nele |
+| Erro | Sintoma | Correção |
+|---|---|---|
+| Sem *fallback* da SPA | F5 em rota interna dá 404 | Regra `/* → /index.html` |
+| `VITE_API_URL` mudada sem rebuild | O site continua chamando a URL antiga | Rebuild |
+| Segredo em `VITE_*` | Publicado no bundle | Nunca; use o backend |
+| `DisallowedHost` | 400 em tudo | Domínio em `ALLOWED_HOSTS` |
+| CSRF falha em produção | 403 em todo POST | `CSRF_TRUSTED_ORIGINS` com `https://` |
+| Redirecionamento infinito | Loop de HTTPS | `SECURE_PROXY_SSL_HEADER` |
+| Erro de CORS em produção | Console cheio | Sirva os dois sob o mesmo site |
+| Uploads somem a cada deploy | Disco efêmero | Armazenamento externo |
+| Frontend publicado antes do backend | Cliente novo, API velha | Backend primeiro |
+| `500` sem detalhes | Comportamento **correto** | Leia os logs; não ligue `DEBUG` |
+| `collectstatic` esquecido | Admin e DRF sem CSS | Comando de build |
 
 ## ✅ Checklist de saída
 
-- [ ] BiblioCom no ar com URL pública
-- [ ] HTTPS com nota A em securityheaders.com
+- [ ] API e SPA no ar, sob o mesmo site, com HTTPS
 - [ ] PostgreSQL gerenciado, migrações aplicadas
-- [ ] Estáticos servidos com hash e cache
-- [ ] Variáveis de ambiente configuradas; nenhum segredo no código
+- [ ] *Fallback* de rotas configurado e testado com F5
+- [ ] Cache com hash nos assets e `no-cache` no `index.html`
+- [ ] Variáveis de ambiente configuradas; nenhum segredo no bundle
 - [ ] Deploy automático a partir da `main`, condicionado ao CI verde
 - [ ] Superusuário e grupos criados em produção
-- [ ] Página de erro personalizada, sem vazamento de informação
+- [ ] Backup do banco ativado
 - [ ] Ciclo completo testado: commit → PR → CI → merge → produção
+- [ ] `docs/deploy.md` reproduzível por outra pessoa
 
-## 📦 Entrega E7 — Sistema no ar
+## 📦 Entrega E8 — Os dois artefatos no ar
 
-URL pública funcionando + `docs/deploy.md` com: plataforma escolhida e por quê, passo a
-passo reproduzível, variáveis necessárias, como rodar migrações, como reverter e como
-acessar os logs.
+URL pública funcionando + `docs/deploy.md` com: estratégia escolhida (A ou B) e por quê,
+passo a passo reproduzível, variáveis necessárias em cada camada, como rodar migrações,
+como reverter e como acessar os logs.
 
 ## 🧪 Exercícios
 
@@ -421,6 +348,7 @@ Ver [`exercicios.md`](exercicios.md) · Checklist em
 ## 📚 Para aprofundar
 
 - [Django — Checklist de implantação](https://docs.djangoproject.com/pt-br/5.0/howto/deployment/checklist/)
+- [Vite — Deploying a Static Site](https://vite.dev/guide/static-deploy)
 - [The Twelve-Factor App (pt-br)](https://12factor.net/pt_br/)
 - [WhiteNoise](https://whitenoise.readthedocs.io/)
-- [Gunicorn — configuração](https://docs.gunicorn.org/en/stable/settings.html)
+- [MDN — Cache-Control](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/Cache-Control)
