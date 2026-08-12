@@ -142,7 +142,14 @@ def test_validacao_de_isbn(autor, isbn, valido):
 ### 3. Frontend com Vitest + Testing Library (20 min)
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 pnpm add -D vitest @vitest/ui jsdom @testing-library/react \
+            @testing-library/user-event @testing-library/jest-dom msw
+```
+
+```powershell
+# Windows PowerShell (crase no lugar da barra invertida)
+pnpm add -D vitest @vitest/ui jsdom @testing-library/react `
             @testing-library/user-event @testing-library/jest-dom msw
 ```
 
@@ -230,7 +237,8 @@ Este teste cobre o caminho mais importante do M11: o erro do DRF chegando ao cam
 O teste que só existe nesta arquitetura — e o que evita o bug mais caro:
 
 ```bash
-# no CI, após rodar os testes das duas camadas
+# no CI, após rodar os testes das duas camadas.
+# O runner do GitHub Actions e Linux — aqui o && e sempre valido.
 cd backend && python manage.py spectacular --file ../frontend/schema.yml
 cd ../frontend && pnpm tipos && git diff --exit-code src/api/schema.d.ts
 ```

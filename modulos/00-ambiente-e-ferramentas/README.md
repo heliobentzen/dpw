@@ -142,9 +142,20 @@ Sistema de gestão para bibliotecas comunitárias — estudo de caso da discipli
 ## Como rodar
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+# Linux / macOS / WSL / Git Bash
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
+python manage.py migrate
+python manage.py runserver
+```
+
+```powershell
+# Windows PowerShell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
 python manage.py migrate
 python manage.py runserver
 ```

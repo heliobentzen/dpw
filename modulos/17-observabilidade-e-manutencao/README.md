@@ -122,12 +122,26 @@ tratamento de dados sob a LGPD, com todas as obrigações que isso implica.
 ### 3. Backup (10 min)
 
 ```bash
-# backup
+# Linux / macOS / WSL / Git Bash
 pg_dump "$DATABASE_URL" | gzip > backup-$(date +%F).sql.gz
 
 # restauração (teste em ambiente SEPARADO)
 gunzip -c backup-2026-08-11.sql.gz | psql "$DATABASE_URL_TESTE"
 ```
+
+```powershell
+# Windows PowerShell — o formato customizado (-Fc) ja e comprimido,
+# o que evita depender de gzip/gunzip
+$data = Get-Date -Format "yyyy-MM-dd"
+pg_dump --dbname=$env:DATABASE_URL -Fc --file="backup-$data.dump"
+
+# restauração (ambiente SEPARADO)
+pg_restore --dbname=$env:DATABASE_URL_TESTE --clean "backup-2026-08-11.dump"
+```
+
+> 🪟 Se o `pg_dump` não estiver no PATH, ele fica em
+> `C:\Program Files\PostgreSQL\16\bin`. Usando o PostgreSQL via Docker, o caminho mais
+> simples é `docker compose exec db pg_dump ...`, idêntico nas três plataformas.
 
 Regra 3-2-1: **3** cópias, em **2** mídias diferentes, com **1** fora do local.
 

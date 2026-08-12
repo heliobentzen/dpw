@@ -23,7 +23,7 @@
 
 | Arquivo | Quando usar |
 |---|---|
-| [`comandos-windows.md`](comandos-windows.md) | 🪟 **Leia a seção 2 antes da primeira aula.** Equivalências PowerShell/Git Bash/WSL2 e as quatro armadilhas do Windows: `curl` como alias, variáveis inline, Gunicorn e finais de linha (CRLF) |
+| [`comandos-windows.md`](comandos-windows.md) | 🪟 **Leia a seção 2 antes da primeira aula.** Equivalências PowerShell/Git Bash/WSL2 e as cinco armadilhas do Windows: `curl` como alias, variáveis inline, `&&` no PowerShell 5.1, Gunicorn e finais de linha (CRLF) |
 
 ## Ponte Python → JavaScript
 

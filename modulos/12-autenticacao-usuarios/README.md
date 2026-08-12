@@ -347,7 +347,8 @@ export function RotaProtegida({ papeis }: { papeis?: string[] }) {
 > do zero. Faça agora — não em produção.
 
 ```bash
-cd backend && python manage.py startapp contas
+cd backend
+python manage.py startapp contas
 ```
 
 Implemente `Usuario`, configure `AUTH_USER_MODEL`, migre, crie o superusuário e o comando
@@ -363,6 +364,7 @@ Implemente `login`, `logout` e `eu` conforme a teoria. Teste com `curl`, guardan
 > [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#continuação-de-linha).
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 # obtém o cookie CSRF
 curl -c cookies.txt http://localhost:8000/api/auth/eu/ -i
 
@@ -378,6 +380,34 @@ curl -b cookies.txt http://localhost:8000/api/auth/eu/
 # logout
 curl -b cookies.txt -X POST http://localhost:8000/api/auth/logout/ -H "X-CSRFToken: $CSRF" -i
 ```
+
+```powershell
+# Windows PowerShell — Invoke-RestMethod com sessao gerencia os cookies sozinho,
+# o que e mais simples que emular o -c/-b do curl.
+$s = $null
+
+# 1. obtem o cookie CSRF (e cria a sessao)
+Invoke-RestMethod -Uri "http://localhost:8000/api/auth/eu/" -SessionVariable s `
+  -SkipHttpErrorCheck                      # 401 e esperado aqui
+
+$csrf = ($s.Cookies.GetCookies("http://localhost:8000") | Where-Object Name -eq "csrftoken").Value
+
+# 2. login
+Invoke-RestMethod -Uri "http://localhost:8000/api/auth/login/" -Method Post -WebSession $s `
+  -ContentType "application/json" -Headers @{ "X-CSRFToken" = $csrf } `
+  -Body '{"username":"bib","password":"senha-de-teste-123"}'
+
+# 3. agora autenticado
+Invoke-RestMethod -Uri "http://localhost:8000/api/auth/eu/" -WebSession $s
+
+# 4. logout
+Invoke-RestMethod -Uri "http://localhost:8000/api/auth/logout/" -Method Post -WebSession $s `
+  -Headers @{ "X-CSRFToken" = $csrf }
+```
+
+> 🪟 `-SkipHttpErrorCheck` exige PowerShell 7+. No PowerShell 5.1, envolva a primeira
+> chamada em `try { ... } catch {}` — ou rode este roteiro no **Git Bash**/**WSL**, que é o
+> caminho mais curto para toda esta seção.
 
 Teste também: senha errada, usuário inexistente (**a mensagem é a mesma?**) e POST sem
 `X-CSRFToken` (deve dar 403).
@@ -423,9 +453,18 @@ que a **API** responde.
 `curl`, ignorando completamente a interface.
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 curl -b cookies-associado.txt -X POST http://localhost:8000/api/obras/ \
      -H "Content-Type: application/json" -H "X-CSRFToken: $CSRF" \
      -d '{"titulo":"Invasão"}' -i
+```
+
+```powershell
+# Windows PowerShell ($s = sessao do associado, criada acima)
+Invoke-RestMethod -Uri "http://localhost:8000/api/obras/" -Method Post -WebSession $s `
+  -ContentType "application/json" -Headers @{ "X-CSRFToken" = $csrf } `
+  -Body '{"titulo":"Invasao"}' -SkipHttpErrorCheck -StatusCodeVariable codigo
+$codigo        # deve ser 403
 ```
 
 Se vier **403**, sua segurança está no lugar certo. Se vier **201**, você estava confiando

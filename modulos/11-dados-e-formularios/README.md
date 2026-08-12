@@ -291,8 +291,11 @@ O `curl` do M01 continua ignorando seu React. Zod é conveniência; o serializer
 ### 5. Tipos a partir do contrato (15 min)
 
 ```bash
-cd backend && python manage.py spectacular --file ../frontend/schema.yml
-cd ../frontend && pnpm dlx openapi-typescript schema.yml -o src/api/schema.d.ts
+# funciona nas tres plataformas — uma linha por comando evita o && (PowerShell 5.1)
+cd backend
+python manage.py spectacular --file ../frontend/schema.yml
+cd ../frontend
+pnpm dlx openapi-typescript schema.yml -o src/api/schema.d.ts
 ```
 
 ```ts

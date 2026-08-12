@@ -65,12 +65,23 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 > 🪟 **No PowerShell, use `curl.exe`** em todos os comandos abaixo.
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 curl -I https://SEU-DOMINIO/
 curl -I https://SEU-DOMINIO/ | grep -iE "strict-transport|x-frame|x-content|referrer"
 curl -s -o /dev/null -w "%{http_code} %{time_total}s\n" https://SEU-DOMINIO/
 curl -I http://SEU-DOMINIO/            # deve redirecionar para https
 curl -s -o /dev/null -w "%{http_code}\n" https://SEU-DOMINIO/obras/42   # fallback: 200
 curl -s https://SEU-DOMINIO/api/obras/ | head -c 200                     # API respondendo
+```
+
+```powershell
+# Windows PowerShell
+curl.exe -I https://SEU-DOMINIO/
+curl.exe -I https://SEU-DOMINIO/ | Select-String "strict-transport|x-frame|x-content|referrer"
+curl.exe -s -o NUL -w "%{http_code} %{time_total}s`n" https://SEU-DOMINIO/
+curl.exe -I http://SEU-DOMINIO/
+curl.exe -s -o NUL -w "%{http_code}`n" https://SEU-DOMINIO/obras/42
+(Invoke-WebRequest https://SEU-DOMINIO/api/obras/).Content.Substring(0, 200)
 ```
 
 ## Se der errado
@@ -87,7 +98,8 @@ curl -s https://SEU-DOMINIO/api/obras/ | head -c 200                     # API r
 
 ### 🔵 Backend (tempo de execução — secretas)
 
-```bash
+```ini
+# valores configurados no painel da PaaS (ou no .env local)
 SECRET_KEY=            # >= 50 caracteres aleatórios, exclusiva de produção
 DEBUG=False
 ALLOWED_HOSTS=seu-dominio.com
@@ -103,7 +115,7 @@ SENTRY_DSN=
 
 ### 🟣 Frontend (tempo de **build** — públicas)
 
-```bash
+```ini
 VITE_API_URL=/api      # caminho relativo: mesmo site, sem CORS
 VITE_SENTRY_DSN=       # desenhado para ser público
 ```

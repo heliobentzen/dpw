@@ -4,9 +4,9 @@ Os roteiros do material usam comandos no formato Linux/macOS. Este arquivo traz 
 equivalente no Windows, os **três caminhos possíveis** e as armadilhas que não são
 simples tradução de comando.
 
-> **Leia a seção 2 antes da primeira aula.** Três coisas quebram em silêncio no Windows e
-> não são resolvidas trocando o comando: o `curl`, as variáveis de ambiente inline e o
-> Gunicorn.
+> **Leia a seção 2 antes da primeira aula.** Quatro coisas quebram em silêncio no Windows e
+> não são resolvidas trocando o comando: o `curl`, as variáveis de ambiente inline, o
+> operador `&&` e o Gunicorn. A quinta — finais de linha — só aparece no deploy (seção 4).
 
 ---
 
@@ -38,7 +38,7 @@ integra com a extensão *WSL*, e o Docker Desktop usa o WSL2 como backend.
 
 ---
 
-## 2. As três armadilhas que não são tradução
+## 2. As quatro armadilhas que não são tradução
 
 ### 2.1 `curl` no PowerShell não é o `curl` ⚠️
 
@@ -92,7 +92,40 @@ set DEBUG=False && python manage.py check --deploy
 > detalhadas, sem servir estáticos — e você vai perder tempo procurando a causa. **Feche o
 > terminal ou limpe a variável** depois de testar.
 
-### 2.3 Gunicorn não roda no Windows ⚠️
+### 2.3 `&&` não existe no PowerShell 5.1 ⚠️
+
+O Windows 10/11 vem com **PowerShell 5.1**. O operador `&&` só foi adicionado no
+**PowerShell 7**. Ou seja: metade dos comandos encadeados de qualquer tutorial falha.
+
+```powershell
+cd backend && python manage.py runserver     # ❌ PowerShell 5.1: erro de sintaxe
+```
+
+Três saídas:
+
+```powershell
+# 1. linhas separadas (o que este material usa)
+cd backend
+python manage.py runserver
+
+# 2. ponto e vírgula — executa o segundo INDEPENDENTE de o primeiro falhar
+cd backend; python manage.py runserver
+
+# 3. instale o PowerShell 7, e aí o && funciona como no Linux
+winget install Microsoft.PowerShell
+```
+
+> ⚠️ `;` **não é equivalente a `&&`.** Em `mkdir x && cd x`, se o `mkdir` falhar o `cd` não
+> roda; com `;`, roda mesmo assim — e você acaba num diretório errado sem perceber. Para
+> comandos onde a ordem importa, prefira linhas separadas.
+
+Descubra sua versão:
+
+```powershell
+$PSVersionTable.PSVersion
+```
+
+### 2.4 Gunicorn não roda no Windows ⚠️
 
 O Gunicorn depende de módulos POSIX (`fcntl`) que não existem no Windows. O comando
 simplesmente falha na importação.
@@ -216,6 +249,10 @@ curl.exe -X POST http://localhost:8000/api/obras/ `
 |---|---|
 | `chmod +x build.sh` | (não se aplica) |
 | `./build.sh` | `.\build.ps1` ou `bash build.sh` (Git Bash/WSL) |
+| `cmd1 && cmd2` | linhas separadas (ou `;`, ou PowerShell 7) |
+| `VAR=x cmd` | `$env:VAR="x"; cmd` |
+| `export VAR=x` | `$env:VAR="x"` |
+| `$(comando)` | `$(comando)` ou `(comando)` |
 
 O `build.sh` do M16 **roda na PaaS, que é Linux** — não precisa executá-lo no Windows. Mas
 veja a seção 4 sobre finais de linha.
@@ -299,7 +336,7 @@ O script detecta o sistema operacional e ajusta as dicas de correção.
 
 ## 7. Se algo do material não funcionar
 
-1. Confira se o comando cai em uma das **três armadilhas** da seção 2.
+1. Confira se o comando cai em uma das **quatro armadilhas** da seção 2.
 2. Procure o equivalente na tabela da seção 3.
 3. Ainda assim travou? **Abra o Git Bash** e cole o comando original — resolve a maioria
    dos casos, sem tradução.

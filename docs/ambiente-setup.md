@@ -32,15 +32,16 @@ caminhos, todos válidos para a disciplina inteira:
 | **Git Bash** (vem com o Git) | Os comandos do material funcionam como estão | Quer colar sem traduzir |
 | **WSL2 (Ubuntu)** | Linux completo dentro do Windows | ⭐ Recomendado a partir do M16 |
 
-**Três coisas quebram em silêncio e não são resolvidas trocando o comando** — leia antes da
-primeira aula:
+**Quatro coisas quebram em silêncio e não são resolvidas trocando o comando** — leia antes
+da primeira aula:
 
 1. **`curl` no PowerShell é apelido de `Invoke-WebRequest`.** Use **`curl.exe`**.
 2. **Variáveis inline não existem.** `DEBUG=False python ...` vira
    `$env:DEBUG="False"; python ...` — e a variável **permanece na sessão**.
-3. **Gunicorn não roda no Windows.** Para a verificação local do M16, use **Waitress**.
+3. **`&&` não existe no PowerShell 5.1** (o padrão do Windows). Use linhas separadas.
+4. **Gunicorn não roda no Windows.** Para a verificação local do M16, use **Waitress**.
 
-E uma quarta, que só aparece no deploy: **finais de linha**. Um `build.sh` salvo com CRLF
+E uma quinta, que só aparece no deploy: **finais de linha**. Um `build.sh` salvo com CRLF
 falha na PaaS. Crie o `.gitattributes` no primeiro commit (seção 10).
 
 📖 **Referência completa:**
@@ -87,11 +88,13 @@ dessincronização entre repositórios.
 ### macOS
 
 ```bash
+# macOS (Homebrew)
 brew install python@3.12
 python3 --version
 ```
 
-### Linux (Debian/Ubuntu)
+
+### Linux (Debian/Ubuntu) — inclui WSL2
 
 ```bash
 sudo apt update
@@ -102,14 +105,26 @@ python3 --version
 ### Ambiente virtual e dependências
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 mkdir -p bibliocom/backend && cd bibliocom/backend
 python3 -m venv .venv
-
-source .venv/bin/activate        # Linux/macOS
-.venv\Scripts\Activate.ps1       # Windows PowerShell
+source .venv/bin/activate
 
 python -m pip install --upgrade pip
 pip install "django>=5.0,<6.0" djangorestframework django-cors-headers \
+            python-dotenv dj-database-url drf-spectacular
+pip freeze > requirements.txt
+```
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force -Path bibliocom\backend
+cd bibliocom\backend
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
+pip install "django>=5.0,<6.0" djangorestframework django-cors-headers `
             python-dotenv dj-database-url drf-spectacular
 pip freeze > requirements.txt
 ```
@@ -124,14 +139,17 @@ que você instalar vai para o lugar errado. Para sair: `deactivate`.
 ### Instalação recomendada: via `fnm` (gerencia versões)
 
 ```bash
-# Linux/macOS
+# Linux / macOS / WSL
 curl -fsSL https://fnm.vercel.app/install | bash
 exec $SHELL
 fnm install 20 && fnm use 20
+```
 
-# Windows (PowerShell, com winget)
+```powershell
+# Windows PowerShell (com winget)
 winget install Schniz.fnm
-fnm install 20; fnm use 20
+fnm install 20
+fnm use 20
 ```
 
 Alternativa simples: instalador oficial em <https://nodejs.org> (escolha **LTS**).
@@ -179,9 +197,17 @@ git config --global pull.rebase false
 Chave SSH (evita digitar token a cada push):
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
 cat ~/.ssh/id_ed25519.pub   # cole em github.com > Settings > SSH and GPG keys
 ssh -T git@github.com       # deve responder "Hi <usuario>!"
+```
+
+```powershell
+# Windows PowerShell
+ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
+Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub | Set-Clipboard   # ja copia
+ssh -T git@github.com
 ```
 
 ---
@@ -272,8 +298,21 @@ os itens em OK.**
 ## 9. Rodar o sistema completo (dois terminais)
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 # terminal 1 — backend
 cd backend && source .venv/bin/activate
+python manage.py runserver          # http://localhost:8000
+
+# terminal 2 — frontend
+cd frontend
+pnpm dev                            # http://localhost:5173
+```
+
+```powershell
+# Windows PowerShell
+# terminal 1 — backend
+cd backend
+.venv\Scripts\Activate.ps1
 python manage.py runserver          # http://localhost:8000
 
 # terminal 2 — frontend

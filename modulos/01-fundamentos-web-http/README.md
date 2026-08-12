@@ -310,6 +310,10 @@ semântica; a versão é responsabilidade da infraestrutura.
 > normalmente. Ver
 > [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#21-curl-no-powershell-não-é-o-curl).
 
+> No PowerShell, troque `curl` por **`curl.exe`** em todos os comandos abaixo e use a crase
+> (`` ` ``) no lugar da barra invertida para quebrar linha. No Git Bash e no WSL, cole como
+> está.
+
 ```bash
 # 1. Só os cabeçalhos
 curl -I https://www.djangoproject.com/

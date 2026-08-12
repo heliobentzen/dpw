@@ -184,8 +184,8 @@ CSRF continua necessário com autenticação por sessão — implementado no M12
 
 **E o risco que só existe aqui:**
 
-```bash
-# frontend/.env
+```ini
+# frontend/.env  — conteudo do arquivo, nao comandos do terminal
 VITE_API_URL=https://bibliocom.org/api          # ✅ público, tudo bem
 VITE_SENTRY_DSN=https://...                     # ✅ desenhado para ser público
 VITE_AWS_SECRET_KEY=AKIA...                     # ❌❌❌ CATÁSTROFE
@@ -335,7 +335,12 @@ Remove-Item Env:\DEBUG        # limpe depois: no PowerShell a variavel fica na s
 Resolva **todos** os avisos e documente o que cada configuração previne. Depois:
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 curl -I http://localhost:8000/api/obras/ | grep -iE "x-frame|x-content|referrer|strict-transport"
+```
+```powershell
+# Windows PowerShell
+curl.exe -I http://localhost:8000/api/obras/ | Select-String "x-frame|x-content|referrer|strict-transport"
 ```
 
 ### Passo 3 — CORS: entender antes de configurar (20 min)

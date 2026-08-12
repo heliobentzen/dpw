@@ -41,9 +41,18 @@ Depois responda: **por que a maior parte dos tutoriais ensina a opção mais ins
 3. Agora ignore a interface:
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 curl -b cookies-associado.txt -X POST http://localhost:8000/api/obras/ \
      -H "Content-Type: application/json" -H "X-CSRFToken: $CSRF" \
      -d '{"titulo":"Teste de invasão","autor":1}' -i
+```
+
+```powershell
+# Windows PowerShell (ver o roteiro do M12 para montar $s e $csrf)
+Invoke-RestMethod -Uri "http://localhost:8000/api/obras/" -Method Post -WebSession $s `
+  -ContentType "application/json" -Headers @{ "X-CSRFToken" = $csrf } `
+  -Body '{"titulo":"Teste de invasao","autor":1}' -SkipHttpErrorCheck -StatusCodeVariable codigo
+$codigo
 ```
 
 4. Qual o status? Se for **201**, corrija o backend e repita.

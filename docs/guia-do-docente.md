@@ -31,10 +31,10 @@ combine com a turma **um** caminho e mantenha-o:
 | **Git Bash** | ⭐ Menor atrito: os comandos do material funcionam colados |
 | WSL2 | Turma mais madura; obrigatório se quiser paridade com produção |
 
-**Quatro coisas quebram em silêncio** e valem 10 minutos de aula na semana 1: `curl` é
-alias no PowerShell (use `curl.exe`); variáveis inline não existem (`$env:VAR="x";`);
-Gunicorn não roda no Windows (Waitress, no M16); e CRLF quebra o deploy (`.gitattributes`,
-no M00). Nenhuma delas gera erro que aponte a causa.
+**Cinco coisas quebram em silêncio** e valem 10 minutos de aula na semana 1: `curl` é
+alias no PowerShell (use `curl.exe`); variáveis inline não existem (`$env:VAR="x";`); `&&`
+não existe no PowerShell 5.1; Gunicorn não roda no Windows (Waitress, no M16); e CRLF
+quebra o deploy (`.gitattributes`, no M00). Nenhuma delas gera erro que aponte a causa.
 
 ### Diagnóstico de JavaScript — semana 1
 

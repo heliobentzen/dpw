@@ -24,9 +24,14 @@ para **um arquivo seu**; (3) o resto, só se necessário.
 **`ModuleNotFoundError: No module named 'django'`**
 Ambiente virtual não ativado, ou pacote instalado em outro interpretador.
 ```bash
-which python      # Linux/macOS — deve apontar para .venv/bin/python
-where python      # Windows
+# Linux / macOS / WSL / Git Bash
+which python                  # deve apontar para .venv/bin/python
 pip list | grep -i django
+```
+```powershell
+# Windows PowerShell
+Get-Command python | Select-Object Source    # deve apontar para .venv\Scripts\python.exe
+pip list | Select-String django
 ```
 
 **`Activate.ps1 cannot be loaded because running scripts is disabled` (Windows)**
@@ -48,9 +53,14 @@ Nunca use `--trusted-host` como solução permanente.
 
 **`Error: That port is already in use.`**
 ```bash
+# Linux / macOS / WSL
 python manage.py runserver 8001          # ou libere a porta:
-lsof -ti:8000 | xargs kill -9            # Linux/macOS
-netstat -ano | findstr :8000             # Windows -> taskkill /PID <pid> /F
+lsof -ti:8000 | xargs kill -9
+```
+```powershell
+# Windows PowerShell
+python manage.py runserver 8001          # ou libere a porta:
+Get-NetTCPConnection -LocalPort 8000 | Select-Object -Expand OwningProcess | Stop-Process -Force
 ```
 
 **`You have N unapplied migration(s)`**
@@ -88,9 +98,18 @@ Prevenção: quem mexe em `models.py` avisa a equipe e faz `git pull` antes.
 
 **Migração inconsistente no ambiente local (só em desenvolvimento!)**
 ```bash
+# Linux / macOS / WSL / Git Bash
 python manage.py migrate acervo zero    # desfaz as migrações do app
 # ou, último recurso em dev:
 rm db.sqlite3 && python manage.py migrate && python manage.py createsuperuser
+```
+```powershell
+# Windows PowerShell
+python manage.py migrate acervo zero
+# ou, último recurso em dev:
+Remove-Item db.sqlite3
+python manage.py migrate
+python manage.py createsuperuser
 ```
 ⚠️ Isso apaga dados. **Nunca** em produção.
 

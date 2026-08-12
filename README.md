@@ -120,14 +120,37 @@ referência de código, não o entregável.
 - 💼 **No mercado** — como o assunto aparece em vagas, code reviews e produção.
 - 🔵 **Backend** / 🟣 **Frontend** — camada tratada no trecho.
 
+### Convenção dos blocos de comando
+
+Todo bloco **executável** que difere entre plataformas aparece em pares:
+
+````markdown
+```bash
+# Linux / macOS / WSL / Git Bash
+...
+```
+```powershell
+# Windows PowerShell
+...
+```
+````
+
+Nunca um comentário `# Windows: ...` **dentro** de um bloco Unix — isso impede copiar e
+colar, que é justamente o que o roteiro pede. Blocos idênticos nas três plataformas (`git`,
+`pip install`, `pnpm`) aparecem uma vez só; blocos que são **conteúdo de arquivo** (`.env`,
+`.gitattributes`) usam ` ```ini `, não ` ```bash `.
+
+Se você encontrar um bloco sem alternativa, é falha do material — abra uma issue.
+
 ## Desenvolvimento no Windows 🪟
 
 Os roteiros usam comandos no formato Linux/macOS. Há três caminhos no Windows — PowerShell
 nativo, Git Bash ou WSL2 — todos válidos para a disciplina inteira.
 
-**Quatro coisas quebram em silêncio e não são resolvidas trocando o comando:** `curl` é
-alias de `Invoke-WebRequest` no PowerShell; variáveis de ambiente inline não existem;
-Gunicorn não roda no Windows; e finais de linha CRLF quebram o deploy.
+**Cinco coisas quebram em silêncio e não são resolvidas trocando o comando:** `curl` é
+alias de `Invoke-WebRequest`; variáveis de ambiente inline não existem; o operador `&&` não
+existe no PowerShell 5.1; Gunicorn não roda no Windows; e finais de linha CRLF quebram o
+deploy.
 
 📖 [`recursos/comandos-windows.md`](recursos/comandos-windows.md) — **leia a seção 2 antes
 da primeira aula.**

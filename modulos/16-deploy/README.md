@@ -249,9 +249,17 @@ Vite faz o *fallback*; a plataforma precisa ser configurada para fazer o mesmo.
 Inspecione `dist/`:
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 ls -la dist/assets/                              # nomes com hash
 du -sh dist/                                     # tamanho total
 grep -r "VITE_" dist/ | head                     # as variáveis embutidas
+```
+
+```powershell
+# Windows PowerShell
+Get-ChildItem dist\assets\                                      # nomes com hash
+"{0:N2} MB" -f ((Get-ChildItem dist -Recurse | Measure-Object Length -Sum).Sum / 1MB)
+Select-String -Recurse "VITE_" dist\* | Select-Object -First 10   # variaveis embutidas
 ```
 
 ### Passo 3 — PostgreSQL e serviço da API (30 min)
@@ -309,7 +317,8 @@ STATICFILES_DIRS = [BASE_DIR / "frontend_dist" / "assets"]
 ```
 
 ```bash
-# build.sh
+# build.sh — executado pela PaaS, que roda LINUX.
+# Nao precisa rodar no seu Windows; garanta apenas o final de linha LF (.gitattributes).
 cd ../frontend && pnpm install && pnpm build
 cp -r dist ../backend/frontend_dist
 cd ../backend && python manage.py collectstatic --noinput

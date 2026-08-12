@@ -24,7 +24,10 @@ resultado de cada item, com evidência:
 Depois, rode e cole a saída:
 
 ```bash
-curl -I https://SEU-DOMINIO/
+curl -I https://SEU-DOMINIO/          # Linux/macOS/WSL/Git Bash
+```
+```powershell
+curl.exe -I https://SEU-DOMINIO/      # Windows PowerShell
 ```
 
 E o relatório do securityheaders.com. Meta: **nota A**.

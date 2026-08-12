@@ -174,8 +174,8 @@ USE_TZ = True
 
 ### Passo 2 — Variáveis de ambiente (20 min)
 
-```bash
-# backend/.env
+```ini
+# backend/.env  — conteudo do arquivo, nao comandos do terminal
 SECRET_KEY=troque-esta-chave
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
@@ -384,9 +384,13 @@ Abra <http://localhost:5173>. Na aba **Network**, confirme: a requisição sai p
 ### Passo 6 — Commit (10 min)
 
 ```bash
-cd .. && git add .
+cd ..
+git add .
 git commit -m "feat: cria backend Django+DRF e frontend React+Vite com proxy"
 ```
+
+> 🪟 Comandos de Git são idênticos nas três plataformas. Evite encadear com `&&`: o
+> PowerShell 5.1 (padrão do Windows) não suporta esse operador — use linhas separadas.
 
 ---
 

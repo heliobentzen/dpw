@@ -53,7 +53,8 @@ issue (história) → branch → commits → PR → CI verde → revisão → me
 ```
 
 ```bash
-git switch main && git pull
+git switch main
+git pull
 git switch -c feat/h07-registrar-emprestimo
 # ... desenvolve, com commits pequenos e coerentes ...
 git push -u origin feat/h07-registrar-emprestimo
