@@ -103,19 +103,32 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 ## Verificação final
 
 ```bash
-# backend
+# ---- Linux / macOS / WSL / Git Bash ----
 cd backend
 DEBUG=False python manage.py check --deploy
 pip-audit
 
-# frontend
 cd ../frontend
 pnpm audit
 pnpm build && grep -rEi "secret|password|api[_-]?key|AKIA" dist/ || echo "nenhum segredo no bundle"
 
-# geral
 detect-secrets scan
 curl -I https://seu-dominio/ | grep -iE "strict-transport|x-frame|x-content|referrer|content-security"
+```
+
+```powershell
+# ---- Windows PowerShell ----
+cd backend
+$env:DEBUG="False"; python manage.py check --deploy; Remove-Item Env:\DEBUG
+pip-audit
+
+cd ..\frontend
+pnpm audit
+pnpm build
+Select-String -Recurse -Pattern "secret|password|api[_-]?key|AKIA" dist/*
+
+detect-secrets scan
+curl.exe -I https://seu-dominio/ | Select-String "strict-transport|x-frame|x-content|referrer|content-security"
 ```
 
 Depois, tente, **no seu próprio sistema**:

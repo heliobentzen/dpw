@@ -11,12 +11,30 @@ Como conduzir a disciplina com este material.
 | −3 semanas | Criar a organização GitHub da turma e o repositório-modelo |
 | −2 semanas | Validar o laboratório: Python 3.12, **Node 20**, Git, Docker, portas 8000/5432/5173 |
 | −2 semanas | ⚠️ **Confirmar acesso a `registry.npmjs.org` e ao PyPI** — proxy bloqueando `npm install` é a falha logística nº 1 |
+| −2 semanas | 🪟 Se o laboratório é Windows: instalar Git (traz o Git Bash), habilitar WSL2 e excluir a pasta de projetos do Windows Defender |
 | −2 semanas | Criar contas de PaaS ou solicitar GitHub Student Pack |
 | −1 semana | Enviar [`ambiente-setup.md`](ambiente-setup.md) aos estudantes com o script de verificação |
 
 > **A falha nº 1 desta disciplina é logística, não técnica**: proxy do laboratório
 > bloqueando `pip` ou `npm`, antivírus bloqueando o `runserver`, ou parceria extensionista
 > fechada tarde demais. Resolva isso antes da aula 1.
+
+### 🪟 Turma no Windows
+
+Os roteiros usam comandos Linux/macOS, com equivalências em
+[`../recursos/comandos-windows.md`](../recursos/comandos-windows.md). Na **aula 1**,
+combine com a turma **um** caminho e mantenha-o:
+
+| Caminho | Recomende quando |
+|---|---|
+| PowerShell nativo | Turma acostumada ao Windows; use as equivalências |
+| **Git Bash** | ⭐ Menor atrito: os comandos do material funcionam colados |
+| WSL2 | Turma mais madura; obrigatório se quiser paridade com produção |
+
+**Quatro coisas quebram em silêncio** e valem 10 minutos de aula na semana 1: `curl` é
+alias no PowerShell (use `curl.exe`); variáveis inline não existem (`$env:VAR="x";`);
+Gunicorn não roda no Windows (Waitress, no M16); e CRLF quebra o deploy (`.gitattributes`,
+no M00). Nenhuma delas gera erro que aponte a causa.
 
 ### Diagnóstico de JavaScript — semana 1
 

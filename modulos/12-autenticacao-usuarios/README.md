@@ -357,6 +357,11 @@ Implemente `Usuario`, configure `AUTH_USER_MODEL`, migre, crie o superusuário e
 
 Implemente `login`, `logout` e `eu` conforme a teoria. Teste com `curl`, guardando cookies:
 
+> 🪟 **Windows:** use `curl.exe` e a crase (`` ` ``) para quebrar linha. O bloco abaixo tem
+> aspas dentro de JSON, que o PowerShell reescreve — o caminho de menor atrito é rodar estes
+> comandos no **Git Bash** ou no **WSL**, ou usar `Invoke-RestMethod -SessionVariable`. Ver
+> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#continuação-de-linha).
+
 ```bash
 # obtém o cookie CSRF
 curl -c cookies.txt http://localhost:8000/api/auth/eu/ -i

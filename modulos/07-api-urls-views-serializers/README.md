@@ -429,6 +429,7 @@ Implemente `ObraSerializer`, `ObraCreateSerializer` e `ObraViewSet` conforme a t
 registre no router e teste **todas** as seis rotas:
 
 ```bash
+# Linux/macOS/WSL/Git Bash
 curl http://localhost:8000/api/obras/
 curl http://localhost:8000/api/obras/1/
 curl -X POST http://localhost:8000/api/obras/ \
@@ -438,6 +439,21 @@ curl -X PATCH http://localhost:8000/api/obras/1/ \
      -H "Content-Type: application/json" -d '{"ano_publicacao":1899}'
 curl -X DELETE http://localhost:8000/api/obras/1/ -i
 ```
+
+```powershell
+# Windows PowerShell. Para corpos JSON, o caminho de menor atrito e um arquivo:
+'{"titulo":"Memorias Postumas","autor":1,"ano_publicacao":1881}' | Set-Content obra.json
+
+curl.exe http://localhost:8000/api/obras/
+curl.exe http://localhost:8000/api/obras/1/
+curl.exe -X POST http://localhost:8000/api/obras/ -H "Content-Type: application/json" -d "@obra.json"
+curl.exe -X PATCH http://localhost:8000/api/obras/1/ -H "Content-Type: application/json" -d '{\"ano_publicacao\":1899}'
+curl.exe -X DELETE http://localhost:8000/api/obras/1/ -i
+```
+
+> 🪟 O PowerShell reescreve aspas duplas antes de repassar ao `curl.exe`. Use arquivo
+> (`-d "@arquivo.json"`), escape com `\"`, ou rode estes comandos no **Git Bash**/**WSL**.
+> Ver [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#continuação-de-linha).
 
 Confira o status de cada uma contra o contrato que você escreveu no M02.
 

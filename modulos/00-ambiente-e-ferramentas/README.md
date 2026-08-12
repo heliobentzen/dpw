@@ -94,23 +94,45 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 
 ### Passo 1 — Instalar e verificar (30 min)
 
-Siga [`../../docs/ambiente-setup.md`](../../docs/ambiente-setup.md), seções 2 a 5, e rode
-o script `verifica_ambiente.py` da seção 7. **Só avance com todos os itens em OK.**
+Siga [`../../docs/ambiente-setup.md`](../../docs/ambiente-setup.md), seções 3 a 5, e rode
+o script `verifica_ambiente.py` da seção 8. **Só avance com todos os itens em OK.**
+
+> 🪟 **No Windows, leia antes a seção 1.1** — você precisa escolher entre PowerShell, Git
+> Bash e WSL2, e conhecer as quatro armadilhas que não são tradução de comando.
 
 ### Passo 2 — Criar o repositório do BiblioCom (30 min)
 
 ```bash
+# Linux/macOS/WSL/Git Bash
 mkdir bibliocom && cd bibliocom
 git init
 python3 -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\Activate.ps1
+source .venv/bin/activate
 
 pip install --upgrade pip
 pip install "django>=5.0,<6.0" python-dotenv
 pip freeze > requirements.txt
 ```
 
-Crie o `.gitignore` (seção 8 do setup) e o `README.md`:
+```powershell
+# Windows PowerShell
+mkdir bibliocom; cd bibliocom
+git init
+git config core.autocrlf input        # evita CRLF quebrar o deploy no M16
+python -m venv .venv
+.venv\Scripts\Activate.ps1            # se bloquear: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+
+python -m pip install --upgrade pip
+pip install "django>=5.0,<6.0" python-dotenv
+pip freeze > requirements.txt
+```
+
+Crie o `.gitignore` (seção 10 do setup), o **`.gitattributes`** e o `README.md`.
+
+> 🪟 **O `.gitattributes` não é opcional se alguém da equipe usa Windows.** Sem ele, um
+> `build.sh` salvo com CRLF quebra o deploy no M16 com a mensagem `bad interpreter` — e
+> ninguém relaciona a causa ao efeito. Conteúdo em
+> [`../../docs/ambiente-setup.md`](../../docs/ambiente-setup.md#gitattributes--obrigatório-se-alguém-da-equipe-usa-windows-).
 
 ```markdown
 # BiblioCom
@@ -189,11 +211,14 @@ aprovação. Isso passa a valer para o projeto da equipe.
 | `.env` aparece em `git status` | Falta a linha no `.gitignore` |
 | Push rejeitado | Alguém enviou antes; `git pull --rebase origin main` |
 | Commit "wip" a cada 3 minutos | Commits devem ser unidades coerentes de mudança |
+| 🪟 `Activate.ps1 cannot be loaded` | Política do PowerShell: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
+| 🪟 Git marca o arquivo inteiro como alterado | Finais de linha; falta `.gitattributes` + `core.autocrlf input` |
 
 ## ✅ Checklist de saída
 
 - [ ] `python verifica_ambiente.py` termina com "Ambiente pronto"
-- [ ] Repositório `bibliocom` no GitHub, com `.gitignore` e `README.md`
+- [ ] Repositório `bibliocom` no GitHub, com `.gitignore`, `.gitattributes` e `README.md`
+- [ ] 🪟 Windows: caminho escolhido (PowerShell / Git Bash / WSL2) e `core.autocrlf input`
 - [ ] `.venv/` **não** versionado
 - [ ] Ao menos 2 commits com mensagem no padrão Conventional Commits
 - [ ] Ao menos 1 Pull Request revisado e mesclado por outra pessoa
@@ -209,3 +234,4 @@ Ver [`exercicios.md`](exercicios.md).
 - [Learn Git Branching (visual e interativo)](https://learngitbranching.js.org/?locale=pt_BR)
 - [Conventional Commits](https://www.conventionalcommits.org/pt-br/)
 - [Python venv — documentação oficial](https://docs.python.org/pt-br/3/library/venv.html)
+- 🪟 [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md) — equivalências e armadilhas do Windows

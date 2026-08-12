@@ -196,8 +196,14 @@ arquivo JavaScript que qualquer pessoa baixa. Prove:
 
 ```bash
 pnpm build
-grep -r "AKIA" dist/          # o segredo está lá, em texto puro
+grep -r "AKIA" dist/                          # Linux/macOS/WSL/Git Bash
 ```
+```powershell
+pnpm build
+Select-String -Recurse "AKIA" dist/*          # Windows PowerShell
+```
+
+O segredo está lá, em texto puro.
 
 Regra sem exceção: **chave que precisa ser secreta não passa pelo frontend.** Se o
 navegador precisa de um serviço que exige chave secreta, o backend faz a chamada e o
@@ -316,7 +322,14 @@ Os gabaritos estão comentados no fim de cada arquivo. Não leia antes de tentar
 ### Passo 2 — `check --deploy` e cabeçalhos (25 min)
 
 ```bash
+# Linux/macOS/WSL
 cd backend && DEBUG=False python manage.py check --deploy
+```
+```powershell
+# Windows PowerShell
+cd backend
+$env:DEBUG="False"; python manage.py check --deploy
+Remove-Item Env:\DEBUG        # limpe depois: no PowerShell a variavel fica na sessao
 ```
 
 Resolva **todos** os avisos e documente o que cada configuração previne. Depois:

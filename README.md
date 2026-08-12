@@ -24,7 +24,7 @@ extensionistas** curricularizadas.
 | [`modulos/`](modulos/) | 18 módulos de conteúdo (69h), cada um com teoria, roteiro prático, exercícios e checklist |
 | [`projeto/`](projeto/) | Projeto integrador em 4 etapas (20h) + trilha extensionista (10h) |
 | [`avaliacao/`](avaliacao/) | Rubricas, pesos, política de recuperação e critérios de correção |
-| [`recursos/`](recursos/) | Código de apoio, nivelamento de JS, checklists imprimíveis |
+| [`recursos/`](recursos/) | Código de apoio, guia do Windows, ponte JS, checklists imprimíveis |
 
 **Comece por aqui:**
 
@@ -119,6 +119,18 @@ referência de código, não o entregável.
 - ✅ **Checklist de saída** — critério objetivo de conclusão do módulo.
 - 💼 **No mercado** — como o assunto aparece em vagas, code reviews e produção.
 - 🔵 **Backend** / 🟣 **Frontend** — camada tratada no trecho.
+
+## Desenvolvimento no Windows 🪟
+
+Os roteiros usam comandos no formato Linux/macOS. Há três caminhos no Windows — PowerShell
+nativo, Git Bash ou WSL2 — todos válidos para a disciplina inteira.
+
+**Quatro coisas quebram em silêncio e não são resolvidas trocando o comando:** `curl` é
+alias de `Invoke-WebRequest` no PowerShell; variáveis de ambiente inline não existem;
+Gunicorn não roda no Windows; e finais de linha CRLF quebram o deploy.
+
+📖 [`recursos/comandos-windows.md`](recursos/comandos-windows.md) — **leia a seção 2 antes
+da primeira aula.**
 
 ## Pré-requisito de JavaScript
 

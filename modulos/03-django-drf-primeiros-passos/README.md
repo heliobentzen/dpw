@@ -92,6 +92,7 @@ navegador.
 ### Passo 1 — Backend: projeto, app e DRF (35 min)
 
 ```bash
+# Linux/macOS/WSL
 mkdir -p bibliocom/backend && cd bibliocom/backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install "django>=5.0,<6.0" djangorestframework django-cors-headers \
@@ -101,6 +102,22 @@ pip freeze > requirements.txt
 django-admin startproject config .     # o ponto evita a pasta duplicada
 python manage.py startapp acervo
 ```
+
+```powershell
+# Windows PowerShell
+New-Item -ItemType Directory -Force -Path bibliocom\backend; cd bibliocom\backend
+python -m venv .venv; .venv\Scripts\Activate.ps1
+pip install "django>=5.0,<6.0" djangorestframework django-cors-headers `
+            python-dotenv dj-database-url drf-spectacular
+pip freeze > requirements.txt
+
+django-admin startproject config .
+python manage.py startapp acervo
+```
+
+> 🪟 Se `Activate.ps1` for bloqueado: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+> Demais equivalências em
+> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md).
 
 ```python
 # config/settings.py
@@ -251,8 +268,14 @@ python manage.py runserver
 Confira, nesta ordem:
 
 ```bash
+# Linux/macOS/WSL/Git Bash
 curl http://localhost:8000/api/ping/
 curl "http://localhost:8000/api/ping/?q=teste&pagina=2"     # veja os parâmetros no JSON
+```
+```powershell
+# Windows PowerShell — curl.exe, nao curl (que e alias de Invoke-WebRequest)
+curl.exe http://localhost:8000/api/ping/
+curl.exe "http://localhost:8000/api/ping/?q=teste&pagina=2"
 ```
 
 E abra <http://localhost:8000/api/docs/> — a documentação OpenAPI já existe, gerada do

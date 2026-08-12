@@ -8,8 +8,11 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 - [ ] `ruff check .` sem erros
 - [ ] `python manage.py makemigrations --check --dry-run` sem pendências
 - [ ] `DEBUG=False python manage.py check --deploy` sem avisos
+      (🪟 PowerShell: `$env:DEBUG="False"; python manage.py check --deploy`)
 - [ ] `requirements.txt` atualizado, com versões fixadas
 - [ ] `DEBUG=False ... gunicorn config.wsgi` roda localmente
+      (🪟 Windows: `waitress-serve --port=8000 config.wsgi:application` — Gunicorn não roda no Windows)
+- [ ] 🪟 `.gitattributes` com `*.sh text eol=lf` (senão o deploy falha com `bad interpreter`)
 - [ ] `collectstatic` roda sem erro
 - [ ] `.env.example` reflete todas as variáveis necessárias
 - [ ] Nenhum segredo no diff (`git diff --staged`)
@@ -58,6 +61,8 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 - [ ] Tempo de resposta comparável ao anterior
 
 ## Comandos de verificação
+
+> 🪟 **No PowerShell, use `curl.exe`** em todos os comandos abaixo.
 
 ```bash
 curl -I https://SEU-DOMINIO/

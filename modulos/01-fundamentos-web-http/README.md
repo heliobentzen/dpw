@@ -304,6 +304,12 @@ semântica; a versão é responsabilidade da infraestrutura.
 
 ### Prática 2 — Falar HTTP na mão com `curl` (40 min)
 
+> 🪟 **Windows (PowerShell): escreva `curl.exe`, não `curl`.** No PowerShell, `curl` é
+> apelido de `Invoke-WebRequest`, que tem outros parâmetros — os comandos abaixo falham com
+> erro confuso. O `curl.exe` já vem no Windows 10/11. No Git Bash e no WSL, `curl` funciona
+> normalmente. Ver
+> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#21-curl-no-powershell-não-é-o-curl).
+
 ```bash
 # 1. Só os cabeçalhos
 curl -I https://www.djangoproject.com/

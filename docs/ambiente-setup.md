@@ -21,6 +21,32 @@ Guia único de instalação. Siga na ordem; ao final, rode a **verificação** d
 > Até o M04 usamos **SQLite** (embutido, zero instalação). PostgreSQL entra no M05, para
 > que a diferença entre "banco de brinquedo" e "banco de verdade" seja sentida na prática.
 
+## 1.1 Windows: escolha o caminho antes de começar 🪟
+
+Os roteiros deste material usam comandos no formato Linux/macOS. No Windows há três
+caminhos, todos válidos para a disciplina inteira:
+
+| Caminho | Como é | Quando |
+|---|---|---|
+| **PowerShell nativo** | Comandos equivalentes, listados na referência | Padrão |
+| **Git Bash** (vem com o Git) | Os comandos do material funcionam como estão | Quer colar sem traduzir |
+| **WSL2 (Ubuntu)** | Linux completo dentro do Windows | ⭐ Recomendado a partir do M16 |
+
+**Três coisas quebram em silêncio e não são resolvidas trocando o comando** — leia antes da
+primeira aula:
+
+1. **`curl` no PowerShell é apelido de `Invoke-WebRequest`.** Use **`curl.exe`**.
+2. **Variáveis inline não existem.** `DEBUG=False python ...` vira
+   `$env:DEBUG="False"; python ...` — e a variável **permanece na sessão**.
+3. **Gunicorn não roda no Windows.** Para a verificação local do M16, use **Waitress**.
+
+E uma quarta, que só aparece no deploy: **finais de linha**. Um `build.sh` salvo com CRLF
+falha na PaaS. Crie o `.gitattributes` no primeiro commit (seção 10).
+
+📖 **Referência completa:**
+[`../recursos/comandos-windows.md`](../recursos/comandos-windows.md) — tabela de
+equivalências, as armadilhas em detalhe e como instalar o WSL2.
+
 ## 2. Estrutura do repositório
 
 ```
@@ -223,6 +249,11 @@ docker compose ps          # deve estar "healthy"
 pip install "psycopg[binary]"
 ```
 
+> 🪟 **Windows:** o Docker Desktop exige o **WSL2 habilitado** — instale o WSL antes do
+> Docker (`wsl --install`). Os comandos `docker` são idênticos no PowerShell. Prefira o
+> container ao instalador nativo do PostgreSQL: menos configuração e igual ao que roda em
+> produção.
+
 ---
 
 ## 8. Verificação do ambiente
@@ -306,6 +337,33 @@ dist/
 > no histórico do Git é segredo vazado — mesmo depois de removido, continua nos commits
 > anteriores.
 
+### `.gitattributes` — obrigatório se alguém da equipe usa Windows 🪟
+
+```gitattributes
+* text=auto eol=lf
+
+*.sh     text eol=lf
+*.py     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+Procfile text eol=lf
+
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+```
+
+```powershell
+git config --global core.autocrlf input
+```
+
+Sem isso, um `build.sh` salvo no Windows chega ao servidor com `\r\n` e o deploy falha com
+`bad interpreter: No such file or directory` — mensagem que não diz nada sobre a causa real.
+**Crie o arquivo no primeiro commit**, junto com o `.gitignore`.
+
 **Atenção ao `.env` do frontend:** ele **não** é secreto (é embutido no bundle em tempo de
 build e qualquer pessoa lê no DevTools), mas segue fora do Git porque muda por ambiente.
 Nunca coloque chave de API nele. Detalhado no M13.
@@ -326,5 +384,11 @@ Nunca coloque chave de API nele. Detalhado no M13.
 | `port 5173 already in use` | Outro Vite rodando | `pnpm dev --port 5174` |
 | `port 5432 already in use` | PostgreSQL local ativo | Pare o serviço ou use `5433:5432` |
 | Requisição do front dá **CORS error** | Chamou `localhost:8000` direto | Use o caminho `/api` (proxy do Vite) |
+| 🪟 `curl` dá erro de parâmetro | PowerShell: alias de `Invoke-WebRequest` | Use `curl.exe` |
+| 🪟 `DEBUG=False python ...` não é reconhecido | Não há variável inline no PowerShell | `$env:DEBUG="False"; python ...` |
+| 🪟 `gunicorn` falha ao importar `fcntl` | Gunicorn não roda no Windows | Use `waitress-serve` (M16) |
+| 🪟 Deploy falha com `bad interpreter` | `build.sh` com CRLF | Configure o `.gitattributes` |
+| 🪟 `pnpm install` muito lento | Antivírus varrendo `node_modules` | Exclua a pasta do projeto no Defender |
+| 🪟 Caminho longo demais | Limite de 260 caracteres | `git config --system core.longpaths true` |
 
 Mais casos em [`faq-troubleshooting.md`](faq-troubleshooting.md).

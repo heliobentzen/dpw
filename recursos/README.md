@@ -19,6 +19,12 @@
 > ⚠️ `vulneravel.py` e `vulneravel.tsx` são **deliberadamente inseguros** e servem apenas
 > para estudo. Nunca use nada deles em produção.
 
+## Ambiente e plataforma
+
+| Arquivo | Quando usar |
+|---|---|
+| [`comandos-windows.md`](comandos-windows.md) | 🪟 **Leia a seção 2 antes da primeira aula.** Equivalências PowerShell/Git Bash/WSL2 e as quatro armadilhas do Windows: `curl` como alias, variáveis inline, Gunicorn e finais de linha (CRLF) |
+
 ## Ponte Python → JavaScript
 
 | Arquivo | Quando usar |

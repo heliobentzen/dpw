@@ -191,14 +191,49 @@ python manage.py collectstatic --noinput
 python manage.py migrate --noinput
 ```
 
+> 🪟 **Windows: finais de linha.** Você não precisa executar o `build.sh` localmente — ele
+> roda na PaaS, que é Linux. Mas se o arquivo for salvo com CRLF, o deploy falha com
+> `bad interpreter: No such file or directory`. Garanta o `.gitattributes` com
+> `*.sh text eol=lf` no repositório (ver
+> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#4-finais-de-linha-crlf--lf))
+> — é a causa mais comum de deploy quebrado em equipe que desenvolve no Windows.
+
 Valide **localmente** antes de subir — este passo economiza a maior parte do tempo de
-depuração remota:
+depuração remota.
+
+**Linux / macOS / WSL2:**
 
 ```bash
 DEBUG=False SECRET_KEY=teste ALLOWED_HOSTS=localhost python manage.py check --deploy
 DEBUG=False python manage.py collectstatic --noinput
 DEBUG=False SECRET_KEY=teste ALLOWED_HOSTS=localhost gunicorn config.wsgi --bind 0.0.0.0:8000
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+# 1. no PowerShell as variaveis NAO sao inline: elas ficam na sessao
+$env:DEBUG="False"; $env:SECRET_KEY="teste"; $env:ALLOWED_HOSTS="localhost"
+
+python manage.py check --deploy
+python manage.py collectstatic --noinput
+
+# 2. Gunicorn NAO roda no Windows (depende de fcntl, que e POSIX).
+#    Waitress e servidor WSGI de producao e roda no Windows:
+pip install waitress
+waitress-serve --port=8000 config.wsgi:application
+
+# 3. ao terminar, LIMPE as variaveis — senao o runserver sobe com DEBUG=False
+Remove-Item Env:\DEBUG, Env:\SECRET_KEY, Env:\ALLOWED_HOSTS
+```
+
+> 🪟 **O `Procfile` continua com Gunicorn** — produção é Linux, e é lá que ele roda. O
+> Waitress serve **apenas** para esta verificação local no Windows; não o adicione ao
+> `requirements.txt` de produção (use um `requirements-dev.txt`, se quiser mantê-lo).
+> No WSL2, use Gunicorn normalmente.
+>
+> Demais equivalências em
+> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md).
 
 ### Passo 2 — Preparar o frontend (20 min)
 
@@ -298,9 +333,17 @@ acopladas na publicação.
 - [ ] `grep` no `dist/` publicado não revela segredo
 
 ```bash
+# Linux/macOS/WSL/Git Bash
 curl -I https://sua-app/
 curl -I https://sua-app/api/obras/
 curl -s -o /dev/null -w "%{http_code}\n" https://sua-app/obras/42     # deve ser 200
+```
+
+```powershell
+# Windows PowerShell — note o .exe (curl sozinho e alias de Invoke-WebRequest)
+curl.exe -I https://sua-app/
+curl.exe -I https://sua-app/api/obras/
+curl.exe -s -o NUL -w "%{http_code}`n" https://sua-app/obras/42
 ```
 
 ---
