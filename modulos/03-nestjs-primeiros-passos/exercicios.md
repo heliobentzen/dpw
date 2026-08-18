@@ -1,126 +1,110 @@
 # M03 — Exercícios
 
-## E03.1 — Mapear o ciclo nos seus dois projetos (individual)
+## E03.1 — Onde mora cada código (individual)
 
-Desenhe o ciclo de uma requisição a `/api/ping/?q=teste`, indicando **arquivo e linha** do
-seu repositório para cada etapa:
+Para cada trecho, diga se pertence ao **Controller**, ao **Service** ou a **nenhum dos dois**,
+e justifique com o critério da teoria (*"mudaria se rodasse por linha de comando?"*).
 
-1. Onde o React dispara a requisição
-2. Onde o proxy do Vite a reescreve
-3. Onde o Django reconhece a URL
-4. Onde a função da view é chamada
-5. Onde os parâmetros da query string são lidos
-6. Onde o dicionário vira JSON
-7. Onde o React recebe e guarda o resultado
-8. Onde a tela é montada
-
-**Entrega:** diagrama + lista `arquivo:linha`.
-
----
-
-## E03.2 — Três endpoints (individual)
-
-Implemente no backend, todos com `AllowAny`:
-
-| Rota | Devolve |
-|---|---|
-| `GET /api/sobre/` | Nome do sistema, descrição e integrantes da equipe |
-| `GET /api/saudacao/<str:nome>/` | `{"mensagem": "Olá, <nome>!"}`, com 400 se o nome tiver menos de 2 letras |
-| `GET /api/calcular/?a=<n>&b=<n>` | Soma, subtração, produto e divisão; **400** com mensagem clara se `b=0` ou se `a`/`b` não forem números |
-
-Requisitos: status HTTP correto em cada caso; formato de erro **igual** nos três; todos
-testados com `curl` e visíveis em `/api/docs/`.
-
----
-
-## E03.3 — Consumir os três no React (individual)
-
-Crie um componente para cada endpoint do E03.2, tratando os **quatro estados** (carregando,
-vazio, erro, conteúdo). No caso de `/api/calcular/`, o erro 400 precisa exibir a mensagem
-vinda do servidor, não uma mensagem genérica.
-
-Responda: **por que o tratamento de erro precisa distinguir "a rede falhou" de "o servidor
-respondeu 400"?** O que o usuário deveria fazer em cada caso?
-
----
-
-## E03.4 — Provar que o proxy importa (individual) ⭐
-
-1. Troque `fetch("/api/ping/")` por `fetch("http://localhost:8000/api/ping/")`.
-2. Recarregue e abra o Console. Capture a mensagem de erro **completa**.
-3. Vá à aba Network: a requisição saiu? Qual o status? Houve uma requisição `OPTIONS` antes?
-4. Agora adicione `http://localhost:5173` ao `CORS_ALLOWED_ORIGINS` e teste de novo.
-5. Volte para `/api/ping/` (com proxy).
-
-**Entrega:** as evidências dos passos 2, 3 e 4 + respostas:
-
-- Quem bloqueou a requisição: o navegador ou o servidor?
-- O que é a requisição `OPTIONS` de *preflight* e quando ela acontece?
-- Por que o `curl` funciona sem nenhuma configuração de CORS?
-- Por que o material prefere o proxy a configurar CORS no desenvolvimento?
-
-Este exercício antecipa o M13. CORS é a fonte nº 1 de frustração em arquitetura
-desacoplada, e quase sempre por não se entender **quem** está bloqueando.
-
----
-
-## E03.5 — Negar por padrão (individual)
-
-1. Remova `@permission_classes([AllowAny])` do `ping`.
-2. Chame com `curl`. Qual status? Qual o corpo da resposta?
-3. Chame pelo navegador estando logado no `/admin/`. Mudou? Por quê?
-4. Explique em 3 linhas por que `DEFAULT_PERMISSION_CLASSES = [IsAuthenticated]` é uma
-   escolha de segurança melhor que `AllowAny`, mesmo dando mais trabalho.
-
----
-
-## E03.6 — Quebre de propósito (individual)
-
-Provoque cada erro, capture a mensagem e explique a causa em uma linha:
-
-| # | Como provocar | Erro esperado |
-|---|---|---|
-| 1 | Remover `rest_framework` do `INSTALLED_APPS` | |
-| 2 | Remover `acervo` do `INSTALLED_APPS` | |
-| 3 | Apagar `SECRET_KEY` do `.env` | |
-| 4 | Esquecer o `return` na view | |
-| 5 | Parar o `runserver` e recarregar o React | |
-| 6 | Remover o bloco `proxy` do `vite.config.ts` | |
-| 7 | Remover `@import "tailwindcss"` do `index.css` | |
-| 8 | Devolver `Response(objeto_python_nao_serializavel)` | |
-
-Ler mensagens de erro com calma é a habilidade de maior retorno da disciplina — e agora são
-**dois** lugares para procurar: o terminal do Django e o Console do navegador.
-
----
-
-## E03.7 — Comparar com o servidor mínimo (individual, discursivo)
-
-Compare o `servidor_minimo.py` do M01 com o que você montou aqui. Para cada
-responsabilidade, diga **quem** a assume agora e **quantas linhas** você escreveu:
-
-| Responsabilidade | No servidor mínimo | No Django+DRF | Linhas que escrevi |
+| # | Código | Camada | Justificativa |
 |---|---|---|---|
-| Roteamento | `if self.path == ...` | | |
-| Ler query string | `parse_qs` | | |
-| Gerar JSON | `json.dumps` + headers | | |
-| Definir status | `send_response(200)` | | |
-| Documentar a API | não existia | | |
-| Validar entrada | não existia | | |
+| 1 | Converter `:id` da URL em número | | |
+| 2 | Recusar empréstimo a quem já tem 3 em aberto | | |
+| 3 | Responder 404 quando a obra não existe | | |
+| 4 | Calcular a data de devolução (14 dias) | | |
+| 5 | Ler o cabeçalho `Authorization` | | |
+| 6 | Enviar e-mail de aviso de atraso | | |
+| 7 | Definir que a resposta do POST é 201 | | |
+| 8 | Decidir que obra sem exemplar não pode ser emprestada | | |
 
-Responda: **o que você ganhou e o que você perdeu** ao adotar o framework? (a segunda parte
-tem resposta real: controle explícito e transparência sobre o que acontece)
+**Verificação:** 3 é pegadinha — o *service* **lança** `NotFoundException`, o framework
+traduz para 404. Ninguém escreve o número.
+
+---
+
+## E03.2 — Injeção de dependência na marra (individual)
+
+Escreva `NotificacaoService` com um método `avisar(mensagem: string)` que só faz
+`console.log`. Injete-o no `AcervoService` e chame-o dentro de `criar()`.
+
+Depois responda por escrito:
+
+1. Quantas instâncias de `NotificacaoService` existem na aplicação? Como você provaria isso?
+2. O que aconteceria se você removesse o `@Injectable()` da classe?
+3. O que aconteceria se você a removesse de `providers` do módulo?
+
+**Verificação:** para (1), coloque um `console.log` no construtor e conte as linhas ao subir.
+Para (2) e (3), a mensagem de erro é diferente em cada caso — anote as duas.
+
+---
+
+## E03.3 — Um módulo do zero, sem CLI (individual) ⭐
+
+Crie o módulo `associados` **à mão**, sem `nest generate`: os três arquivos e os registros.
+Endpoints: `GET /api/associados` e `GET /api/associados/:id`, com dados em memória.
+
+**Verificação:**
+- [ ] `GET /api/associados` responde 200 com a lista
+- [ ] `GET /api/associados/999` responde 404
+- [ ] O `AssociadosModule` está em `imports` do `AppModule`
+- [ ] O service está em `providers` do `AssociadosModule`
+
+> Fazer à mão uma vez é o que ensina a ler o erro `Nest can't resolve dependencies` — que é
+> quase sempre um destes dois registros faltando.
+
+---
+
+## E03.4 — Quebrar de propósito (em duplas)
+
+Provoquem cada erro, anotem a **mensagem exata** e o que a causou:
+
+| # | Provoque | Mensagem | O que ela indica |
+|---|---|---|---|
+| 1 | Remova o service de `providers` | | |
+| 2 | Remova o `@Injectable()` | | |
+| 3 | Declare `@Get(":id")` antes de `@Get("destaques")` e chame `/obras/destaques` | | |
+| 4 | Retorne `undefined` de um handler | | |
+| 5 | Suba dois servidores na mesma porta | | |
+
+O caso 3 volta no M07 como erro comum de ordenação de rotas. Guardem a anotação.
+
+---
+
+## E03.5 — Variável de ambiente (individual)
+
+Acrescente `NOME_BIBLIOTECA` ao `.env` e exponha `GET /api/info` devolvendo
+`{ nome, ambiente }`, lendo do `ConfigService`.
+
+**Verificação:**
+- [ ] A chave está no `.env` **e** no `.env.example`
+- [ ] O `.env` não aparece em `git status`
+- [ ] Mudar o valor e **reiniciar** muda a resposta
+- [ ] Mudar sem reiniciar **não** muda — e você sabe dizer por quê
+
+---
+
+## E03.6 — Ler o contrato (individual)
+
+Abra `/api/docs` e responda:
+
+1. Qual o tipo declarado da resposta de `GET /obras/:id`?
+2. O 404 aparece documentado? Se não, por quê?
+3. Que parte do seu código gerou cada informação da página?
 
 ---
 
 ## Gabarito parcial
 
-**E03.4** — Quem bloqueia é o **navegador**, não o servidor: a resposta chega, e o navegador
-se recusa a entregá-la ao JavaScript porque falta o cabeçalho
-`Access-Control-Allow-Origin`. Por isso o `curl` funciona — ele não implementa a política de
-mesma origem. O *preflight* `OPTIONS` acontece quando a requisição não é "simples" (método
-diferente de GET/POST/HEAD, ou cabeçalho customizado como `Content-Type: application/json`).
+**E03.1** — 1: Controller (`ParseIntPipe`). 2: Service. 3: Service lança, framework traduz.
+4: Service. 5: Controller. 6: Service (ou um provider próprio). 7: Controller. 8: Service.
 
-**E03.5 (2)** — `401 Unauthorized` com `{"detail": "As credenciais de autenticação não foram
-fornecidas."}`. No passo 3 funciona porque o cookie de sessão criado no login do admin é
-enviado junto — o mesmo mecanismo que o M12 vai usar.
+**E03.2** — (1) Uma só: o Nest cria *singletons* por módulo. (2) Sem `@Injectable()` a classe
+não tem metadados de injeção; o erro aparece ao resolver as dependências **dela**. (3) Sem
+estar em `providers`, o Nest não a conhece: `Nest can't resolve dependencies of the
+AcervoService (?)` — o `?` marca a posição do parâmetro não resolvido.
+
+**E03.4** — 3: `/obras/destaques` casa com `:id`, e o `ParseIntPipe` responde **400**, não 404.
+Erro de ordenação se manifesta como erro de validação, o que confunde. 4: o Nest responde
+200 com corpo vazio — não é erro, e é pior por isso.
+
+**E03.6** — 2: só aparece se houver `@ApiNotFoundResponse`. Swagger documenta o que o código
+**declara**, não o que ele faz.

@@ -1,567 +1,398 @@
-# M07 — API: mapeamento de URLs, views e serializers
+# M07 — API: rotas, controllers e DTOs
 
-> **CH:** 6h (3h teóricas · 3h práticas) · **Semanas 6–7** · **Pré-requisitos:** M02, M06
-> **Ementa:** *Views: Mapeamento de URLs; Criação de classes / métodos / funções para
-> processamento de requisições.* (+ *operações CRUD a partir da API do framework*)
+> **CH:** 6h (3h teóricas · 3h práticas) · **Semana 7** · **Pré-requisitos:** M03, M06
 
-O módulo que fecha o backend. Ao final dele existe uma API real, documentada e testável —
-que é o **pré-requisito para o frontend começar** na semana 8.
+Fecha o backend. Aqui a ementa é atendida em dois itens: *"mapeamento de URLs"* e *"criação
+de classes, métodos e funções para processamento das requisições"*.
+
+Ao final deste módulo a API está pronta — e o frontend do M08 tem contra o que trabalhar.
 
 ## 🎯 Objetivos
 
-1. Mapear URLs para views com parâmetros tipados, prefixos, namespaces e routers.
-2. Escrever views como **função**, como **classe** (`APIView`) e como **ViewSet**, sabendo
-   quando usar cada uma.
-3. Serializar e **validar** dados com `Serializer` e `ModelSerializer`.
-4. Implementar filtros, busca, ordenação e paginação.
-5. Gerar documentação OpenAPI e tipos TypeScript a partir do código.
+Ao final você será capaz de:
+
+1. Desenhar rotas REST coerentes, com o método e o status corretos.
+2. Validar entrada com DTOs, sem escrever `if` de validação.
+3. Explicar por que a entidade **não** deve ser exposta na resposta.
+4. Publicar um contrato OpenAPI que o frontend consome sem adivinhar.
 
 ---
 
 ## 📖 Teoria (3h)
 
-### 1. Mapeamento de URLs (30 min)
-
-#### O grafo de URLconfs
+### 1. O recurso é um substantivo
 
 ```
-config/urls.py                                (raiz, apontada por ROOT_URLCONF)
-├── path("admin/", admin.site.urls)
-├── path("api/", include("acervo.urls"))      -> /api/obras/, /api/obras/42/
-└── path("api/schema/", SpectacularAPIView)   -> OpenAPI
+❌ POST /api/criarObra           ✅ POST   /api/obras
+❌ GET  /api/obras/deletar/42    ✅ DELETE /api/obras/42
+❌ GET  /api/buscarObrasPorAutor ✅ GET    /api/obras?autorId=3
 ```
 
-```python
-# acervo/urls.py
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
+A URL identifica **o quê**; o método HTTP diz **o que fazer** com ele. Verbo na URL é
+sintoma de que o método está sendo ignorado.
 
-from . import views
-
-router = DefaultRouter()
-router.register("obras", views.ObraViewSet, basename="obra")
-router.register("autores", views.AutorViewSet, basename="autor")
-router.register("emprestimos", views.EmprestimoViewSet, basename="emprestimo")
-
-app_name = "acervo"
-
-urlpatterns = [
-    path("", include(router.urls)),
-    path("relatorios/acervo/", views.relatorio_acervo, name="relatorio_acervo"),
-]
-```
-
-**Uma linha de `router.register` gera seis rotas:**
-
-| Rota | Método | Ação do ViewSet | Status |
+| Método | Rota | Faz | Status de sucesso |
 |---|---|---|---|
-| `/api/obras/` | GET | `list` | 200 |
-| `/api/obras/` | POST | `create` | 201 |
-| `/api/obras/{id}/` | GET | `retrieve` | 200 |
-| `/api/obras/{id}/` | PUT | `update` | 200 |
-| `/api/obras/{id}/` | PATCH | `partial_update` | 200 |
-| `/api/obras/{id}/` | DELETE | `destroy` | 204 |
+| `GET` | `/obras` | Lista | 200 |
+| `GET` | `/obras/42` | Detalha | 200 · **404** se não existe |
+| `POST` | `/obras` | Cria | **201** |
+| `PATCH` | `/obras/42` | Altera parcialmente | 200 |
+| `PUT` | `/obras/42` | Substitui inteiro | 200 |
+| `DELETE` | `/obras/42` | Remove | **204** (sem corpo) |
 
-É o contrato do M02 materializado — e é por isso que o contrato vem antes: o router
-**impõe** a convenção de recurso + método, e desvios ficam evidentes.
+**PATCH ou PUT?** `PUT` exige o recurso inteiro — omitir um campo o apaga. `PATCH` altera só
+o que veio. Formulário de edição quase sempre quer `PATCH`. Este material usa `PATCH`.
 
-#### Converters (rotas fora do router)
+**Status importa.** `200` para tudo obriga o cliente a inspecionar o corpo para saber se deu
+certo. É por isso que o M08 consegue tratar erro em um lugar só: o status é confiável.
 
-| Converter | Casa com | Exemplo |
-|---|---|---|
-| `str` | Texto sem `/` | `<str:slug>` |
-| `int` | Dígitos | `<int:pk>` |
-| `slug` | `a-z0-9-_` | `<slug:slug>` |
-| `uuid` | UUID | `<uuid:id>` |
-| `path` | Texto **com** `/` | `<path:arquivo>` |
+### 2. Por que DTO e não a entidade
 
-O Django testa os padrões **na ordem**; padrão genérico antes de específico esconde o
-específico:
+A tentação é receber e devolver a entidade direto. Três razões para não:
 
-```python
-# ❌ /api/obras/destaques/ nunca é alcançada
-path("obras/<str:slug>/", ...),
-path("obras/destaques/", ...),
+**Entrada — *mass assignment*.** Se o controller faz `save(req.body)`, quem enviar
+`{"titulo":"X","destaque":true,"criadoEm":"1999-01-01"}` grava tudo. O DTO define **o que é
+aceito**; o resto é descartado.
 
-# ✅ literal primeiro
-path("obras/destaques/", ...),
-path("obras/<str:slug>/", ...),
-```
+**Saída — vazamento.** A entidade `Usuario` tem `senhaHash`. Devolvê-la inteira publica o
+hash de todo mundo. O M13 volta a este ponto.
 
-#### Nomear e reverter
-
-```python
-from django.urls import reverse
-reverse("acervo:obra-detail", kwargs={"pk": 42})    # -> "/api/obras/42/"
-```
-
-O router nomeia as rotas como `<basename>-list` e `<basename>-detail`. Use `reverse()` nos
-testes (M14) — nunca escreva a URL literal.
-
-### 2. Views: três níveis de abstração (45 min) ⭐
-
-O DRF oferece três formas de processar uma requisição. A ementa pede as três: *classes /
-métodos / funções*.
-
-#### Nível 1 — função (`@api_view`)
-
-```python
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def relatorio_acervo(request):
-    """Tudo explícito: nenhuma convenção escondida."""
-    dados = Obra.objects.aggregate(
-        total_obras=Count("id"),
-        total_exemplares=Count("exemplares"),
-    )
-    return Response(dados)
-```
-
-**Use quando:** o endpoint não é um CRUD sobre um model — relatórios, ações de domínio,
-integrações.
-
-#### Nível 2 — classe (`APIView`)
-
-```python
-from rest_framework.views import APIView
-
-
-class ObraListAPIView(APIView):
-    def get(self, request):
-        obras = Obra.objects.select_related("autor")
-        return Response(ObraSerializer(obras, many=True).data)
-
-    def post(self, request):
-        serializer = ObraCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)     # 400 automático com os erros
-        obra = serializer.save()
-        return Response(ObraSerializer(obra).data, status=201)
-```
-
-Organiza por **método HTTP**: um método Python por verbo. **Use quando:** o fluxo é
-específico demais para um ViewSet, mas ainda é um recurso.
-
-#### Nível 3 — `ModelViewSet`
-
-```python
-from rest_framework import viewsets
-
-
-class ObraViewSet(viewsets.ModelViewSet):
-    queryset = Obra.objects.select_related("autor", "editora").prefetch_related("categorias")
-    serializer_class = ObraSerializer
-```
-
-Duas linhas úteis, seis rotas, paginação, validação e documentação. **Use quando:** é CRUD
-padrão sobre um model — o caso da maioria dos recursos.
-
-#### Como escolher
-
-| Situação | Escolha |
-|---|---|
-| CRUD padrão de um model | **`ModelViewSet`** |
-| CRUD com regras muito próprias | `ModelViewSet` + sobrescrever os métodos |
-| Recurso sem model, ou fluxo peculiar | `APIView` |
-| Relatório, ação, integração, healthcheck | **`@api_view`** |
-| Está aprendendo o mecanismo | `@api_view` primeiro — nada é implícito |
-
-> A regra honesta: use a abstração mais alta **que você consegue explicar**. `ModelViewSet`
-> que a equipe não entende vira caixa-preta na primeira exceção. Consulte
-> [cdrf.co](https://www.cdrf.co/) para ver o que cada classe realmente faz.
-
-#### Pontos de extensão do ViewSet
-
-```python
-class ObraViewSet(viewsets.ModelViewSet):
-    def get_queryset(self):          # QUE objetos esta view enxerga (controle de acesso!)
-        ...
-    def get_serializer_class(self):  # serializer diferente para leitura e escrita
-        ...
-    def perform_create(self, serializer):   # o que fazer ao salvar
-        serializer.save(cadastrada_por=self.request.user)
-    def get_permissions(self):       # permissões por ação
-        ...
-```
-
-#### Ações customizadas
-
-```python
-from rest_framework.decorators import action
-
-
-class EmprestimoViewSet(viewsets.ModelViewSet):
-    @action(detail=True, methods=["post"])
-    def devolver(self, request, pk=None):
-        """POST /api/emprestimos/42/devolver/"""
-        emprestimo = self.get_object()
-        if emprestimo.devolvido_em:
-            return Response({"detail": "Empréstimo já devolvido."}, status=409)
-        emprestimo.devolver()
-        return Response(EmprestimoSerializer(emprestimo).data)
-
-    @action(detail=False, methods=["get"])
-    def atrasados(self, request):
-        """GET /api/emprestimos/atrasados/"""
-        qs = self.get_queryset().filter(
-            devolvido_em__isnull=True, previsao_devolucao__lt=timezone.localdate()
-        )
-        return Response(self.get_serializer(qs, many=True).data)
-```
-
-`detail=True` gera `/{id}/acao/`; `detail=False` gera `/acao/`.
-
-### 3. Serializers (50 min) ⭐
-
-O serializer faz **três** coisas: converte objeto → JSON, converte JSON → objeto e
-**valida**. É o `Form` do Django, adaptado a API.
-
-```python
-from rest_framework import serializers
-
-from .models import Obra
-
-
-class AutorResumoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Autor
-        fields = ["id", "nome"]
-
-
-class ObraSerializer(serializers.ModelSerializer):
-    """Leitura: relações aninhadas, campos calculados."""
-
-    autor = AutorResumoSerializer(read_only=True)
-    exemplares_total = serializers.IntegerField(read_only=True)
-    exemplares_disponiveis = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = Obra
-        fields = ["id", "titulo", "subtitulo", "autor", "editora", "ano_publicacao",
-                  "isbn", "sinopse", "exemplares_total", "exemplares_disponiveis"]
-
-
-class ObraCreateSerializer(serializers.ModelSerializer):
-    """Escrita: só ids, e só o que o cliente pode definir."""
-
-    class Meta:
-        model = Obra
-        fields = ["titulo", "subtitulo", "autor", "editora", "categorias",
-                  "ano_publicacao", "isbn", "sinopse"]
-```
-
-> **Aninhe na leitura, use id na escrita** — a decisão do contrato (M02) implementada. A
-> tela quer `autor.nome` sem uma segunda requisição; o formulário só precisa mandar
-> `autor: 7`.
-
-```python
-class ObraViewSet(viewsets.ModelViewSet):
-    def get_serializer_class(self):
-        if self.action in {"create", "update", "partial_update"}:
-            return ObraCreateSerializer
-        return ObraSerializer
-```
-
-> ⚠️ **Nunca use `fields = "__all__"`.** Quando alguém adicionar `aprovada_por_admin` ao
-> model, o campo aparece na API pública sem ninguém perceber. É *mass assignment* (M13).
-
-#### Validação
-
-O DRF valida em três níveis, na mesma ordem do `Form` do Django:
-
-```python
-class ObraCreateSerializer(serializers.ModelSerializer):
-
-    # 1. por campo
-    def validate_isbn(self, valor):
-        limpo = valor.replace("-", "").replace(" ", "")
-        if limpo and (not limpo.isdigit() or len(limpo) not in (10, 13)):
-            raise serializers.ValidationError("O ISBN deve ter 10 ou 13 dígitos.")
-        return limpo                      # SEMPRE retorne o valor (limpo)
-
-    def validate_ano_publicacao(self, valor):
-        atual = timezone.localdate().year
-        if valor and valor > atual:
-            raise serializers.ValidationError(f"O ano não pode ser maior que {atual}.")
-        return valor
-
-    # 2. entre campos
-    def validate(self, attrs):
-        if attrs.get("subtitulo") and not attrs.get("titulo"):
-            raise serializers.ValidationError(
-                {"titulo": "Informe o título antes do subtítulo."}
-            )
-        return attrs
-```
-
-Erro de validação vira, automaticamente, uma resposta **400** no formato do contrato:
-
-```json
-{
-  "isbn": ["O ISBN deve ter 10 ou 13 dígitos."],
-  "ano_publicacao": ["O ano não pode ser maior que 2026."]
-}
-```
-
-**Validação de unicidade ao editar** — a pegadinha clássica:
-
-```python
-class Meta:
-    validators = [
-        serializers.UniqueTogetherValidator(
-            queryset=Obra.objects.all(), fields=["titulo", "autor"],
-            message="Já existe uma obra com este título para este autor.",
-        )
-    ]
-```
-
-O DRF exclui a própria instância automaticamente na edição — ao contrário do `Form`, onde
-era preciso lembrar do `exclude(pk=self.instance.pk)`.
-
-#### Serializer com regra de negócio
-
-```python
-class EmprestimoCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Emprestimo
-        fields = ["exemplar", "associado"]
-
-    def validate_exemplar(self, exemplar):
-        if not exemplar.disponivel:
-            raise serializers.ValidationError("Este exemplar já está emprestado.")
-        return exemplar
-
-    def validate_associado(self, associado):
-        if not associado.pode_pegar_emprestado:
-            raise serializers.ValidationError("Associado inativo ou no limite de empréstimos.")
-        return associado
-```
-
-> A regra continua vivendo no **model** (M04); o serializer apenas a consulta e traduz para
-> uma mensagem. Isso mantém a regra válida também no admin, no shell e nos comandos.
-
-### 4. Filtros, busca, ordenação e paginação (30 min)
-
-```bash
-pip install django-filter
-```
-
-```python
-# settings.py
-REST_FRAMEWORK = {
-    "DEFAULT_FILTER_BACKENDS": [
-        "django_filters.rest_framework.DjangoFilterBackend",
-        "rest_framework.filters.SearchFilter",
-        "rest_framework.filters.OrderingFilter",
-    ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 20,
-}
-```
-
-```python
-class ObraViewSet(viewsets.ModelViewSet):
-    filterset_fields = ["autor", "editora", "ano_publicacao", "categorias"]
-    search_fields = ["titulo", "subtitulo", "isbn", "autor__nome"]
-    ordering_fields = ["titulo", "ano_publicacao", "criado_em"]
-    ordering = ["titulo"]
-```
+**Contrato — acoplamento.** Se a resposta *é* a entidade, renomear uma coluna quebra o
+frontend. Com DTO, existe uma camada onde a mudança é absorvida de propósito.
 
 ```
-GET /api/obras/?search=casmurro&autor=7&ordering=-ano_publicacao&page=2
+Requisição ──▶ [ DTO de entrada ] ──▶ Service ──▶ Entidade ──▶ Banco
+Resposta   ◀── [ DTO de saída   ] ◀── Service ◀── Entidade ◀── Banco
 ```
 
-> `ordering_fields` explícito é **controle de acesso**, não estética: sem ele, o cliente
-> ordena por qualquer campo, inclusive de relações, e vaza a existência e a ordem de dados
-> que não deveria ver (M13).
-
-**Paginação nunca é opcional.** Um endpoint sem paginação funciona com 50 registros e
-derruba o servidor com 50.000.
-
-### 5. Documentação e tipos (25 min) ⭐
-
-```python
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-
-
-class ObraViewSet(viewsets.ModelViewSet):
-    @extend_schema(
-        summary="Lista as obras do acervo",
-        parameters=[OpenApiParameter("search", str, description="Busca em título e autor")],
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-```
-
-```bash
-python manage.py spectacular --file schema.yml     # gera o OpenAPI
-```
-
-E, no frontend, os tipos saem do mesmo schema:
-
-```bash
-cd frontend
-pnpm add -D openapi-typescript
-pnpm dlx openapi-typescript ../backend/schema.yml -o src/api/schema.d.ts
-```
+### 3. Validação declarativa
 
 ```ts
-import type { components } from "./api/schema";
+export class CriarObraDto {
+  @IsString() @Length(1, 200)
+  titulo: string;
 
-type Obra = components["schemas"]["Obra"];    // sempre sincronizado com o backend
+  @IsInt() @Min(1400) @Max(2100) @IsOptional()
+  anoPublicacao?: number;
+}
 ```
 
-**Por que isso importa:** renomear `titulo` no serializer muda o schema, que muda o tipo,
-que faz o TypeScript **falhar na compilação**. É a defesa concreta contra o contrato
-quebrado em silêncio, descrito no M02. Coloque a geração no CI (M14).
+Nenhum `if`. Os decorators são lidos pelo `ValidationPipe`, que roda **antes** do controller:
+se a entrada não bate, o Nest responde 400 com a lista de erros, e o seu método nunca é
+chamado.
+
+O `ValidationPipe` global, com `whitelist: true`, é a linha que impede *mass assignment*:
+propriedade não declarada no DTO é **removida** do objeto.
+
+### 4. Camadas, de novo
+
+| Camada | Responsabilidade |
+|---|---|
+| **DTO** | O formato aceito e devolvido |
+| **Controller** | Rota, status, extração de parâmetros |
+| **Service** | Regra de negócio |
+| **Repository** | Acesso a dados |
+
+Regra que resolve as dúvidas: **o service não sabe que HTTP existe**. Se você precisou
+importar `Request` ou `Response` dentro dele, a lógica está na camada errada.
+
+### 5. Erros no formato do domínio
+
+```ts
+throw new NotFoundException("Obra não encontrada");
+throw new ConflictException("Já existe exemplar com este tombo");
+throw new ForbiddenException("Você não pode editar obra de outro usuário");
+```
+
+Cada uma vira o status certo com corpo JSON padronizado. O service lança linguagem de
+domínio; o framework traduz para HTTP. É o mesmo princípio da separação de camadas.
+
+💼 **No mercado:** desenhar rota, escolher status e validar entrada é o trabalho diário de
+quem faz backend. Em entrevista, "quando você usaria PATCH em vez de PUT?" e "como você
+evita mass assignment?" separam quem copiou tutorial de quem entendeu.
 
 ---
 
 ## 🛠️ Roteiro prático (3h)
 
-### Passo 1 — CRUD de Obra com ViewSet (50 min)
-
-Implemente `ObraSerializer`, `ObraCreateSerializer` e `ObraViewSet` conforme a teoria,
-registre no router e teste **todas** as seis rotas:
+### Passo 1 — Validação global (20 min)
 
 ```bash
-# Linux/macOS/WSL/Git Bash
-curl http://localhost:8000/api/obras/
-curl http://localhost:8000/api/obras/1/
-curl -X POST http://localhost:8000/api/obras/ \
-     -H "Content-Type: application/json" \
-     -d '{"titulo":"Memórias Póstumas","autor":1,"ano_publicacao":1881}'
-curl -X PATCH http://localhost:8000/api/obras/1/ \
-     -H "Content-Type: application/json" -d '{"ano_publicacao":1899}'
-curl -X DELETE http://localhost:8000/api/obras/1/ -i
+cd ~/dev/bibliocom/backend
+pnpm add class-validator class-transformer
+```
+
+Em `src/main.ts`:
+
+```ts
+app.useGlobalPipes(
+  new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }),
+);
+```
+
+| Opção | O que faz | Por que importa |
+|---|---|---|
+| `whitelist: true` | Remove propriedades não declaradas no DTO | **A proteção contra mass assignment** |
+| `forbidNonWhitelisted: true` | Em vez de remover em silêncio, responde 400 | Erro de integração aparece cedo, não em produção |
+| `transform: true` | Converte o corpo em instância do DTO e faz coerção de tipo | Sem isto, `"42"` da query continua string |
+
+### Passo 2 — DTOs de entrada (35 min)
+
+`src/acervo/dto/criar-obra.dto.ts`:
+
+```ts
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsArray, IsInt, IsOptional, IsString, Length, Max, Min } from "class-validator";
+
+export class CriarObraDto {
+  @ApiProperty({ example: "Dom Casmurro", maxLength: 200 })
+  @IsString()
+  @Length(1, 200)
+  titulo: string;
+
+  @ApiPropertyOptional({ example: 1899 })
+  @IsOptional()
+  @IsInt()
+  @Min(1400)
+  @Max(2100)
+  anoPublicacao?: number;
+
+  @ApiProperty({ example: 3, description: "id do autor" })
+  @IsInt()
+  autorId: number;
+
+  @ApiPropertyOptional({ type: [Number], example: [1, 4] })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  categoriaIds?: number[];
+}
+```
+
+| Trecho | O que faz |
+|---|---|
+| `@ApiProperty` | Alimenta o Swagger. É o que faz a documentação nascer do código |
+| `@IsOptional()` | Sem ele, `undefined` reprova nas outras regras |
+| `@IsInt({ each: true })` | Valida **cada item** do array |
+| `Length(1, 200)` | Mínimo 1 impede título vazio; 200 casa com o `@Column` da entidade |
+
+`src/acervo/dto/atualizar-obra.dto.ts` — um `PATCH` aceita qualquer subconjunto:
+
+```ts
+import { PartialType } from "@nestjs/swagger";
+import { CriarObraDto } from "./criar-obra.dto";
+
+export class AtualizarObraDto extends PartialType(CriarObraDto) {}
+```
+
+`PartialType` torna **todos** os campos opcionais, preservando as validações de quem vier.
+Uma linha em vez de um arquivo duplicado que sai de sincronia.
+
+E o DTO da query, que também é entrada e também merece validação:
+
+```ts
+export class ListarObrasDto {
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1)
+  pagina = 1;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100)
+  tamanho = 20;
+
+  @IsOptional() @IsString() @Length(1, 100)
+  busca?: string;
+}
+```
+
+| Trecho | Por quê |
+|---|---|
+| `@Type(() => Number)` | Query string chega como texto sempre. Sem isto, `@IsInt` reprova `"2"` |
+| `@Max(100)` no `tamanho` | Impede `?tamanho=999999` derrubar a API. **Limite de paginação é segurança**, não capricho |
+
+### Passo 3 — DTO de saída (30 min)
+
+`src/acervo/dto/obra.resposta.ts`:
+
+```ts
+export class ObraResposta {
+  @ApiProperty() id: number;
+  @ApiProperty() titulo: string;
+  @ApiProperty({ nullable: true }) anoPublicacao: number | null;
+  @ApiProperty() autor: { id: number; nome: string };
+  @ApiProperty({ type: [String] }) categorias: string[];
+  @ApiProperty() exemplaresDisponiveis: number;
+
+  static de(obra: Obra): ObraResposta {
+    return {
+      id: obra.id,
+      titulo: obra.titulo,
+      anoPublicacao: obra.anoPublicacao,
+      autor: { id: obra.autor.id, nome: obra.autor.nome },
+      categorias: (obra.categorias ?? []).map((c) => c.nome),
+      exemplaresDisponiveis: (obra.exemplares ?? []).filter((e) => e.disponivel).length,
+    };
+  }
+}
+```
+
+Repare no que a resposta **não** tem: `criadoEm`, `atualizadoEm`, o `autorId` cru, a
+biografia inteira da autora. E no que ela **tem** e a entidade não: `exemplaresDisponiveis`,
+um número calculado que o frontend usaria três requisições para descobrir.
+
+> **É este o argumento do DTO de saída.** Não é cerimônia: é desenhar a resposta para quem
+> vai consumi-la, em vez de despejar a tabela.
+
+### Passo 4 — O controller completo (45 min)
+
+```ts
+@ApiTags("obras")
+@Controller("obras")
+export class AcervoController {
+  constructor(private readonly acervo: AcervoService) {}
+
+  @Get()
+  @ApiOkResponse({ type: [ObraResposta] })
+  async listar(@Query() filtros: ListarObrasDto) {
+    return this.acervo.listar(filtros);
+  }
+
+  @Get(":id")
+  @ApiOkResponse({ type: ObraResposta })
+  @ApiNotFoundResponse({ description: "Obra não encontrada" })
+  async buscarUm(@Param("id", ParseIntPipe) id: number) {
+    return ObraResposta.de(await this.acervo.buscarUm(id));
+  }
+
+  @Post()
+  @HttpCode(201)
+  @ApiCreatedResponse({ type: ObraResposta })
+  async criar(@Body() dto: CriarObraDto) {
+    return ObraResposta.de(await this.acervo.criar(dto));
+  }
+
+  @Patch(":id")
+  async atualizar(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() dto: AtualizarObraDto,
+  ) {
+    return ObraResposta.de(await this.acervo.atualizar(id, dto));
+  }
+
+  @Delete(":id")
+  @HttpCode(204)
+  async remover(@Param("id", ParseIntPipe) id: number) {
+    await this.acervo.remover(id);
+  }
+}
+```
+
+| Trecho | O que faz |
+|---|---|
+| `@Query() filtros: ListarObrasDto` | A query inteira validada e convertida numa classe |
+| `@Body() dto: CriarObraDto` | O corpo já validado. Se chegar aqui, é válido |
+| `@HttpCode(201)` / `@HttpCode(204)` | O padrão do Nest é 201 no POST e 200 nos demais. Explicitar deixa o contrato legível |
+| `@ApiNotFoundResponse` | Documenta o caminho de erro. Contrato que só descreve o sucesso é contrato pela metade |
+| retorno vazio no `DELETE` | 204 significa "sem conteúdo". Devolver corpo aqui contradiz o status |
+
+⚠️ **Ordem de rotas importa.** Se você criar `@Get("destaques")` **depois** de `@Get(":id")`,
+a requisição a `/obras/destaques` casa com `:id`, e o `ParseIntPipe` responde 400. Rotas
+literais vêm **antes** das paramétricas.
+
+### Passo 5 — Testar o contrato inteiro (30 min)
+
+```bash
+# Linux / macOS / WSL / Git Bash
+curl -i -X POST http://localhost:3000/api/obras \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"Memórias Póstumas","anoPublicacao":1881,"autorId":1}'
+
+curl -i -X POST http://localhost:3000/api/obras \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"","anoPublicacao":3000,"autorId":1}'
+
+curl -i -X POST http://localhost:3000/api/obras \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"X","autorId":1,"destaque":true}'
 ```
 
 ```powershell
-# Windows PowerShell. Para corpos JSON, o caminho de menor atrito e um arquivo:
-'{"titulo":"Memorias Postumas","autor":1,"ano_publicacao":1881}' | Set-Content obra.json
+# Windows PowerShell
+$h = @{ "Content-Type" = "application/json" }
+Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Post -Headers $h `
+  -Body '{"titulo":"Memórias Póstumas","anoPublicacao":1881,"autorId":1}'
 
-curl.exe http://localhost:8000/api/obras/
-curl.exe http://localhost:8000/api/obras/1/
-curl.exe -X POST http://localhost:8000/api/obras/ -H "Content-Type: application/json" -d "@obra.json"
-curl.exe -X PATCH http://localhost:8000/api/obras/1/ -H "Content-Type: application/json" -d '{\"ano_publicacao\":1899}'
-curl.exe -X DELETE http://localhost:8000/api/obras/1/ -i
+# os dois casos de erro: -SkipHttpErrorCheck mostra o corpo em vez de lançar
+Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Post -Headers $h `
+  -Body '{"titulo":"","anoPublicacao":3000,"autorId":1}' -SkipHttpErrorCheck
+Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Post -Headers $h `
+  -Body '{"titulo":"X","autorId":1,"destaque":true}' -SkipHttpErrorCheck
 ```
 
-> 🪟 O PowerShell reescreve aspas duplas antes de repassar ao `curl.exe`. Use arquivo
-> (`-d "@arquivo.json"`), escape com `\"`, ou rode estes comandos no **Git Bash**/**WSL**.
-> Ver [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#continuação-de-linha).
+Preencha a tabela com o que observou:
 
-Confira o status de cada uma contra o contrato que você escreveu no M02.
+| Requisição | Status esperado | Status obtido | O corpo explica o erro? |
+|---|---|---|---|
+| Válida | 201 | | |
+| Título vazio, ano 3000 | 400 | | |
+| Campo `destaque` não declarado | 400 | | |
 
-### Passo 2 — Anotações e desempenho (30 min)
+O terceiro caso é o `forbidNonWhitelisted` em ação: um campo que o DTO não declara é
+**recusado**, não ignorado. É a diferença entre uma API que avisa e uma que grava lixo.
 
-`exemplares_total` e `exemplares_disponiveis` não podem ser propriedades Python: isso é
-N+1 (M06). Anote no queryset:
+### Passo 6 — Congelar o contrato (20 min)
 
-```python
-class ObraViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Obra.objects.select_related("autor", "editora")
-        .prefetch_related("categorias")
-        .annotate(
-            exemplares_total=Count("exemplares", distinct=True),
-            exemplares_disponiveis=Count(
-                "exemplares",
-                filter=Q(exemplares__emprestimos__devolvido_em__isnull=True),
-                distinct=True,
-            ),
-        )
-        .order_by("titulo")
-    )
+Em `main.ts`, exponha o schema como arquivo:
+
+```ts
+const documento = SwaggerModule.createDocument(app, config);
+SwaggerModule.setup("api/docs", app, documento);
+writeFileSync("./openapi.json", JSON.stringify(documento, null, 2));
 ```
 
-Meça com o Debug Toolbar ou `CaptureQueriesContext`: quantas consultas a listagem de 20
-obras faz **antes** e **depois**? Registre.
+Abra `/api/docs` e confira: cada rota, cada campo, cada status — **derivado do código**.
+Documentação que não pode divergir da implementação, porque nasce dela.
 
-### Passo 3 — Validação (40 min)
-
-Implemente todas as validações da teoria e prove cada uma com `curl`:
-
-| Teste | Esperado |
-|---|---|
-| `titulo` vazio | 400, `{"titulo": ["Este campo não pode ser em branco."]}` |
-| `isbn: "abc"` | 400, mensagem do `validate_isbn` |
-| `ano_publicacao: 2999` | 400 |
-| `autor: 99999` | 400, chave estrangeira inválida |
-| Campo inexistente no corpo | Ignorado silenciosamente — **por quê?** |
-| `id` enviado no POST | Ignorado (`read_only`) — **por quê isso importa?** |
-
-As duas últimas linhas são as importantes: elas mostram que o serializer é uma **lista de
-permissões**, não uma peneira.
-
-### Passo 4 — Filtros e ação customizada (30 min)
-
-1. Configure `filterset_fields`, `search_fields` e `ordering_fields`.
-2. Implemente `EmprestimoViewSet` com as ações `devolver` (detail) e `atrasados` (list).
-3. Teste combinações: `?search=&ordering=&page=`.
-4. Tente ordenar por um campo **fora** de `ordering_fields`. O que acontece?
-
-### Passo 5 — Documentar e gerar tipos (30 min)
-
-1. Anote os endpoints com `@extend_schema`.
-2. Abra `/api/docs/` e navegue: os exemplos batem com a realidade?
-3. Gere `schema.yml` e, no frontend, `src/api/schema.d.ts`.
-4. Compare o schema gerado com o `docs/contrato-api.md` que você escreveu no M02.
-   **Onde divergiram?** Corrija o que estiver errado — pode ser o contrato, pode ser o
-   código.
-
-O passo 4 é o fechamento do bloco de backend: o contrato projetado encontra o contrato
-implementado.
+Commite o `openapi.json`. No M15 ele vira os tipos do frontend, e o CI passa a falhar
+quando o arquivo commitado não bate com o gerado. É assim que o contrato deixa de ser
+promessa e vira verificação.
 
 ---
 
 ## ⚠️ Erros comuns
 
-| Erro | Correção |
+| Sintoma | Diagnóstico |
 |---|---|
-| `fields = "__all__"` | Lista explícita (*mass assignment*) |
-| Propriedade Python no serializer | N+1; use `annotate` no queryset |
-| Endpoint sem paginação | Configure `PAGE_SIZE` |
-| `ordering` livre pelo cliente | Declare `ordering_fields` |
-| `get_queryset` sem filtro por usuário | IDOR (M13) |
-| `validate_<campo>` sem `return` | O valor vira `None` silenciosamente |
-| Mesmo serializer para leitura e escrita | Expõe campos demais ou obriga aninhamento na escrita |
-| Status 200 para criação | Use 201 e devolva o objeto criado |
-| Regra de negócio só no serializer | Coloque no model; o serializer traduz |
-| Documentação escrita à mão | Desatualiza em uma semana; gere do código |
+| DTO não valida nada | Faltou `useGlobalPipes(new ValidationPipe(...))` |
+| `anoPublicacao` da query reprova sendo número | Faltou `@Type(() => Number)` e `transform: true` |
+| `/obras/destaques` responde 400 | Rota literal declarada depois da paramétrica |
+| Resposta traz `senhaHash` ou campos internos | Você devolveu a entidade em vez do DTO de saída |
+| `POST` responde 200 | Faltou `@HttpCode(201)` |
+| Campos extras são gravados no banco | Faltou `whitelist: true` |
+| `Cannot read properties of undefined (reading 'nome')` no DTO de saída | O service não carregou `relations` (M06) |
+| Swagger vazio | Faltaram os `@ApiProperty` nos DTOs |
 
 ## ✅ Checklist de saída
 
-- [ ] CRUD completo de ao menos 2 recursos via `ModelViewSet`
-- [ ] Ao menos 1 `APIView` e 1 `@api_view` implementados e justificados
-- [ ] Serializers separados para leitura e escrita, com `fields` explícito
-- [ ] Validação por campo e entre campos, testada com `curl`
-- [ ] Ao menos 2 ações customizadas (`@action`)
-- [ ] Filtros, busca, ordenação e paginação funcionando
-- [ ] Nenhuma consulta N+1 (medido)
-- [ ] `/api/docs/` navegável e coerente
-- [ ] `schema.d.ts` gerado no frontend
-- [ ] Contrato do M02 confrontado com a implementação, e divergências resolvidas
-
-## 📦 Entrega E3 — API documentada
-
-API do BiblioCom no ar (local) com: 2+ recursos em CRUD completo, validação de servidor,
-filtros e paginação, 2 ações customizadas, documentação OpenAPI e o comparativo
-contrato-projetado × contrato-implementado.
+- [ ] Cinco rotas REST, com método e status corretos
+- [ ] `ValidationPipe` global com `whitelist` e `forbidNonWhitelisted`
+- [ ] DTOs de entrada com validação declarativa — **nenhum `if` de validação**
+- [ ] DTO de saída que **não** expõe a entidade
+- [ ] Listagem paginada, com teto de `tamanho`
+- [ ] Rotas literais declaradas antes das paramétricas
+- [ ] `/api/docs` completo, com os caminhos de erro documentados
+- [ ] `openapi.json` versionado
+- [ ] Os três casos do Passo 5 testados e a tabela preenchida
 
 ## 🧪 Exercícios
 
-Ver [`exercicios.md`](exercicios.md) · Referência rápida em [`cheatsheet.md`](cheatsheet.md).
+Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [DRF — Serializers](https://www.django-rest-framework.org/api-guide/serializers/)
-- [DRF — ViewSets](https://www.django-rest-framework.org/api-guide/viewsets/)
-- [DRF — Filtering](https://www.django-rest-framework.org/api-guide/filtering/)
-- [Classy DRF](https://www.cdrf.co/) — o que cada classe do DRF realmente faz
-- [drf-spectacular](https://drf-spectacular.readthedocs.io/)
-- [Django — Despachante de URLs](https://docs.djangoproject.com/pt-br/5.0/topics/http/urls/)
+- [NestJS — Controllers](https://docs.nestjs.com/controllers)
+- [NestJS — Validation](https://docs.nestjs.com/techniques/validation)
+- [NestJS — OpenAPI](https://docs.nestjs.com/openapi/introduction)
+- [MDN — Códigos de status HTTP](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status)

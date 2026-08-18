@@ -1,294 +1,170 @@
-# M07 — Cheatsheet: URLs, Views e Serializers (DRF)
+# Cola — Controllers, DTOs e validação
 
-## URLconf e router
+## Rotas e métodos
 
-```python
-# config/urls.py
-from django.urls import include, path
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+| Método | Rota | Status |
+|---|---|---|
+| `GET` | `/obras` | 200 |
+| `GET` | `/obras/:id` | 200 · 404 |
+| `POST` | `/obras` | **201** |
+| `PATCH` | `/obras/:id` | 200 · 404 |
+| `PUT` | `/obras/:id` | 200 (substitui inteiro) |
+| `DELETE` | `/obras/:id` | **204**, sem corpo |
 
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/", include("acervo.urls")),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
-]
+URL é substantivo; o verbo é o método HTTP.
+
+## Controller
+
+```ts
+@ApiTags("obras")
+@Controller("obras")
+export class AcervoController {
+  constructor(private readonly acervo: AcervoService) {}
+
+  @Get()
+  listar(@Query() filtros: ListarObrasDto) {}
+
+  @Get(":id")
+  buscarUm(@Param("id", ParseIntPipe) id: number) {}
+
+  @Post()
+  @HttpCode(201)
+  criar(@Body() dto: CriarObraDto) {}
+
+  @Delete(":id")
+  @HttpCode(204)
+  remover(@Param("id", ParseIntPipe) id: number) {}
+}
 ```
 
-```python
-# acervo/urls.py
-from rest_framework.routers import DefaultRouter
+⚠️ **Rota literal antes de paramétrica.** `@Get("destaques")` depois de `@Get(":id")` nunca
+é alcançada.
 
-router = DefaultRouter()
-router.register("obras", views.ObraViewSet, basename="obra")
+### Extratores
 
-app_name = "acervo"
-urlpatterns = [
-    path("", include(router.urls)),
-    path("relatorios/acervo/", views.relatorio_acervo, name="relatorio_acervo"),
-]
-```
-
-Rotas geradas: `obra-list` (`/obras/`) e `obra-detail` (`/obras/{pk}/`).
-Ações customizadas viram `obra-<nome-da-acao>`.
-
-### Converters
-
-| | Casa com |
+| Decorator | De onde |
 |---|---|
-| `<str:x>` | texto sem `/` |
-| `<int:x>` | dígitos |
-| `<slug:x>` | `a-z0-9-_` |
-| `<uuid:x>` | UUID |
-| `<path:x>` | texto **com** `/` |
+| `@Param("id")` | `/obras/:id` |
+| `@Query()` | `?pagina=1` |
+| `@Body()` | corpo JSON |
+| `@Headers("authorization")` | cabeçalho |
+| `@Req()` / `@Res()` | evite — acopla a camada HTTP |
 
-## Views — três níveis
+## ValidationPipe global
 
-```python
-# função
-@api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def minha_view(request):
-    if request.method == "POST":
-        ...
-    return Response({...}, status=200)
-
-# classe
-class MinhaAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request): ...
-    def post(self, request): ...
-
-# viewset
-class ObraViewSet(viewsets.ModelViewSet):
-    queryset = Obra.objects.all()
-    serializer_class = ObraSerializer
+```ts
+app.useGlobalPipes(new ValidationPipe({
+  whitelist: true,              // remove campo não declarado — anti mass assignment
+  forbidNonWhitelisted: true,   // e responde 400 em vez de ignorar
+  transform: true,              // converte para a classe do DTO
+}));
 ```
 
-### Variantes de ViewSet
+## DTO de entrada
 
-| Classe | Ações |
+```ts
+export class CriarObraDto {
+  @ApiProperty({ example: "Dom Casmurro" })
+  @IsString() @Length(1, 200)
+  titulo: string;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsInt() @Min(1400) @Max(2100)
+  anoPublicacao?: number;
+
+  @IsOptional() @IsArray() @IsInt({ each: true })
+  categoriaIds?: number[];
+}
+
+// PATCH: tudo opcional, validações preservadas
+export class AtualizarObraDto extends PartialType(CriarObraDto) {}
+```
+
+### Validadores
+
+| Decorator | Valida |
 |---|---|
-| `ModelViewSet` | list, create, retrieve, update, partial_update, destroy |
-| `ReadOnlyModelViewSet` | list, retrieve |
-| `GenericViewSet` + mixins | escolha as ações |
+| `@IsString()` `@IsInt()` `@IsBoolean()` | tipo |
+| `@IsEmail()` `@IsUrl()` `@IsUUID()` | formato |
+| `@Length(min, max)` `@Min()` `@Max()` | tamanho / faixa |
+| `@IsEnum(Estado)` | valor de enum |
+| `@IsOptional()` | pula as demais se `undefined` |
+| `@IsArray()` + `@X({ each: true })` | cada item |
+| `@ValidateNested()` + `@Type(() => Dto)` | objeto aninhado |
+| `@Type(() => Number)` | **query string** → número |
 
-```python
-class ObraViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                  viewsets.GenericViewSet):
-    ...
+## DTO de query
+
+```ts
+export class ListarObrasDto {
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1)
+  pagina = 1;
+
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100)
+  tamanho = 20;                 // teto é segurança, não capricho
+}
 ```
 
-### Pontos de extensão
+## DTO de saída
 
-```python
-class ObraViewSet(viewsets.ModelViewSet):
-    def get_queryset(self):
-        qs = super().get_queryset()
-        if not self.request.user.eh_equipe:
-            qs = qs.filter(publicada=True)       # controle de acesso
-        return qs
+```ts
+export class ObraResposta {
+  @ApiProperty() id: number;
+  @ApiProperty() titulo: string;
+  @ApiProperty() autor: { id: number; nome: string };
+  @ApiProperty() exemplaresDisponiveis: number;
 
-    def get_serializer_class(self):
-        if self.action in {"create", "update", "partial_update"}:
-            return ObraCreateSerializer
-        return ObraSerializer
-
-    def get_permissions(self):
-        if self.action in {"list", "retrieve"}:
-            return [AllowAny()]
-        return [IsAuthenticated()]
-
-    def perform_create(self, serializer):
-        serializer.save(cadastrada_por=self.request.user)   # servidor decide
-
-    def perform_destroy(self, instance):
-        instance.excluida_em = timezone.now()               # exclusão lógica
-        instance.save(update_fields=["excluida_em"])
+  static de(obra: Obra): ObraResposta { /* … */ }
+}
 ```
 
-### Ações customizadas
+Nunca devolva a entidade: vaza campo interno (`senhaHash`) e acopla o cliente ao esquema.
 
-```python
-@action(detail=True, methods=["post"])
-def devolver(self, request, pk=None):        # POST /api/emprestimos/42/devolver/
-    ...
+## Exceções → status
 
-@action(detail=False, methods=["get"], url_path="em-atraso")
-def atrasados(self, request):                 # GET /api/emprestimos/em-atraso/
-    ...
+```ts
+throw new NotFoundException("Obra não encontrada");        // 404
+throw new BadRequestException("Data inválida");            // 400
+throw new UnauthorizedException();                         // 401
+throw new ForbiddenException();                            // 403
+throw new ConflictException("Tombo já existe");            // 409
+throw new UnprocessableEntityException("Sem exemplar");    // 422
 ```
 
-## Serializers
+O service lança linguagem de domínio; o framework traduz para HTTP.
 
-```python
-class ObraSerializer(serializers.ModelSerializer):
-    autor = AutorResumoSerializer(read_only=True)          # aninhado na leitura
-    autor_id = serializers.PrimaryKeyRelatedField(
-        queryset=Autor.objects.all(), source="autor", write_only=True
-    )
-    disponiveis = serializers.IntegerField(read_only=True)  # vem do annotate
-    url = serializers.HyperlinkedIdentityField(view_name="acervo:obra-detail")
+## Swagger
 
-    class Meta:
-        model = Obra
-        fields = ["id", "titulo", "autor", "autor_id", "disponiveis", "url"]
-        read_only_fields = ["id"]
-        extra_kwargs = {"isbn": {"required": False}}
+```ts
+@ApiTags("obras")
+@ApiOkResponse({ type: ObraResposta })
+@ApiCreatedResponse({ type: ObraResposta })
+@ApiNotFoundResponse({ description: "Obra não encontrada" })
 ```
 
-### Tipos de campo
+Documente também os caminhos de erro.
 
-```python
-serializers.CharField(max_length=200, allow_blank=True, trim_whitespace=True)
-serializers.IntegerField(min_value=0, max_value=100)
-serializers.DecimalField(max_digits=8, decimal_places=2)   # dinheiro: vira string no JSON
-serializers.BooleanField(default=False)
-serializers.DateField() / DateTimeField()
-serializers.ChoiceField(choices=Situacao.choices)
-serializers.EmailField() / URLField() / UUIDField()
-serializers.ImageField() / FileField()
-serializers.SerializerMethodField()          # calculado; cuidado com N+1
-serializers.PrimaryKeyRelatedField(queryset=...)
-serializers.SlugRelatedField(slug_field="nome", queryset=...)
-serializers.StringRelatedField()             # usa __str__
-```
-
-```python
-def get_situacao(self, obj):                 # para SerializerMethodField
-    return "atrasado" if obj.esta_atrasado else "ok"
-```
-
-### Validação
-
-```python
-def validate_<campo>(self, valor):    # 1. por campo
-    if ...: raise serializers.ValidationError("mensagem")
-    return valor                       # SEMPRE retorne
-
-def validate(self, attrs):            # 2. entre campos
-    if attrs["fim"] < attrs["inicio"]:
-        raise serializers.ValidationError({"fim": "Deve ser após o início."})
-    return attrs
-
-class Meta:                            # 3. declarativa
-    validators = [
-        UniqueTogetherValidator(queryset=Obra.objects.all(), fields=["titulo", "autor"])
-    ]
-```
-
-```python
-serializer.is_valid(raise_exception=True)     # 400 automático no formato do contrato
-serializer.validated_data
-serializer.errors
-```
-
-## Permissões
-
-```python
-from rest_framework.permissions import (AllowAny, IsAuthenticated, IsAdminUser,
-                                        IsAuthenticatedOrReadOnly, BasePermission)
-
-class EhEquipeOuSomenteLeitura(BasePermission):
-    def has_permission(self, request, view):
-        if request.method in ("GET", "HEAD", "OPTIONS"):
-            return True
-        return request.user.is_authenticated and request.user.eh_equipe
-
-    def has_object_permission(self, request, view, obj):
-        return request.user.eh_equipe or obj.associado.user_id == request.user.id
-```
-
-## Filtros, busca, ordenação, paginação
-
-```python
-class ObraViewSet(viewsets.ModelViewSet):
-    filterset_fields = ["autor", "ano_publicacao"]
-    search_fields = ["titulo", "autor__nome"]        # ?search=
-    ordering_fields = ["titulo", "ano_publicacao"]   # ?ordering= (lista de permissões!)
-    ordering = ["titulo"]
-```
-
-```python
-# filtro customizado
-import django_filters
-
-class ObraFilter(django_filters.FilterSet):
-    ano_min = django_filters.NumberFilter(field_name="ano_publicacao", lookup_expr="gte")
-    ano_max = django_filters.NumberFilter(field_name="ano_publicacao", lookup_expr="lte")
-    disponivel = django_filters.BooleanFilter(method="filtrar_disponivel")
-
-    class Meta:
-        model = Obra
-        fields = ["autor", "ano_min", "ano_max", "disponivel"]
-
-    def filtrar_disponivel(self, queryset, name, value):
-        ...
-```
-
-```python
-class PaginacaoPadrao(PageNumberPagination):
-    page_size = 20
-    page_size_query_param = "page_size"
-    max_page_size = 100                    # limite: senão o cliente pede tudo
-```
-
-## Status e respostas
-
-```python
-from rest_framework import status
-from rest_framework.response import Response
-
-Response(dados)                                     # 200
-Response(dados, status=status.HTTP_201_CREATED)
-Response(status=status.HTTP_204_NO_CONTENT)
-Response({"detail": "..."}, status=status.HTTP_409_CONFLICT)
-
-from rest_framework.exceptions import (ValidationError, NotFound, PermissionDenied,
-                                       NotAuthenticated, Throttled)
-raise NotFound("Obra não encontrada.")
-raise PermissionDenied("Você não pode alterar esta obra.")
-```
-
-| Situação | Status |
-|---|---|
-| Leitura ok | 200 |
-| Criado | 201 |
-| Removido / sem corpo | 204 |
-| Dados inválidos | 400 |
-| Não autenticado | 401 |
-| Autenticado, sem permissão | 403 |
-| Não existe (ou não é seu) | 404 |
-| Conflito de estado | 409 |
-| Excesso de requisições | 429 |
-
-## Documentação e tipos
-
-```python
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
-
-@extend_schema(
-    summary="...",
-    parameters=[OpenApiParameter("search", str)],
-    responses={200: ObraSerializer(many=True)},
-    examples=[OpenApiExample("Exemplo", value={"titulo": "Dom Casmurro"})],
-)
-```
+## Testar
 
 ```bash
-python manage.py spectacular --file schema.yml
-pnpm dlx openapi-typescript ../backend/schema.yml -o src/api/schema.d.ts
+# Linux / macOS / WSL / Git Bash
+curl -i -X POST http://localhost:3000/api/obras \
+  -H "Content-Type: application/json" -d '{"titulo":"X","autorId":1}'
 ```
 
-## Anti-padrões
+```powershell
+# Windows PowerShell
+Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Post `
+  -ContentType "application/json" -Body '{"titulo":"X","autorId":1}' -SkipHttpErrorCheck
+```
 
-| ❌ | ✅ |
+## Erros
+
+| Sintoma | Causa |
 |---|---|
-| `fields = "__all__"` | lista explícita |
-| `SerializerMethodField` que consulta o banco | `annotate` no queryset |
-| Endpoint sem paginação | `PAGE_SIZE` + `max_page_size` |
-| `ordering` livre | `ordering_fields` declarado |
-| `get_queryset` sem filtrar por usuário | filtre — evita IDOR |
-| Mesmo serializer para ler e escrever | dois serializers |
-| Campo sensível vindo do cliente | `perform_create(serializer.save(user=...))` |
-| 200 para tudo | status correto por situação |
+| DTO não valida | Faltou `useGlobalPipes` |
+| Query numérica reprova | Faltou `@Type(() => Number)` + `transform: true` |
+| `/obras/destaques` dá 400 | Rota literal depois da paramétrica |
+| `POST` responde 200 | Faltou `@HttpCode(201)` |
+| Campo extra é gravado | Faltou `whitelist: true` |
+| Swagger vazio | Faltaram os `@ApiProperty` |

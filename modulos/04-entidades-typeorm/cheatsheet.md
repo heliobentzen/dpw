@@ -1,199 +1,128 @@
-# M04 — Cheatsheet: Models
+# Cola — Entidades TypeORM
 
 ## Esqueleto
 
-```python
-from django.db import models
+```ts
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
+@Entity()                      // nome da tabela = nome da classe em minúsculas
+export class Obra {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-class MinhaEntidade(models.Model):
-    # campos
-    nome = models.CharField("rótulo", max_length=100)
-
-    class Meta:
-        verbose_name = "minha entidade"
-        verbose_name_plural = "minhas entidades"
-        ordering = ["nome"]
-        constraints = [...]
-        indexes = [...]
-
-    def __str__(self):
-        return self.nome
-
-    def get_absolute_url(self):
-        return reverse("app:detail", kwargs={"pk": self.pk})
+  @Column({ length: 200 })
+  titulo: string;
+}
 ```
 
-## Campos
+`@Entity("acervo_obra")` força outro nome de tabela.
 
-```python
-# texto
-models.CharField(max_length=100)
-models.TextField(blank=True)
-models.SlugField(unique=True)
-models.EmailField()
-models.URLField()
+## Colunas
 
-# números
-models.IntegerField()
-models.PositiveIntegerField()
-models.DecimalField(max_digits=10, decimal_places=2)   # dinheiro
-models.FloatField()                                     # NUNCA para dinheiro
-
-# data/hora
-models.DateField()
-models.DateTimeField()
-models.DateField(default=timezone.localdate)
-models.DateTimeField(auto_now_add=True)   # só na criação
-models.DateTimeField(auto_now=True)       # a cada save()
-models.DurationField()
-
-# lógico e arquivos
-models.BooleanField(default=False)
-models.FileField(upload_to="docs/%Y/%m/")
-models.ImageField(upload_to="capas/")      # requer Pillow
-models.UUIDField(default=uuid.uuid4, editable=False)
-models.JSONField(default=dict)
-```
-
-## Opções
-
-```python
-null=True          # permite NULL no BANCO
-blank=True         # permite vazio na VALIDAÇÃO
-default=...        # valor padrão
-unique=True        # restrição de unicidade
-db_index=True      # índice
-editable=False     # some dos formulários
-choices=...        # conjunto fechado de valores
-help_text="..."    # ajuda no form/admin
-verbose_name="..." # rótulo (1º posicional)
-```
-
-**Regra do null/blank**
-
-| Tipo | Opcional |
+| Decorator | Gera |
 |---|---|
-| `CharField`, `TextField` | `blank=True` |
-| Numérico, data, FK | `null=True, blank=True` |
-| `BooleanField` | `default=False` (ou `null=True` se "não informado" for válido) |
+| `@PrimaryGeneratedColumn()` | `SERIAL PRIMARY KEY` |
+| `@PrimaryGeneratedColumn("uuid")` | `UUID PRIMARY KEY` |
+| `@Column({ length: 200 })` | `varchar(200)` |
+| `@Column({ type: "text" })` | `text` |
+| `@Column({ type: "int" })` | `integer` |
+| `@Column({ type: "decimal", precision: 10, scale: 2 })` | `decimal(10,2)` — **dinheiro** |
+| `@Column({ type: "boolean", default: false })` | `boolean NOT NULL DEFAULT false` |
+| `@Column({ type: "date" })` | `date` (sem hora) |
+| `@Column({ type: "timestamptz" })` | `timestamp with time zone` |
+| `@Column({ type: "enum", enum: Estado })` | `enum` — no SQLite use `simple-enum` |
+| `@CreateDateColumn()` | preenchido na criação |
+| `@UpdateDateColumn()` | atualizado a cada `save` |
+| `@DeleteDateColumn()` | exclusão lógica (`softDelete`) |
 
-## Choices
+### Opções
 
-```python
-class Situacao(models.TextChoices):
-    ATIVO = "ATIVO", "Ativo"
-    INATIVO = "INATIVO", "Inativo"
-
-situacao = models.CharField(max_length=10, choices=Situacao.choices, default=Situacao.ATIVO)
-
-obj.situacao == Situacao.ATIVO
-obj.get_situacao_display()          # "Ativo"
-```
-
-## Relacionamentos
-
-```python
-# 1-N
-autor = models.ForeignKey("Autor", on_delete=models.PROTECT, related_name="obras")
-obra.autor            # ida
-autor.obras.all()     # volta
-
-# N-N
-categorias = models.ManyToManyField("Categoria", related_name="obras", blank=True)
-obra.categorias.add(c) / .remove(c) / .set([...]) / .clear() / .all()
-
-# N-N com atributos
-membros = models.ManyToManyField("Pessoa", through="Participacao")
-
-# 1-1
-user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-# auto-relacionamento
-pai = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL)
-```
-
-### `on_delete`
-
-| Política | Efeito |
+| Opção | Efeito |
 |---|---|
-| `CASCADE` | Apaga os filhos |
-| `PROTECT` | Impede apagar o pai |
-| `RESTRICT` | Impede, com regra mais fina |
-| `SET_NULL` | Zera a FK (exige `null=True`) |
-| `SET_DEFAULT` | Usa o `default` |
-| `SET(fn)` | Usa o retorno de `fn` |
-| `DO_NOTHING` | Nada (perigoso) |
+| `nullable: true` | Aceita `NULL`. **Acompanhe no tipo TS:** `number \| null` |
+| `unique: true` | Índice único |
+| `default: valor` | Padrão no banco |
+| `select: false` | Não vem em `find()` — use em `senhaHash` |
 
-## Meta
+> ⚠️ Nunca `float`/`double` para dinheiro. Use `decimal`.
 
-```python
-class Meta:
-    ordering = ["-criado_em", "nome"]
-    verbose_name = "obra"
-    verbose_name_plural = "obras"
-    db_table = "acervo_obra"          # só se precisar do nome exato
-    unique_together = [["a", "b"]]    # legado; prefira UniqueConstraint
-    abstract = True                    # classe base sem tabela
-    permissions = [("pode_exportar", "Pode exportar relatórios")]
-    indexes = [models.Index(fields=["titulo"])]
-    constraints = [
-        models.UniqueConstraint(fields=["a", "b"], name="a_b_unicos"),
-        models.UniqueConstraint(
-            fields=["exemplar"],
-            condition=models.Q(devolvido_em__isnull=True),
-            name="um_ativo_por_exemplar",
-        ),
-        models.CheckConstraint(
-            condition=models.Q(fim__gte=models.F("inicio")),
-            name="fim_apos_inicio",
-        ),
-    ]
+## Relações
+
+```ts
+// 1:N — o @ManyToOne carrega a chave estrangeira
+@ManyToOne(() => Autor, (a) => a.obras, { nullable: false, onDelete: "RESTRICT" })
+autor: Autor;
+
+@OneToMany(() => Obra, (o) => o.autor)
+obras: Obra[];
+
+// N:N — @JoinTable em UM só lado
+@ManyToMany(() => Categoria, (c) => c.obras)
+@JoinTable({ name: "obra_categoria" })
+categorias: Categoria[];
+
+// 1:1
+@OneToOne(() => Perfil, { cascade: true })
+@JoinColumn()
+perfil: Perfil;
 ```
 
-> `CheckConstraint(condition=...)` a partir do Django 5.1; antes, `check=...`.
+Sempre `() => Entidade` (função), nunca a classe direta — evita erro de importação circular.
 
-## Model abstrato (reuso)
+### `onDelete`
 
-```python
-class Auditavel(models.Model):
-    criado_em = models.DateTimeField(auto_now_add=True)
-    atualizado_em = models.DateTimeField(auto_now=True)
+| Valor | O que acontece | Quando |
+|---|---|---|
+| `RESTRICT` | Impede apagar o pai | **Padrão sensato** |
+| `CASCADE` | Apaga os filhos junto | Filho não existe sem o pai (`Exemplar → Obra`) |
+| `SET NULL` | Zera a referência | Vínculo opcional |
 
-    class Meta:
-        abstract = True
+Pergunta que decide: *"este registro faz sentido sozinho?"*
 
+## Índices
 
-class Obra(Auditavel):
-    ...
+```ts
+@Index()                                    // coluna
+@Column({ length: 13 })
+isbn: string;
+
+@Index(["autor", "anoPublicacao"])          // composto, na classe
+@Index(["tombo"], { unique: true })
+@Entity()
+export class Obra {}
 ```
 
-## Comandos
+Indexe o que aparece em `WHERE`/`ORDER BY`/`JOIN` com frequência. PK e FK já são indexadas.
+
+## Registrar
+
+```ts
+// no módulo do domínio
+@Module({ imports: [TypeOrmModule.forFeature([Autor, Obra])] })
+
+// no app.module.ts
+TypeOrmModule.forRoot({
+  type: "postgres",
+  url: process.env.DATABASE_URL,
+  autoLoadEntities: true,
+  synchronize: false,          // ⚠️ true só no M04
+  logging: true,
+})
+```
+
+## Conferir o que foi gerado
 
 ```bash
-python manage.py makemigrations [app]
-python manage.py makemigrations --name descricao_curta app
-python manage.py sqlmigrate app 0001        # mostra o SQL
-python manage.py migrate [app] [numero]
-python manage.py showmigrations
-python manage.py shell
-python manage.py dbshell
-python manage.py dumpdata app --indent 2 > fixture.json
-python manage.py loaddata fixture
-python manage.py check                       # validação estática do projeto
+pnpm dlx sqlite3 bibliocom.sqlite ".schema obra"     # SQLite
+docker compose exec db psql -U bibliocom -c "\d obra" # PostgreSQL
 ```
 
-## Diagrama Mermaid do modelo (para o relatório)
+## Erros
 
-````markdown
-```mermaid
-erDiagram
-    AUTOR ||--o{ OBRA : escreve
-    EDITORA ||--o{ OBRA : publica
-    OBRA }o--o{ CATEGORIA : classifica
-    OBRA ||--o{ EXEMPLAR : possui
-    EXEMPLAR ||--o{ EMPRESTIMO : registra
-    ASSOCIADO ||--o{ EMPRESTIMO : realiza
-    USER ||--|| ASSOCIADO : autentica
-```
-````
+| Mensagem | Causa |
+|---|---|
+| `Entity metadata for X#y was not found` | Falta no `forFeature` |
+| `Cannot read properties of undefined (reading 'name')` | Importação circular — use `() => Entidade` |
+| `DataTypeNotSupportedError` | Tipo inexistente no banco (`enum` no SQLite) |
+| Tudo virou `varchar(255)` | Faltou `type`/`length` |
+| `NOT NULL constraint failed` | Campo obrigatório sem valor ou sem `default` |
