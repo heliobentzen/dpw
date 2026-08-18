@@ -90,9 +90,6 @@ A regra de roteamento, em ordem:
 3. qualquer outra coisa → index.html   ← o fallback
 ```
 
-Repare que a lista encurtou em relação a uma stack com painel administrativo embutido: não
-há `/admin/` nem estáticos de framework. **Menos rotas, menos configuração para errar.**
-
 Configuração por plataforma:
 
 ```
@@ -194,10 +191,8 @@ pnpm build            # nest build → dist/main.js
 | `start:prod` | A cada boot | Sobe a aplicação. **Sem `--watch`**, sem recompilar |
 | `migration:run:prod` | Antes de subir | Aplica as migrações pendentes (M05) |
 
-> 🎉 **Aqui a stack única economiza um problema inteiro.** Antes, o servidor de produção do
-> Python (Gunicorn) **não rodava no Windows**, e a turma precisava de um substituto só para
-> a verificação local. Com Node, `node dist/main.js` é exatamente o mesmo comando em
-> Windows, macOS, Linux e na PaaS. Não há segundo servidor, nem instrução separada.
+> `node dist/main.js` é o mesmo comando em Windows, macOS, Linux e na PaaS. Não há
+> servidor de produção separado nem instrução por plataforma.
 
 Ajuste `main.ts` para produção:
 
@@ -238,7 +233,7 @@ de `dist/`, não do fonte.
 
 > 🪟 **Finais de linha.** Se o seu deploy usa algum `.sh`, ele roda na PaaS, que é Linux —
 > salvo com CRLF, falha com `bad interpreter: No such file or directory`. Garanta o
-> `.gitattributes` com `*.sh text eol=lf` (M00). Continua valendo mesmo sem Gunicorn.
+> `.gitattributes` com `*.sh text eol=lf` (M00).
 
 ### Passo 2 — Preparar o frontend (20 min)
 
@@ -386,7 +381,7 @@ curl.exe -s -o NUL -w "%{http_code}`n" https://sua-app/obras/42
 | Login funciona local e falha em produção | Cookie `secure` não enviado | `app.set("trust proxy", 1)` |
 | Redirecionamento infinito | Loop de HTTPS | Deixe o TLS com o proxy da PaaS |
 | Erro de CORS em produção | Console cheio | Sirva os dois sob o mesmo site |
-| Uploads somem a cada deploy | Disco efêmero | Armazenamento externo |
+| Uploads somem a cada deploy | Disco efêmero — esperado | Armazenamento de objetos (S3, R2, Blob); ver M07, passo 6 |
 | Frontend publicado antes do backend | Cliente novo, API velha | Backend primeiro |
 | `500` sem detalhes | Comportamento **correto** | Leia os logs; nunca exponha `erro.stack` |
 | API responde HTML | Faltou `exclude` no `ServeStaticModule` | Estratégia B, ver Passo 4 |

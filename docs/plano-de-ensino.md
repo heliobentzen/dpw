@@ -75,7 +75,7 @@ Ao final da disciplina, o estudante será capaz de:
    versionadas.
 4. Implementar CRUD com a API do ORM, com consultas filtradas, agregadas e otimizadas.
 5. Expor esse CRUD como API REST versionada, validada, paginada e documentada (OpenAPI).
-6. Mapear URLs para views no servidor **e** rotas para telas no cliente.
+6. Mapear URLs para controllers no servidor **e** rotas para telas no cliente.
 7. Construir interfaces com componentes React, TypeScript e Tailwind, responsivas e
    acessíveis.
 8. Gerenciar estado de servidor com cache e revalidação, e formulários com validação em

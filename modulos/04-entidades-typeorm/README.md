@@ -45,16 +45,13 @@ const obra = await this.repo.findOneBy({ id });   // tipo: Obra | null
 
 ### 2. O que o ORM cobra
 
-Ferramenta honesta tem custo declarado:
-
-| Custo | Como o material trata |
+| Custo | Onde é tratado |
 |---|---|
 | Você escreve menos SQL — e entende menos SQL | O M06 exige ler o SQL gerado (`logging: true`) antes de aceitar qualquer consulta |
 | Consultas ingênuas viram lentidão (problema N+1) | M06 dedica uma seção inteira ao N+1, com medição |
 | Abstração vaza: casos difíceis exigem SQL de novo | M06 mostra o `QueryBuilder` e quando descer para SQL puro |
 
-> **A regra do material:** o ORM não é desculpa para não saber SQL. É uma forma de não
-> escrever o SQL trivial à mão — e o trivial é ~90% do CRUD.
+> O ORM não dispensa saber SQL. Ele dispensa **escrever** o SQL trivial — que é ~90% do CRUD.
 
 ### 3. Da classe à tabela
 

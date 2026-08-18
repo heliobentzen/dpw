@@ -5,10 +5,8 @@
 O módulo que **só existe nesta stack**. Backend e frontend falam a mesma linguagem — então
 podem compartilhar as definições, e o compilador passa a vigiar a fronteira entre eles.
 
-> Este módulo substitui o antigo "Django Admin". A justificativa está no
-> [ADR-12](../../docs/decisoes-tecnicas.md#adr-12--back-office-construído-não-herdado):
-> customizar um painel pronto ensina o painel; compartilhar tipos ensina a proteger um
-> contrato — e é o ganho que justifica ter escolhido TypeScript ponta a ponta.
+> Por que este módulo existe no lugar de um back-office pronto:
+> [ADR-12](../../docs/decisoes-tecnicas.md#adr-12--back-office-construído-não-herdado).
 
 ## 🎯 Objetivos
 

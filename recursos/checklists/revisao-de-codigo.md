@@ -43,9 +43,9 @@ demais e deveria ser dividido.
 ## Views e URLs
 
 - [ ] Toda ação que altera dados é POST?
-- [ ] Há `{% csrf_token %}` em todo formulário POST?
+- [ ] Rotas de escrita estão cobertas por `@UseGuards` (não só escondidas na interface)?
 - [ ] POST bem-sucedido redireciona (PRG)?
-- [ ] Nenhuma URL escrita literalmente (use `{% url %}` / `reverse`)?
+- [ ] Nenhuma URL de API escrita literalmente no cliente (use o módulo de API)?
 - [ ] `get_object_or_404` em vez de `get()` solto?
 
 ## Segurança
@@ -55,7 +55,7 @@ demais e deveria ser dividido.
 - [ ] A consulta é filtrada pelo usuário da sessão (sem IDOR)?
 - [ ] `fields` explícito no ModelForm (nada de `"__all__"`)?
 - [ ] Campos sensíveis definidos no servidor, não vindos do cliente?
-- [ ] Nenhum `|safe` / `mark_safe` sobre dado do usuário?
+- [ ] Nenhum `dangerouslySetInnerHTML` sobre dado do usuário?
 - [ ] Nenhum SQL montado com f-string?
 - [ ] Nenhuma credencial, token ou dado real de pessoa no diff?
 

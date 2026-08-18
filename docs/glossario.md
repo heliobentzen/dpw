@@ -133,21 +133,17 @@ banco quando os dados são realmente usados.
 
 **Path converter** — Tipagem no padrão da URL: `<int:pk>`, `<slug:slug>`, `<uuid:id>`.
 
-**Namespace de URL** — Prefixo que evita colisão de nomes entre apps: `acervo:obra_detail`.
-
-**`reverse()` / `{% url %}`** — Constroem a URL a partir do **nome** da rota. Nunca escreva
-URL na mão.
+**Prefixo de rota** — Definido em `@Controller("obras")`; todas as rotas da classe partem dele.
+O prefixo global (`/api`) é definido uma vez, em `main.ts`.
 
 **Slug** — Identificador textual amigável para URL: `guia-de-nestjs-para-iniciantes`.
 
-**Template** — Arquivo de texto (geralmente HTML) com marcações que o framework preenche.
+**Componente** — Função que recebe *props* e devolve JSX. É a unidade de interface do React —
+o equivalente ao "template" de frameworks com renderização no servidor.
 
-**Contexto** — Dicionário de dados que a view envia ao template.
+**Props** — Dados que o componente pai passa ao filho. São somente leitura.
 
-**Herança de template** — `{% extends %}` + `{% block %}`: um layout base, várias páginas.
-
-**Filtro de template** — Transformação de valor na exibição: `{{ nome|title }}`,
-`{{ data|date:"d/m/Y" }}`.
+**Composição** — Montar telas combinando componentes pequenos, em vez de herdar layouts.
 
 **Arquivo estático** — CSS, JS, imagens da aplicação (`STATIC_URL`).
 
@@ -195,7 +191,7 @@ f-strings em SQL, não.
 React escapa por padrão; `dangerouslySetInnerHTML` desliga a proteção.
 
 **CSRF** — *Cross-Site Request Forgery*: site malicioso dispara ação autenticada no seu
-site. Mitigado pelo token `{% csrf_token %}`.
+site. Mitigado por `SameSite=Lax` no cookie de sessão e por token anti-CSRF nas rotas de escrita.
 
 **IDOR** — *Insecure Direct Object Reference*: acessar `/pedido/42/` de outra pessoa
 trocando o número. Autorização por objeto resolve.

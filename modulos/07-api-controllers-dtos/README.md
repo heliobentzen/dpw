@@ -14,7 +14,8 @@ Ao final você será capaz de:
 1. Desenhar rotas REST coerentes, com o método e o status corretos.
 2. Validar entrada com DTOs, sem escrever `if` de validação.
 3. Explicar por que a entidade **não** deve ser exposta na resposta.
-4. Publicar um contrato OpenAPI que o frontend consome sem adivinhar.
+4. Receber upload de arquivo com validação de tipo, tamanho e nome.
+5. Publicar um contrato OpenAPI que o frontend consome sem adivinhar.
 
 ---
 
@@ -115,7 +116,7 @@ evita mass assignment?" separam quem copiou tutorial de quem entendeu.
 
 ## 🛠️ Roteiro prático (3h)
 
-### Passo 1 — Validação global (20 min)
+### Passo 1 — Validação global (15 min)
 
 ```bash
 cd ~/dev/bibliocom/backend
@@ -140,7 +141,7 @@ app.useGlobalPipes(
 | `forbidNonWhitelisted: true` | Em vez de remover em silêncio, responde 400 | Erro de integração aparece cedo, não em produção |
 | `transform: true` | Converte o corpo em instância do DTO e faz coerção de tipo | Sem isto, `"42"` da query continua string |
 
-### Passo 2 — DTOs de entrada (35 min)
+### Passo 2 — DTOs de entrada (30 min)
 
 `src/acervo/dto/criar-obra.dto.ts`:
 
@@ -245,7 +246,7 @@ um número calculado que o frontend usaria três requisições para descobrir.
 > **É este o argumento do DTO de saída.** Não é cerimônia: é desenhar a resposta para quem
 > vai consumi-la, em vez de despejar a tabela.
 
-### Passo 4 — O controller completo (45 min)
+### Passo 4 — O controller completo (40 min)
 
 ```ts
 @ApiTags("obras")
@@ -301,7 +302,7 @@ export class AcervoController {
 a requisição a `/obras/destaques` casa com `:id`, e o `ParseIntPipe` responde 400. Rotas
 literais vêm **antes** das paramétricas.
 
-### Passo 5 — Testar o contrato inteiro (30 min)
+### Passo 5 — Testar o contrato inteiro (25 min)
 
 ```bash
 # Linux / macOS / WSL / Git Bash
@@ -342,7 +343,96 @@ Preencha a tabela com o que observou:
 O terceiro caso é o `forbidNonWhitelisted` em ação: um campo que o DTO não declara é
 **recusado**, não ignorado. É a diferença entre uma API que avisa e uma que grava lixo.
 
-### Passo 6 — Congelar o contrato (20 min)
+### Passo 6 — Upload de arquivo (25 min) ⭐
+
+Toda obra tem capa. É o requisito mais comum de qualquer CRUD — e o que mais aparece mal
+feito, porque envolve três decisões que ninguém toma por você.
+
+```bash
+pnpm --filter backend add -D @types/multer
+```
+
+```ts
+@Post(":id/capa")
+@UseGuards(AutenticadoGuard)
+@UseInterceptors(
+  FileInterceptor("arquivo", {
+    limits: { fileSize: 2 * 1024 * 1024 },        // 2 MB
+    fileFilter: (_req, file, cb) => {
+      const permitidos = ["image/jpeg", "image/png", "image/webp"];
+      cb(null, permitidos.includes(file.mimetype));
+    },
+  }),
+)
+async enviarCapa(
+  @Param("id", ParseIntPipe) id: number,
+  @UploadedFile() arquivo: Express.Multer.File,
+) {
+  if (!arquivo) throw new BadRequestException("Envie um arquivo em 'arquivo'");
+  return this.acervo.salvarCapa(id, arquivo);
+}
+```
+
+| Trecho | O que faz |
+|---|---|
+| `FileInterceptor("arquivo")` | Lê o campo `arquivo` de um corpo `multipart/form-data` (M01). JSON não transporta binário |
+| `limits.fileSize` | **Teto obrigatório.** Sem ele, uma requisição de 4 GB derruba o servidor — é a mesma classe de problema do `@Max` na paginação |
+| `fileFilter` | Recusa tipos fora da lista **antes** de gravar |
+| `@UseGuards` | Upload é escrita: exige autenticação. Endpoint de upload aberto vira hospedagem de arquivo de graça para terceiros |
+
+#### As três decisões
+
+**1. Confie no conteúdo, não na extensão nem no `Content-Type`.**
+
+O `mimetype` do `fileFilter` vem do **cliente** — quem envia escolhe o que declarar. Um
+`.php` renomeado para `.jpg` passa. Confira os *magic bytes*:
+
+```ts
+const ASSINATURAS: Record<string, number[]> = {
+  "image/jpeg": [0xff, 0xd8, 0xff],
+  "image/png": [0x89, 0x50, 0x4e, 0x47],
+};
+
+function pareceImagem(buffer: Buffer, mimetype: string): boolean {
+  const esperado = ASSINATURAS[mimetype];
+  return !!esperado && esperado.every((b, i) => buffer[i] === b);
+}
+```
+
+**2. Nunca use o nome de arquivo enviado pelo cliente.**
+
+```ts
+const nome = arquivo.originalname;                 // ❌ "../../etc/cron.d/x"
+const nome = `${randomUUID()}${extname(arquivo.originalname)}`;  // ✅
+```
+
+O nome original é entrada do usuário como qualquer outra. Além do *path traversal*, ele
+permite sobrescrever o arquivo de outra pessoa e vaza informação (`orçamento-final-v3.jpg`).
+
+**3. Disco de contêiner é efêmero.**
+
+Na PaaS do M16, o disco é recriado a cada deploy: **os uploads somem**. Em desenvolvimento
+grave em `backend/uploads/` (e ponha no `.gitignore`); em produção, use armazenamento de
+objetos (S3, R2, Blob). O código muda em um lugar só se você isolar a gravação num service.
+
+**Deu certo se:**
+
+```bash
+# Linux / macOS / WSL / Git Bash
+curl -i -b cookies.txt -X POST http://localhost:3000/api/obras/1/capa -F "arquivo=@capa.jpg"
+curl -i -b cookies.txt -X POST http://localhost:3000/api/obras/1/capa -F "arquivo=@doc.pdf"
+```
+
+```powershell
+# Windows PowerShell
+curl.exe -i -b cookies.txt -X POST http://localhost:3000/api/obras/1/capa -F "arquivo=@capa.jpg"
+curl.exe -i -b cookies.txt -X POST http://localhost:3000/api/obras/1/capa -F "arquivo=@doc.pdf"
+```
+
+O primeiro responde 201; o segundo, 400. Depois renomeie o PDF para `.jpg` e reenvie: se
+passar, falta a checagem de conteúdo do item 1.
+
+### Passo 7 — Congelar o contrato (15 min)
 
 Em `main.ts`, exponha o schema como arquivo:
 
@@ -373,6 +463,9 @@ promessa e vira verificação.
 | Campos extras são gravados no banco | Faltou `whitelist: true` |
 | `Cannot read properties of undefined (reading 'nome')` no DTO de saída | O service não carregou `relations` (M06) |
 | Swagger vazio | Faltaram os `@ApiProperty` nos DTOs |
+| Upload responde 400 sempre | O nome do campo no `FileInterceptor` não bate com o do formulário |
+| Arquivo grande derruba o servidor | Faltou `limits.fileSize` |
+| Upload some depois do deploy | Disco efêmero — use armazenamento de objetos (M16) |
 
 ## ✅ Checklist de saída
 
@@ -383,6 +476,7 @@ promessa e vira verificação.
 - [ ] Listagem paginada, com teto de `tamanho`
 - [ ] Rotas literais declaradas antes das paramétricas
 - [ ] `/api/docs` completo, com os caminhos de erro documentados
+- [ ] Upload com teto de tamanho, filtro de tipo, nome gerado no servidor e conferência de conteúdo
 - [ ] `openapi.json` versionado
 - [ ] Os três casos do Passo 5 testados e a tabela preenchida
 

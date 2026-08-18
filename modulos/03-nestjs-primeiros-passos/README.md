@@ -140,42 +140,17 @@ destaca de quem responde "no service, porque sim".
 > 🐧 [`ambiente-setup.md`, seção 4](../../docs/ambiente-setup.md#4-nodejs-e-pnpm) ·
 > 🪟 [`ambiente-setup-windows.md`, passo 4](../../docs/ambiente-setup-windows.md#passo-4--nodejs-e-pnpm)
 
-### Passo 1 — O monorepo (20 min)
+### Passo 1 — Conferir o monorepo (5 min)
 
-O repositório `bibliocom` existe desde o M00. Agora ele ganha a estrutura de **workspaces**:
-uma instalação de dependências para três projetos.
+O `package.json` e o `pnpm-workspace.yaml` foram criados no M00. Confira que estão lá:
 
-Na raiz, crie `pnpm-workspace.yaml`:
-
-```yaml
-packages:
-  - "backend"
-  - "frontend"
-  - "pacotes/*"
+```bash
+cd ~/dev/bibliocom          # 🪟 Windows: Set-Location C:\dev\bibliocom
+cat pnpm-workspace.yaml
 ```
 
-E `package.json`:
-
-```json
-{
-  "name": "bibliocom",
-  "private": true,
-  "scripts": {
-    "dev:api": "pnpm --filter backend start:dev",
-    "dev:web": "pnpm --filter frontend dev"
-  }
-}
-```
-
-| Campo | O que faz |
-|---|---|
-| `"private": true` | Impede publicação acidental no npm. Obrigatório na raiz de um workspace |
-| `pnpm --filter backend <script>` | Roda o script **daquele** projeto, de qualquer pasta |
-| `pacotes/*` | Reserva o lugar do `@bibliocom/tipos`, que entra no M15 |
-
-**Por que monorepo:** um único PR mostra a mudança completa — entidade → DTO → tipo → tela.
-Com dois repositórios, a mesma mudança viraria dois PRs que podem ser mesclados fora de
-ordem, quebrando produção.
+Deve listar `backend`, `frontend` e `pacotes/*`. As pastas ainda não existem — `backend/`
+nasce no próximo passo, `frontend/` no M08 e `pacotes/tipos/` no M15.
 
 ### Passo 2 — Criar o backend (25 min)
 
@@ -207,7 +182,7 @@ backend/src/
 └── app.service.ts       provider de exemplo
 ```
 
-### Passo 3 — O primeiro módulo de domínio (35 min)
+### Passo 3 — O primeiro módulo de domínio (45 min)
 
 ```bash
 pnpm dlx @nestjs/cli generate module acervo
@@ -349,6 +324,19 @@ NODE_ENV=development
 > pessoa nova sabe o que precisa configurar. Mantenha os dois em sincronia: variável nova
 > no `.env` sem entrada no `.env.example` é o bug de integração mais comum de todos.
 
+**Falhe cedo se faltar variável.** Sem isto, uma variável ausente vira `undefined` e o erro
+aparece só quando alguém usa a funcionalidade — em produção, na sexta-feira:
+
+```ts
+ConfigModule.forRoot({
+  isGlobal: true,
+  validate: (config) => esquemaEnv.parse(config),   // Zod: mesma biblioteca do M11
+}),
+```
+
+O `parse` lança na **inicialização** se algo faltar ou estiver com tipo errado. Um serviço
+que não sobe é um problema óbvio; um que sobe quebrado é um problema caro.
+
 `src/main.ts`:
 
 ```ts
@@ -375,7 +363,7 @@ reescrever todas as URLs do frontend depois.
 **Deu certo se:** `curl.exe -i http://localhost:3000/api/obras` responde 200 e
 `http://localhost:3000/obras` agora responde 404.
 
-### Passo 5 — Documentação automática (15 min)
+### Passo 5 — Documentação automática (20 min)
 
 ```bash
 pnpm add @nestjs/swagger

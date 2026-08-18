@@ -133,6 +133,20 @@ function urlSegura(url: string): string | undefined {
 > `rel="noopener"` impede que a página aberta acesse `window.opener` e redirecione a sua —
 > o ataque de *tabnabbing*.
 
+#### Upload de arquivo
+
+Três falhas clássicas, todas cobertas no [M07, passo 6](../07-api-controllers-dtos/#passo-6--upload-de-arquivo-25-min-):
+
+| Falha | Consequência |
+|---|---|
+| Confiar no `Content-Type` enviado | Um executável renomeado passa por imagem |
+| Usar o nome de arquivo do cliente | *Path traversal* e sobrescrita de arquivo alheio |
+| Não limitar tamanho | Negação de serviço com uma requisição |
+
+E uma quarta, específica de quem serve os arquivos pelo próprio domínio: um SVG é
+**executável no navegador** (pode conter `<script>`). Se aceitar SVG, sirva-o com
+`Content-Disposition: attachment` ou a partir de outro domínio.
+
 #### Injeção de comando e path traversal
 
 ```ts
@@ -335,8 +349,7 @@ Os gabaritos estão comentados no fim de cada arquivo. Não leia antes de tentar
 
 ### Passo 2 — Auditoria de dependências e cabeçalhos (25 min)
 
-O Django tinha um `check --deploy` pronto. Aqui a verificação é montada por você — e o que
-ela audita fica explícito.
+A verificação é montada por você, e o que ela audita fica explícito.
 
 ```bash
 cd ~/dev/bibliocom/backend

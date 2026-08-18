@@ -58,10 +58,6 @@ que o Windows faz de diferente.
 | [2.4](#24--grava-arquivo-em-utf-16-) | `>` grava arquivo em UTF-16 | M07, M15, M16 |
 | [2.5](#25-a-crase-de-continuação-e-o-espaço-invisível-) | Espaço depois da crase corta o comando | todos |
 
-> 🎉 **Uma armadilha desapareceu com a mudança de stack.** O servidor de produção do Python
-> (Gunicorn) não rodava no Windows, e exigia um substituto só para a verificação local do
-> M16. Com Node, `node dist/main.js` é o mesmo comando em Windows, macOS, Linux e na PaaS.
-
 ### 2.1 `curl` no PowerShell não é o `curl` ⚠️
 
 No PowerShell, `curl` é **apelido de `Invoke-WebRequest`**, que tem outros parâmetros.
@@ -178,8 +174,8 @@ New-Item -ItemType File -Path .gitignore
 code .gitignore
 ```
 
-> No **PowerShell 7** o `>` já grava UTF-8 e o problema não existe. Mas como você não sabe
-> em qual versão o colega está, use sempre `Out-File -Encoding ascii`.
+> No **PowerShell 7** o `>` já grava UTF-8 e o problema não existe. Como você não sabe em
+> qual versão o colega está, use sempre `Out-File` com `-Encoding` explícito.
 
 ### 2.5 A crase de continuação e o espaço invisível ⚠️
 

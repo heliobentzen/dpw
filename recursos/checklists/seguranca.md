@@ -59,7 +59,7 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 ## Entrada e saída
 
 - [ ] Nenhum SQL montado com f-string/concatenação
-- [ ] Nenhum `|safe` / `mark_safe` sobre dado do usuário
+- [ ] Nenhum `dangerouslySetInnerHTML` sobre dado do usuário (ou sanitizado com DOMPurify)
 - [ ] Nenhum `dangerouslySetInnerHTML` sem sanitização (DOMPurify)
 - [ ] URLs informadas pelo usuário têm o esquema validado (só http/https)
 - [ ] Upload valida tipo (conteúdo, não extensão) e tamanho

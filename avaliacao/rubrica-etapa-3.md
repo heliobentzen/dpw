@@ -48,7 +48,7 @@
 | **D1. Autenticação** | Fluxo completo, incluindo recuperação de senha e política de senha forte | Login, logout e 2+ papéis funcionando | Autenticação frágil ou papel único | Ausente | |
 | **D2. Autorização** | Permissões + autorização por objeto; recurso alheio devolve 404 | Permissões por papel e filtro na consulta | Só exige autenticação | Sem controle; IDOR presente | |
 | **D3. Configuração** | `check --deploy` limpo, cabeçalhos de segurança nota A | `check --deploy` sem avisos | Alguns avisos | `DEBUG=True` ou segredo no repositório | |
-| **D4. Entrada e saída** | Nenhum `|safe` indevido, SQL parametrizado, upload validado, `fields` explícito | Sem vulnerabilidades identificadas nas verificações do M13 | 1 problema médio | Vulnerabilidade explorável | |
+| **D4. Entrada e saída** | Nenhum `dangerouslySetInnerHTML` sem sanitização, SQL parametrizado, upload validado por conteúdo, DTO de saída explícito | Sem vulnerabilidades identificadas nas verificações do M13 | 1 problema médio | Vulnerabilidade explorável | |
 | **D6. Dados pessoais** | Mapa de dados, minimização aplicada **no DTO de saída** (a API não devolve o que a tela não usa), aviso publicado | Mapa preenchido e aviso escrito | Mapa incompleto | Ausente; coleta sem finalidade | |
 
 ## Bloco E — Qualidade e testes (peso 3)

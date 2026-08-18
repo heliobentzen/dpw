@@ -59,9 +59,8 @@ pnpm add -D @faker-js/faker supertest @types/supertest
 | `supertest` | Faz requisições HTTP contra a aplicação **sem subir servidor** |
 | `@faker-js/faker` | Gera dados plausíveis, evitando `"teste1"`, `"teste2"` |
 
-> 💡 **Ganho da stack única:** Jest e Vitest têm API praticamente idêntica (`describe`, `it`,
-> `expect`). O que você aprender aqui vale no frontend, na seção 3 — o que não acontecia
-> quando o backend usava `pytest`.
+> Jest e Vitest têm API praticamente idêntica (`describe`, `it`, `expect`). O que você
+> aprender aqui vale na seção 3, sobre o frontend.
 
 **Regra de negócio (prioridade 1):**
 
