@@ -35,8 +35,8 @@ garantir que eles se encontrem.
              ┌─────────────┴─────────────┐
              ▼                           ▼
    ┌───────────────────┐       ┌────────────────────┐
-   │ Gunicorn + Django │       │ Arquivos estáticos │
-   │ (N workers)       │       │ index.html + JS/CSS│
+   │ Node + NestJS     │       │ Arquivos estáticos │
+   │ (N instâncias)    │       │ index.html + JS/CSS│
    └─────────┬─────────┘       └────────────────────┘
              │                     (SPA compilada)
              ▼
@@ -61,11 +61,14 @@ a escolha de autenticação por sessão **depende** desta topologia.
 
 | | Backend | Frontend |
 |---|---|---|
-| Artefato | Código Python + dependências | Pasta `dist/` com HTML, JS, CSS |
-| Quando é montado | No deploy | **No build** |
+| Artefato | Pasta `dist/` com JavaScript compilado | Pasta `dist/` com HTML, JS, CSS |
+| Quando é montado | No deploy (`nest build`) | No deploy (`vite build`) |
 | Configuração | Lida em **tempo de execução** | Embutida em **tempo de build** |
 | Trocar variável | Reiniciar o processo | **Recompilar** |
-| Roda o quê | Gunicorn | Nada — são arquivos estáticos |
+| Roda o quê | `node dist/main.js` | Nada — são arquivos estáticos |
+
+> Os dois produzem uma pasta chamada `dist/`, e são coisas completamente diferentes. O do
+> backend é JavaScript para o Node executar; o do frontend é o site para o navegador baixar.
 
 > ⚠️ A terceira linha é a que pega todo mundo. `VITE_API_URL` é substituída pelo valor
 > literal durante `pnpm build`. Mudar a variável na plataforma **não** muda o site: é
@@ -82,12 +85,13 @@ desenvolvimento porque o Vite já faz o *fallback*.
 A regra de roteamento, em ordem:
 
 ```
-1. /api/*      → Django
-2. /admin/*    → Django
-3. /static/*   → arquivos do Django (admin, DRF)
-4. /assets/*   → arquivos da SPA (JS, CSS com hash)
-5. qualquer outra coisa → index.html   ← o fallback
+1. /api/*      → NestJS
+2. /assets/*   → arquivos da SPA (JS, CSS com hash)
+3. qualquer outra coisa → index.html   ← o fallback
 ```
+
+Repare que a lista encurtou em relação a uma stack com painel administrativo embutido: não
+há `/admin/` nem estáticos de framework. **Menos rotas, menos configuração para errar.**
 
 Configuração por plataforma:
 
@@ -99,21 +103,19 @@ Configuração por plataforma:
 
 ```nginx
 # Nginx (VPS)
-location /api/ { proxy_pass http://unix:/run/bibliocom.sock; }
-location /admin/ { proxy_pass http://unix:/run/bibliocom.sock; }
+location /api/ { proxy_pass http://127.0.0.1:3000; }
 location / {
-    root /var/www/bibliocom/dist;
+    root /var/www/bibliocom/frontend/dist;
     try_files $uri $uri/ /index.html;     # ← o fallback
 }
 ```
 
-```python
-# Django servindo a SPA (opção de artefato único; ver Passo 4)
-urlpatterns = [
-    path("api/", include("acervo.urls")),
-    path("admin/", admin.site.urls),
-    re_path(r"^(?!api/|admin/|static/).*$", TemplateView.as_view(template_name="index.html")),
-]
+```ts
+// NestJS servindo a SPA (opção de artefato único; ver Passo 4)
+ServeStaticModule.forRoot({
+  rootPath: join(__dirname, "..", "..", "frontend", "dist"),
+  exclude: ["/api/{*caminho}"],           // /api/* continua indo para os controllers
+});
 ```
 
 ### 4. Cache e nomes com hash (15 min)
@@ -169,85 +171,74 @@ expandir → migrar → contrair do M05, aplicado ao contrato.
 ### Passo 1 — Preparar o backend (25 min)
 
 ```bash
-# Linux / macOS / WSL / Git Bash
-cd backend
-pip install gunicorn whitenoise dj-database-url "psycopg[binary]"
-pip freeze > requirements.txt
+cd ~/dev/bibliocom/backend
+pnpm add pg
+pnpm build            # nest build → dist/main.js
+```
+
+`backend/package.json` — os scripts que a plataforma vai chamar:
+
+```json
+{
+  "scripts": {
+    "build": "nest build",
+    "start:prod": "node dist/main.js",
+    "migration:run:prod": "typeorm-ts-node-commonjs -d dist/data-source.js migration:run"
+  }
+}
+```
+
+| Script | Quando roda | O que faz |
+|---|---|---|
+| `build` | No deploy | Compila TypeScript para `dist/` |
+| `start:prod` | A cada boot | Sobe a aplicação. **Sem `--watch`**, sem recompilar |
+| `migration:run:prod` | Antes de subir | Aplica as migrações pendentes (M05) |
+
+> 🎉 **Aqui a stack única economiza um problema inteiro.** Antes, o servidor de produção do
+> Python (Gunicorn) **não rodava no Windows**, e a turma precisava de um substituto só para
+> a verificação local. Com Node, `node dist/main.js` é exatamente o mesmo comando em
+> Windows, macOS, Linux e na PaaS. Não há segundo servidor, nem instrução separada.
+
+Ajuste `main.ts` para produção:
+
+```ts
+const app = await NestFactory.create(AppModule);
+app.setGlobalPrefix("api");
+app.set("trust proxy", 1);        // a PaaS termina o TLS; sem isto, o cookie secure não vai
+app.use(helmet());
+await app.listen(process.env.PORT ?? 3000, "0.0.0.0");
+```
+
+| Linha | Por quê |
+|---|---|
+| `trust proxy` | Sem ela, o Express acha que a conexão é HTTP e **recusa** enviar o cookie `secure`. Sintoma: login funciona local e falha em produção, sem erro |
+| `"0.0.0.0"` | Escutar em todas as interfaces. Só `localhost` seria inacessível de fora do contêiner |
+| `process.env.PORT` | A plataforma **decide** a porta e a informa por variável. Porta fixa não recebe tráfego |
+
+Valide localmente antes de subir — este passo economiza a maior parte do tempo de depuração
+remota. É o **mesmo comando nas três plataformas**:
+
+```bash
+pnpm build
+NODE_ENV=production SESSION_SECRET=teste node dist/main.js
 ```
 
 ```powershell
-# Windows PowerShell
-Set-Location backend
-pip install gunicorn whitenoise dj-database-url "psycopg[binary]"
-pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
+# Windows PowerShell — variáveis não são inline e FICAM na sessão
+$env:NODE_ENV="production"; $env:SESSION_SECRET="teste"
+pnpm build
+node dist/main.js
+
+# ao terminar, limpe — senão o próximo start:dev sobe em modo produção
+Remove-Item Env:\NODE_ENV, Env:\SESSION_SECRET
 ```
 
-> 🪟 **Instalar o `gunicorn` no Windows funciona; executá-lo, não** — ele importa `fcntl`,
-> que não existe fora de sistemas POSIX. Ele precisa estar no `requirements.txt` porque
-> **quem roda é o servidor da PaaS, que é Linux**. Para a verificação local do passo 4, use
-> o Waitress. E `Out-File -Encoding ascii` em vez de `>`, senão o `requirements.txt` sai em
-> UTF-16 e o build na PaaS falha.
+**Deu certo se:** `curl.exe -i http://localhost:3000/api/obras` responde 200 rodando a partir
+de `dist/`, não do fonte.
 
-`Procfile`:
-
-```
-web: gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3 --timeout 60 --access-logfile -
-release: python manage.py migrate --noinput
-```
-
-`build.sh`:
-
-```bash
-#!/usr/bin/env bash
-set -o errexit
-pip install -r requirements.txt
-python manage.py collectstatic --noinput
-python manage.py migrate --noinput
-```
-
-> 🪟 **Windows: finais de linha.** Você não precisa executar o `build.sh` localmente — ele
-> roda na PaaS, que é Linux. Mas se o arquivo for salvo com CRLF, o deploy falha com
-> `bad interpreter: No such file or directory`. Garanta o `.gitattributes` com
-> `*.sh text eol=lf` no repositório (ver
-> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#4-finais-de-linha-crlf--lf-))
-> — é a causa mais comum de deploy quebrado em equipe que desenvolve no Windows.
-
-Valide **localmente** antes de subir — este passo economiza a maior parte do tempo de
-depuração remota.
-
-**Linux / macOS / WSL2:**
-
-```bash
-DEBUG=False SECRET_KEY=teste ALLOWED_HOSTS=localhost python manage.py check --deploy
-DEBUG=False python manage.py collectstatic --noinput
-DEBUG=False SECRET_KEY=teste ALLOWED_HOSTS=localhost gunicorn config.wsgi --bind 0.0.0.0:8000
-```
-
-**Windows (PowerShell):**
-
-```powershell
-# 1. no PowerShell as variaveis NAO sao inline: elas ficam na sessao
-$env:DEBUG="False"; $env:SECRET_KEY="teste"; $env:ALLOWED_HOSTS="localhost"
-
-python manage.py check --deploy
-python manage.py collectstatic --noinput
-
-# 2. Gunicorn NAO roda no Windows (depende de fcntl, que e POSIX).
-#    Waitress e servidor WSGI de producao e roda no Windows:
-pip install waitress
-waitress-serve --port=8000 config.wsgi:application
-
-# 3. ao terminar, LIMPE as variaveis — senao o runserver sobe com DEBUG=False
-Remove-Item Env:\DEBUG, Env:\SECRET_KEY, Env:\ALLOWED_HOSTS
-```
-
-> 🪟 **O `Procfile` continua com Gunicorn** — produção é Linux, e é lá que ele roda. O
-> Waitress serve **apenas** para esta verificação local no Windows; não o adicione ao
-> `requirements.txt` de produção (use um `requirements-dev.txt`, se quiser mantê-lo).
-> No WSL2, use Gunicorn normalmente.
->
-> Demais equivalências em
-> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md).
+> 🪟 **Finais de linha.** Se o seu deploy usa algum `.sh`, ele roda na PaaS, que é Linux —
+> salvo com CRLF, falha com `bad interpreter: No such file or directory`. Garanta o
+> `.gitattributes` com `*.sh text eol=lf` (M00). Continua valendo mesmo sem Gunicorn.
 
 ### Passo 2 — Preparar o frontend (20 min)
 
@@ -280,27 +271,32 @@ Select-String -Recurse "VITE_" dist\* | Select-Object -First 10   # variaveis em
 
 1. Na PaaS: **New → PostgreSQL**. Copie a *Internal Database URL*.
 2. **New → Web Service**, apontando para `backend/`:
-   - Build: `./build.sh`
-   - Start: `gunicorn config.wsgi --bind 0.0.0.0:$PORT`
+   - Build: `pnpm install --frozen-lockfile && pnpm build`
+   - Start: `pnpm migration:run:prod && pnpm start:prod`
 3. Variáveis:
 
 | Chave | Valor |
 |---|---|
-| `SECRET_KEY` | gere uma **nova**, exclusiva de produção |
-| `DEBUG` | `False` |
-| `ALLOWED_HOSTS` | `bibliocom.onrender.com` |
+| `SESSION_SECRET` | gere um **novo**, exclusivo de produção |
+| `NODE_ENV` | `production` |
 | `DATABASE_URL` | a Internal Database URL |
-| `CSRF_TRUSTED_ORIGINS` | `https://bibliocom.onrender.com` |
+| `CORS_ORIGENS` | `https://bibliocom.onrender.com` |
 
-4. Deploy. Acompanhe os logs até o fim.
-5. Crie o superusuário e os grupos pelo shell da plataforma:
+⚠️ **Não** existe `PORT` nesta lista: a plataforma a define sozinha. Defini-la à mão é um
+jeito comum de o serviço subir e nunca receber tráfego.
+
+4. Deploy. Acompanhe os logs até o fim — as migrações aparecem lá.
+5. Crie o primeiro usuário de coordenação. Como não há painel administrativo pronto, use um
+   script `pnpm seed:admin` que lê e-mail e senha do ambiente:
 
 ```bash
-python manage.py createsuperuser
-python manage.py criar_grupos
+ADMIN_EMAIL=voce@exemplo.org ADMIN_SENHA='...' pnpm seed:admin
 ```
 
-6. Teste: `curl https://sua-api/api/obras/`
+> Um script versionado é melhor que criar o usuário à mão: é reproduzível, roda igual em
+> qualquer ambiente e fica registrado no repositório o que foi feito.
+
+6. Teste: `curl https://sua-api/api/obras`
 
 ### Passo 4 — Publicar a SPA sob o mesmo site (30 min) ⭐
 
@@ -322,20 +318,28 @@ Duas estratégias; escolha **uma** e documente a escolha.
 O status `200` (e não 301/302) é o que faz o proxy servir o conteúdo mantendo a URL — é
 isso que preserva o *same-site* e evita CORS.
 
-**B) Django serve a SPA** (artefato único, mais simples de operar)
-
-```python
-# config/settings.py
-TEMPLATES[0]["DIRS"] = [BASE_DIR / "frontend_dist"]
-STATICFILES_DIRS = [BASE_DIR / "frontend_dist" / "assets"]
-```
+**B) O NestJS serve a SPA** (artefato único, mais simples de operar)
 
 ```bash
-# build.sh — executado pela PaaS, que roda LINUX.
-# Nao precisa rodar no seu Windows; garanta apenas o final de linha LF (.gitattributes).
-cd ../frontend && pnpm install && pnpm build
-cp -r dist ../backend/frontend_dist
-cd ../backend && python manage.py collectstatic --noinput
+pnpm --filter backend add @nestjs/serve-static
+```
+
+```ts
+// backend/src/app.module.ts
+ServeStaticModule.forRoot({
+  rootPath: join(__dirname, "..", "..", "frontend", "dist"),
+  exclude: ["/api/{*caminho}"],
+}),
+```
+
+⚠️ O `exclude` é obrigatório: sem ele, o módulo de estáticos captura `/api/*` **antes** dos
+controllers e toda a API responde `index.html` — com status 200, o que torna o diagnóstico
+especialmente confuso.
+
+Comando de build na plataforma, a partir da raiz do monorepo:
+
+```
+pnpm install --frozen-lockfile && pnpm --filter frontend build && pnpm --filter backend build
 ```
 
 Um serviço, um deploy, zero CORS. Em troca, o build fica mais lento e as camadas ficam
@@ -379,13 +383,15 @@ curl.exe -s -o NUL -w "%{http_code}`n" https://sua-app/obras/42
 | `VITE_API_URL` mudada sem rebuild | O site continua chamando a URL antiga | Rebuild |
 | Segredo em `VITE_*` | Publicado no bundle | Nunca; use o backend |
 | `DisallowedHost` | 400 em tudo | Domínio em `ALLOWED_HOSTS` |
-| CSRF falha em produção | 403 em todo POST | `CSRF_TRUSTED_ORIGINS` com `https://` |
-| Redirecionamento infinito | Loop de HTTPS | `SECURE_PROXY_SSL_HEADER` |
+| Login funciona local e falha em produção | Cookie `secure` não enviado | `app.set("trust proxy", 1)` |
+| Redirecionamento infinito | Loop de HTTPS | Deixe o TLS com o proxy da PaaS |
 | Erro de CORS em produção | Console cheio | Sirva os dois sob o mesmo site |
 | Uploads somem a cada deploy | Disco efêmero | Armazenamento externo |
 | Frontend publicado antes do backend | Cliente novo, API velha | Backend primeiro |
-| `500` sem detalhes | Comportamento **correto** | Leia os logs; não ligue `DEBUG` |
-| `collectstatic` esquecido | Admin e DRF sem CSS | Comando de build |
+| `500` sem detalhes | Comportamento **correto** | Leia os logs; nunca exponha `erro.stack` |
+| API responde HTML | Faltou `exclude` no `ServeStaticModule` | Estratégia B, ver Passo 4 |
+| Cookie de sessão não chega | Faltou `trust proxy` | `app.set("trust proxy", 1)` |
+| Serviço sobe e não recebe tráfego | Porta fixa no código | Use `process.env.PORT` |
 
 ## ✅ Checklist de saída
 
@@ -395,7 +401,7 @@ curl.exe -s -o NUL -w "%{http_code}`n" https://sua-app/obras/42
 - [ ] Cache com hash nos assets e `no-cache` no `index.html`
 - [ ] Variáveis de ambiente configuradas; nenhum segredo no bundle
 - [ ] Deploy automático a partir da `main`, condicionado ao CI verde
-- [ ] Superusuário e grupos criados em produção
+- [ ] Usuário de coordenação criado por script versionado
 - [ ] Backup do banco ativado
 - [ ] Ciclo completo testado: commit → PR → CI → merge → produção
 - [ ] `docs/deploy.md` reproduzível por outra pessoa
@@ -413,8 +419,8 @@ Ver [`exercicios.md`](exercicios.md) · Checklist em
 
 ## 📚 Para aprofundar
 
-- [Django — Checklist de implantação](https://docs.djangoproject.com/pt-br/5.0/howto/deployment/checklist/)
+- [NestJS — Serve Static](https://docs.nestjs.com/recipes/serve-static)
 - [Vite — Deploying a Static Site](https://vite.dev/guide/static-deploy)
 - [The Twelve-Factor App (pt-br)](https://12factor.net/pt_br/)
-- [WhiteNoise](https://whitenoise.readthedocs.io/)
+- [TypeORM — migrações em produção](https://typeorm.io/migrations#running-and-reverting-migrations)
 - [MDN — Cache-Control](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/Cache-Control)

@@ -11,7 +11,7 @@ projeto quando falha**, e trata o resto como leitura. Ver
 ## 🎯 Objetivos
 
 1. Priorizar o que testar quando o tempo é escasso.
-2. Testar model, serializer, permissões e API com `pytest-django`.
+2. Testar regra de negócio, DTOs, permissões e API com Jest e Supertest.
 3. Testar componentes e formulários com Vitest + Testing Library.
 4. Garantir o **contrato** entre as camadas no CI.
 5. Configurar lint, formatação e integração contínua para os dois projetos.
@@ -30,116 +30,121 @@ Prioridade, nesta ordem:
 
 | # | O que | Por quê | Camada |
 |---|---|---|---|
-| 1 | **Regra de negócio** | É o que o sistema faz de único | 🔵 model |
+| 1 | **Regra de negócio** | É o que o sistema faz de único | 🔵 service |
 | 2 | **Controle de acesso** | Falha aqui é incidente, não bug | 🔵 API |
-| 3 | **Validação** | Protege a integridade dos dados | 🔵 serializer |
+| 3 | **Validação** | Protege a integridade dos dados | 🔵 DTO |
 | 4 | **Contrato** | Divergência silenciosa entre camadas | ⚪ CI |
 | 5 | Componente com lógica | Formulário, filtro, estado | 🟣 |
 | 6 | Fluxo completo (e2e) | Caro e frágil; 1 ou 2 no máximo | ⚪ |
 
-**Não teste:** o framework (o Django já é testado), componentes puramente visuais,
+**Não teste:** o framework (NestJS e TypeORM já são testados), componentes puramente visuais,
 `getters` triviais.
 
 > Numa arquitetura desacoplada, o item 4 é o que mais dá prejuízo e o que menos gente
 > testa: os dois lados passam nos próprios testes e o sistema não funciona.
 
-### 2. Backend com `pytest-django` (20 min)
+### 2. Backend com Jest (20 min)
+
+O NestJS já vem com Jest configurado — o `nest new` do M03 criou `jest` e os scripts. Falta
+só o utilitário de dados:
 
 ```bash
-pip install pytest pytest-django pytest-cov model-bakery
+cd ~/dev/bibliocom/backend
+pnpm add -D @faker-js/faker supertest @types/supertest
 ```
 
-```ini
-# backend/pytest.ini
-[pytest]
-DJANGO_SETTINGS_MODULE = config.settings
-python_files = test_*.py
-addopts = -v --tb=short --reuse-db
-```
+| Pacote | Para quê |
+|---|---|
+| `jest` | Já instalado pelo `nest new`. Executor e biblioteca de asserção |
+| `supertest` | Faz requisições HTTP contra a aplicação **sem subir servidor** |
+| `@faker-js/faker` | Gera dados plausíveis, evitando `"teste1"`, `"teste2"` |
 
-```python
-# backend/conftest.py
-import pytest
-from rest_framework.test import APIClient
-
-
-@pytest.fixture
-def api_client():
-    return APIClient()
-
-
-@pytest.fixture
-def bibliotecario(db, django_user_model):
-    return django_user_model.objects.create_user(
-        username="bib", password="senha-de-teste-123", papel="BIBLIOTECARIO",
-        email="bib@exemplo.org",
-    )
-
-
-@pytest.fixture
-def cliente_bib(api_client, bibliotecario):
-    api_client.force_authenticate(bibliotecario)
-    return api_client
-```
+> 💡 **Ganho da stack única:** Jest e Vitest têm API praticamente idêntica (`describe`, `it`,
+> `expect`). O que você aprender aqui vale no frontend, na seção 3 — o que não acontecia
+> quando o backend usava `pytest`.
 
 **Regra de negócio (prioridade 1):**
 
-```python
-@pytest.mark.django_db
-def test_exemplar_nao_pode_ter_dois_emprestimos_ativos(exemplar, associado):
-    Emprestimo.objects.create(exemplar=exemplar, associado=associado)
-    with pytest.raises(IntegrityError):
-        Emprestimo.objects.create(exemplar=exemplar, associado=associado)
+```ts
+describe("EmprestimosService", () => {
+  it("recusa segundo empréstimo ativo do mesmo exemplar", async () => {
+    await service.emprestar(exemplar.id, associado.id);
+
+    await expect(service.emprestar(exemplar.id, outroAssociado.id))
+      .rejects.toThrow(ConflictException);
+  });
+
+  it("recusa o quarto empréstimo em aberto do mesmo associado", async () => {
+    for (const ex of tresExemplares) await service.emprestar(ex.id, associado.id);
+
+    await expect(service.emprestar(quarto.id, associado.id))
+      .rejects.toThrow(UnprocessableEntityException);
+  });
+});
 ```
 
-Testar a **restrição do banco** (M04), e não só a validação do serializer, garante que a
-regra vale para toda escrita — inclusive pelo admin e por comandos.
+Teste também a **restrição do banco** (M04), não só a validação do DTO — assim a regra vale
+para toda escrita, inclusive por script ou migração:
+
+```ts
+it("impede tombo duplicado no nível do banco", async () => {
+  await repo.save(repo.create({ tombo: "A-001", obra }));
+  await expect(repo.save(repo.create({ tombo: "A-001", obra })))
+    .rejects.toThrow(QueryFailedError);
+});
+```
 
 **Controle de acesso (prioridade 2)** — a matriz do M12 vira teste parametrizado:
 
-```python
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    "papel,metodo,rota,esperado",
-    [
-        (None,            "get",  "obra-list",   200),
-        (None,            "post", "obra-list",   401),
-        ("ASSOCIADO",     "post", "obra-list",   403),
-        ("BIBLIOTECARIO", "post", "obra-list",   201),
-        ("ASSOCIADO",     "get",  "relatorios",  403),
-        ("COORDENACAO",   "get",  "relatorios",  200),
-    ],
-)
-def test_matriz_de_acesso(api_client, django_user_model, autor, papel, metodo, rota, esperado):
-    if papel:
-        u = django_user_model.objects.create_user("u", password="x", papel=papel)
-        atribuir_permissoes(u)
-        api_client.force_authenticate(u)
+```ts
+describe("matriz de acesso", () => {
+  it.each([
+    [null,            "get",    "/api/obras", 200],
+    [null,            "post",   "/api/obras", 401],
+    ["associado",     "post",   "/api/obras", 403],
+    ["bibliotecario", "post",   "/api/obras", 201],
+    ["associado",     "get",    "/api/relatorios", 403],
+    ["coordenacao",   "get",    "/api/relatorios", 200],
+    ["bibliotecario", "delete", "/api/obras/1", 403],
+    ["coordenacao",   "delete", "/api/obras/1", 204],
+  ])("%s %s %s -> %i", async (papel, metodo, rota, esperado) => {
+    const req = request(app.getHttpServer())[metodo](rota);
+    if (papel) req.set("Cookie", await sessaoDe(papel));
+    if (metodo === "post") req.send({ titulo: "T", autorId: autor.id });
 
-    url = reverse(f"acervo:{rota}")
-    dados = {"titulo": "T", "autor": autor.pk} if metodo == "post" else None
-    resposta = getattr(api_client, metodo)(url, dados, format="json")
-
-    assert resposta.status_code == esperado, f"{papel} {metodo} {rota}"
+    await req.expect(esperado);
+  });
+});
 ```
 
-Uma falha de autorização introduzida por engano passa a quebrar o CI. É, provavelmente, o
-teste de maior retorno do projeto inteiro.
+`it.each` recebe a tabela e roda um teste por linha, com nome legível. Uma falha de
+autorização introduzida por engano passa a quebrar o CI — é, provavelmente, o teste de maior
+retorno do projeto inteiro.
 
 **Validação (prioridade 3):**
 
-```python
-@pytest.mark.django_db
-@pytest.mark.parametrize("isbn,valido", [
-    ("9788535914849", True), ("978-85-359-1484-9", True),
-    ("123", False), ("abcdefghijklm", False), ("", True),
-])
-def test_validacao_de_isbn(autor, isbn, valido):
-    s = ObraCreateSerializer(data={"titulo": "T", "autor": autor.pk, "isbn": isbn})
-    assert s.is_valid() == valido
+```ts
+it.each([
+  ["9788535914849", true],
+  ["978-85-359-1484-9", true],
+  ["123", false],
+  ["abcdefghijklm", false],
+  ["", true],
+])("ISBN %s -> válido: %s", async (isbn, valido) => {
+  const erros = await validate(Object.assign(new CriarObraDto(), {
+    titulo: "T", autorId: autor.id, isbn,
+  }));
+  expect(erros.length === 0).toBe(valido);
+});
 ```
 
-### 3. Frontend com Vitest + Testing Library (20 min)
+Repare que isto testa o **DTO isolado**, sem HTTP e sem banco: milissegundos por caso, o que
+permite cobrir muitas combinações.
+
+### 3. Frontend com Vitest e Testing Library (25 min)
+
+Mesma API do Jest, executor diferente — o Vitest roda sobre o Vite e reaproveita a
+configuração que o projeto já tem.
 
 ```bash
 # Linux / macOS / WSL / Git Bash
@@ -243,8 +248,9 @@ O teste que só existe nesta arquitetura — e o que evita o bug mais caro:
 ```bash
 # no CI, após rodar os testes das duas camadas.
 # O runner do GitHub Actions e Linux — aqui o && e sempre valido.
-cd backend && python manage.py spectacular --file ../frontend/schema.yml
-cd ../frontend && pnpm tipos && git diff --exit-code src/api/schema.d.ts
+cd backend && pnpm gerar:schema          # escreve openapi.json (M07)
+cd .. && pnpm --filter @bibliocom/tipos gerar
+git diff --exit-code pacotes/tipos/src/api.d.ts
 ```
 
 Se o schema mudou e os tipos não foram regenerados, o CI falha. Combinado com o
@@ -257,14 +263,15 @@ chegar a produção.
 
 ### Passo 1 — Backend: as três prioridades (50 min)
 
-Configure `pytest.ini` e `conftest.py`, e escreva ao menos 15 testes:
+Monte o cenário de teste (banco SQLite em memória e um utilitário `sessaoDe(papel)`) e
+escreva ao menos 15 testes:
 
-- 6 de regra de negócio (prazo, limite, disponibilidade, atraso, devolução, constraint)
-- 6 da matriz de acesso (parametrizados, incluindo IDOR)
-- 3 de validação de serializer (parametrizados)
+- 6 de regra de negócio (prazo, limite, disponibilidade, atraso, devolução, restrição do banco)
+- 6 da matriz de acesso (com `it.each`, incluindo IDOR)
+- 3 de validação de DTO (com `it.each`)
 
 ```bash
-pytest -v --cov=. --cov-report=term-missing
+pnpm test --coverage
 ```
 
 ### Passo 2 — Frontend: componente e formulário (40 min)
@@ -302,22 +309,23 @@ jobs:
         options: >-
           --health-cmd pg_isready --health-interval 5s --health-retries 10
     env:
-      SECRET_KEY: chave-apenas-para-ci
-      DEBUG: "False"
+      SESSION_SECRET: segredo-apenas-para-ci
+      NODE_ENV: test
       DATABASE_URL: postgres://test:test@localhost:5432/test
     defaults: { run: { working-directory: backend } }
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12", cache: pip }
-      - run: pip install -r requirements.txt
-      - run: ruff check .
-      - run: python manage.py makemigrations --check --dry-run
-      - run: python manage.py check --deploy
-      - run: pytest --cov=. --cov-fail-under=60
-      - run: python manage.py spectacular --file schema.yml
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm tsc --noEmit
+      - run: pnpm test --coverage --coverageThreshold='{"global":{"lines":60}}'
+      - run: pnpm gerar:schema
       - uses: actions/upload-artifact@v4
-        with: { name: schema, path: backend/schema.yml }
+        with: { name: schema, path: backend/openapi.json }
 
   frontend:
     runs-on: ubuntu-latest
@@ -331,11 +339,11 @@ jobs:
         with: { node-version: 20, cache: pnpm, cache-dependency-path: frontend/pnpm-lock.yaml }
       - run: pnpm install --frozen-lockfile
       - uses: actions/download-artifact@v4
-        with: { name: schema, path: frontend }
+        with: { name: schema, path: backend }
       - name: Tipos sincronizados com a API
         run: |
-          pnpm tipos
-          git diff --exit-code src/api/schema.d.ts
+          pnpm --filter @bibliocom/tipos gerar
+          git diff --exit-code ../pacotes/tipos/src/api.d.ts
       - run: pnpm lint
       - run: pnpm tsc --noEmit
       - run: pnpm vitest run
@@ -353,7 +361,7 @@ gerado pelo backend no mesmo commit e falha se os tipos estiverem defasados.
 
 | Erro | Correção |
 |---|---|
-| Esquecer `@pytest.mark.django_db` | `Database access not allowed` |
+| Testes compartilhando o mesmo banco | Use SQLite em memória, recriado por suíte |
 | Testar o framework | Teste **sua** regra |
 | Só `status_code` na asserção | Verifique também o efeito no banco |
 | `getByTestId` para tudo | `getByRole` — testa acessibilidade junto |
@@ -371,8 +379,8 @@ gerado pelo backend no mesmo commit e falha se os tipos estiverem defasados.
 - [ ] ≥ 6 testes no frontend, incluindo o erro 400 no formulário
 - [ ] MSW simulando a API, sem depender do backend
 - [ ] Cobertura ≥ 60% no backend
-- [ ] `ruff check` e `pnpm lint` sem erros
-- [ ] `tsc --noEmit` sem erros
+- [ ] `pnpm lint` sem erros nas duas camadas
+- [ ] `pnpm tsc --noEmit` sem erros nas duas camadas
 - [ ] **Teste de contrato no CI** (tipos sincronizados)
 - [ ] CI verde nos dois jobs; `main` protegida
 - [ ] Ao menos 1 teste de regressão a partir de um bug real
@@ -388,8 +396,9 @@ Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [pytest-django](https://pytest-django.readthedocs.io/)
-- [DRF — Testing](https://www.django-rest-framework.org/api-guide/testing/)
+- [NestJS — Testing](https://docs.nestjs.com/fundamentals/testing)
+- [Jest](https://jestjs.io/pt-BR/)
+- [Supertest](https://github.com/ladjs/supertest)
 - [Vitest](https://vitest.dev/)
 - [Testing Library — princípios](https://testing-library.com/docs/guiding-principles)
 - [MSW](https://mswjs.io/)

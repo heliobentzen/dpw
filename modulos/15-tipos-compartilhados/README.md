@@ -1,240 +1,279 @@
-# M15 — Django Admin
+# M15 — Tipos compartilhados entre as camadas
 
-> **CH:** 2h (1h teórica · 1h prática) · **Semana 15** · **Pré-requisitos:** M04, M07
-> Módulo complementar (não exigido pela ementa), mas de altíssimo retorno: entrega um
-> back-office funcional em minutos e é o que viabiliza o projeto extensionista sair do
-> papel dentro da carga horária.
+> **CH:** 2h (1h teórica · 1h prática) · **Semana 15** · **Pré-requisitos:** M07, M11, M14
+
+O módulo que **só existe nesta stack**. Backend e frontend falam a mesma linguagem — então
+podem compartilhar as definições, e o compilador passa a vigiar a fronteira entre eles.
+
+> Este módulo substitui o antigo "Django Admin". A justificativa está no
+> [ADR-12](../../docs/decisoes-tecnicas.md#adr-12--back-office-construído-não-herdado):
+> customizar um painel pronto ensina o painel; compartilhar tipos ensina a proteger um
+> contrato — e é o ganho que justifica ter escolhido TypeScript ponta a ponta.
 
 ## 🎯 Objetivos
 
-1. Configurar o admin para uso real por uma equipe não técnica.
-2. Customizar listagens, filtros, buscas e formulários.
-3. Implementar ações em massa e edição *inline*.
-4. Reconhecer os limites do admin — e quando **não** usá-lo.
+Ao final você será capaz de:
+
+1. Explicar por que a fronteira entre camadas é onde bugs se escondem.
+2. Publicar um pacote interno consumido pelas duas camadas.
+3. Gerar tipos do frontend a partir do contrato OpenAPI do backend.
+4. Fazer o CI falhar quando as camadas saem de sincronia.
 
 ---
 
 ## 📖 Teoria (1h)
 
-### 1. O que o admin é e o que não é
+### 1. O bug que nenhum teste pega
 
-O admin é uma interface CRUD gerada a partir dos models, destinada a **pessoas de
-confiança da equipe** (staff). Ele é excelente para: cadastro de dados de apoio, correção
-pontual, inspeção e operação interna nos primeiros meses de um sistema.
+Na quinta-feira, alguém renomeia um campo no backend:
 
-**Ele não é:** interface para o usuário final, nem substituto de telas com regra de
-negócio, nem lugar para expor dados sensíveis a quem não deveria vê-los. Todo campo do
-model fica visível a quem tem acesso, e a granularidade de permissões é por model, não por
-registro (a menos que você programe isso).
-
-> No BiblioCom: a **coordenação** usa o admin (`/admin/`) para cadastrar categorias,
-> editoras e corrigir dados. O **balcão** usa a SPA (M08–M11), que aplica as regras de
-> empréstimo e foi desenhada para o celular. Confundir os dois papéis é o erro de projeto
-> mais comum — e, numa arquitetura desacoplada, o mais caro.
-
-**Consequência de segurança:** o admin fica no mesmo domínio da SPA e usa a mesma sessão.
-Um usuário com `is_staff` acessa dados que a API talvez não exponha. Trate `is_staff` como
-privilégio real, não como "acesso ao painel" (M13).
-
-### 2. Registro básico
-
-```python
-# acervo/admin.py
-from django.contrib import admin
-
-from .models import Autor, Categoria, Editora, Emprestimo, Exemplar, Obra
-
-
-@admin.register(Autor)
-class AutorAdmin(admin.ModelAdmin):
-    list_display = ["nome", "nascimento", "total_obras"]
-    search_fields = ["nome"]
-    ordering = ["nome"]
-
-    @admin.display(description="obras", ordering="_total")
-    def total_obras(self, obj):
-        return obj._total
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).annotate(_total=Count("obras"))
+```ts
+// antes                          // depois
+@Column() anoPublicacao: number;  @Column() ano: number;
 ```
 
-### 3. Opções mais usadas
+O que acontece:
 
-```python
-@admin.register(Obra)
-class ObraAdmin(admin.ModelAdmin):
-    # listagem
-    list_display = ["titulo", "autor", "ano_publicacao", "disponiveis", "criado_em"]
-    list_display_links = ["titulo"]
-    list_filter = ["categorias", "editora", "ano_publicacao"]
-    search_fields = ["titulo", "subtitulo", "isbn", "autor__nome"]
-    list_select_related = ["autor", "editora"]        # evita N+1 na listagem
-    list_per_page = 50
-    date_hierarchy = "criado_em"
-    ordering = ["titulo"]
-    list_editable = ["ano_publicacao"]                # edição direta na lista
+| Camada | Resultado |
+|---|---|
+| Testes do backend | ✅ verdes — foram atualizados junto |
+| Testes do frontend | ✅ verdes — o MSW devolve o *mock* antigo |
+| `tsc --noEmit` do frontend | ✅ passa — o tipo local ainda diz `anoPublicacao` |
+| CI | ✅ **tudo verde** |
+| Produção | ❌ a tela mostra `undefined` |
 
-    # formulário
-    fieldsets = [
-        ("Identificação", {"fields": ["titulo", "subtitulo", "isbn"]}),
-        ("Autoria e publicação", {"fields": ["autor", "editora", "ano_publicacao"]}),
-        ("Classificação", {"fields": ["categorias"]}),
-        ("Descrição", {"fields": ["sinopse"], "classes": ["collapse"]}),
-    ]
-    filter_horizontal = ["categorias"]                # widget melhor para M2M
-    autocomplete_fields = ["autor", "editora"]        # busca em vez de <select> gigante
-    readonly_fields = ["criado_em", "atualizado_em"]
-    prepopulated_fields = {"slug": ("titulo",)}
-    save_on_top = True
+**Cada camada está certa isoladamente, e o sistema está quebrado.** É o modo de falha
+característico de arquitetura desacoplada, e nenhum teste unitário o encontra — porque o
+erro não está *dentro* de nenhuma camada, está *entre* elas.
+
+### 2. Três formas de tratar a fronteira
+
+| Estratégia | Como funciona | Problema |
+|---|---|---|
+| **Confiança** | O frontend declara suas interfaces à mão | Divergem em silêncio. É o caso acima |
+| **Documentação** | Uma planilha ou wiki descreve o contrato | Desatualiza na primeira sexta-feira |
+| **Verificação** ⭐ | O tipo do frontend é **derivado** do backend, e o CI confere | É o que faremos |
+
+A diferença é categórica: nas duas primeiras a sincronia depende de disciplina humana; na
+terceira, de compilador.
+
+### 3. O que compartilhar — e o que não
+
+```
+pacotes/tipos/
+├── src/
+│   ├── api.d.ts        gerado do OpenAPI — NÃO editar à mão
+│   ├── enums.ts        escrito à mão: Papel, EstadoExemplar, SituacaoEmprestimo
+│   └── regras.ts       escrito à mão: constantes e validações puras
+└── package.json
 ```
 
-`autocomplete_fields` exige `search_fields` no admin do model referenciado — e resolve o
-problema real de um `<select>` com 20.000 opções travando o navegador.
+| Compartilhar | Não compartilhar |
+|---|---|
+| Tipos de requisição e resposta | Entidades do TypeORM (arrastam o ORM para o navegador) |
+| Enums de domínio | Services, controllers, repositórios |
+| Constantes de negócio (`LIMITE_EMPRESTIMOS = 3`) | Qualquer coisa que toque banco, arquivo ou rede |
+| Funções puras de validação | Segredo, configuração, chave |
 
-### 4. Inlines
+> ⚠️ **A tentação é compartilhar a entidade.** Não faça: ela traz decorators do TypeORM,
+> referências circulares e código que só faz sentido no servidor. O que atravessa a
+> fronteira é o **formato dos dados**, não o modelo de domínio.
 
-```python
-class ExemplarInline(admin.TabularInline):        # ou StackedInline
-    model = Exemplar
-    extra = 1
-    fields = ["tombo", "estado", "adquirido_em"]
-    show_change_link = True
+### 4. Duas fontes, dois mecanismos
 
+| O que | De onde vem | Como se mantém correto |
+|---|---|---|
+| `api.d.ts` | **Gerado** do `openapi.json` (M07) | Regerar; o CI compara com o commitado |
+| `enums.ts`, `regras.ts` | **Escritos** à mão, uma vez | O backend os importa — divergir não compila |
 
-@admin.register(Obra)
-class ObraAdmin(admin.ModelAdmin):
-    inlines = [ExemplarInline]
+O segundo caso é o mais elegante: se o backend **importa** `Papel` do pacote compartilhado,
+não existe "o enum do backend" e "o enum do frontend". Existe um, e os dois usam.
+
+```ts
+// pacotes/tipos/src/enums.ts
+export enum Papel { ASSOCIADO = "associado", BIBLIOTECARIO = "bibliotecario", COORDENACAO = "coordenacao" }
+
+// backend/src/contas/entidades/usuario.entity.ts
+import { Papel } from "@bibliocom/tipos";
+@Column({ type: "simple-enum", enum: Papel }) papel: Papel;
+
+// frontend/src/components/MenuAdmin.tsx
+import { Papel } from "@bibliocom/tipos";
+if (usuario.papel === Papel.COORDENACAO) { … }
 ```
 
-Cadastra obra e exemplares na mesma tela.
+Um valor digitado errado no frontend — `"coordenaçao"` — deixa de compilar. Antes, viraria
+um menu que nunca aparece e ninguém entende por quê.
 
-### 5. Ações em massa
-
-```python
-@admin.action(description="Marcar exemplares selecionados como desgastados")
-def marcar_desgastado(modeladmin, request, queryset):
-    atualizados = queryset.update(estado=Exemplar.Estado.DESGASTADO)
-    modeladmin.message_user(request, f"{atualizados} exemplar(es) atualizado(s).")
-
-
-@admin.register(Exemplar)
-class ExemplarAdmin(admin.ModelAdmin):
-    actions = [marcar_desgastado]
-```
-
-### 6. Colunas calculadas e formatadas
-
-```python
-@admin.display(description="Situação", boolean=False)
-def situacao(self, obj):
-    if obj.devolvido_em:
-        return format_html('<span style="color:green">Devolvido</span>')
-    if obj.esta_atrasado:
-        return format_html('<b style="color:#b91c1c">Atrasado ({} dias)</b>', obj.dias_de_atraso)
-    return "Ativo"
-```
-
-> Use `format_html` — nunca concatenação de strings — para gerar HTML no admin. Ela escapa
-> os argumentos automaticamente. `mark_safe` sobre dado do usuário é XSS.
-
-### 7. Restringir o que cada pessoa vê
-
-```python
-class EmprestimoAdmin(admin.ModelAdmin):
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(registrado_por=request.user)
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_superuser       # ninguém mais apaga histórico
-```
-
-### 8. Personalizar a identidade
-
-```python
-# config/urls.py ou config/admin.py
-admin.site.site_header = "BiblioCom — Administração"
-admin.site.site_title = "BiblioCom"
-admin.site.index_title = "Painel de gestão"
-```
+💼 **No mercado:** isto é o argumento central de stacks TypeScript ponta a ponta, e o motivo
+de ferramentas como tRPC existirem. Em entrevista, "como vocês garantiam que front e back
+não divergiam?" é uma pergunta que a maioria responde com "a gente conversava".
 
 ---
 
 ## 🛠️ Roteiro prático (1h)
 
-### Passo 1 — Superusuário e registro (10 min)
+### Passo 1 — Criar o pacote (15 min)
 
 ```bash
-python manage.py createsuperuser
-python manage.py runserver
+cd ~/dev/bibliocom
+mkdir -p pacotes/tipos/src
 ```
 
-```python
-# acervo/admin.py
-from django.contrib import admin
-from .models import Autor, Categoria, Editora, Exemplar, Obra, Associado, Emprestimo
+`pacotes/tipos/package.json`:
 
-admin.site.register([Autor, Categoria, Editora, Exemplar, Obra, Associado, Emprestimo])
+```json
+{
+  "name": "@bibliocom/tipos",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "gerar": "openapi-typescript ../../backend/openapi.json -o src/api.d.ts"
+  }
+}
 ```
 
-Acesse `/admin/` e navegue. Note como está **inutilizável** para volume real: listas sem
-colunas úteis, sem busca, sem filtro.
+| Campo | O que faz |
+|---|---|
+| `@bibliocom/tipos` | O `@escopo/` marca que é um pacote interno, não do npm |
+| `"private": true` | Impede publicação acidental |
+| `main`/`types` apontando para `.ts` | Sem passo de build: os consumidores compilam o fonte. Simples e suficiente para o monorepo |
 
-### Passo 2 — Tornar o admin utilizável (30 min)
+O `pnpm-workspace.yaml` do M03 já inclui `pacotes/*`. Ligue as camadas:
 
-Configure `ObraAdmin`, `ExemplarAdmin`, `AssociadoAdmin` e `EmprestimoAdmin` com
-`list_display`, `list_filter`, `search_fields`, `list_select_related`,
-`autocomplete_fields` e `date_hierarchy`.
+```bash
+pnpm --filter backend  add @bibliocom/tipos --workspace
+pnpm --filter frontend add @bibliocom/tipos --workspace
+```
 
-Meça o antes e o depois com o Debug Toolbar: quantas consultas a listagem de obras fazia
-sem `list_select_related` e quantas faz depois?
+`--workspace` faz o pnpm resolver o pacote **localmente**, por link, em vez de procurar no
+registro público.
 
-### Passo 3 — Inline, ação e coluna calculada (20 min)
+### Passo 2 — Enums compartilhados (15 min)
 
-1. `ExemplarInline` dentro de `ObraAdmin`.
-2. Ação "Registrar devolução" em `EmprestimoAdmin`, que só afeta empréstimos em aberto e
-   informa quantos foram processados.
-3. Coluna `situacao` colorida em `EmprestimoAdmin`.
-4. Bloqueie a exclusão de empréstimos para não superusuários.
+`pacotes/tipos/src/enums.ts`:
+
+```ts
+export enum Papel {
+  ASSOCIADO = "associado",
+  BIBLIOTECARIO = "bibliotecario",
+  COORDENACAO = "coordenacao",
+}
+
+export enum EstadoExemplar {
+  NOVO = "novo", BOM = "bom", DESGASTADO = "desgastado", DESCARTADO = "descartado",
+}
+
+export const LIMITE_EMPRESTIMOS_ABERTOS = 3;
+export const DIAS_DE_EMPRESTIMO = 14;
+```
+
+`pacotes/tipos/src/index.ts`:
+
+```ts
+export * from "./enums";
+export * from "./api";
+```
+
+Agora **apague** as definições duplicadas do backend e do frontend, e importe daqui.
+
+**Deu certo se:** `pnpm --filter backend tsc --noEmit` continua limpo depois de você trocar
+o enum local pelo importado — e quebra se você digitar `Papel.COORDENACAOO`.
+
+⚠️ Repare que `LIMITE_EMPRESTIMOS_ABERTOS` agora é **um só número** para as duas camadas. A
+regra do M06 (recusar o quarto empréstimo) e a mensagem que o frontend mostra ("você já tem
+3 empréstimos") não podem mais discordar.
+
+### Passo 3 — Gerar os tipos da API (20 min)
+
+```bash
+pnpm --filter @bibliocom/tipos add -D openapi-typescript
+cd backend && pnpm gerar:schema        # escreve openapi.json (M07)
+cd .. && pnpm --filter @bibliocom/tipos gerar
+```
+
+Abra `pacotes/tipos/src/api.d.ts`: cada rota, cada DTO, cada campo — derivados do backend.
+
+Use no frontend:
+
+```ts
+import type { components } from "@bibliocom/tipos";
+
+type Obra = components["schemas"]["ObraResposta"];
+
+export async function buscarObra(id: number): Promise<Obra> {
+  return api.get<Obra>(`/obras/${id}`);
+}
+```
+
+> Acrescente `api.d.ts` a uma linha de exclusão do ESLint e **nunca o edite à mão**. Arquivo
+> gerado que alguém editou é a pior categoria de bug: a próxima geração apaga a correção.
+
+### Passo 4 — Provar que funciona (10 min) ⭐
+
+Este é o passo que justifica o módulo. Faça o experimento:
+
+1. No backend, renomeie `anoPublicacao` para `ano` no `ObraResposta`.
+2. Rode `pnpm gerar:schema` e regenere os tipos.
+3. Rode `pnpm --filter frontend tsc --noEmit`.
+
+**Deu certo se:** o TypeScript aponta o erro, com nome de arquivo e linha, em cada lugar do
+frontend que usava o campo antigo.
+
+Compare com o que teria acontecido antes deste módulo: nada. Tudo verde, e a tela quebrada
+em produção.
+
+Reverta a mudança ao final.
+
+### Passo 5 — O CI como guardião (10 min)
+
+O experimento acima só protege quem lembrar de rodar os comandos. Torne isso obrigatório —
+acrescente ao job do frontend no `ci.yml` (M14):
+
+```yaml
+      - name: Tipos sincronizados com a API
+        run: |
+          pnpm --filter @bibliocom/tipos gerar
+          git diff --exit-code pacotes/tipos/src/api.d.ts
+```
+
+`git diff --exit-code` sai com erro se houver qualquer diferença. Traduzindo: **se você
+mudou a API e não regerou os tipos, o CI falha e o PR não passa.**
+
+**Deu certo se:** você mudar um DTO, commitar sem regerar, e o CI ficar vermelho.
 
 ---
 
 ## ⚠️ Erros comuns
 
-| Erro | Correção |
+| Sintoma | Diagnóstico |
 |---|---|
-| Usar o admin como sistema do usuário final | Construa telas próprias com as regras |
-| Listagem lenta | `list_select_related` e `list_per_page` |
-| `<select>` com milhares de itens | `autocomplete_fields` |
-| `mark_safe` com dado do usuário | `format_html` |
-| Dar `is_staff` a todo mundo | Permissões por grupo (M12) |
-| Deixar `/admin/` na URL padrão em produção | Mude o caminho e restrinja acesso (M13) |
+| `Cannot find module '@bibliocom/tipos'` | Faltou `--workspace` no `add`, ou um `pnpm install` na raiz |
+| Mudanças no pacote não aparecem | O editor está com cache; reinicie o servidor de TypeScript do VS Code |
+| `api.d.ts` gerado vazio | O `openapi.json` está desatualizado ou os DTOs não têm `@ApiProperty` (M07) |
+| CI falha em `git diff` sem ninguém ter mexido | O `openapi.json` não foi commitado junto com a mudança do DTO |
+| Import do pacote arrasta o TypeORM para o frontend | Você exportou uma **entidade** em vez de um tipo. Ver seção 3 |
+| Enum duplicado voltou a divergir | Alguém redeclarou localmente em vez de importar |
 
 ## ✅ Checklist de saída
 
-- [ ] Todos os models registrados com admin customizado
-- [ ] Listagens com colunas úteis, filtros e busca
-- [ ] `list_select_related` aplicado, com medição antes/depois
-- [ ] Ao menos 1 inline, 1 ação em massa e 1 coluna calculada
-- [ ] Exclusão de dados históricos restrita
-- [ ] Cabeçalho e títulos personalizados
+- [ ] `@bibliocom/tipos` criado e ligado às duas camadas por workspace
+- [ ] Enums e constantes de negócio **importados** pelas duas, sem duplicata
+- [ ] `api.d.ts` gerado do `openapi.json`, nunca editado à mão
+- [ ] O frontend usa os tipos gerados no cliente de API
+- [ ] Nenhuma entidade do TypeORM atravessa a fronteira
+- [ ] Experimento do Passo 4 executado — você **viu** o compilador acusar
+- [ ] Verificação de contrato no CI, e você a viu falhar de propósito
 
-## 🧪 Exercícios rápidos
+## 🧪 Exercícios
 
-1. Configure o admin de forma que uma pessoa da coordenação consiga, em **até 3 cliques**,
-   descobrir todos os empréstimos em atraso de um associado específico.
-2. Crie uma ação que exporte a seleção em CSV (`HttpResponse` com
-   `Content-Disposition: attachment`).
-3. Adicione um filtro customizado (`admin.SimpleListFilter`) "Situação do empréstimo" com
-   as opções Ativo / Atrasado / Devolvido.
-4. Faça a listagem de obras exibir a quantidade de exemplares disponíveis, ordenável, sem
-   gerar N+1 (dica: `annotate` no `get_queryset`).
+Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [Django — The Django admin site](https://docs.djangoproject.com/pt-br/5.0/ref/contrib/admin/)
-- [Django — Admin actions](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/actions/)
-- [django-import-export](https://django-import-export.readthedocs.io/) — importação/exportação em planilha
+- [pnpm workspaces](https://pnpm.io/workspaces)
+- [openapi-typescript](https://openapi-ts.dev/)
+- [NestJS — OpenAPI](https://docs.nestjs.com/openapi/introduction)
+- [TypeScript — declaration files](https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html)

@@ -94,7 +94,7 @@ Aplique ao **projeto da equipe** e documente antes/depois:
 - [ ] `detect-secrets scan` limpo, inclusive no histórico
 - [ ] Nenhum segredo no bundle (`grep` no `dist/`)
 - [ ] Rate limit no login
-- [ ] Serializers minimizados
+- [ ] DTOs de saída minimizados
 
 ---
 
@@ -106,7 +106,7 @@ Aplique ao **projeto da equipe** e documente antes/depois:
 Depois:
 
 1. Risque as linhas com "não" na última coluna e **remova os campos do sistema**.
-2. Confira: a **API** ainda devolve algum campo que a tela não usa? Minimize o serializer.
+2. Confira: a **API** ainda devolve algum campo que a tela não usa? Minimize o DTO de saída.
 3. Escreva o aviso de privacidade (máx. 1 página, linguagem de 9º ano).
 4. Descreva como o sistema atende aos direitos de acesso, correção e eliminação.
 5. Escreva o plano de resposta a incidente: quem faz o quê nas primeiras 24h, e quem

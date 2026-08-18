@@ -9,7 +9,7 @@ tinha: **quais riscos a arquitetura desacoplada acrescenta?**
 ## 🎯 Objetivos
 
 1. Explicar as principais classes de vulnerabilidade e como se manifestam nas duas camadas.
-2. Identificar código vulnerável e corrigi-lo, no Django e no React.
+2. Identificar código vulnerável e corrigi-lo, no NestJS e no React.
 3. Configurar CORS, CSP e cabeçalhos de segurança corretamente.
 4. Reconhecer os riscos específicos de SPA: segredo no *bundle*, XSS em React, CORS
    permissivo, roubo de token.
@@ -37,44 +37,50 @@ Campeã do Top 10. Já implementada no M12; aqui, os padrões de ataque.
 
 #### IDOR
 
-```python
-# ❌ qualquer pessoa autenticada vê o empréstimo de qualquer outra
-class EmprestimoViewSet(viewsets.ModelViewSet):
-    queryset = Emprestimo.objects.all()
+```ts
+// ❌ qualquer pessoa autenticada vê o empréstimo de qualquer outra
+listar() {
+  return this.emprestimos.find({ relations: { exemplar: true } });
+}
 
-# ✅ o filtro faz parte da consulta
-    def get_queryset(self):
-        qs = Emprestimo.objects.select_related("exemplar__obra")
-        return qs if self.request.user.eh_equipe else qs.filter(associado__user=self.request.user)
+// ✅ o filtro faz parte da consulta
+listar(usuario: Usuario) {
+  const qb = this.emprestimos.createQueryBuilder("e").leftJoinAndSelect("e.exemplar", "ex");
+  if (usuario.papel === Papel.ASSOCIADO) qb.where("e.associadoId = :id", { id: usuario.id });
+  return qb.getMany();
+}
 ```
 
 #### Mass assignment
 
-```python
-class Meta:
-    fields = "__all__"                     # ❌ expõe qualquer campo futuro
-    fields = ["titulo", "autor", "isbn"]   # ✅
+```ts
+// ❌ sem whitelist, qualquer campo enviado chega à entidade
+new ValidationPipe({ whitelist: false })
+
+// ✅ só o que o DTO declara sobrevive; o resto é recusado
+new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })
 ```
 
 #### Autorização decidida pelo cliente
 
-```python
-# ❌ o cliente escolhe o próprio papel
-usuario.papel = request.data["papel"]
+```ts
+// ❌ o cliente escolhe o próprio papel
+usuario.papel = dto.papel;
 
-# ✅ o servidor decide
-def perform_create(self, serializer):
-    serializer.save(cadastrada_por=self.request.user)
+// ✅ o servidor decide, a partir da sessão
+async criar(dto: CriarObraDto, @Req() req: Request) {
+  return this.obras.criar({ ...dto, cadastradaPor: req.user as Usuario });
+}
 ```
 
 #### O erro específico de SPA
 
 ```tsx
 // ❌ "protegido" só no cliente
-{usuario.eh_equipe && <BotaoExcluir />}
+{usuario.papel !== "associado" && <BotaoExcluir />}
 ```
 
-Esconder o botão é UX. Sem `permission_classes` no ViewSet, um `curl` faz a exclusão. A
+Esconder o botão é UX. Sem `@UseGuards` no controller, um `curl` faz a exclusão. A
 regra: **cada tela escondida no cliente precisa de uma permissão correspondente no
 servidor**, e a matriz do M12 é o instrumento que verifica isso.
 
@@ -82,10 +88,10 @@ servidor**, e a matriz do M12 é o instrumento que verifica isso.
 
 #### SQL
 
-```python
-Obra.objects.raw(f"SELECT * FROM acervo_obra WHERE titulo = '{nome}'")   # ❌
-Obra.objects.filter(titulo=nome)                                          # ✅ ORM
-Obra.objects.raw("SELECT * FROM acervo_obra WHERE titulo = %s", [nome])   # ✅ parametrizado
+```ts
+qb.where(`obra.titulo = '${nome}'`)                                  // ❌ concatenação
+qb.where("obra.titulo = :nome", { nome })                            // ✅ parametrizado
+this.obras.query("SELECT * FROM obra WHERE titulo = $1", [nome])     // ✅ SQL puro, com parâmetro
 ```
 
 Dados nunca são concatenados em comandos — vale para SQL, shell e caminhos de arquivo.
@@ -129,12 +135,13 @@ function urlSegura(url: string): string | undefined {
 
 #### Injeção de comando e path traversal
 
-```python
-os.system(f"convert {nome} saida.png")                    # ❌
-subprocess.run(["convert", nome, "saida.png"], check=True) # ✅ lista, sem shell
+```ts
+exec(`convert ${nome} saida.png`);                        // ❌ passa pelo shell
+execFile("convert", [nome, "saida.png"]);                 // ✅ argumentos separados
 
-os.path.join(MEDIA_ROOT, request.GET["arquivo"])          # ❌ ../../etc/passwd
-safe_join(MEDIA_ROOT, nome_validado)                       # ✅
+path.join(PASTA_MIDIA, req.query.arquivo as string);      // ❌ ../../etc/passwd
+const alvo = path.resolve(PASTA_MIDIA, nomeValidado);     // ✅ e confira o prefixo:
+if (!alvo.startsWith(PASTA_MIDIA)) throw new ForbiddenException();
 ```
 
 ### 3. CORS e CSRF numa SPA (30 min) ⭐
@@ -153,17 +160,16 @@ Duas coisas diferentes que a turma sempre confunde.
 API precisa de proteção, ela precisa de **autenticação e autorização** — CORS é irrelevante
 para isso.
 
-```python
-# ✅ lista explícita
-CORS_ALLOWED_ORIGINS = ["https://bibliocom.org"]
-CORS_ALLOW_CREDENTIALS = True
+```ts
+// ✅ lista explícita
+app.enableCors({ origin: ["https://bibliocom.org"], credentials: true });
 
-# ❌ nunca
-CORS_ALLOW_ALL_ORIGINS = True         # com credenciais, expõe sessões
-CORS_ALLOWED_ORIGINS = ["*"]
+// ❌ nunca
+app.enableCors({ origin: true, credentials: true });   // reflete qualquer origem
+app.enableCors({ origin: "*", credentials: true });
 ```
 
-> A combinação `CORS_ALLOW_ALL_ORIGINS = True` **com** `CORS_ALLOW_CREDENTIALS = True` é a
+> A combinação `origin: true` **com** `credentials: true` é a
 > falha de configuração mais comum em API de projeto acadêmico: qualquer site passa a poder
 > fazer requisições autenticadas em nome do seu usuário logado e **ler** as respostas.
 >
@@ -211,14 +217,24 @@ frontend chama o backend.
 
 ### 5. A05 — Configuração insegura (20 min)
 
-```python
-DEBUG = True            # ❌ em produção: expõe código, settings, SQL e variáveis
-ALLOWED_HOSTS = ["*"]   # ❌ envenenamento de cache e de links
+```ts
+// ❌ em produção: o corpo do erro vaza stack trace, caminho de arquivo e SQL
+app.useGlobalFilters(new AllExceptionsFilter({ expor: true }));
+
+// ✅ resposta genérica para o cliente; o detalhe vai para o log
+@Catch()
+export class FiltroDeErros implements ExceptionFilter {
+  catch(erro: unknown, host: ArgumentsHost) {
+    this.logger.error(erro);                          // detalhe: só no log
+    const res = host.switchToHttp().getResponse();
+    res.status(500).json({ mensagem: "Erro interno" }); // cliente: nada de útil
+  }
+}
 ```
 
-```bash
-python manage.py check --deploy      # antes de todo deploy
-```
+⚠️ **O padrão do NestJS já é seguro** — ele não expõe *stack trace* em produção. O risco
+aqui é você **piorar** isso ao escrever um filtro de exceção que devolve `erro.message` ou
+`erro.stack` "para facilitar a depuração". É a origem mais comum de vazamento nesta stack.
 
 **No frontend:**
 
@@ -238,28 +254,26 @@ com proteção: **ofuscação não é segurança**.
 
 | Falha | Mitigação |
 |---|---|
-| Senha fraca | `AUTH_PASSWORD_VALIDATORS`, mínimo 12 |
-| Força bruta | Bloqueio por usuário+IP (M12) |
-| Enumeração de usuários | Mensagem única |
-| Session fixation | `login()` rotaciona a sessão |
+| Senha fraca | `@MinLength(12)` no DTO + lista de senhas vazadas |
+| Hash rápido (MD5/SHA) | Argon2 ou bcrypt (M12) |
+| Força bruta | `@nestjs/throttler` por usuário+IP (M12) |
+| Enumeração de usuários | Mensagem única em qualquer falha |
+| *Session fixation* | `req.session.regenerate()` após o login |
 | Token em `localStorage` | Cookie `HttpOnly` (ADR-07) |
 | Cache não limpo no logout | `queryClient.clear()` |
-| Sessão eterna | `SESSION_COOKIE_AGE` |
+| Sessão eterna | `cookie.maxAge` |
 
 ### 7. Cabeçalhos e CSP (20 min)
 
-```python
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_HSTS_SECONDS = 31_536_000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = "DENY"
-    SECURE_REFERRER_POLICY = "same-origin"
+```ts
+import helmet from "helmet";
+
+app.use(helmet({
+  hsts: { maxAge: 31_536_000, includeSubDomains: true, preload: true },
+  frameguard: { action: "deny" },              // X-Frame-Options
+  noSniff: true,                               // X-Content-Type-Options
+  referrerPolicy: { policy: "same-origin" },
+}));
 ```
 
 **CSP numa SPA** exige atenção: o Vite injeta estilos e o React não precisa de
@@ -294,8 +308,8 @@ portabilidade, informação.
 
 **Riscos específicos da arquitetura desacoplada:**
 
-- A API devolve **todos** os campos do serializer, inclusive os que a tela não mostra.
-  Alguém abre a aba Network e lê. **Minimize no serializer, não na tela.**
+- A API devolve **todos** os campos do DTO de saída, inclusive os que a tela não mostra.
+  Alguém abre a aba Network e lê. **Minimize no DTO, não na tela.**
 - Serviços de monitoramento no frontend (Sentry, analytics) capturam URLs, o que pode
   incluir dados pessoais em parâmetros. Configure `send_default_pii=False` (M17).
 - Cache do TanStack Query guarda dados na memória do navegador — daí a limpeza no logout.
@@ -310,7 +324,7 @@ Regra prática: **se não é essencial, não colete.** O dado que você não tem
 
 O laboratório tem **duas partes**, uma por camada:
 
-- Backend: [`vulneravel.py`](../../recursos/codigo/vulneravel.py) — 10 casos
+- Backend: [`vulneravel.ts`](../../recursos/codigo/vulneravel.ts) — 10 casos
 - Frontend: [`vulneravel.tsx`](../../recursos/codigo/vulneravel.tsx) — 8 casos
 
 Trabalhe em duplas: uma pessoa ataca, a outra corrige; depois trocam. Para **cada** caso,
@@ -319,20 +333,38 @@ entregue: vulnerabilidade (nome OWASP), impacto de negócio, exploração concre
 
 Os gabaritos estão comentados no fim de cada arquivo. Não leia antes de tentar.
 
-### Passo 2 — `check --deploy` e cabeçalhos (25 min)
+### Passo 2 — Auditoria de dependências e cabeçalhos (25 min)
+
+O Django tinha um `check --deploy` pronto. Aqui a verificação é montada por você — e o que
+ela audita fica explícito.
 
 ```bash
-# Linux/macOS/WSL
-cd backend && DEBUG=False python manage.py check --deploy
-```
-```powershell
-# Windows PowerShell
-cd backend
-$env:DEBUG="False"; python manage.py check --deploy
-Remove-Item Env:\DEBUG        # limpe depois: no PowerShell a variavel fica na sessao
+cd ~/dev/bibliocom/backend
+pnpm audit --audit-level=high      # A06 — dependências vulneráveis
+pnpm add helmet
 ```
 
-Resolva **todos** os avisos e documente o que cada configuração previne. Depois:
+Aplique o `helmet` da seção 7 e confira o resultado com a requisição abaixo. Depois, para
+**cada** cabeçalho que apareceu, escreva numa linha o que ele previne:
+
+| Cabeçalho | Previne |
+|---|---|
+| `Strict-Transport-Security` | |
+| `X-Frame-Options: DENY` | |
+| `X-Content-Type-Options: nosniff` | |
+| `Referrer-Policy` | |
+| `Content-Security-Policy` | |
+
+Confira também, no seu código:
+
+- [ ] `ValidationPipe` com `whitelist` e `forbidNonWhitelisted` (A01)
+- [ ] Cookie de sessão com `httpOnly`, `secure` em produção e `sameSite` (A07)
+- [ ] `SESSION_SECRET` vindo do ambiente, **diferente** do de desenvolvimento (A05)
+- [ ] CORS com lista explícita de origens, nunca `origin: true` (A05)
+- [ ] Nenhum filtro de exceção devolvendo `erro.stack` ao cliente (A05)
+- [ ] `sourcemap: false` no build do frontend
+
+Depois:
 
 ```bash
 # Linux / macOS / WSL / Git Bash
@@ -377,7 +409,7 @@ curl.exe -I http://localhost:8000/api/obras/ | Select-String "x-frame|x-content|
 | `fields = "__all__"` | Mass assignment |
 | f-string em SQL | Injeção |
 | Proteção só no `RotaProtegida` | A API fica aberta |
-| Serializer devolvendo campo que a tela não mostra | Vazamento pela aba Network |
+| DTO de saída devolvendo campo que a tela não mostra | Vazamento pela aba Network |
 | Coletar dado "porque pode ser útil" | Violação de minimização (LGPD) |
 
 ## ✅ Checklist de saída
@@ -391,7 +423,7 @@ curl.exe -I http://localhost:8000/api/obras/ | Select-String "x-frame|x-content|
 - [ ] `pip-audit` e `pnpm audit` sem alertas críticos
 - [ ] Mapa de dados pessoais preenchido
 - [ ] Aviso de privacidade redigido
-- [ ] Serializers minimizados (não devolvem o que a tela não usa)
+- [ ] DTOs de saída minimizados (não devolvem o que a tela não usa)
 
 ## 📦 Entrega E6 — Relatório de segurança
 
@@ -414,7 +446,8 @@ Ver [`exercicios.md`](exercicios.md) · Checklist em
 ## 📚 Para aprofundar
 
 - [OWASP Top 10:2021 (pt-BR)](https://owasp.org/Top10/pt_BR/)
-- [Django — Segurança](https://docs.djangoproject.com/pt-br/5.0/topics/security/)
+- [NestJS — Security](https://docs.nestjs.com/security/helmet)
+- [Helmet — cabeçalhos HTTP](https://helmetjs.github.io/)
 - [OWASP — Cross-Site Scripting Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
 - [MDN — CORS](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/CORS)
 - [React — dangerouslySetInnerHTML](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
