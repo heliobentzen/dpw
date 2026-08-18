@@ -256,7 +256,7 @@ async function buscarObras() {
 ```
 
 ⚠️ **`fetch` não lança erro em 404 ou 500.** Ele só rejeita se a rede falhar. Verificar
-`resposta.ok` é obrigatório — é o erro nº 1 de quem vem de `requests` do Python.
+`resposta.ok` é obrigatório. É onde mais tropeça quem vem de `requests` do Python.
 
 ```python
 # Python

@@ -12,8 +12,8 @@
 
 ### 1. Crie o repositório
 
-**Público**, chamado `dpw-exercicios`, na sua conta. Separado do `bibliocom` — este é seu
-caderno de exercícios; aquele é o sistema.
+**Público**, chamado `dpw-exercicios`, na sua conta. Separado do `bibliocom`: este é o seu
+caderno; aquele é o sistema.
 
 ```bash
 mkdir -p ~/dev/dpw-exercicios && cd ~/dev/dpw-exercicios
@@ -54,8 +54,8 @@ Metade da nota é conseguir **provar** o que você fez. Três tipos de link:
 | Um **trecho de arquivo** | Abra o arquivo, clique no número da linha (arraste para várias) e tecle `y` — a URL vira permanente, presa ao commit |
 | O **histórico ramificado** | `…/network` mostra o grafo de branches e merges |
 
-⚠️ Sem teclar `y`, o link aponta para a branch e **muda** quando você commitar de novo. O
-professor abriria outra coisa.
+⚠️ Sem teclar `y`, o link aponta para a branch e **muda** a cada commit novo. Quando o
+professor abrir, vai encontrar outra coisa.
 
 ### 4. Modelo do `README.md`
 
@@ -157,8 +157,9 @@ código e a saída (pode recortar as linhas relevantes).
 
 ## E00.3 — Conflito de merge, provocado sozinho ⭐
 
-Você **vai** viver isso na Etapa 3. Melhor agora, sem nota do projeto em jogo — e dá para
-provocar sem depender de mais ninguém: duas branches suas, partindo do mesmo ponto.
+Você **vai** viver isso na Etapa 3. Melhor descobrir agora, sem a nota do projeto em jogo e
+sem ser às 23h da véspera. E dá para provocar sozinho: duas branches suas, saindo do mesmo
+ponto.
 
 ```bash
 # no seu dpw-exercicios, com a main já commitada
@@ -173,8 +174,8 @@ git switch main
 git merge feat/titulo-b                # ← conflito
 ```
 
-O `main~1` é o truque: a segunda branch nasce do estado anterior, exatamente como aconteceria
-se um colega tivesse começado antes de você integrar.
+O `main~1` é o truque. A segunda branch nasce do estado anterior, que é exatamente o que
+acontece quando um colega começou a trabalhar antes de você integrar o seu.
 
 Resolva **à mão**, entendendo os marcadores:
 
@@ -203,8 +204,9 @@ versão da sua branch
 
 ## E00.4 — Desfazer sem pânico
 
-Cinco situações que acontecem toda semana. Execute cada uma **de verdade** no
-`dpw-exercicios` e registre o comando e o efeito.
+Cinco situações que acontecem toda semana, e que separam quem resolve em 10 segundos de quem
+apaga a pasta e clona de novo. Execute cada uma **de verdade** no `dpw-exercicios` e registre
+o comando e o efeito.
 
 | # | Cenário | Comando |
 |---|---|---|
@@ -262,7 +264,7 @@ provocada.
 - [ ] Cada passo **elimina** uma hipótese — não é lista de comandos soltos
 - [ ] A demonstração mostra o roteiro encontrando a causa real
 
-> Este exercício vale mais que os outros para a vida profissional: treina **método**, não
+> Dos cinco, é o que mais serve na vida profissional: treina **método**, não
 > comando decorado.
 
 ---
@@ -280,7 +282,7 @@ Antes de enviar, abra esse link numa **janela anônima** e confira:
 - [ ] Nenhum arquivo `.env` com valor real foi commitado
 - [ ] `node_modules/` não está no repositório
 
-> Link quebrado é evidência ausente. O que o professor não conseguir abrir, não conta.
+> Link quebrado é evidência ausente. O que o professor não conseguir abrir, não existiu.
 
 ## Critérios de correção
 

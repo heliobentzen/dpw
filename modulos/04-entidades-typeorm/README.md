@@ -93,10 +93,10 @@ titulo: string;
 | `unique: true` | Pode repetir? |
 | `default` | O que vale quando ninguém informou? |
 
-**A decisão mais consequente é `nullable`.** Uma coluna que aceita nulo obriga **todo**
-código que a lê a tratar a ausência. Torne nulo só o que é genuinamente opcional no mundo
-real — e, quando um texto for opcional, prefira `default: ""` a `nullable: true`: string
-vazia e `null` significando "sem valor" é a origem de metade dos `if` defensivos.
+**A decisão mais cara é `nullable`.** Coluna que aceita nulo obriga **todo** código que a lê
+a tratar a ausência. Torne nulo só o que é genuinamente opcional no mundo real. Para texto
+opcional, prefira `default: ""` a `nullable: true`: ter string vazia **e** `null` querendo
+dizer "sem valor" é a origem de metade dos `if` defensivos de qualquer sistema.
 
 ### 5. Relações
 
@@ -131,8 +131,8 @@ export class Obra {
 | `CASCADE` | Apaga as obras junto | Só quando o filho **não existe** sem o pai (um item dentro de um pedido) |
 | `SET NULL` | Zera a referência, mantém a obra | Quando o vínculo é opcional |
 
-> Escolher `CASCADE` sem pensar é como apagar uma editora e perder o catálogo. A pergunta
-> certa é: *"este registro faz sentido sozinho?"*
+> `CASCADE` escolhido no automático é como apagar uma editora e levar o catálogo junto. A
+> pergunta certa é sempre: *"este registro faz sentido sozinho?"*
 
 #### N:N — uma obra tem várias categorias, uma categoria tem várias obras
 
@@ -161,12 +161,13 @@ isbn: string;
 ```
 
 Regra prática: indexe o que aparece em `WHERE`, `ORDER BY` ou `JOIN` **com frequência**.
-Índice não é grátis — ocupa espaço e torna a escrita mais lenta. Chave primária e chave
-estrangeira já são indexadas automaticamente.
+Índice não é de graça: ocupa espaço e deixa a escrita mais lenta. Chave primária e
+estrangeira já vêm indexadas.
 
-💼 **No mercado:** modelagem é onde erro custa mais caro. Um campo mal tipado vira migração
-de dados seis meses depois, com sistema em produção. Em *code review*, `nullable: true` sem
-justificativa e `CASCADE` sem justificativa são os dois comentários mais frequentes.
+💼 **No mercado:** modelagem é onde o erro custa mais caro. Um campo mal tipado vira migração
+de dados seis meses depois, com o sistema em produção e o cliente perguntando por quê. Em
+*code review*, `nullable: true` e `CASCADE` sem justificativa são os dois comentários mais
+frequentes.
 
 ---
 
@@ -430,8 +431,8 @@ Agora vocês. `Associado` e `Emprestimo`, com as regras:
 Escreva as entidades, suba e confira o schema. Depois, justifique por escrito, em uma linha
 cada: todo `nullable`, todo `unique`, todo `onDelete` e todo índice que você criou.
 
-> A justificativa **é** o exercício. Entidade sem justificativa é chute que a turma
-> descobre estar errado no M06, quando as consultas começam a doer.
+> A justificativa **é** o exercício. Modelagem sem justificativa é chute, e o chute cobra a
+> conta no M06, quando as consultas começam a doer.
 
 ---
 

@@ -8,8 +8,8 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 > **Frontend** — React 19 · TypeScript · Vite · Tailwind CSS 4 · React Router · TanStack Query
 > **Comum** — monorepo pnpm · tipos compartilhados · Git/GitHub · Docker · CI · deploy em PaaS
 >
-> **Uma linguagem em toda a stack.** A transição backend→frontend na semana 8 deixa de ser
-> troca de idioma e passa a ser troca de camada — o maior amortecedor pedagógico do curso.
+> **Uma linguagem em toda a stack.** Na semana 8, quando a turma passa para o frontend, ela
+> troca de camada e não de idioma. É o que mais suaviza a virada do curso.
 >
 > A ementa fala em "framework escolhido". Ver
 > [`docs/decisoes-tecnicas.md`](docs/decisoes-tecnicas.md) para a justificativa completa,
@@ -103,9 +103,9 @@ bibliocom/                    monorepo (workspaces do pnpm)
 └── pacotes/tipos/ @bibliocom/tipos — DTOs e enums (M15)
 ```
 
-O domínio **e a linguagem** são os mesmos nas duas camadas. Quando a turma troca de camada
-na semana 8, não troca de idioma: o TypeScript do M04 é o mesmo do M11. Essa continuidade é
-intencional e é o principal amortecedor da transição backend→frontend.
+O domínio **e a linguagem** são os mesmos nas duas camadas: o TypeScript do M04 é o mesmo do
+M11. A continuidade é proposital, e é o que evita que a semana 8 pareça o começo de outro
+curso.
 
 O projeto da equipe é **outro sistema**, de tema livre, definido na Etapa 1. O BiblioCom é
 referência de código, não o entregável.
@@ -138,18 +138,18 @@ Todo bloco **executável** que difere entre plataformas aparece em pares:
 ```
 ````
 
-Nunca um comentário `# Windows: ...` **dentro** de um bloco Unix — isso impede copiar e
-colar, que é justamente o que o roteiro pede. Blocos idênticos nas três plataformas (`git`,
-`pnpm`, `npx`) aparecem uma vez só; blocos que são **conteúdo de arquivo** (`.env`,
-`.gitattributes`) usam ` ```ini `, não ` ```bash `.
+Nunca um comentário `# Windows: ...` **dentro** de um bloco Unix. Isso obriga a editar o
+comando antes de rodar, que é justo o contrário do que um roteiro deveria fazer. Blocos
+idênticos nas três plataformas (`git`, `pnpm`, `npx`) aparecem uma vez só; blocos que são
+**conteúdo de arquivo** (`.env`, `.gitattributes`) usam ` ```ini `, não ` ```bash `.
 
-Se você encontrar um bloco sem alternativa, é falha do material — abra uma issue.
+Achou um bloco sem alternativa? É falha do material, não sua. Abra uma issue.
 
 ## Montagem do ambiente
 
-O ambiente é montado **pela turma, comando a comando** — instalar dependência, configurar o
-projeto e versionar código são conteúdo da disciplina, não preparação para ela. Não há
-script que faça isso no lugar do aluno; há um que **confere** o resultado
+O ambiente é montado **pela turma, comando a comando**. Instalar dependência, configurar
+projeto e versionar código são conteúdo da disciplina, não preparação para ela. Não existe
+script que faça isso no lugar do aluno; existe um que **confere** o resultado
 ([`verifica-ambiente.mjs`](recursos/codigo/verifica-ambiente.mjs)).
 
 Em compensação, **nada é instalado antes da hora**. A montagem acontece em três momentos,
@@ -161,9 +161,8 @@ cada peça chegando junto com o problema que ela resolve:
 | **Antes do M03** | NestJS CLI e as dependências do backend | `--etapa m03` |
 | **Antes do M05** | Docker + PostgreSQL | `--etapa m05` |
 
-**A stack só tem um runtime.** Não há Python, `venv` nem `pip`: a semana 1 instala **Node e
-pnpm**, e é isso. Foi o maior ganho colateral da mudança para TypeScript ponta a ponta — o
-setup que antes tinha dois ecossistemas paralelos passou a ter um.
+**A stack tem um runtime só.** A semana 1 instala **Node e pnpm**, e acabou: não há segundo
+ecossistema de pacotes para manter, nem ambiente virtual para lembrar de ativar.
 
 Guias: [`docs/ambiente-setup.md`](docs/ambiente-setup.md) (Linux/macOS) ou
 [`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md) (Windows).

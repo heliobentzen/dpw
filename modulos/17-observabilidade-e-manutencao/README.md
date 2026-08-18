@@ -45,8 +45,8 @@ LoggerModule.forRoot({
 | `transport: pino-pretty` só fora de produção | Colorido para você ler; JSON para a plataforma indexar |
 | **`redact`** | Apaga campos sensíveis **antes** de escrever. Sem isto, o cookie de sessão de cada requisição vai para o log — e quem lê o log assume a sessão |
 
-> ⚠️ `redact` é a linha mais importante do bloco. Log é lido por mais gente do que o banco:
-> equipe de suporte, plataforma de agregação, e quem tiver acesso ao painel.
+> ⚠️ O `redact` é a linha mais importante do bloco. Log é lido por muito mais gente que o
+> banco: suporte, plataforma de agregação e qualquer pessoa com acesso ao painel.
 
 Para **stdout**, não arquivo (fator XI do 12-factor): a plataforma coleta, agrega e permite
 buscar.
@@ -125,7 +125,7 @@ if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
 }
 ```
 
-`sendDefaultPii: false` não é detalhe: enviar dados pessoais para um serviço externo é
+Repare no `sendDefaultPii: false`. Enviar dados pessoais para um serviço externo é
 tratamento de dados sob a LGPD, com todas as obrigações que isso implica.
 
 ### 3. Backup (10 min)

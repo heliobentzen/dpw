@@ -80,7 +80,8 @@ async criar(dto: CriarObraDto, @Req() req: Request) {
 {usuario.papel !== "associado" && <BotaoExcluir />}
 ```
 
-Esconder o botão é UX. Sem `@UseGuards` no controller, um `curl` faz a exclusão. A
+Esconder o botão é experiência de uso. Sem `@UseGuards` no controller, um `curl` de três
+linhas apaga o registro do mesmo jeito. A
 regra: **cada tela escondida no cliente precisa de uma permissão correspondente no
 servidor**, e a matriz do M12 é o instrumento que verifica isso.
 
@@ -169,10 +170,9 @@ Duas coisas diferentes que a turma sempre confunde.
 | Protege quem | O **usuário do outro site** | O **seu** usuário |
 | Erro típico | "blocked by CORS policy" no console | 403 em todo POST |
 
-**CORS não é segurança da sua API.** Ele impede que o JavaScript de `site-malicioso.com`
-**leia** a resposta da sua API. Ele não impede `curl`, nem Postman, nem um servidor. Se sua
-API precisa de proteção, ela precisa de **autenticação e autorização** — CORS é irrelevante
-para isso.
+**CORS não protege a sua API.** Ele impede que o JavaScript de `site-malicioso.com` **leia**
+a resposta. Não impede `curl`, nem Postman, nem um servidor qualquer. Se a sua API precisa de
+proteção, ela precisa de **autenticação e autorização**; CORS não entra nessa conta.
 
 ```ts
 // ✅ lista explícita

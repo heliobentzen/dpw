@@ -29,8 +29,8 @@ Ao final você será capaz de:
 ❌ GET  /api/buscarObrasPorAutor ✅ GET    /api/obras?autorId=3
 ```
 
-A URL identifica **o quê**; o método HTTP diz **o que fazer** com ele. Verbo na URL é
-sintoma de que o método está sendo ignorado.
+A URL identifica **o quê**; o método HTTP diz **o que fazer** com ele. Verbo na URL é sinal
+de que o método HTTP está sendo ignorado.
 
 | Método | Rota | Faz | Status de sucesso |
 |---|---|---|---|
@@ -44,16 +44,17 @@ sintoma de que o método está sendo ignorado.
 **PATCH ou PUT?** `PUT` exige o recurso inteiro — omitir um campo o apaga. `PATCH` altera só
 o que veio. Formulário de edição quase sempre quer `PATCH`. Este material usa `PATCH`.
 
-**Status importa.** `200` para tudo obriga o cliente a inspecionar o corpo para saber se deu
-certo. É por isso que o M08 consegue tratar erro em um lugar só: o status é confiável.
+**Status importa.** Responder `200` para tudo obriga o cliente a abrir o corpo da resposta
+para descobrir se deu certo. É por confiar no status que o M08 consegue tratar erro num
+lugar só.
 
 ### 2. Por que DTO e não a entidade
 
 A tentação é receber e devolver a entidade direto. Três razões para não:
 
-**Entrada — *mass assignment*.** Se o controller faz `save(req.body)`, quem enviar
-`{"titulo":"X","destaque":true,"criadoEm":"1999-01-01"}` grava tudo. O DTO define **o que é
-aceito**; o resto é descartado.
+**Entrada: *mass assignment*.** Se o controller faz `save(req.body)`, quem enviar
+`{"titulo":"X","destaque":true,"criadoEm":"1999-01-01"}` grava os três. O DTO define **o que
+é aceito**; o resto vai para o lixo.
 
 **Saída — vazamento.** A entidade `Usuario` tem `senhaHash`. Devolvê-la inteira publica o
 hash de todo mundo. O M13 volta a este ponto.
@@ -94,7 +95,7 @@ propriedade não declarada no DTO é **removida** do objeto.
 | **Service** | Regra de negócio |
 | **Repository** | Acesso a dados |
 
-Regra que resolve as dúvidas: **o service não sabe que HTTP existe**. Se você precisou
+Regra que resolve a dúvida: **o service não sabe que HTTP existe**. Se você precisou
 importar `Request` ou `Response` dentro dele, a lógica está na camada errada.
 
 ### 5. Erros no formato do domínio
@@ -243,8 +244,8 @@ Repare no que a resposta **não** tem: `criadoEm`, `atualizadoEm`, o `autorId` c
 biografia inteira da autora. E no que ela **tem** e a entidade não: `exemplaresDisponiveis`,
 um número calculado que o frontend usaria três requisições para descobrir.
 
-> **É este o argumento do DTO de saída.** Não é cerimônia: é desenhar a resposta para quem
-> vai consumi-la, em vez de despejar a tabela.
+> Esse é o argumento do DTO de saída. Não é cerimônia; é desenhar a resposta para quem vai
+> consumi-la, em vez de despejar a tabela e desejar boa sorte.
 
 ### Passo 4 — O controller completo (40 min)
 
@@ -345,8 +346,8 @@ O terceiro caso é o `forbidNonWhitelisted` em ação: um campo que o DTO não d
 
 ### Passo 6 — Upload de arquivo (25 min) ⭐
 
-Toda obra tem capa. É o requisito mais comum de qualquer CRUD — e o que mais aparece mal
-feito, porque envolve três decisões que ninguém toma por você.
+Toda obra tem capa. É o requisito mais comum de qualquer CRUD e um dos que mais aparecem mal
+feitos, porque envolve três decisões que ninguém toma no seu lugar.
 
 ```bash
 pnpm --filter backend add -D @types/multer

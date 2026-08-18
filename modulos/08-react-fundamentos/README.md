@@ -180,7 +180,7 @@ export function Contador() {
    obras.push(nova); setObras(obras);                            // ❌ não re-renderiza
    ```
 
-A regra 4 é a causa nº 1 de "mudei o estado e a tela não atualizou": o React compara
+A regra 4 explica a maior parte dos "mudei o estado e a tela não atualizou": o React compara
 referências, e o array continua sendo o mesmo objeto.
 
 #### Onde colocar o estado

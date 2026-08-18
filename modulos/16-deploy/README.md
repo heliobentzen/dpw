@@ -3,9 +3,9 @@
 > **CH:** 4h (2h teóricas · 2h práticas) · **Semana 16** · **Pré-requisitos:** M13, M14
 > **Ementa:** *Tópicos relevantes: Implantação (deploy) do sistema.*
 
-O módulo em que o projeto deixa de ser exercício e vira sistema. Regra do material: ao final
-desta semana **todo mundo tem uma URL pública funcionando** — com o BiblioCom, não com o
-projeto da equipe. O projeto vem depois, com o caminho já conhecido.
+O módulo em que o projeto deixa de ser exercício e vira sistema. Regra: ao final desta semana
+**todo mundo tem uma URL pública funcionando**, com o BiblioCom e não com o projeto da
+equipe. O projeto vem depois, quando o caminho já não tem surpresa.
 
 Numa arquitetura desacoplada, "fazer deploy" significa publicar **dois** artefatos e
 garantir que eles se encontrem.
@@ -79,7 +79,7 @@ a escolha de autenticação por sessão **depende** desta topologia.
 O usuário acessa `https://bibliocom.org/obras/42` diretamente, ou dá F5 nessa rota. O
 servidor recebe `GET /obras/42` — e não existe arquivo com esse nome.
 
-**Sem configuração: 404.** É o bug nº 1 do deploy de SPA, e ele não aparece em
+**Sem configuração: 404.** É o tropeço clássico do deploy de SPA, e ele não aparece em
 desenvolvimento porque o Vite já faz o *fallback*.
 
 A regra de roteamento, em ordem:
@@ -124,9 +124,9 @@ index.html         → Cache-Control: no-cache        (sempre revalida)
 /assets/*.js|css   → Cache-Control: max-age=31536000, immutable
 ```
 
-O `index.html` é pequeno e aponta para os arquivos com hash; os arquivos com hash nunca
-mudam de conteúdo. Resultado: cache eterno **e** deploy que chega ao usuário
-imediatamente. É a solução definitiva para "o usuário está vendo a versão antiga".
+O `index.html` é pequeno e aponta para os arquivos com hash; os arquivos com hash nunca mudam
+de conteúdo. Resultado: cache eterno **e** deploy que chega ao usuário na hora. Resolve de
+vez o clássico "no meu computador aparece a versão nova".
 
 ### 5. Migrações em produção (20 min)
 
@@ -159,7 +159,8 @@ expandir → migrar → contrair do M05, aplicado ao contrato.
 | VPS + Nginx | Baixo/médio | Alto | Requisito de contrato ou custo em escala |
 | Nuvem gerenciada | Variável | Muito alto | Empresa com equipe de infra |
 
-> Camadas gratuitas mudam de política. Verifique antes do semestre e tenha plano B.
+> Camada gratuita muda de política sem avisar, e costuma avisar na semana da entrega.
+> Verifique antes do semestre e tenha plano B.
 
 ---
 

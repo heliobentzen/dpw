@@ -26,11 +26,11 @@ Node não impõe estrutura. Um projeto Express começa assim:
 app.get("/obras", (req, res) => { /* consulta o banco, valida, responde */ });
 ```
 
-Funciona. E na semana 12, com 40 rotas, vira um arquivo de 800 linhas em que ninguém acha
-nada, nada é testável isoladamente e cada pessoa da equipe organizou de um jeito.
+Funciona. Na semana 12, com 40 rotas, isso vira um arquivo de 800 linhas onde ninguém acha
+nada, nada é testável isoladamente e cada pessoa da equipe organizou do seu jeito.
 
-O NestJS impõe uma estrutura em três peças. **Essa imposição é o produto** — é o que
-permite quatro pessoas trabalharem no mesmo backend sem colidir.
+O NestJS impõe uma estrutura em três peças. **A imposição é o produto:** é o que permite
+quatro pessoas mexerem no mesmo backend sem colidir.
 
 | Peça | Responsabilidade | O que **não** deve fazer |
 |---|---|---|
@@ -67,8 +67,8 @@ export class ObrasController {
 ```
 
 Ninguém escreve `new ObrasService()`. O Nest lê o tipo do parâmetro, procura quem foi
-declarado como provider naquele módulo, cria uma única instância e entrega. Isso é
-**injeção de dependência**: a classe declara *o que precisa*, não *como obter*.
+declarado como provider naquele módulo, cria uma instância e entrega pronta. Isso é
+**injeção de dependência**: a classe declara *o que precisa*, não *como conseguir*.
 
 Três consequências práticas:
 
@@ -77,7 +77,7 @@ Três consequências práticas:
 3. **Trocar a implementação não toca o consumidor** — útil quando o `EmailService` de
    desenvolvimento vira o de produção.
 
-> O `private readonly` no construtor não é enfeite: é atalho do TypeScript que **declara e
+> O `private readonly` no construtor é atalho do TypeScript: **declara e
 > atribui** a propriedade numa linha só. Sem ele, seria `this.obras = obras`.
 
 ### 3. Decorators
@@ -91,8 +91,8 @@ grafo de dependências.
 buscarUm(@Param("id") id: string) { … }
 ```
 
-Não há mágica — há um registro sendo lido em tempo de inicialização. É o mesmo mecanismo
-que o TypeORM usa em `@Entity()` (M04) e o `class-validator` em `@IsString()` (M07). Um
+Não há mágica nenhuma: há um registro sendo lido na inicialização. É o mesmo mecanismo que
+o TypeORM usa em `@Entity()` (M04) e o `class-validator` em `@IsString()` (M07). Um
 conceito, três usos.
 
 ### 4. O ciclo de uma requisição
@@ -166,7 +166,7 @@ pnpm start:dev
 |---|---|
 | `pnpm dlx @nestjs/cli` | Executa a CLI **sem instalá-la** globalmente. É o `npx` do pnpm |
 | `new backend` | Gera o projeto na pasta `backend/` |
-| `--skip-git` | **Importante:** sem isto, a CLI cria um segundo repositório dentro do seu |
+| `--skip-git` | **Importante.** Sem isto a CLI cria um segundo repositório dentro do seu, e você passa meia hora sem entender por que o `git status` ignora tudo em `backend/` |
 | `@nestjs/config` | Lê variáveis de ambiente do `.env` |
 | `pnpm start:dev` | Sobe em <http://localhost:3000>, recarregando a cada arquivo salvo |
 
@@ -191,8 +191,8 @@ pnpm dlx @nestjs/cli generate service acervo --no-spec
 ```
 
 A CLI cria os três arquivos **e os registra** no `app.module.ts` e no `acervo.module.ts`.
-Esse registro é o passo que mais se esquece quando se cria à mão — e o erro resultante
-(`Nest can't resolve dependencies`) não diz que faltou registrar.
+Esse registro é justamente o que se esquece ao criar à mão, e o erro que aparece
+(`Nest can't resolve dependencies`) não menciona registro nenhum.
 
 > `--no-spec` pula o arquivo de teste. Eles entram no M14, com o conteúdo que os justifica.
 
@@ -385,7 +385,7 @@ SwaggerModule.setup("api/docs", app, SwaggerModule.createDocument(app, config));
 **Deu certo se:** <http://localhost:3000/api/docs> mostra os dois endpoints, com botão de
 testar.
 
-Esse schema OpenAPI não é enfeite: é o **contrato** de que o M02 falou, e é dele que o M15
+Esse schema OpenAPI é o **contrato** de que o M02 falou, e é dele que o M15
 gera os tipos do frontend. A documentação existe porque o código existe — ela não pode
 divergir.
 

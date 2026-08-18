@@ -68,7 +68,7 @@ Se você não tem preferência: **PowerShell**.
 
 ### 0.2 Escolha a pasta — fora do OneDrive, sem espaço e sem acento ⚠️
 
-Esta é a causa nº 1 de problemas inexplicáveis no Windows, e **nenhum tutorial avisa**.
+Esta é a origem da maior parte dos problemas inexplicáveis no Windows, e **nenhum tutorial avisa**.
 
 | ❌ Evite | Por quê |
 |---|---|
@@ -479,7 +479,7 @@ curl.exe --version
 
 | Linha | O que faz |
 |---|---|
-| `curl.exe --version` | ⚠️ O `.exe` **não é enfeite**. No PowerShell, `curl` sozinho é apelido de `Invoke-WebRequest`, um comando diferente. Todo `curl` dos roteiros vira `curl.exe` aqui |
+| `curl.exe --version` | ⚠️ O `.exe` faz falta. No PowerShell, `curl` sozinho é apelido de `Invoke-WebRequest`, um comando diferente. Todo `curl` dos roteiros vira `curl.exe` aqui |
 
 ---
 

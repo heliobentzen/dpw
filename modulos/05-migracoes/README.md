@@ -29,9 +29,9 @@ O `synchronize` compara entidades × banco e aplica a diferença. Ele acerta o c
 | `varchar(200)` → `varchar(50)` | Trunca ou falha, dependendo do banco | Decidir o que fazer com os textos longos |
 | `nullable` → `NOT NULL` com linhas nulas | Falha | Preencher um padrão, depois apertar a regra |
 
-O problema não é o `synchronize` ser ruim; é que essas perguntas **não têm resposta
-automática**. Elas dependem do negócio. Migração é o lugar onde a resposta fica registrada,
-revisada em PR e aplicada na mesma ordem em toda máquina.
+O `synchronize` não é ruim. É que essas perguntas **não têm resposta automática**: elas
+dependem do negócio. Migração é o lugar onde a resposta fica registrada, revisada em PR e
+aplicada na mesma ordem em toda máquina.
 
 ### 2. Uma migração é código versionado
 
@@ -83,9 +83,9 @@ Como renomear uma coluna sem derrubar o sistema? Não de uma vez.
 | 3. Trocar leitura | — | Código lê só `resumo` |
 | 4. Contrair | Remove `sinopse` | — |
 
-Parece burocracia até a primeira vez que um deploy é revertido: com expandir/contrair, o
-código antigo continua funcionando com o banco novo. Sem ele, reverter significa restaurar
-backup.
+Parece burocracia até o dia em que você precisa reverter um deploy. Com expandir/contrair,
+o código antigo continua funcionando com o banco novo. Sem ele, reverter significa restaurar
+backup, e aí a conversa muda de tom.
 
 💼 **No mercado:** "como você renomearia uma coluna de uma tabela com 10 milhões de linhas,
 sem downtime?" é pergunta clássica de entrevista pleno. A resposta é esta seção.
@@ -128,7 +128,7 @@ Em `app.module.ts`, troque `synchronize: true` por `synchronize: false` e acresc
 `migrations: ["dist/migracoes/*.js"]`.
 
 > Repare no `dist/`: a aplicação roda **compilada**, a CLI roda o **fonte**. Caminhos
-> diferentes para a mesma coisa é a confusão nº 1 deste módulo.
+> diferentes para a mesma coisa. Guarde isso: é o que mais confunde neste módulo.
 
 Acrescente ao `package.json` do backend:
 
@@ -171,8 +171,8 @@ chave estrangeira, cada índice.
 
 **Deu certo se:** a tabela `migrations` existe e tem uma linha.
 
-> ⚠️ **Gerar não é aplicar.** São dois comandos porque entre eles existe um passo humano:
-> **revisar**. Migração que ninguém leu é migração que apaga dados.
+> ⚠️ **Gerar não é aplicar.** São dois comandos porque entre eles cabe um passo humano:
+> **revisar**. Migração que ninguém leu é migração que apaga dados calada.
 
 ### Passo 3 — Uma coluna nova, do jeito certo (20 min)
 
@@ -225,10 +225,10 @@ export class DestacaObrasAntigas1738000000001 implements MigrationInterface {
 }
 ```
 
-⚠️ Repare no `down`: ele **não** restaura o estado anterior com fidelidade — zera tudo,
-inclusive destaques marcados à mão. Isso é honesto e deve estar comentado no arquivo.
-Migração de dados frequentemente não é perfeitamente reversível; declare isso em vez de
-fingir que é.
+⚠️ Olhe o `down`: ele **não** restaura o estado anterior com fidelidade. Zera tudo, inclusive
+destaques que alguém marcou à mão. Comente isso no arquivo. Migração de dados raramente é
+perfeitamente reversível, e é melhor declarar a limitação do que descobri-la no pior
+momento possível.
 
 ### Passo 5 — Trocar SQLite por PostgreSQL (20 min)
 

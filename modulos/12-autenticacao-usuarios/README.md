@@ -57,9 +57,9 @@ segurança. Três opções reais:
 O raciocínio, que é o que importa aprender:
 
 > A maioria dos tutoriais ensina JWT em `localStorage` porque é o mais fácil de fazer
-> funcionar. Mas `localStorage` é legível por **qualquer** JavaScript que rode na página —
-> inclusive o que um XSS injetou, e inclusive o de uma dependência comprometida. Um cookie
-> `HttpOnly` simplesmente **não existe** para o JavaScript.
+> funcionar. Só que `localStorage` é legível por **qualquer** JavaScript que rode na página:
+> o que um XSS injetou, e o daquela dependência que ninguém auditou. Um cookie `HttpOnly`
+> simplesmente **não existe** para o JavaScript.
 >
 > JWT é a resposta certa quando há vários domínios, clientes móveis ou serviços que não
 > compartilham sessão. **Não é o nosso caso.** Escolher pelo modelo de ameaça, e não pelo
@@ -123,8 +123,8 @@ const ok = await argon2.verify(hash, senhaEnviada); // ao autenticar
 | **Nunca** criptografia reversível | Se você consegue recuperar a senha, quem invadir também consegue |
 | O *salt* já vem embutido | Argon2 e bcrypt guardam o salt dentro do próprio hash |
 
-> Se um site consegue **enviar sua senha por e-mail** quando você esquece, ele a guardou de
-> forma reversível. É motivo para não usar o site.
+> Se um site consegue **te mandar a senha por e-mail** quando você esquece, ele guardou a
+> senha de forma reversível. É motivo suficiente para não usar o site.
 
 ### 4. Endpoints de sessão (25 min)
 
@@ -146,8 +146,8 @@ Três detalhes que decidem se o frontend fica simples ou não:
 3. **A resposta nunca traz `senhaHash`.** Use DTO de saída (M07), sempre.
 
 ⚠️ **A mensagem de erro do login é genérica**: `"Credenciais inválidas"`, nunca "esse e-mail
-não existe". Distinguir os dois casos entrega ao atacante uma lista de e-mails cadastrados —
-é **enumeração de usuários**, e o M13 volta a ela.
+não existe". Distinguir os dois casos entrega de bandeja a lista de e-mails cadastrados. Isso
+tem nome, **enumeração de usuários**, e o M13 volta ao assunto.
 
 ### 5. Autorização em quatro níveis (25 min)
 
@@ -490,9 +490,10 @@ Implemente, com o que o M10 e o M11 ensinaram:
 - Login que, ao dar certo, **invalida** a consulta da sessão para o cache atualizar
 - Logout que limpa o cache inteiro (`queryClient.clear()`)
 
-> **Esconder um botão não é segurança.** A proteção de rota no cliente melhora a experiência
-> — evita mostrar uma tela que falharia. Quem chama a API direto continua sendo barrado pelo
-> backend, e é lá que a segurança mora. O M13 demonstra isso com a API na mão.
+> **Esconder um botão não é segurança.** Proteger rota no cliente melhora a experiência,
+> porque evita mostrar uma tela que ia falhar de qualquer jeito. Quem chama a API direto
+> continua barrado pelo backend, e é lá que a segurança mora. O M13 demonstra isso com um
+> `curl` e nenhuma cerimônia.
 
 ### Passo 5 — Verificar a matriz nas duas camadas (25 min) ⭐
 

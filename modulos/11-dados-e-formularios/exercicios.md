@@ -27,7 +27,7 @@ requisições.
 
 **Entrega:** as duas gravações + explicação em 5 linhas de qual é o papel da `queryKey`.
 
-Este é o erro nº 1 de quem começa com Query, e o sintoma (dados de outra busca aparecendo)
+Quase todo mundo tropeça nisso ao começar com Query, e o sintoma (dados de outra busca aparecendo)
 é difícil de diagnosticar sem entender o cache.
 
 ---

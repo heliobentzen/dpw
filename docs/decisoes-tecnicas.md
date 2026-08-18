@@ -123,7 +123,7 @@ teste de contrato no CI.
 
 **Justificativa.** É o ganho que *só* existe nesta stack e que justifica tê-la escolhido:
 mudar um campo na entidade quebra a compilação do frontend **antes** do deploy, não em
-produção. Ensinar isso vale mais que customizar um painel que a turma não levaria consigo.
+produção. Rende mais que customizar um painel que a turma não levaria consigo.
 
 A "gestão de usuários" da ementa continua atendida pelo M12, que ganhou o CRUD
 administrativo de usuários e papéis que antes ficava implícito no Admin.

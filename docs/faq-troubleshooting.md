@@ -240,7 +240,7 @@ Faltou `exclude: ["/api/{*caminho}"]` no `ServeStaticModule`: os arquivos estát
 capturando `/api/*` antes dos controllers. Como o status é 200, o diagnóstico engana.
 
 **F5 numa rota interna dá 404**
-Falta a regra de *fallback* (`/* → /index.html`). O bug nº 1 de deploy de SPA — não aparece
+Falta a regra de *fallback* (`/* → /index.html`). O tropeço clássico do deploy de SPA — não aparece
 em desenvolvimento porque o Vite já faz o fallback.
 
 **`500 Internal Server Error` sem detalhes**

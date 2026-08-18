@@ -70,8 +70,8 @@ for (const obra of obras) {
 }
 ```
 
-Com 100 obras, isso são **101 consultas**: uma para a lista, uma por obra. É o problema N+1
-— a causa nº 1 de API lenta.
+Com 100 obras, são **101 consultas**: uma para a lista e uma por obra. É o problema N+1, a
+causa mais comum de API lenta.
 
 A correção é declarar o que você precisa, e o ORM faz um `JOIN`:
 
@@ -94,9 +94,9 @@ await this.repo.find({ relations: { autor: true, categorias: true } });   // 1 c
 await this.repo.find({ skip: 0, take: 20 });
 ```
 
-Endpoint de listagem **sem limite** funciona em desenvolvimento com 20 registros e derruba a
-API com 200 mil. Toda listagem deste material é paginada — e o M07 padroniza o formato da
-resposta.
+Listagem **sem limite** funciona lindamente com os seus 20 registros de teste e derruba a API
+com os 200 mil do cliente. Toda listagem deste material é paginada, e o M07 padroniza o
+formato da resposta.
 
 ### 5. Transações
 
@@ -114,7 +114,7 @@ Se qualquer linha lançar, tudo é desfeito. **Regra:** duas ou mais escritas qu
 verdadeiras juntas vão numa transação.
 
 💼 **No mercado:** N+1 e falta de paginação são os dois achados mais comuns em revisão de
-API júnior. Saber demonstrar o problema com o log na mão vale mais que citar o nome dele.
+API júnior. Quem sabe demonstrá-lo com o log na mão se destaca de quem só cita o nome.
 
 ---
 
@@ -260,8 +260,9 @@ curl -s -o /dev/null -w "%{time_total}s\n" http://localhost:3000/api/obras
 curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras
 ```
 
-> Escrever a versão ruim é parte do exercício. Quem só vê a correta não reconhece o padrão
-> quando ele aparecer disfarçado, dentro de um `map` em outro arquivo.
+> Escrever a versão ruim é parte do exercício. Quem só viu a correta não reconhece o padrão
+> quando ele aparece disfarçado, dentro de um `map` em outro arquivo, escrito por outra
+> pessoa.
 
 ### Passo 5 — QueryBuilder e busca (35 min)
 

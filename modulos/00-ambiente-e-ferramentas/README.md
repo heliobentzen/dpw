@@ -2,8 +2,8 @@
 
 > **CH:** 3h (1h teórica · 2h prática) · **Semana 1** · **Pré-requisito:** nenhum
 
-Módulo complementar (não exigido pela ementa), mas sem ele nada funciona. Pode ser
-convertido em pré-atividade assíncrona.
+Módulo complementar: a ementa não pede, mas sem ele nada funciona. Pode virar
+pré-atividade assíncrona.
 
 ## 🎯 Objetivos
 
@@ -32,13 +32,12 @@ maquina/
 └── projeto-b/node_modules/     React 19
 ```
 
-Não há comando de "ativar": basta estar dentro da pasta. Em outros ecossistemas isso exige
-um passo explícito — em Python, por exemplo, um *ambiente virtual* que precisa ser ativado
-em cada terminal novo, e cuja ausência é uma fonte clássica de erro. Aqui esse passo não
-existe, e é um dos motivos de a stack única simplificar o setup.
+Não há comando de "ativar": basta estar dentro da pasta. Outros ecossistemas pedem um passo
+explícito. Em Python, por exemplo, você ativa um *ambiente virtual* em cada terminal novo, e
+esquecer disso rende uma tarde inteira de erro estranho. Aqui esse passo não existe.
 
-> **O que substitui a ativação** é a pasta em que você está. Rodar `pnpm test` de dentro de
-> `backend/` e de dentro de `frontend/` executa suítes diferentes — o `pnpm` decide pelo
+> **O que substitui a ativação é a pasta em que você está.** Rodar `pnpm test` dentro de
+> `backend/` e dentro de `frontend/` executa suítes diferentes. Quem decide é o
 > `package.json` mais próximo.
 
 ### 2. Reprodutibilidade
@@ -54,13 +53,14 @@ lugar:
 | `README.md` | Como subir o projeto em ≤ 5 comandos |
 | `docker-compose.yml` | Serviços externos (banco) idênticos para todos |
 
-⚠️ **O arquivo de lock é versionado.** É ele — não o `package.json` — que garante que você e
-seu colega instalem exatamente as mesmas versões. `package.json` diz `"react": "^19.0.0"`, o
-que aceita 19.0.0 e 19.4.2; o lock fixa qual foi. Apagá-lo "para resolver um problema" é
-trocar um bug por um bug que só acontece na máquina dos outros.
+⚠️ **O arquivo de lock é versionado.** É ele, e não o `package.json`, que garante que você e
+seu colega instalem exatamente as mesmas versões. O `package.json` diz `"react": "^19.0.0"`,
+o que aceita tanto a 19.0.0 quanto a 19.4.2; o lock registra qual delas foi. Apagar o lock
+"para resolver um problema" troca o seu bug por um bug que só aparece na máquina dos outros,
+o que é uma forma criativa de não resolver nada.
 
-💼 **No mercado:** a primeira tarefa de qualquer pessoa que entra num time é *rodar o
-projeto localmente*. Times maduros medem esse tempo — a meta é minutos, não dias.
+💼 **No mercado:** a primeira tarefa de quem entra num time é *rodar o projeto localmente*.
+Times maduros medem esse tempo. A meta é minutos, não dias.
 
 ### 3. Git: o modelo mental
 
@@ -111,7 +111,7 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 ### Passo 1 — Instalar as ferramentas (20 min)
 
 Só três coisas hoje: **Node 20, Git e VS Code**. Docker e PostgreSQL entram no M05, quando
-passam a ser usados — instalar tudo agora seria montar peças sem saber para que servem.
+passam a servir para alguma coisa. Instalar tudo agora só antecipa problemas.
 
 Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
 
@@ -138,7 +138,7 @@ code --version
 
 ### Passo 2 — Criar o monorepo (25 min)
 
-Aqui começa o conteúdo do módulo. **Digite os comandos, não copie sem ler** — cada linha
+Aqui começa o conteúdo do módulo. **Digite os comandos, não cole sem ler.** Cada linha
 corresponde a um conceito que a avaliação teórica cobra.
 
 #### 🐧 Linux / 🍎 macOS / WSL2 / Git Bash
@@ -157,7 +157,7 @@ Set-Location C:\dev\bibliocom
 
 | Linha | O que faz |
 |---|---|
-| criar a pasta | O projeto fica em `dev/bibliocom`. 🪟 **Fora do OneDrive e sem espaço ou acento no caminho** — o OneDrive sincroniza `node_modules` e trava o Git |
+| criar a pasta | O projeto fica em `dev/bibliocom`. 🪟 **Fora do OneDrive, sem espaço nem acento no caminho.** O OneDrive tenta sincronizar as 30 mil dependências e trava o Git |
 | entrar na pasta | Todo o resto acontece daqui |
 
 #### O manifesto do projeto
@@ -193,22 +193,22 @@ packages:
   - "pacotes/*"
 ```
 
-As pastas ainda não existem — elas nascem no M03 e no M08. Declarar agora é o que faz um
-único `pnpm install` na raiz resolver as três quando chegarem.
+As pastas ainda não existem: nascem no M03 e no M08. Declará-las agora é o que faz um único
+`pnpm install` na raiz resolver as três quando chegarem.
 
-**Por que monorepo:** um único PR mostra a mudança completa — entidade → DTO → tipo → tela.
-Com dois repositórios, a mesma mudança viraria dois PRs, que podem ser mesclados fora de
-ordem e quebrar produção.
+**Por que monorepo:** um único PR mostra a mudança completa, de entidade a tela. Com dois
+repositórios, a mesma mudança vira dois PRs, que alguém pode mesclar fora de ordem e quebrar
+produção na sexta-feira.
 
 **Deu certo se:** `pnpm install` roda sem erro e cria `node_modules/` e `pnpm-lock.yaml`.
 
-⚠️ **O `pnpm-lock.yaml` é versionado**, o `node_modules/` não. O primeiro é a receita exata;
-o segundo é o resultado, reconstruível a qualquer momento. Confundir os dois é o erro que
-faz repositórios de 500 MB.
+⚠️ **O `pnpm-lock.yaml` é versionado; o `node_modules/` não.** O primeiro é a receita, o
+segundo é o bolo. Confundir os dois é como versionar 30 mil arquivos que qualquer um
+reconstrói com um comando, e é assim que nasce repositório de 500 MB.
 
 ### Passo 3 — Versionar o projeto (25 min)
 
-O ambiente existe, mas nada dele está versionado. Agora criamos o repositório — e, antes do
+O ambiente existe, mas nada dele está versionado. Agora criamos o repositório e, antes do
 primeiro commit, decidimos **o que não entra nele**.
 
 #### 3a. Iniciar o repositório
@@ -222,7 +222,7 @@ git config core.autocrlf input
 | Linha | O que faz |
 |---|---|
 | `cd ~/dev/bibliocom` | Sobe um nível: a raiz do repositório é `bibliocom`, não `backend`. O repositório abraça as duas camadas |
-| `git init` | Cria o repositório — passa a existir a pasta oculta `.git` com todo o histórico |
+| `git init` | Cria o repositório. Passa a existir a pasta oculta `.git`, onde mora todo o histórico |
 | `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Relevante sobretudo no Windows: sem isto, o deploy do M16 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
 
 A estrutura agora:
@@ -235,10 +235,10 @@ bibliocom/                 ← raiz do repositório
 └── node_modules/          dependências baixadas — NÃO pode entrar no Git
 ```
 
-As duas colunas dessa lista resumem o próximo arquivo: o `.gitignore` é onde você diz qual
-é qual.
+A coluna da direita é o assunto do próximo arquivo. O `.gitignore` é onde você diz o que
+entra e o que fica de fora.
 
-#### 3b. `.gitignore` — o que não entra
+#### 3b. `.gitignore`: o que fica de fora
 
 Crie `.gitignore` **na raiz** (`bibliocom/`):
 
@@ -282,17 +282,18 @@ Thumbs.db
 > mostra "`.gitignore`" — e o Git ignora o arquivo. Use o VS Code (`code .gitignore`) e
 > confira os nomes reais com `Get-ChildItem -Force`.
 
-#### 3c. `.gitattributes` — proteção da equipe
+#### 3c. `.gitattributes`: proteção da equipe
 
 Crie também `.gitattributes` na raiz:
 
 ```gitattributes
 * text=auto eol=lf
 
-*.sh     text eol=lf
-*.py     text eol=lf
-*.yml    text eol=lf
-Procfile text eol=lf
+*.sh   text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
 
 *.bat text eol=crlf
 *.ps1 text eol=crlf
@@ -302,18 +303,19 @@ Procfile text eol=lf
 ```
 
 O `core.autocrlf` do passo 3a protege **você**; o `.gitattributes` protege **quem clonar**,
-inclusive sem ter configurado nada. Por isso ele é versionado e aquele não.
+inclusive quem não configurou nada. Por isso um é versionado e o outro não.
 
-Ele precisa estar no **primeiro commit**: arquivos já commitados com CRLF continuam assim.
+Ele precisa estar no **primeiro commit**. Arquivo já commitado com CRLF continua com CRLF,
+e ninguém vai lembrar disso quando o deploy quebrar no M16.
 
-#### 3d. README — como rodar o projeto
+#### 3d. README: como rodar o projeto
 
 Crie `README.md` na raiz:
 
 ````markdown
 # BiblioCom
 
-Sistema de gestão para bibliotecas comunitárias — estudo de caso da disciplina DPW.
+Sistema de gestão para bibliotecas comunitárias. Estudo de caso da disciplina DPW.
 
 ## Como rodar
 
@@ -325,12 +327,12 @@ pnpm dev:api          # http://localhost:3000
 pnpm dev:web          # http://localhost:5173
 ```
 
-Funciona igual no Windows, macOS e Linux — é o mesmo runtime nos três.
+Os mesmos comandos valem no Windows, no macOS e no Linux.
 ````
 
-💼 **No mercado:** a primeira tarefa de quem entra num time é *rodar o projeto localmente*.
-Times maduros medem esse tempo — a meta é minutos, não dias. O README é o que decide isso.
-Ele cresce junto com o projeto: no M03 ganha `migrate` e `runserver`, no M05 o banco.
+Este arquivo é o que decide se alguém consegue rodar seu projeto. Ele cresce junto com o
+código: no M03 ganha os comandos de migração, no M05 o banco em Docker. Um README
+desatualizado é pior que nenhum, porque manda a pessoa por um caminho que não existe mais.
 
 #### 3e. Primeiro commit
 
@@ -346,11 +348,12 @@ git commit -m "chore: inicializa estrutura do projeto"
 | `git add .` | Move para a *staging area* tudo que mudou e não está no `.gitignore` |
 | `git commit -m "..."` | Grava o snapshot com a mensagem |
 
-**Deu certo se:** o `git status` listou **4 itens** — `.gitignore`, `.gitattributes`,
+**Deu certo se:** o `git status` listou **seis itens**: `.gitignore`, `.gitattributes`,
 `README.md`, `package.json`, `pnpm-lock.yaml` e `pnpm-workspace.yaml`.
 
-⚠️ Se `node_modules/`, `.env` ou algum `.sqlite` aparecerem, pare e corrija o `.gitignore` antes de
-commitar. Depois de commitado, o arquivo continua no histórico mesmo que você o remova.
+⚠️ Se `node_modules/`, `.env` ou algum `.sqlite` aparecerem, pare e corrija o `.gitignore`
+antes de commitar. Depois de commitado, o arquivo fica no histórico mesmo que você o apague
+no commit seguinte.
 
 > 🪟 **`warning: CRLF will be replaced by LF` não é erro.** É o `core.autocrlf input`
 > guardando o arquivo com finais de linha do Linux. Na sua pasta ele continua com CRLF.
@@ -361,16 +364,16 @@ commitar. Depois de commitado, o arquivo continua no histórico mesmo que você 
 node ~/dpw/recursos/codigo/verifica-ambiente.mjs
 ```
 
-Este script **não instala nada** — ele confere e, para cada falha, diz o comando exato que
+Este script **não instala nada**. Ele confere e, para cada falha, diz o comando exato que
 corrige. Rode-o sempre que algo parar de funcionar.
 
-**Só avance com os itens da semana 1 em OK.** Node, pnpm e Docker aparecem como pendentes
-até os módulos em que entram; isso é esperado.
+**Só avance com os itens da semana 1 em OK.** As dependências do backend e o Docker aparecem
+como pendentes até os módulos em que entram, e isso é esperado.
 
 
 ### Passo 4 — Publicar no GitHub (20 min)
 
-Crie o repositório **vazio** em github.com (sem README, sem .gitignore — você já tem) e:
+Crie o repositório **vazio** em github.com. Sem README, sem `.gitignore`: você já tem os dois, e deixar o GitHub criar outros só rende conflito no primeiro push.
 
 ```bash
 git remote add origin git@github.com:<seu-usuario>/bibliocom.git
@@ -406,8 +409,9 @@ Inverta os papéis e repita.
 
 ### Passo 6 — Proteger a branch principal (extra, 5 min)
 
-Em *Settings → Branches → Add rule*: exija Pull Request antes do merge e ao menos 1
-aprovação. Isso passa a valer para o projeto da equipe.
+Em *Settings → Branches → Add rule*: exija Pull Request antes do merge e ao menos uma
+aprovação. Vale para o projeto da equipe também, e evita o clássico push direto na `main` às
+vésperas da entrega.
 
 ---
 
@@ -420,11 +424,11 @@ aprovação. Isso passa a valer para o projeto da equipe.
 | Colega tem versão diferente da sua | O `pnpm-lock.yaml` não foi commitado, ou alguém o apagou |
 | `.env` aparece em `git status` | Falta a linha no `.gitignore` |
 | Push rejeitado | Alguém enviou antes; `git pull --rebase origin main` |
-| Commit "wip" a cada 3 minutos | Commits devem ser unidades coerentes de mudança |
+| Cinco commits `wip` seguidos | Commit é unidade coerente de mudança, não botão de salvar |
 
 🪟 **Erros de Windows** (política de execução bloqueando o `pnpm`, OneDrive travando o Git,
 `Filename too long` no `node_modules`) estão catalogados em
-[`docs/ambiente-setup-windows.md`, passo 12](../../docs/ambiente-setup-windows.md#passo-11--erros-e-diagnóstico).
+[`docs/ambiente-setup-windows.md`, passo 11](../../docs/ambiente-setup-windows.md#passo-11--erros-e-diagnóstico).
 
 ## ✅ Checklist de saída
 
