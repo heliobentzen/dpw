@@ -10,7 +10,7 @@ convertido em pré-atividade assíncrona.
 Ao final você será capaz de:
 
 1. Explicar o papel de ambiente virtual, gerenciador de pacotes e controle de versão.
-2. Preparar um ambiente Python isolado e reprodutível.
+2. Preparar um projeto Node reprodutível, com dependências versionadas.
 3. Usar o fluxo Git básico em equipe (branch → commit → push → PR).
 4. Diagnosticar sozinho os erros mais comuns de instalação.
 
@@ -18,18 +18,28 @@ Ao final você será capaz de:
 
 ## 📖 Teoria (1h)
 
-### 1. Por que ambiente virtual
+### 1. Por que dependências ficam no projeto
 
-Projeto A precisa de Django 4.2; projeto B, de Django 5.1. Instalados no Python global,
-um sobrescreve o outro. O ambiente virtual (`venv`) cria uma pasta com um Python e um
-`site-packages` próprios: **um projeto, um ambiente**.
+Projeto A precisa do React 18; projeto B, do React 19. Instalados globalmente, um
+sobrescreve o outro.
+
+O Node resolve isso por padrão: **cada projeto tem sua própria pasta `node_modules/`**, e o
+`import` procura a partir do arquivo que importou, subindo até encontrá-la.
 
 ```
 maquina/
-├── Python global            (não instale nada aqui)
-├── projeto-a/.venv/         Django 4.2
-└── projeto-b/.venv/         Django 5.1
+├── projeto-a/node_modules/     React 18
+└── projeto-b/node_modules/     React 19
 ```
+
+Não há comando de "ativar": basta estar dentro da pasta. Em outros ecossistemas isso exige
+um passo explícito — em Python, por exemplo, um *ambiente virtual* que precisa ser ativado
+em cada terminal novo, e cuja ausência é uma fonte clássica de erro. Aqui esse passo não
+existe, e é um dos motivos de a stack única simplificar o setup.
+
+> **O que substitui a ativação** é a pasta em que você está. Rodar `pnpm test` de dentro de
+> `backend/` e de dentro de `frontend/` executa suítes diferentes — o `pnpm` decide pelo
+> `package.json` mais próximo.
 
 ### 2. Reprodutibilidade
 
@@ -38,10 +48,16 @@ lugar:
 
 | Artefato | Função |
 |---|---|
-| `requirements.txt` (ou `pyproject.toml`) | Lista exata de dependências e versões |
+| `package.json` | Quais dependências, e em que faixa de versão |
+| **`pnpm-lock.yaml`** | A versão **exata** de cada uma, e das dependências delas |
 | `.env.example` | Quais variáveis de ambiente são necessárias (sem os valores) |
 | `README.md` | Como subir o projeto em ≤ 5 comandos |
-| `docker-compose.yml` | Serviços externos (banco, cache) idênticos para todos |
+| `docker-compose.yml` | Serviços externos (banco) idênticos para todos |
+
+⚠️ **O arquivo de lock é versionado.** É ele — não o `package.json` — que garante que você e
+seu colega instalem exatamente as mesmas versões. `package.json` diz `"react": "^19.0.0"`, o
+que aceita 19.0.0 e 19.4.2; o lock fixa qual foi. Apagá-lo "para resolver um problema" é
+trocar um bug por um bug que só acontece na máquina dos outros.
 
 💼 **No mercado:** a primeira tarefa de qualquer pessoa que entra num time é *rodar o
 projeto localmente*. Times maduros medem esse tempo — a meta é minutos, não dias.
@@ -92,32 +108,35 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 
 ## 🛠️ Roteiro prático (2h)
 
-### Passo 1 — Instalar as ferramentas (25 min)
+### Passo 1 — Instalar as ferramentas (20 min)
 
-Só três coisas hoje: **Python, Git e VS Code**. Node, Docker e PostgreSQL entram nos módulos
-em que passam a ser usados — instalar tudo agora seria montar seis peças de uma vez, sem
-saber para que servem.
+Só três coisas hoje: **Node 20, Git e VS Code**. Docker e PostgreSQL entram no M05, quando
+passam a ser usados — instalar tudo agora seria montar peças sem saber para que servem.
 
 Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
 
 | Seu sistema | Guia | O que fazer hoje |
 |---|---|---|
-| 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) | Passos 0 a 4 e 7 |
-| 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) | Seções 2, 3, 5 e 6 |
-| 🪟→🐧 **WSL2** | instale o WSL2 pelo passo 8.1 do guia Windows, depois siga o guia **Linux** dentro do Ubuntu | — |
+| 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) | Passos 0 a 5 |
+| 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) | Seções 3 a 5 |
+| 🪟→🐧 **WSL2** | instale o WSL2 pelo passo 7.1 do guia Windows, depois siga o guia **Linux** dentro do Ubuntu | — |
 
 > 🪟 **Quem está no Windows não deve seguir o guia Linux "adaptando".** Metade dos problemas
 > da primeira semana vem daí. O guia próprio existe para você não precisar traduzir nada.
 
-**Deu certo se:** os três comandos abaixo respondem uma versão.
+**Deu certo se:** os quatro comandos abaixo respondem uma versão.
 
 ```bash
-python3 --version      # 🪟 Windows: python --version
+node --version      # v20 ou superior
+pnpm --version      # 9 ou superior
 git --version
 code --version
 ```
 
-### Passo 2 — Criar o ambiente virtual (20 min)
+> Repare no que **não** está na lista: nenhum segundo runtime, nenhum ambiente virtual para
+> ativar. Backend e frontend rodam sobre o mesmo Node.
+
+### Passo 2 — Criar o monorepo (25 min)
 
 Aqui começa o conteúdo do módulo. **Digite os comandos, não copie sem ler** — cada linha
 corresponde a um conceito que a avaliação teórica cobra.
@@ -125,67 +144,67 @@ corresponde a um conceito que a avaliação teórica cobra.
 #### 🐧 Linux / 🍎 macOS / WSL2 / Git Bash
 
 ```bash
-mkdir -p ~/dev/bibliocom/backend
-cd ~/dev/bibliocom/backend
-python3 -m venv .venv
-source .venv/bin/activate
+mkdir -p ~/dev/bibliocom
+cd ~/dev/bibliocom
 ```
 
 #### 🪟 Windows (PowerShell)
 
 ```powershell
-New-Item -ItemType Directory -Force -Path C:\dev\bibliocom\backend
-Set-Location C:\dev\bibliocom\backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+New-Item -ItemType Directory -Force -Path C:\dev\bibliocom
+Set-Location C:\dev\bibliocom
 ```
 
 | Linha | O que faz |
 |---|---|
-| criar a pasta | O projeto fica em `dev/bibliocom`. 🪟 **Fora do OneDrive e sem espaço ou acento no caminho** — o OneDrive sincroniza o `.venv` e trava o Git |
+| criar a pasta | O projeto fica em `dev/bibliocom`. 🪟 **Fora do OneDrive e sem espaço ou acento no caminho** — o OneDrive sincroniza `node_modules` e trava o Git |
 | entrar na pasta | Todo o resto acontece daqui |
-| `python -m venv .venv` | Roda o **módulo** `venv` (`-m`) e cria o ambiente na pasta `.venv`. É este comando que materializa o conceito da teoria: um Python e uma biblioteca **só deste projeto** |
-| ativar | Põe o `.venv` na frente do PATH desta janela. 🪟 O `.\` é obrigatório no PowerShell, e o executável fica em `Scripts\`, não em `bin/` |
 
-**Deu certo se:** o prompt passou a mostrar `(.venv)` na frente.
-
-⚠️ **Se `(.venv)` não aparecer, PARE.** Tudo que instalar daqui em diante vai para o Python
-global, e o erro só se manifesta lá na frente, quando o projeto não roda na máquina de outra
-pessoa. 🪟 Se falhou com `Activate.ps1 cannot be loaded`, rode
-`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
-
-> **Terminal novo, ativação nova.** O ambiente vale para a janela, não para a máquina. É a
-> segunda causa mais comum de `ModuleNotFoundError: No module named 'django'`.
-
-#### Instalar a primeira dependência
+#### O manifesto do projeto
 
 ```bash
-python -m pip install --upgrade pip
-pip install "django>=5.0,<6.0"
-pip freeze > requirements.txt
+pnpm init
 ```
 
-🪟 **No PowerShell, a última linha é outra:**
+Isso cria um `package.json`. Abra-o e **edite** para:
 
-```powershell
-pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
+```json
+{
+  "name": "bibliocom",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter backend start:dev",
+    "dev:web": "pnpm --filter frontend dev"
+  }
+}
 ```
 
-| Linha | O que faz |
+| Campo | O que faz |
 |---|---|
-| `python -m pip` | Chama o pip **através do Python ativo** — garante que é o do `.venv` |
-| `pip install "django>=5.0,<6.0"` | Instala o Django 5.x. As aspas fixam a faixa de versão e, no PowerShell, impedem que o `>` seja lido como redirecionamento |
-| `pip freeze > requirements.txt` | Congela as versões exatas. É este arquivo que faz o projeto rodar igual na máquina de outra pessoa |
-| 🪟 `Out-File -Encoding ascii` | No PowerShell 5.1 o `>` grava **UTF-16**, e o `pip install -r` falha depois com `Invalid requirement: 'ÿþd'` — na máquina do colega, dias depois |
+| `"private": true` | Impede publicação acidental no npm. **Obrigatório** na raiz de um workspace |
+| `scripts` | Atalhos que rodam de qualquer pasta. `pnpm dev:api` sobe o backend sem você precisar entrar nele |
 
-**Um pacote só, de propósito.** DRF, `python-dotenv` e as outras dependências entram no
-**M03**, cada uma quando o projeto passa a usá-la. Você vai ver o `requirements.txt` crescer
-junto com o que o sistema faz — que é como gestão de dependência se aprende.
+E `pnpm-workspace.yaml`, que declara os projetos do monorepo:
 
-**Deu certo se:** `python -c "import django; print(django.get_version())"` responde `5.x`, e
-`requirements.txt` tem poucas linhas. Se tiver 200, o `pip freeze` rodou **fora** do
-ambiente virtual e capturou o Python do sistema inteiro.
+```yaml
+packages:
+  - "backend"
+  - "frontend"
+  - "pacotes/*"
+```
 
+As pastas ainda não existem — elas nascem no M03 e no M08. Declarar agora é o que faz um
+único `pnpm install` na raiz resolver as três quando chegarem.
+
+**Por que monorepo:** um único PR mostra a mudança completa — entidade → DTO → tipo → tela.
+Com dois repositórios, a mesma mudança viraria dois PRs, que podem ser mesclados fora de
+ordem e quebrar produção.
+
+**Deu certo se:** `pnpm install` roda sem erro e cria `node_modules/` e `pnpm-lock.yaml`.
+
+⚠️ **O `pnpm-lock.yaml` é versionado**, o `node_modules/` não. O primeiro é a receita exata;
+o segundo é o resultado, reconstruível a qualquer momento. Confundir os dois é o erro que
+faz repositórios de 500 MB.
 
 ### Passo 3 — Versionar o projeto (25 min)
 
@@ -210,32 +229,33 @@ A estrutura agora:
 
 ```
 bibliocom/                 ← raiz do repositório
-└── backend/
-    ├── .venv/             ambiente virtual — NÃO pode entrar no Git
-    └── requirements.txt   dependências — PRECISA entrar no Git
+├── package.json           scripts e metadados   — PRECISA entrar no Git
+├── pnpm-lock.yaml         versões exatas        — PRECISA entrar no Git
+├── pnpm-workspace.yaml    quais são os projetos — PRECISA entrar no Git
+└── node_modules/          dependências baixadas — NÃO pode entrar no Git
 ```
 
-Essas duas últimas linhas resumem o próximo arquivo.
+As duas colunas dessa lista resumem o próximo arquivo: o `.gitignore` é onde você diz qual
+é qual.
 
 #### 3b. `.gitignore` — o que não entra
 
 Crie `.gitignore` **na raiz** (`bibliocom/`):
 
 ```gitignore
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-
-# Django
-*.log
-db.sqlite3
-/backend/media/
-/backend/staticfiles/
-
-# Node (a partir do M03)
+# Node
 node_modules/
 dist/
+.vite/
+*.tsbuildinfo
+coverage/
+
+# Banco local (a partir do M04)
+*.sqlite
+*.sqlite-journal
+
+# Logs
+*.log
 
 # Ambiente
 .env
@@ -251,8 +271,9 @@ Thumbs.db
 
 | Padrão | Por que fica de fora |
 |---|---|
-| `.venv/`, `node_modules/` | São **reconstruíveis** a partir do `requirements.txt` e do `package.json`. Versionar cópias de dependência incha o repositório e gera conflito a cada `pip install` |
-| `db.sqlite3` | É o **seu** banco local. O banco de outra pessoa é outro; o de produção é outro ainda |
+| `node_modules/` | É **reconstruível** a partir do `package.json` + `pnpm-lock.yaml`. São dezenas de milhares de arquivos: versioná-los incha o repositório e gera conflito a cada instalação |
+| `*.sqlite` | É o **seu** banco local. O de outra pessoa é outro; o de produção é outro ainda |
+| `dist/`, `coverage/` | Saída de build e de teste. Geradas por comando, não escritas por pessoa |
 | `.env` | Contém segredo. **Segredo que entra no Git é segredo vazado** — mesmo removido depois, continua nos commits anteriores |
 | `!.env.example` | A `!` **desfaz** o ignore da linha acima. O `.env.example` entra sim: ele documenta *quais* variáveis existem, sem os valores |
 
@@ -299,19 +320,12 @@ Sistema de gestão para bibliotecas comunitárias — estudo de caso da discipli
 ### Linux / macOS
 
 ```bash
-cd backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pnpm install          # instala backend, frontend e pacotes de uma vez
+pnpm dev:api          # http://localhost:3000
+pnpm dev:web          # http://localhost:5173
 ```
 
-### Windows (PowerShell)
-
-```powershell
-Set-Location backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
+Funciona igual no Windows, macOS e Linux — é o mesmo runtime nos três.
 ````
 
 💼 **No mercado:** a primeira tarefa de quem entra num time é *rodar o projeto localmente*.
@@ -333,9 +347,9 @@ git commit -m "chore: inicializa estrutura do projeto"
 | `git commit -m "..."` | Grava o snapshot com a mensagem |
 
 **Deu certo se:** o `git status` listou **4 itens** — `.gitignore`, `.gitattributes`,
-`README.md` e `backend/requirements.txt`.
+`README.md`, `package.json`, `pnpm-lock.yaml` e `pnpm-workspace.yaml`.
 
-⚠️ Se `.venv/`, `.env` ou `db.sqlite3` aparecerem, pare e corrija o `.gitignore` antes de
+⚠️ Se `node_modules/`, `.env` ou algum `.sqlite` aparecerem, pare e corrija o `.gitignore` antes de
 commitar. Depois de commitado, o arquivo continua no histórico mesmo que você o remova.
 
 > 🪟 **`warning: CRLF will be replaced by LF` não é erro.** É o `core.autocrlf input`
@@ -344,7 +358,7 @@ commitar. Depois de commitado, o arquivo continua no histórico mesmo que você 
 #### 3f. Conferir o ambiente
 
 ```bash
-python ~/dpw/recursos/codigo/verifica_ambiente.py
+node ~/dpw/recursos/codigo/verifica-ambiente.mjs
 ```
 
 Este script **não instala nada** — ele confere e, para cada falha, diz o comando exato que
@@ -401,25 +415,26 @@ aprovação. Isso passa a valer para o projeto da equipe.
 
 | Sintoma | Diagnóstico |
 |---|---|
-| `(.venv)` não aparece no prompt | O venv não foi ativado; tudo que instalar vai para o Python global |
-| `requirements.txt` com 200 linhas | Você rodou `pip freeze` sem venv, capturando o sistema inteiro |
+| `Cannot find module` depois de clonar | Faltou `pnpm install` na raiz |
+| `node_modules/` aparece no `git status` | Falta a linha no `.gitignore` |
+| Colega tem versão diferente da sua | O `pnpm-lock.yaml` não foi commitado, ou alguém o apagou |
 | `.env` aparece em `git status` | Falta a linha no `.gitignore` |
 | Push rejeitado | Alguém enviou antes; `git pull --rebase origin main` |
 | Commit "wip" a cada 3 minutos | Commits devem ser unidades coerentes de mudança |
 
-🪟 **Erros de Windows** (política de execução, `python` abrindo a Microsoft Store, `pip install -r`
-falhando com `Invalid requirement: 'ÿþd'`, OneDrive travando o Git) estão catalogados em
+🪟 **Erros de Windows** (política de execução bloqueando o `pnpm`, OneDrive travando o Git,
+`Filename too long` no `node_modules`) estão catalogados em
 [`docs/ambiente-setup-windows.md`, passo 12](../../docs/ambiente-setup-windows.md#passo-12--erros-e-diagnóstico).
 
 ## ✅ Checklist de saída
 
-- [ ] `python verifica_ambiente.py` termina com "Ambiente da etapa M00 pronto"
-- [ ] Ambiente virtual ativa e mostra `(.venv)` no prompt
-- [ ] `requirements.txt` com **poucas** linhas (só Django e suas dependências diretas)
+- [ ] `node verifica-ambiente.mjs` termina com "Ambiente da etapa M00 pronto"
+- [ ] `pnpm install` roda sem erro na raiz
+- [ ] `package.json` com `"private": true` e `pnpm-workspace.yaml` declarando os três projetos
 - [ ] Repositório `bibliocom` no GitHub, com `.gitignore`, `.gitattributes` e `README.md`
 - [ ] 🪟 Windows: terminal escolhido, projeto em `C:\dev` (fora do OneDrive), `core.autocrlf input`
-      e `requirements.txt` legível com `Get-Content`
-- [ ] `.venv/` **não** versionado
+      e `core.longpaths` habilitado
+- [ ] `node_modules/` **não** versionado; `pnpm-lock.yaml` **sim**
 - [ ] Ao menos 2 commits com mensagem no padrão Conventional Commits
 - [ ] Ao menos 1 Pull Request revisado e mesclado por outra pessoa
 - [ ] Chave SSH configurada (push sem digitar senha)
@@ -433,6 +448,7 @@ Ver [`exercicios.md`](exercicios.md).
 - [Pro Git (livro completo, em português)](https://git-scm.com/book/pt-br/v2)
 - [Learn Git Branching (visual e interativo)](https://learngitbranching.js.org/?locale=pt_BR)
 - [Conventional Commits](https://www.conventionalcommits.org/pt-br/)
-- [Python venv — documentação oficial](https://docs.python.org/pt-br/3/library/venv.html)
+- [pnpm — workspaces](https://pnpm.io/workspaces)
+- [Node.js — resolução de módulos](https://nodejs.org/api/modules.html#all-together)
 - 🪟 [`../../docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) — setup completo do Windows, passo a passo
 - 🪟 [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md) — tabela de equivalências, para consulta durante o curso

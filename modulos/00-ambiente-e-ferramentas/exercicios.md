@@ -4,25 +4,26 @@
 
 Crie um repositório `dpw-exercicios` contendo:
 
-- `.venv/` ignorado
-- `requirements.txt` com **exatamente** `django` e `python-dotenv` (mais suas dependências
+- `node_modules/` ignorado
+- `package.json` e `pnpm-lock.yaml` versionados (mais suas dependências
   transitivas)
 - `README.md` com a seção "Como rodar"
 - `.env.example` com as chaves `SECRET_KEY=` e `DEBUG=` (sem valores reais)
 
-**Verificação:** apague a pasta `.venv/`, recrie-a a partir do `requirements.txt` e mostre
-que `python -c "import django; print(django.get_version())"` funciona.
+**Verificação:** apague a pasta `node_modules/`, recrie-a com `pnpm install` a partir do
+lock, e mostre que os scripts continuam funcionando. Compare o `pnpm-lock.yaml` antes e
+depois com `git diff`: ele **não** pode ter mudado.
 
 ---
 
 ## E00.2 — Arqueologia de histórico (individual)
 
-Usando um repositório público qualquer (ex.: `django/django`), responda com o comando que
+Usando um repositório público qualquer (ex.: `nestjs/nest`), responda com o comando que
 usou:
 
 1. Quantos commits o repositório tem? (`git rev-list --count HEAD`)
 2. Qual foi o primeiro commit e sua data?
-3. Quem mais modificou o arquivo `django/db/models/query.py`?
+3. Quem mais modificou o arquivo `packages/core/injector/injector.ts`?
 4. O que mudou no último commit que tocou esse arquivo?
 
 Objetivo: `git log`, `git show`, `git shortlog -sn --` deixam de ser mistério.
@@ -72,7 +73,7 @@ Para cada cenário, escreva o comando e teste num repositório de brincadeira:
 
 ## E00.5 — Diagnóstico (individual)
 
-Uma colega diz: *"Instalei o Django mas o Python fala que não existe."* Escreva o roteiro
+Uma colega diz: *"Instalei o pacote mas o import fala que não existe."* Escreva o roteiro
 de diagnóstico em **até 5 passos**, cada um com o comando e o que a saída indicaria.
 
 Este exercício vale mais que os outros para a vida profissional: ele treina *método*, não
