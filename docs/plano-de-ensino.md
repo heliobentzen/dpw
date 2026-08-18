@@ -35,7 +35,7 @@
 | Protocolo HTTP: métodos POST e GET | M01 (+ M07 na prática da API) | — |
 | Model: classes que geram o banco automaticamente | M04 | 🔵 |
 | Atualização do banco a partir das alterações nas classes | M05 (migrações) | 🔵 |
-| Consultas ao BD e CRUD pela API do framework | M06 (ORM) + M07 (ViewSets) | 🔵 |
+| Consultas ao BD e CRUD pela API do framework | M06 (Repository/QueryBuilder) + M07 (Controllers) | 🔵 |
 | Views: mapeamento de URLs | M07 (`urls.py`, `DefaultRouter`) + M10 (React Router) | 🔵🟣 |
 | Views: classes/métodos/funções de processamento de requisições | M07 (FBV, `APIView`, `ViewSet`) | 🔵 |
 | **Templates: interfaces com o usuário** | **M08, M09, M11 (componentes React + Tailwind)** ⚠️ | 🟣 |
@@ -95,7 +95,7 @@ Ao final da disciplina, o estudante será capaz de:
 | Competência | Evidência avaliável | Como aparece em vagas |
 |---|---|---|
 | Modelagem com ORM | Entidades do projeto + migrações limpas | "TypeORM", "ORM", "modelagem relacional" |
-| Construção de API REST | API documentada em OpenAPI | "REST", "DRF", "API design" |
+| Construção de API REST | API documentada em OpenAPI | "REST", "NestJS", "API design" |
 | React + TypeScript | Interface do projeto | "React", "TypeScript", "SPA" |
 | CSS utilitário | Interface responsiva e acessível | "Tailwind", "responsivo", "acessibilidade" |
 | Estado e cache no cliente | Listagens com carregamento e erro tratados | "TanStack Query", "state management" |

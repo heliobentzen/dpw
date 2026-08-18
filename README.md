@@ -27,11 +27,11 @@ extensionistas** curricularizadas.
 | [`modulos/`](modulos/) | 18 módulos de conteúdo (69h), cada um com teoria, roteiro prático, exercícios e checklist |
 | [`projeto/`](projeto/) | Projeto integrador em 4 etapas (20h) + trilha extensionista (10h) |
 | [`avaliacao/`](avaliacao/) | Rubricas, pesos, política de recuperação e critérios de correção |
-| [`recursos/`](recursos/) | Código de apoio, guia do Windows, ponte JS, checklists imprimíveis |
+| [`recursos/`](recursos/) | Código de apoio, guia do Windows, referência de JS/TS, checklists imprimíveis |
 
 **Comece por aqui:**
 
-1. Estudante → [`docs/plano-de-ensino.md`](docs/plano-de-ensino.md) → monte o ambiente com **um comando** (abaixo) → [`modulos/00-ambiente-e-ferramentas/`](modulos/00-ambiente-e-ferramentas/)
+1. Estudante → [`docs/plano-de-ensino.md`](docs/plano-de-ensino.md) → [monte o ambiente](#montagem-do-ambiente) → [`modulos/00-ambiente-e-ferramentas/`](modulos/00-ambiente-e-ferramentas/)
 2. Docente → [`docs/guia-do-docente.md`](docs/guia-do-docente.md) → [`docs/cronograma.md`](docs/cronograma.md)
 3. Equipe de projeto → [`projeto/README.md`](projeto/README.md)
 
@@ -193,7 +193,7 @@ destructuring, *spread*, `map`/`filter`, módulos ES, Promises e `async/await`) 
 atendido pela turma a que este material se destina.
 
 Para apoio individual de quem chegar com lacunas, e para outras turmas que venham a usar
-este material, há uma referência de ponte Python→JavaScript em
+este material, há uma referência de JavaScript moderno em
 [`recursos/js-para-react.md`](recursos/js-para-react.md), com um diagnóstico de 20 minutos
 e a compensação de carga prevista em
 [`docs/cronograma.md`](docs/cronograma.md#6-variações-de-calendário).

@@ -17,7 +17,7 @@ usaram X?").
 ## Modelo
 
 ```markdown
-# ADR-0003 — Usar sessão do Django em vez de JWT para autenticação
+# ADR-0003 — Usar sessão com cookie em vez de JWT para autenticação
 
 - **Status:** aceito
 - **Data:** 2026-09-14
@@ -38,21 +38,21 @@ Restrições relevantes:
 
 ## Decisão
 
-Vamos usar autenticação por **sessão** (`django.contrib.auth`), com cookies
+Vamos usar autenticação por **sessão** (`express-session` + `passport-local`), com cookies
 `HttpOnly`/`Secure`/`SameSite=Lax`.
 
 ## Alternativas consideradas
 
 | Opção | Prós | Contras | Por que não |
 |---|---|---|---|
-| Sessão (escolhida) | Nativo, seguro por padrão, revogação imediata, CSRF já tratado | Não serve bem para cliente fora do domínio | — |
+| Sessão (escolhida) | Segredo nunca chega ao JavaScript, revogação imediata, menos peças | Não serve bem para cliente fora do domínio | — |
 | JWT | Bom para APIs e mobile; sem estado no servidor | Revogação difícil; mais superfície de erro; equipe sem experiência | Não temos cliente que justifique; revogação é requisito |
 | OAuth com provedor externo | Sem gestão de senhas | Depende de conta Google/etc.; parte dos usuários não tem | Público-alvo inclui pessoas sem e-mail ativo |
 
 ## Consequências
 
-**Fica mais fácil:** login e permissões saem prontos; proteção CSRF é automática; revogar
-acesso é apagar a sessão.
+**Fica mais fácil:** um XSS não rouba a sessão (cookie `HttpOnly`); revogar acesso é apagar
+a sessão do servidor; não há refresh token para gerenciar.
 
 **Fica mais difícil:** se houver app mobile no futuro, será preciso adicionar
 autenticação por token (o DRF suporta as duas simultaneamente — custo estimado: 1 sprint).

@@ -185,7 +185,7 @@ export function ListaAssociados() {
  *     inteiro do usuário, incluindo `papel`, enviado no PATCH. Campo
  *     `hidden` não protege nada — o cliente controla o corpo.
  *     Correção: enviar apenas os campos editáveis, E (o que realmente
- *     importa) restringir `fields` no serializer do backend.
+ *     importa) declarar os campos no DTO de saída do backend.
  *
  *  6. A07 Token em localStorage + vazamento de dados. Qualquer XSS lê
  *     `localStorage.getItem("token")`. Guardar o objeto do usuário
@@ -204,7 +204,7 @@ export function ListaAssociados() {
  *     associados para qualquer pessoa que alcance a rota; e mesmo que a
  *     tela escondesse colunas, a API já devolveu tudo — visível na aba
  *     Network.
- *     Correção: minimizar no SERIALIZER (não devolver o que a tela não
+ *     Correção: minimizar no DTO DE SAÍDA (não devolver o que a tela não
  *     usa), exigir permissão no endpoint, e questionar se o CPF precisa
  *     existir no sistema (princípio da necessidade).
  */

@@ -20,7 +20,7 @@ cheatsheet.md      Referência rápida (quando o volume de sintaxe justifica)
 | [01](01-fundamentos-web-http/) | Fundamentos da web e HTTP | 5 | **E0** — relatório de inspeção HTTP |
 | [02](02-arquitetura-desacoplada/) | Arquitetura desacoplada e contrato de API | 2 | Contrato do BiblioCom |
 
-### Bloco 2 — Backend: dados e API (23h) 🔵
+### Bloco 2 — Backend: dados e API (24h) 🔵
 | # | Módulo | CH | Entrega |
 |---|---|---:|---|
 | [03](03-nestjs-primeiros-passos/) | NestJS: módulos, controllers e providers | 4 | API respondendo JSON |

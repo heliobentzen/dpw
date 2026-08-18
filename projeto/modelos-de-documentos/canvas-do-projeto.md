@@ -60,7 +60,7 @@ O que **não** faremos nesta versão, e por quê:
 |---|---|
 | Prazo | Semana 18 |
 | Equipe | `<N>` pessoas, `<X>` h/semana no total |
-| Técnica | Python/Django, PostgreSQL, PaaS gratuita |
+| Técnica | TypeScript (NestJS + React), PostgreSQL, PaaS gratuita |
 | Contexto de uso | `<equipamento, conexão e local onde o sistema será usado>` |
 | Orçamento | `<R$ ou "zero">` |
 

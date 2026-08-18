@@ -114,7 +114,7 @@ Leia o [ADR-09](../../docs/decisoes-tecnicas.md#adr-09--o-custo-em-carga-horári
 responda:
 
 1. Quais conteúdos foram removidos para caber React e Tailwind?
-2. Cite **duas** competências que um estudante da versão anterior (Django + templates)
+2. Cite **duas** competências que um estudante de uma stack monolítica com templates
    teria e você não terá.
 3. Cite **duas** que você terá e essa pessoa não teria.
 4. Se você fosse coordenar a disciplina, faria a mesma escolha? Justifique em 5 linhas,
