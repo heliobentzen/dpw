@@ -27,7 +27,7 @@ Usuário digita  https://bibliocom.org/obras/42
         ▼
    servidor recebe  GET /obras/42
         │
-        ├─ É /api/*, /admin/* ou /static/*?  ──▶ Django responde
+        ├─ É /api/*?                          ──▶ NestJS responde
         │
         └─ Qualquer outra coisa  ──▶ devolve index.html (sempre o mesmo)
                                           │

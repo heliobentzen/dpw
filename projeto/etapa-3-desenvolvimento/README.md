@@ -24,7 +24,7 @@ O sistema funcionando, testado e **no ar** — a maior entrega da disciplina.
 | Sprint | Semanas | Foco sugerido |
 |---|---|---|
 | S1 | 12–13 | 🔵 Models, migrações, admin, dados de exemplo, **contrato de API** |
-| S2 | 14–15 | 🔵 API completa (serializers, validação, filtros) · 🟣 telas de leitura |
+| S2 | 14–15 | 🔵 API completa (DTOs, validação, filtros) · 🟣 telas de leitura |
 | S3 | 16–17 | ⚪ Autenticação ponta a ponta, formulários, testes, **deploy** |
 | S4 | 18 | Ajustes com a organização parceira, acessibilidade, documentação |
 
@@ -92,7 +92,7 @@ Layout do celular precisa de ajuste — issue #23.
 - [ ] Tem teste? O teste falharia se a regra fosse quebrada?
 - [ ] Regra de negócio está no model/service, não espalhada na view?
 - [ ] Alguma consulta N+1? (`select_related`/`prefetch_related`)
-- [ ] Controle de acesso: a view filtra o queryset por usuário?
+- [ ] Controle de acesso: o service filtra a consulta pelo usuário da sessão?
 - [ ] Alguma URL literal, `fields = "__all__"` ou `dangerouslySetInnerHTML`?
 - [ ] 🟣 `queryKey` inclui todos os filtros? A mutação invalida o cache certo?
 - [ ] 🟣 Os quatro estados estão tratados nesta tela?
@@ -115,7 +115,7 @@ Revisão é sobre o código, nunca sobre a pessoa. Comentário útil sugere alte
 
 ### 🔵 Backend — API
 - [ ] CRUD completo em 2+ recursos, via ViewSet
-- [ ] Serializers separados para leitura e escrita, com `fields` explícito
+- [ ] DTOs separados para entrada e saída, com os campos declarados explicitamente
 - [ ] Validação de servidor: 3+ `validate_<campo>` e 1 `validate()`
 - [ ] Filtros, busca, ordenação (com `ordering_fields`) e paginação
 - [ ] 2+ ações customizadas (`@action`)

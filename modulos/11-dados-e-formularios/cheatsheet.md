@@ -197,7 +197,7 @@ import { Controller } from "react-hook-form";
 ## Tipos do OpenAPI
 
 ```bash
-python manage.py spectacular --file ../frontend/schema.yml
+pnpm gerar:schema      # escreve backend/openapi.json
 pnpm dlx openapi-typescript schema.yml -o src/api/schema.d.ts
 ```
 
@@ -231,7 +231,7 @@ export function useDebounce<T>(valor: T, ms = 400): T {
 | Copiar `data` para `useState` | Usar `data` direto |
 | `queryKey: ["obras"]` com filtros variáveis | Incluir os filtros na chave |
 | Mutação sem `invalidateQueries` | Invalidar o que mudou |
-| Validar só no cliente | Validar também no serializer |
+| Validar só no cliente | Validar também no DTO de saída |
 | Ignorar o corpo do 400 | Mapear campo a campo |
 | Tipos escritos à mão | Gerar do OpenAPI |
 | `mutate` quando precisa do retorno | `mutateAsync` |

@@ -183,7 +183,7 @@ Durante o curso, quando um roteiro trouxer comando em formato Linux,
 [`recursos/comandos-windows.md`](recursos/comandos-windows.md) traz a tabela de
 equivalências e as **seis armadilhas** que não se resolvem trocando o comando: `curl` é
 alias de `Invoke-WebRequest`; variáveis de ambiente inline não existem; `&&` não existe no
-PowerShell 5.1; Gunicorn não roda no Windows; `>` grava arquivos em UTF-16; e um espaço
+PowerShell 5.1; `>` grava arquivos em UTF-16; e um espaço
 depois da crase de continuação corta o comando em silêncio.
 
 ## Pré-requisito de JavaScript

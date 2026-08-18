@@ -11,7 +11,7 @@
 | Fundamentos da web e HTTP | M01 | 25% |
 | Arquitetura desacoplada e contrato de API | M02 | 15% |
 | Model, ORM e migrações | M04, M05, M06 | 35% |
-| API: URLs, views e serializers | M07 | 25% |
+| API: rotas, controllers e DTOs | M07 | 25% |
 
 > A prova acontece na semana 10, quando o frontend mal começou. React e Tailwind **não**
 > são cobrados aqui — são avaliados no portfólio (E4) e na Etapa 3.
@@ -59,24 +59,29 @@ token CSRF e confirmação.
 > Este código está em produção e a página leva 8 segundos para carregar com 200 obras.
 > Aponte **todos** os problemas e reescreva.
 
-```python
-def relatorio(request):
-    obras = Obra.objects.all()
-    dados = []
-    for obra in obras:
-        dados.append({
-            "titulo": obra.titulo,
-            "autor": obra.autor.nome,
-            "categorias": ", ".join([c.nome for c in obra.categorias.all()]),
-            "exemplares": obra.exemplares.count(),
-            "emprestados": obra.exemplares.filter(emprestimos__devolvido_em=None).count(),
-        })
-    return render(request, "relatorio.html", {"dados": dados})
+```ts
+async relatorio() {
+  const obras = await this.obras.find();
+  const dados = [];
+  for (const obra of obras) {
+    const autor = await this.autores.findOneBy({ id: obra.autorId });
+    const categorias = await this.categorias.find({ where: { obras: { id: obra.id } } });
+    const exemplares = await this.exemplares.countBy({ obra: { id: obra.id } });
+    const emprestados = await this.exemplares.count({
+      where: { obra: { id: obra.id }, emprestimos: { devolvidoEm: IsNull() } },
+    });
+    dados.push({ titulo: obra.titulo, autor: autor.nome,
+                 categorias: categorias.map((c) => c.nome).join(", "),
+                 exemplares, emprestados });
+  }
+  return dados;
+}
 ```
 
-*Espera-se:* identificar N+1 em quatro lugares (`autor`, `categorias`, `count()` duas
-vezes); reescrever com `select_related("autor")`, `prefetch_related("categorias")` e
-`annotate(Count(...))` com `filter=Q(...)`; e estimar a redução de ~801 consultas para 2.
+*Espera-se:* identificar N+1 em **quatro** lugares (`autor`, `categorias` e as duas
+contagens); reescrever com `relations` para autor e categorias e com agregação no
+`QueryBuilder` (`COUNT` + `groupBy`) para os totais; e estimar a redução de ~801 consultas
+para 2.
 
 ---
 
@@ -84,15 +89,20 @@ vezes); reescrever com `select_related("autor")`, `prefetch_related("categorias"
 
 > Encontre as **cinco** falhas de segurança e corrija:
 
-```python
-@csrf_exempt
-def perfil(request, user_id):
-    usuario = Usuario.objects.get(pk=user_id)
-    if request.method == "POST":
-        usuario.email = request.POST["email"]
-        usuario.papel = request.POST.get("papel", usuario.papel)
-        usuario.save()
-    return render(request, "perfil.html", {"usuario": usuario})
+```ts
+@Controller("perfil")
+export class PerfilController {
+  @Get(":id")
+  async ver(@Param("id") id: number) {
+    return this.usuarios.findOneBy({ id });
+  }
+
+  @Patch(":id")
+  async atualizar(@Param("id") id: number, @Body() corpo: any) {
+    await this.usuarios.update(id, corpo);
+    return this.usuarios.findOneBy({ id });
+  }
+}
 ```
 
 ---

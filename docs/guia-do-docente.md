@@ -151,7 +151,7 @@ Se precisar reduzir a carga sem ferir a ementa, corte nesta ordem:
 4. M00 Ambiente: transforme em pré-atividade assíncrona
 5. M10 Rotas (2h) — pode ser absorvido pelo M11, com perda
 
-**Antes de cortar, considere o modo híbrido** ([ADR-04](decisoes-tecnicas.md#adr-04--modo-híbrido-como-alternativa-documentada)):
+**Antes de cortar, considere o modo híbrido** ([ADR-04](decisoes-tecnicas.md#adr-11--o-item-templates-da-ementa)):
 ele libera ~8h de uma vez. Com o pré-requisito de JS atendido, porém, a única razão que
 resta para adotá-lo é a **leitura estrita da ementa** — não a capacidade da turma.
 

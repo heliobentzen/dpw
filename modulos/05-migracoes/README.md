@@ -96,7 +96,7 @@ sem downtime?" é pergunta clássica de entrevista pleno. A resposta é esta se�
 
 > 📦 **Instale o Docker antes desta aula** — ele entra no Passo 5.
 > 🐧 [`ambiente-setup.md`, seção 7](../../docs/ambiente-setup.md#7-postgresql-via-docker-a-partir-do-m05) ·
-> 🪟 [`ambiente-setup-windows.md`, passo 8](../../docs/ambiente-setup-windows.md#passo-8--docker-e-postgresql)
+> 🪟 [`ambiente-setup-windows.md`, passo 7](../../docs/ambiente-setup-windows.md#passo-7--docker-e-postgresql)
 > — no Windows o Docker exige o WSL2, então **não deixe para a hora da aula**.
 
 ### Passo 1 — Desligar o `synchronize` (20 min)

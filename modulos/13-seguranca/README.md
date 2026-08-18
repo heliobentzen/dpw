@@ -182,7 +182,7 @@ CSRF continua necessário com autenticação por sessão — implementado no M12
 
 | Item | Regra |
 |---|---|
-| `SECRET_KEY` | Variável de ambiente; nunca no Git |
+| `SESSION_SECRET` | Variável de ambiente; nunca no Git |
 | Senhas | Hash Argon2/PBKDF2 |
 | Trânsito | HTTPS + HSTS |
 | Tokens | `secrets.token_urlsafe()`; guarde o hash |
@@ -194,7 +194,7 @@ CSRF continua necessário com autenticação por sessão — implementado no M12
 # frontend/.env  — conteudo do arquivo, nao comandos do terminal
 VITE_API_URL=https://bibliocom.org/api          # ✅ público, tudo bem
 VITE_SENTRY_DSN=https://...                     # ✅ desenhado para ser público
-VITE_AWS_SECRET_KEY=AKIA...                     # ❌❌❌ CATÁSTROFE
+VITE_AWS_SESSION_SECRET=AKIA...                     # ❌❌❌ CATÁSTROFE
 ```
 
 Toda variável `VITE_*` é **substituída pelo valor literal em tempo de build** e vai para o

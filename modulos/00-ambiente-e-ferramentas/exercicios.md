@@ -8,7 +8,7 @@ Crie um repositório `dpw-exercicios` contendo:
 - `package.json` e `pnpm-lock.yaml` versionados (mais suas dependências
   transitivas)
 - `README.md` com a seção "Como rodar"
-- `.env.example` com as chaves `SECRET_KEY=` e `DEBUG=` (sem valores reais)
+- `.env.example` com as chaves `SESSION_SECRET=` e `DEBUG=` (sem valores reais)
 
 **Verificação:** apague a pasta `node_modules/`, recrie-a com `pnpm install` a partir do
 lock, e mostre que os scripts continuam funcionando. Compare o `pnpm-lock.yaml` antes e

@@ -138,7 +138,7 @@ destaca de quem responde "no service, porque sim".
 
 > 📦 **Antes desta aula**, instale o Node 20 e o pnpm.
 > 🐧 [`ambiente-setup.md`, seção 4](../../docs/ambiente-setup.md#4-nodejs-e-pnpm) ·
-> 🪟 [`ambiente-setup-windows.md`, passo 6](../../docs/ambiente-setup-windows.md#passo-6--nodejs-e-pnpm)
+> 🪟 [`ambiente-setup-windows.md`, passo 4](../../docs/ambiente-setup-windows.md#passo-4--nodejs-e-pnpm)
 
 ### Passo 1 — O monorepo (20 min)
 

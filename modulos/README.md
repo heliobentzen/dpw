@@ -86,7 +86,7 @@ Todos os módulos constroem o mesmo sistema, incrementalmente.
 | M11 | Listagem com cache, busca com *debounce*, formulários validados | 🟣 |
 | M12 | Login, papéis, rotas protegidas, sessão ponta a ponta | ⚪ |
 | M13 | Correção de vulnerabilidades plantadas nas duas camadas | ⚪ |
-| M14 | pytest no backend, Vitest + Testing Library no frontend | ⚪ |
+| M14 | Jest no backend, Vitest + Testing Library no frontend | ⚪ |
 | M15 | Admin customizado para a coordenação da biblioteca | 🔵 |
 | M16 | API e SPA no ar, mesmo site, HTTPS, CI/CD | ⚪ |
 | M17 | Logs, healthcheck, backup e plano de manutenção | ⚪ |

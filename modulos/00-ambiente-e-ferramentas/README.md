@@ -424,7 +424,7 @@ aprovação. Isso passa a valer para o projeto da equipe.
 
 🪟 **Erros de Windows** (política de execução bloqueando o `pnpm`, OneDrive travando o Git,
 `Filename too long` no `node_modules`) estão catalogados em
-[`docs/ambiente-setup-windows.md`, passo 12](../../docs/ambiente-setup-windows.md#passo-12--erros-e-diagnóstico).
+[`docs/ambiente-setup-windows.md`, passo 12](../../docs/ambiente-setup-windows.md#passo-11--erros-e-diagnóstico).
 
 ## ✅ Checklist de saída
 

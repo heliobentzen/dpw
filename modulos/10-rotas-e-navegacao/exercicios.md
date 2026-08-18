@@ -131,7 +131,7 @@ está no M07 e no M13, não aqui)
 
 **E10.1** — `/obras/:id` casaria com `/obras/nova`, tratando `"nova"` como id. A API
 receberia `GET /api/obras/nova/` e devolveria 404 — sintoma confuso, causa banal. Rotas
-literais antes de paramétricas, exatamente como no `urls.py` do Django (M07).
+literais antes de paramétricas, exatamente como nos controllers do backend (M07).
 
 **E10.5** — `<Link>` intercepta o clique, chama `history.pushState` e troca o componente:
 nenhuma requisição de documento, contador preservado. `<a href>` faz o navegador pedir o
@@ -140,6 +140,6 @@ volta a zero.
 
 **E10.7** — Não é segurança, é **experiência do usuário**. `<RotaProtegida>` só esconde a
 tela; o código está no *bundle* que qualquer pessoa baixa, e a API pode ser chamada
-diretamente por `curl`. A segurança real está nas `permission_classes` e no `get_queryset`
+diretamente por `curl`. A segurança real está nos `Guards` e no filtro da consulta
 do DRF (M07/M13). Esconder o que a pessoa não pode usar é cortesia; recusar no servidor é
 proteção.

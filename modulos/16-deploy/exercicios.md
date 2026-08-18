@@ -43,7 +43,7 @@ Provoque cada falha em produção, capture a evidência e corrija:
 | 1 | `ALLOWED_HOSTS` errado | Remover o domínio | | |
 | 2 | SPA não construída | Remover `pnpm --filter frontend build` do comando de build | | |
 | 3 | Migração não aplicada | Remover `migrate` do release | | |
-| 4 | Variável de ambiente faltando | Remover `SECRET_KEY` | | |
+| 4 | Variável de ambiente faltando | Remover `SESSION_SECRET` | | |
 | 5 | Porta fixa no código | Trocar `process.env.PORT` por `3000` | | |
 
 Objetivo: reconhecer o sintoma antes de precisar procurar a causa. Em produção, essa
@@ -122,7 +122,7 @@ concretos (não intenções):
 1. O banco foi apagado por engano. Qual o procedimento? Quanto se perde?
 2. A conta da PaaS foi suspensa. Como sobe em outro lugar? Quanto tempo leva?
 3. A pessoa que fez o deploy saiu da equipe. Quem tem acesso? Onde estão as credenciais?
-4. Vazou a `SECRET_KEY`. O que fazer, em que ordem, nas primeiras 2 horas?
+4. Vazou a `SESSION_SECRET`. O que fazer, em que ordem, nas primeiras 2 horas?
 5. O site está fora do ar há 30 minutos e ninguém percebeu. Como isso deixa de acontecer?
 6. Um usuário reporta que perdeu dados. Como você investiga?
 

@@ -1,4 +1,4 @@
-# JavaScript moderno para React — ponte Python → JS
+# JavaScript moderno e TypeScript — referência da disciplina
 
 > **Como usar este material, nesta oferta.** O pré-requisito de JavaScript **está
 > atendido**: a turma já programa em JS, e os módulos M08–M11 foram dimensionados com essa
@@ -7,13 +7,19 @@
 > 1. **Diagnóstico da semana 1** (abaixo) — para localizar quem individualmente chega com
 >    lacuna e direcionar monitoria, **não** para decidir o cronograma.
 > 2. **Referência de consulta** durante os módulos 08–11, especialmente a tabela
->    Python↔JavaScript e a seção 5 (imutabilidade), que é onde o React realmente cobra.
+>    de equivalências e a seção 5 (imutabilidade), que é onde o React realmente cobra.
 > 3. **Nivelamento de 4h** para outras turmas ou instituições que adotem o material sem o
 >    pré-requisito, retirando 2h de M06 e 2h de M15 (ver
 >    [`../docs/cronograma.md`](../docs/cronograma.md#6-variações-de-calendário)).
 >
-> Escopo deliberadamente estreito: **só o JavaScript que os módulos M08–M11 usam.** Não é
-> um curso de JS — é uma ponte, apoiada no Python que a turma já sabe.
+> Escopo deliberadamente estreito: **só o JavaScript que a disciplina usa.** Não é um curso
+> de JS.
+>
+> ⚠️ **As tabelas comparativas com Python são herança da versão anterior do material**, em
+> que o backend era Django. Elas continuam úteis para quem chega de outra linguagem, mas
+> **não** descrevem a stack atual: aqui, backend e frontend são TypeScript, e o que a turma
+> precisa atravessar é JavaScript → TypeScript, não Python → JavaScript. A parte de tipos
+> está no M04 (entidades) e no M15 (tipos compartilhados).
 
 ## Diagnóstico (20 min, semana 1)
 
@@ -55,7 +61,7 @@ console.log([].length && "tem itens");
 
 **Leitura do resultado, pela turma:** se mais de 20% ficar em 0–1, reavalie o cronograma —
 4h de nivelamento (retiradas de M06 e M15) ou o modo híbrido
-([ADR-04](../docs/decisoes-tecnicas.md#adr-04--modo-híbrido-como-alternativa-documentada)).
+([ADR-04](../docs/decisoes-tecnicas.md#adr-11--o-item-templates-da-ementa)).
 Numa turma com o pré-requisito atendido, o esperado é encontrar 2 ou 3 casos isolados —
 e encontrá-los agora custa uma monitoria; encontrá-los na semana 8 custa o bloco de
 frontend dessas pessoas.
@@ -94,7 +100,7 @@ undefined     // não foi definido
 ```
 
 **Valores falsos** (*falsy*): `false`, `0`, `""`, `null`, `undefined`, `NaN`. Todo o resto
-é verdadeiro — inclusive `[]` e `{}`, que em Python seriam falsos.
+é verdadeiro — inclusive `[]` e `{}`, que em muitas linguagens seriam falsos.
 
 ```python
 # Python
@@ -120,7 +126,7 @@ const nada = () => { console.log("oi"); };      // corpo com chaves: precisa de 
 const criarObra = (titulo, ano = 2026) => ({ titulo, ano });   // ⚠️ objeto entre parênteses
 ```
 
-| Python | JavaScript |
+| Outra linguagem (ex.: Python) | JavaScript |
 |---|---|
 | `def f(a, b): return a + b` | `const f = (a, b) => a + b` |
 | `lambda x: x * 2` | `x => x * 2` |
@@ -151,7 +157,7 @@ obras.find(o => o.id === 2);
 obras.filter(o => o.ano > 1895).map(o => o.titulo);
 ```
 
-| Python | JavaScript |
+| Outra linguagem (ex.: Python) | JavaScript |
 |---|---|
 | `[o.titulo for o in obras]` | `obras.map(o => o.titulo)` |
 | `[o for o in obras if o.ano > 1895]` | `obras.filter(o => o.ano > 1895)` |
@@ -194,7 +200,7 @@ const { id, ...semId } = obra;
 const [primeiro, ...resto] = [1, 2, 3, 4];
 ```
 
-| Python | JavaScript |
+| Outra linguagem (ex.: Python) | JavaScript |
 |---|---|
 | `a, b = tupla` | `const [a, b] = arr` |
 | `{**d, "x": 1}` | `{ ...d, x: 1 }` |
@@ -330,7 +336,7 @@ E evite `any` — se não souber o tipo, use `unknown` e estreite depois.
 
 ## Exercícios (nivelamento ou monitoria)
 
-### N1 — Traduzir de Python (individual)
+### N1 — Traduzir de outra linguagem (individual)
 
 ```python
 obras = [{"titulo": "A", "ano": 1899, "disp": 2}, {"titulo": "B", "ano": 1890, "disp": 0}]

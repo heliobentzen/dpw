@@ -276,7 +276,7 @@ export function ObraFormPage() {
 ```
 
 O bloco do `catch` é o mais importante do módulo. Ele fecha o ciclo do contrato: o
-serializer do M07 devolve `{"isbn": ["..."]}`, e essa estrutura é mapeada campo a campo no
+DTO do M07 devolve `{"isbn": ["..."]}`, e essa estrutura é mapeada campo a campo no
 formulário. **Só funciona porque o formato do erro foi padronizado no contrato (M02).**
 
 #### As duas validações, de novo
@@ -284,16 +284,16 @@ formulário. **Só funciona porque o formato do erro foi padronizado no contrato
 | Camada | Serve para | O que acontece se faltar |
 |---|---|---|
 | **Cliente** (Zod) | Resposta imediata, sem ida ao servidor | UX ruim; o sistema continua íntegro |
-| **Servidor** (serializer) | **Integridade e segurança** | Dado inválido no banco |
+| **Servidor** (DTO) | **Integridade e segurança** | Dado inválido no banco |
 
-O `curl` do M01 continua ignorando seu React. Zod é conveniência; o serializer é a defesa.
+O `curl` do M01 continua ignorando seu React. Zod é conveniência; o DTO validado é a defesa.
 
 ### 5. Tipos a partir do contrato (15 min)
 
 ```bash
 # funciona nas tres plataformas — uma linha por comando evita o && (PowerShell 5.1)
 cd backend
-python manage.py spectacular --file ../frontend/schema.yml
+pnpm gerar:schema      # escreve backend/openapi.json
 cd ../frontend
 pnpm dlx openapi-typescript schema.yml -o src/api/schema.d.ts
 ```
@@ -376,7 +376,7 @@ precisa aparecer no campo certo.
 
 Gere `schema.d.ts`, troque os tipos escritos à mão por ele e **prove a proteção**:
 
-1. No backend, renomeie `titulo` para `nome` no `ObraSerializer`.
+1. No backend, renomeie `titulo` para `nome` no `ObraResposta`.
 2. Regenere o schema e os tipos.
 3. Rode `pnpm build`. O que acontece?
 4. Reverta.

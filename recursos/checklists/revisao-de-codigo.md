@@ -37,7 +37,7 @@ demais e deveria ser dividido.
 - [ ] Alguma iteração acessando FK sem `select_related`? (N+1)
 - [ ] Algum `.count()` ou `.exists()` dentro de laço?
 - [ ] Filtro por relação N-N sem `distinct()`?
-- [ ] Incremento numérico feito em Python em vez de `F()`?
+- [ ] Incremento numérico lido e reescrito na aplicação, em vez de `UPDATE ... SET x = x + 1`?
 - [ ] Listagem sem paginação?
 
 ## Views e URLs
@@ -52,7 +52,7 @@ demais e deveria ser dividido.
 
 - [ ] A view exige autenticação onde deveria?
 - [ ] A view exige permissão onde deveria?
-- [ ] O queryset é filtrado pelo usuário (sem IDOR)?
+- [ ] A consulta é filtrada pelo usuário da sessão (sem IDOR)?
 - [ ] `fields` explícito no ModelForm (nada de `"__all__"`)?
 - [ ] Campos sensíveis definidos no servidor, não vindos do cliente?
 - [ ] Nenhum `|safe` / `mark_safe` sobre dado do usuário?

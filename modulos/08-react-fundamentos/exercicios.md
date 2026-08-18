@@ -103,7 +103,7 @@ tela:
 |---|---|---|
 | Carregando | Network → Slow 3G | |
 | Vazio | Apagar as obras no shell | |
-| Com conteúdo | Popular com `manage.py popular` | |
+| Com conteúdo | Popular com `pnpm dlx ts-node src/semear.ts` | |
 | Erro de rede | Parar o `runserver` | |
 | Erro 401 | Remover `AllowAny` | |
 | Erro 500 | `raise Exception()` na view | |

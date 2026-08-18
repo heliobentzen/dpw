@@ -23,7 +23,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 
 > Esse ponto ficou mais importante com a arquitetura desacoplada: sem o portfólio
 > individual, é comum a equipe se dividir em "quem faz backend" e "quem faz frontend", e
-> metade da turma sair sem ter escrito um serializer ou um componente.
+> metade da turma sair sem ter escrito um DTO ou um componente.
 
 ## Como cada entrega é avaliada
 
@@ -70,7 +70,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 
 ### E3 — API documentada 🔵
 - [ ] CRUD completo em 2+ recursos, via ViewSet
-- [ ] Serializers separados para leitura e escrita, com `fields` explícito
+- [ ] DTOs separados para entrada e saída, com os campos declarados explicitamente
 - [ ] Validação de servidor testada com `curl` (3+ `validate_<campo>`, 1 `validate()`)
 - [ ] Filtros, busca, ordenação declarada e paginação
 - [ ] 2+ ações customizadas
