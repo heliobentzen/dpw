@@ -1,12 +1,19 @@
-# Desenvolvimento no Windows — guia de equivalências
+# Windows — referência de comandos
 
-Os roteiros do material usam comandos no formato Linux/macOS. Este arquivo traz o
-equivalente no Windows, os **três caminhos possíveis** e as armadilhas que não são
-simples tradução de comando.
+**Este arquivo é de consulta, não de instalação.** Para montar o ambiente, siga
+[`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md), que é um guia
+completo e independente, do zero até os dois servidores rodando.
 
-> **Leia a seção 2 antes da primeira aula.** Quatro coisas quebram em silêncio no Windows e
-> não são resolvidas trocando o comando: o `curl`, as variáveis de ambiente inline, o
-> operador `&&` e o Gunicorn. A quinta — finais de linha — só aparece no deploy (seção 4).
+Use **este** arquivo durante o curso, quando um roteiro trouxer um comando em formato
+Linux/macOS e você precisar do equivalente. Ele traz a tabela de equivalências (seção 3) e
+as armadilhas em detalhe (seções 2 e 4).
+
+| Preciso de… | Vá para |
+|---|---|
+| Instalar Python, Node, Git, Docker | [`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md) |
+| Traduzir um comando do roteiro | [seção 3](#3-tabela-de-equivalências) deste arquivo |
+| Entender por que algo quebrou | [seção 2](#2-as-seis-armadilhas-que-não-são-tradução) deste arquivo |
+| Instalar o WSL2 | [seção 1.1](#instalar-o-wsl2-opcional-10-min) deste arquivo |
 
 ---
 
@@ -38,7 +45,19 @@ integra com a extensão *WSL*, e o Docker Desktop usa o WSL2 como backend.
 
 ---
 
-## 2. As quatro armadilhas que não são tradução
+## 2. As seis armadilhas que não são tradução
+
+Nenhuma delas se resolve trocando o comando por um equivalente — todas exigem entender o
+que o Windows faz de diferente.
+
+| # | Armadilha | Aparece em |
+|---|---|---|
+| [2.1](#21-curl-no-powershell-não-é-o-curl-) | `curl` é apelido de `Invoke-WebRequest` | M01, M07, M12, M13, M16 |
+| [2.2](#22-variáveis-de-ambiente-inline-não-existem-) | Variáveis inline não existem — e ficam na sessão | M13, M16 |
+| [2.3](#23--não-existe-no-powershell-51-) | `&&` não existe no PowerShell 5.1 | todos |
+| [2.4](#24-gunicorn-não-roda-no-windows-) | Gunicorn não roda no Windows | M16 |
+| [2.5](#25--grava-arquivo-em-utf-16-) | `>` grava arquivo em UTF-16 | M00, M16 |
+| [2.6](#26-a-crase-de-continuação-e-o-espaço-invisível-) | Espaço depois da crase corta o comando | todos |
 
 ### 2.1 `curl` no PowerShell não é o `curl` ⚠️
 
@@ -145,6 +164,62 @@ O objetivo da verificação local é provar que a aplicação funciona **fora do
 com `DEBUG=False` e estáticos coletados. Waitress cumpre isso.
 
 > Se estiver no WSL2, use Gunicorn normalmente — é Linux.
+
+### 2.5 `>` grava arquivo em UTF-16 ⚠️
+
+No **PowerShell 5.1** — o que vem instalado no Windows — o operador `>` não grava texto
+puro: grava **UTF-16**, com dois bytes por caractere e um marcador BOM no início. O arquivo
+parece normal no editor, mas outras ferramentas leem lixo.
+
+```powershell
+pip freeze > requirements.txt        # ❌ arquivo em UTF-16
+```
+
+O erro aparece depois, na máquina de **outra pessoa**, quando ela clona o repositório:
+
+```
+ERROR: Invalid requirement: 'ÿþd'
+```
+
+Forma correta, que funciona no PowerShell 5.1 **e** no 7:
+
+```powershell
+pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
+```
+
+| Trecho | O que faz |
+|---|---|
+| `\| Out-File` | Grava a saída num arquivo, com controle explícito de codificação |
+| `-Encoding ascii` | Texto puro, 1 byte por caractere, sem BOM |
+
+Vale para **todo** `>` que gere arquivo de texto lido por outra ferramenta: `requirements.txt`,
+`.env`, `.txt`, `.json`. Para criar arquivo de configuração, prefira o editor:
+
+```powershell
+New-Item -ItemType File -Path .gitignore
+code .gitignore
+```
+
+> No **PowerShell 7** o `>` já grava UTF-8 e o problema não existe. Mas como você não sabe
+> em qual versão o colega está, use sempre `Out-File -Encoding ascii`.
+
+### 2.6 A crase de continuação e o espaço invisível ⚠️
+
+Para quebrar um comando longo em várias linhas, o Linux usa `\` e o PowerShell usa a crase
+(`` ` ``). A diferença perigosa é que a crase precisa ser **o último caractere da linha**:
+
+```powershell
+pip install django `
+            djangorestframework
+```
+
+Se houver **um único espaço depois da crase**, o PowerShell trata a linha como terminada.
+O comando roda pela metade — instala `django`, ignora o resto — e **não há mensagem de
+erro**. Como espaço em branco no fim da linha é invisível, o diagnóstico é penoso.
+
+Por isso este material escreve comandos de instalação em **linha única**, por mais longos
+que fiquem. Se precisar quebrar, ative "renderizar espaços em branco" no editor
+(*View → Render Whitespace* no VS Code).
 
 ---
 
@@ -306,6 +381,8 @@ git config --global core.autocrlf input
 
 | Situação | No Windows |
 |---|---|
+| **Pasta do projeto** | ⚠️ Use `C:\dev`. Dentro do `Documents` o OneDrive sincroniza `node_modules` e `.venv`, travando `pnpm install` e produzindo mudanças fantasma no Git. Espaços e acentos no caminho também quebram ferramentas |
+| **Aliases de execução** | ⚠️ `python.exe` e `python3.exe` vêm como atalhos que abrem a Microsoft Store. Desligue em *Gerenciar aliases de execução de aplicativo* |
 | **Docker Desktop** | Exige WSL2 habilitado. Instale o WSL antes do Docker |
 | **PostgreSQL local** | Prefira o container Docker ao instalador nativo |
 | **Caminhos longos** | `node_modules` pode passar de 260 caracteres. Habilite: `git config --system core.longpaths true` e ative *Long Paths* no Windows |
@@ -336,7 +413,7 @@ O script detecta o sistema operacional e ajusta as dicas de correção.
 
 ## 7. Se algo do material não funcionar
 
-1. Confira se o comando cai em uma das **quatro armadilhas** da seção 2.
+1. Confira se o comando cai em uma das **seis armadilhas** da seção 2.
 2. Procure o equivalente na tabela da seção 3.
 3. Ainda assim travou? **Abra o Git Bash** e cole o comando original — resolve a maioria
    dos casos, sem tradução.

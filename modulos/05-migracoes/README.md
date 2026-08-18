@@ -300,10 +300,21 @@ errado num branch de teste e observe.
 Este passo demonstra a promessa central do ORM: **o código da aplicação não muda**.
 
 ```bash
-docker compose up -d          # arquivo em docs/ambiente-setup.md, seção 6
+# Linux / macOS / WSL / Git Bash
+docker compose up -d          # docker-compose.yml em docs/ambiente-setup.md, seção 7
 pip install "psycopg[binary]" dj-database-url
 pip freeze > requirements.txt
 ```
+
+```powershell
+# Windows PowerShell
+docker compose up -d          # docker-compose.yml em docs/ambiente-setup-windows.md, passo 8.3
+pip install "psycopg[binary]" dj-database-url
+pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
+```
+
+> 🪟 `Out-File -Encoding ascii` em vez de `>`: no PowerShell 5.1 o `>` grava o arquivo em
+> UTF-16 e o `pip install -r` falha depois, na máquina de quem clonar.
 
 ```bash
 # .env

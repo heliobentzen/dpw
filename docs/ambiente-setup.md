@@ -1,6 +1,18 @@
-# Setup do ambiente de desenvolvimento
+# Setup do ambiente — Linux e macOS
 
-Guia único de instalação. Siga na ordem; ao final, rode a **verificação** da seção 8.
+Guia de instalação para **Linux e macOS**. Siga na ordem; ao final, rode a **verificação**
+da seção 8.
+
+> ## 🪟 Está no Windows?
+>
+> **Use o guia próprio: [`ambiente-setup-windows.md`](ambiente-setup-windows.md).**
+>
+> Ele é completo e independente — do zero até os dois servidores rodando, com cada linha
+> explicada. Não é tradução deste arquivo, e você **não** precisa alternar entre os dois.
+>
+> Vale também se você optou por **Git Bash** (o guia indica onde os comandos daqui servem)
+> ou por **WSL2** — nesse caso, siga o WSL2 até o fim e depois use **este** arquivo, porque
+> lá dentro é Linux de verdade.
 
 > São **dois** ambientes: Python (backend) e Node (frontend). Eles são independentes —
 > cada um com seu gerenciador de pacotes, seu arquivo de dependências e seu diretório.
@@ -20,33 +32,6 @@ Guia único de instalação. Siga na ordem; ao final, rode a **verificação** d
 
 > Até o M04 usamos **SQLite** (embutido, zero instalação). PostgreSQL entra no M05, para
 > que a diferença entre "banco de brinquedo" e "banco de verdade" seja sentida na prática.
-
-## 1.1 Windows: escolha o caminho antes de começar 🪟
-
-Os roteiros deste material usam comandos no formato Linux/macOS. No Windows há três
-caminhos, todos válidos para a disciplina inteira:
-
-| Caminho | Como é | Quando |
-|---|---|---|
-| **PowerShell nativo** | Comandos equivalentes, listados na referência | Padrão |
-| **Git Bash** (vem com o Git) | Os comandos do material funcionam como estão | Quer colar sem traduzir |
-| **WSL2 (Ubuntu)** | Linux completo dentro do Windows | ⭐ Recomendado a partir do M16 |
-
-**Quatro coisas quebram em silêncio e não são resolvidas trocando o comando** — leia antes
-da primeira aula:
-
-1. **`curl` no PowerShell é apelido de `Invoke-WebRequest`.** Use **`curl.exe`**.
-2. **Variáveis inline não existem.** `DEBUG=False python ...` vira
-   `$env:DEBUG="False"; python ...` — e a variável **permanece na sessão**.
-3. **`&&` não existe no PowerShell 5.1** (o padrão do Windows). Use linhas separadas.
-4. **Gunicorn não roda no Windows.** Para a verificação local do M16, use **Waitress**.
-
-E uma quinta, que só aparece no deploy: **finais de linha**. Um `build.sh` salvo com CRLF
-falha na PaaS. Crie o `.gitattributes` no primeiro commit (seção 10).
-
-📖 **Referência completa:**
-[`../recursos/comandos-windows.md`](../recursos/comandos-windows.md) — tabela de
-equivalências, as armadilhas em detalhe e como instalar o WSL2.
 
 ## 2. Estrutura do repositório
 
@@ -79,12 +64,6 @@ dessincronização entre repositórios.
 
 ## 3. Python (backend)
 
-### Windows
-
-1. Baixe em <https://www.python.org/downloads/> a versão 3.12+.
-2. Na primeira tela, **marque "Add python.exe to PATH"**. É o erro nº 1 da turma.
-3. Verifique no PowerShell: `python --version`
-
 ### macOS
 
 ```bash
@@ -105,26 +84,12 @@ python3 --version
 ### Ambiente virtual e dependências
 
 ```bash
-# Linux / macOS / WSL / Git Bash
 mkdir -p bibliocom/backend && cd bibliocom/backend
 python3 -m venv .venv
 source .venv/bin/activate
 
 python -m pip install --upgrade pip
 pip install "django>=5.0,<6.0" djangorestframework django-cors-headers \
-            python-dotenv dj-database-url drf-spectacular
-pip freeze > requirements.txt
-```
-
-```powershell
-# Windows PowerShell
-New-Item -ItemType Directory -Force -Path bibliocom\backend
-cd bibliocom\backend
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-
-python -m pip install --upgrade pip
-pip install "django>=5.0,<6.0" djangorestframework django-cors-headers `
             python-dotenv dj-database-url drf-spectacular
 pip freeze > requirements.txt
 ```
@@ -139,17 +104,9 @@ que você instalar vai para o lugar errado. Para sair: `deactivate`.
 ### Instalação recomendada: via `fnm` (gerencia versões)
 
 ```bash
-# Linux / macOS / WSL
 curl -fsSL https://fnm.vercel.app/install | bash
 exec $SHELL
 fnm install 20 && fnm use 20
-```
-
-```powershell
-# Windows PowerShell (com winget)
-winget install Schniz.fnm
-fnm install 20
-fnm use 20
 ```
 
 Alternativa simples: instalador oficial em <https://nodejs.org> (escolha **LTS**).
@@ -197,17 +154,9 @@ git config --global pull.rebase false
 Chave SSH (evita digitar token a cada push):
 
 ```bash
-# Linux / macOS / WSL / Git Bash
 ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
 cat ~/.ssh/id_ed25519.pub   # cole em github.com > Settings > SSH and GPG keys
 ssh -T git@github.com       # deve responder "Hi <usuario>!"
-```
-
-```powershell
-# Windows PowerShell
-ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
-Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub | Set-Clipboard   # ja copia
-ssh -T git@github.com
 ```
 
 ---
@@ -275,11 +224,6 @@ docker compose ps          # deve estar "healthy"
 pip install "psycopg[binary]"
 ```
 
-> 🪟 **Windows:** o Docker Desktop exige o **WSL2 habilitado** — instale o WSL antes do
-> Docker (`wsl --install`). Os comandos `docker` são idênticos no PowerShell. Prefira o
-> container ao instalador nativo do PostgreSQL: menos configuração e igual ao que roda em
-> produção.
-
 ---
 
 ## 8. Verificação do ambiente
@@ -298,21 +242,8 @@ os itens em OK.**
 ## 9. Rodar o sistema completo (dois terminais)
 
 ```bash
-# Linux / macOS / WSL / Git Bash
 # terminal 1 — backend
 cd backend && source .venv/bin/activate
-python manage.py runserver          # http://localhost:8000
-
-# terminal 2 — frontend
-cd frontend
-pnpm dev                            # http://localhost:5173
-```
-
-```powershell
-# Windows PowerShell
-# terminal 1 — backend
-cd backend
-.venv\Scripts\Activate.ps1
 python manage.py runserver          # http://localhost:8000
 
 # terminal 2 — frontend
@@ -395,13 +326,14 @@ Procfile text eol=lf
 *.pdf binary
 ```
 
-```powershell
-git config --global core.autocrlf input
-```
-
 Sem isso, um `build.sh` salvo no Windows chega ao servidor com `\r\n` e o deploy falha com
 `bad interpreter: No such file or directory` — mensagem que não diz nada sobre a causa real.
 **Crie o arquivo no primeiro commit**, junto com o `.gitignore`.
+
+> Este arquivo é responsabilidade de **quem cria o repositório**, mesmo que essa pessoa use
+> Linux: ele protege a equipe inteira, inclusive quem entra depois sem configurar nada.
+> Quem está no Windows encontra o passo detalhado em
+> [`ambiente-setup-windows.md`](ambiente-setup-windows.md#112-gitattributes--obrigatório-).
 
 **Atenção ao `.env` do frontend:** ele **não** é secreto (é embutido no bundle em tempo de
 build e qualquer pessoa lê no DevTools), mas segue fora do Git porque muda por ambiente.
@@ -413,8 +345,6 @@ Nunca coloque chave de API nele. Detalhado no M13.
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
-| `python: command not found` (Windows) | PATH não configurado | Reinstale marcando "Add to PATH", ou use `py` |
-| `Activate.ps1 cannot be loaded` | Política do PowerShell | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
 | `ModuleNotFoundError: django` | venv não ativo | Ative o venv e reinstale |
 | `pnpm: command not found` | Corepack não habilitado | `corepack enable` |
 | `EACCES` ao instalar pacote global | Permissão | Use `fnm`/`corepack`, nunca `sudo npm -g` |
@@ -423,11 +353,8 @@ Nunca coloque chave de API nele. Detalhado no M13.
 | `port 5173 already in use` | Outro Vite rodando | `pnpm dev --port 5174` |
 | `port 5432 already in use` | PostgreSQL local ativo | Pare o serviço ou use `5433:5432` |
 | Requisição do front dá **CORS error** | Chamou `localhost:8000` direto | Use o caminho `/api` (proxy do Vite) |
-| 🪟 `curl` dá erro de parâmetro | PowerShell: alias de `Invoke-WebRequest` | Use `curl.exe` |
-| 🪟 `DEBUG=False python ...` não é reconhecido | Não há variável inline no PowerShell | `$env:DEBUG="False"; python ...` |
-| 🪟 `gunicorn` falha ao importar `fcntl` | Gunicorn não roda no Windows | Use `waitress-serve` (M16) |
-| 🪟 Deploy falha com `bad interpreter` | `build.sh` com CRLF | Configure o `.gitattributes` |
-| 🪟 `pnpm install` muito lento | Antivírus varrendo `node_modules` | Exclua a pasta do projeto no Defender |
-| 🪟 Caminho longo demais | Limite de 260 caracteres | `git config --system core.longpaths true` |
+
+🪟 **Erros de Windows** têm tabela própria, com causa e diagnóstico:
+[`ambiente-setup-windows.md`, passo 12](ambiente-setup-windows.md#passo-12--erros-e-diagnóstico).
 
 Mais casos em [`faq-troubleshooting.md`](faq-troubleshooting.md).

@@ -169,10 +169,24 @@ expandir → migrar → contrair do M05, aplicado ao contrato.
 ### Passo 1 — Preparar o backend (25 min)
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 cd backend
 pip install gunicorn whitenoise dj-database-url "psycopg[binary]"
 pip freeze > requirements.txt
 ```
+
+```powershell
+# Windows PowerShell
+Set-Location backend
+pip install gunicorn whitenoise dj-database-url "psycopg[binary]"
+pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
+```
+
+> 🪟 **Instalar o `gunicorn` no Windows funciona; executá-lo, não** — ele importa `fcntl`,
+> que não existe fora de sistemas POSIX. Ele precisa estar no `requirements.txt` porque
+> **quem roda é o servidor da PaaS, que é Linux**. Para a verificação local do passo 4, use
+> o Waitress. E `Out-File -Encoding ascii` em vez de `>`, senão o `requirements.txt` sai em
+> UTF-16 e o build na PaaS falha.
 
 `Procfile`:
 
@@ -195,7 +209,7 @@ python manage.py migrate --noinput
 > roda na PaaS, que é Linux. Mas se o arquivo for salvo com CRLF, o deploy falha com
 > `bad interpreter: No such file or directory`. Garanta o `.gitattributes` com
 > `*.sh text eol=lf` no repositório (ver
-> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#4-finais-de-linha-crlf--lf))
+> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#4-finais-de-linha-crlf--lf-))
 > — é a causa mais comum de deploy quebrado em equipe que desenvolve no Windows.
 
 Valide **localmente** antes de subir — este passo economiza a maior parte do tempo de

@@ -105,17 +105,26 @@ python manage.py startapp acervo
 
 ```powershell
 # Windows PowerShell
-New-Item -ItemType Directory -Force -Path bibliocom\backend; cd bibliocom\backend
-python -m venv .venv; .venv\Scripts\Activate.ps1
-pip install "django>=5.0,<6.0" djangorestframework django-cors-headers `
-            python-dotenv dj-database-url drf-spectacular
-pip freeze > requirements.txt
+New-Item -ItemType Directory -Force -Path C:\dev\bibliocom\backend
+Set-Location C:\dev\bibliocom\backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install "django>=5.0,<6.0" djangorestframework django-cors-headers python-dotenv dj-database-url drf-spectacular
+pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
 
 django-admin startproject config .
 python manage.py startapp acervo
 ```
 
-> 🪟 Se `Activate.ps1` for bloqueado: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+> 🪟 **Três detalhes do bloco acima**, todos explicados em
+> [`ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md):
+> uma linha por comando (o `;` executa o segundo mesmo se o primeiro falhar, e `&&` não
+> existe no PowerShell 5.1); o `.\` antes de `.venv` (o PowerShell não executa nada da pasta
+> atual sem caminho explícito); e `Out-File -Encoding ascii` no lugar de `>` — **o `>` grava
+> o arquivo em UTF-16** e o `pip install -r requirements.txt` falha na máquina de quem
+> clonar, com `Invalid requirement: 'ÿþd'`.
+>
+> Se `Activate.ps1` for bloqueado: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 > Demais equivalências em
 > [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md).
 

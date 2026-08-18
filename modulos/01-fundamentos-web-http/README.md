@@ -308,7 +308,7 @@ semântica; a versão é responsabilidade da infraestrutura.
 > apelido de `Invoke-WebRequest`, que tem outros parâmetros — os comandos abaixo falham com
 > erro confuso. O `curl.exe` já vem no Windows 10/11. No Git Bash e no WSL, `curl` funciona
 > normalmente. Ver
-> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#21-curl-no-powershell-não-é-o-curl).
+> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#21-curl-no-powershell-não-é-o-curl-).
 
 > No PowerShell, troque `curl` por **`curl.exe`** em todos os comandos abaixo e use a crase
 > (`` ` ``) no lugar da barra invertida para quebrar linha. No Git Bash e no WSL, cole como

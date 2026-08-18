@@ -31,10 +31,27 @@ combine com a turma **um** caminho e mantenha-o:
 | **Git Bash** | ⭐ Menor atrito: os comandos do material funcionam colados |
 | WSL2 | Turma mais madura; obrigatório se quiser paridade com produção |
 
-**Cinco coisas quebram em silêncio** e valem 10 minutos de aula na semana 1: `curl` é
-alias no PowerShell (use `curl.exe`); variáveis inline não existem (`$env:VAR="x";`); `&&`
-não existe no PowerShell 5.1; Gunicorn não roda no Windows (Waitress, no M16); e CRLF
-quebra o deploy (`.gitattributes`, no M00). Nenhuma delas gera erro que aponte a causa.
+**Mande a turma do Windows para o guia próprio**,
+[`ambiente-setup-windows.md`](ambiente-setup-windows.md) — completo, do zero, com cada linha
+explicada. Não peça para "adaptar" o guia Linux: é a origem da maior parte do atrito da
+primeira semana.
+
+**Seis coisas quebram em silêncio** e valem 10 minutos de aula na semana 1: `curl` é alias
+no PowerShell (use `curl.exe`); variáveis inline não existem (`$env:VAR="x";`); `&&` não
+existe no PowerShell 5.1; Gunicorn não roda no Windows (Waitress, no M16); `>` grava
+arquivos em UTF-16, quebrando o `requirements.txt` na máquina do colega; e um espaço depois
+da crase de continuação corta o comando pela metade. Nenhuma delas gera erro que aponte a
+causa.
+
+**Duas verificações valem mais que qualquer aviso**, porque previnem dias de problema:
+
+1. **A pasta do projeto está fora do OneDrive?** O `Documents` é sincronizado por padrão em
+   máquina nova e em conta institucional. Com `.venv` e `node_modules` dentro dele, o Git
+   acusa mudanças fantasma, arquivos ficam bloqueados e o `pnpm install` trava. Peça
+   `C:\dev` — sem espaço e sem acento no caminho.
+2. **`Get-Content requirements.txt` mostra texto legível?** Se aparecerem caracteres
+   estranhos ou espaços entre cada letra, o arquivo saiu em UTF-16 e vai falhar na máquina
+   de quem clonar.
 
 ### Diagnóstico de JavaScript — semana 1
 

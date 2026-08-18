@@ -38,7 +38,8 @@ print("  Verificação do ambiente — Desenvolvimento de Projeto Web")
 print("=" * 62)
 info(f"Sistema: {platform.system()} {platform.release()}")
 if WINDOWS:
-    info("Guia de equivalências: recursos/comandos-windows.md")
+    info("Guia de setup do Windows: docs/ambiente-setup-windows.md")
+    info("Tabela de equivalências:  recursos/comandos-windows.md")
 
 # --- Python ---------------------------------------------------------------
 check(
@@ -117,7 +118,8 @@ if node:
 pnpm = shutil.which("pnpm")
 check("pnpm instalado", pnpm is not None, "corepack enable; corepack prepare pnpm@latest --activate")
 if pnpm:
-    versao_pnpm = subprocess.run(["pnpm", "--version"], capture_output=True, text=True, shell=WINDOWS)
+    # `pnpm` é um .cmd no Windows: usar o caminho resolvido evita depender de shell=True
+    versao_pnpm = subprocess.run([pnpm, "--version"], capture_output=True, text=True)
     info(f"pnpm {versao_pnpm.stdout.strip()}")
 
 # --- Específico do Windows ------------------------------------------------
@@ -132,9 +134,24 @@ if WINDOWS:
         shutil.which("curl.exe") is not None or shutil.which("curl") is not None,
         "Use sempre 'curl.exe' no PowerShell — 'curl' é alias de Invoke-WebRequest",
     )
-    info("Lembrete: escreva 'curl.exe' nos roteiros, nunca 'curl'")
 
-    # 2. .gitattributes: evita CRLF quebrando o deploy
+    # 2. Pasta do projeto fora do OneDrive, sem espaço e sem acento no caminho
+    #    (causa nº 1 de lentidão, arquivo bloqueado e mudança fantasma no Git)
+    cwd = os.getcwd()
+    check(
+        "Projeto fora do OneDrive",
+        "onedrive" not in cwd.lower(),
+        "Mova o projeto para C:\\dev — o OneDrive sincroniza .venv e node_modules, "
+        "travando o pnpm install e produzindo mudanças fantasma no Git",
+    )
+    check(
+        "Caminho sem espaço nem acento",
+        " " not in cwd and cwd.isascii(),
+        f"Caminho atual: {cwd} — mova para C:\\dev. Espaços e acentos quebram "
+        "ferramentas que não põem aspas nos caminhos",
+    )
+
+    # 3. .gitattributes e autocrlf: evitam CRLF quebrando o deploy no M16
     raiz = None
     for pasta in (".", "..", "../.."):
         if os.path.isdir(os.path.join(pasta, ".git")):
@@ -145,11 +162,11 @@ if WINDOWS:
             ".gitattributes presente",
             os.path.isfile(os.path.join(raiz, ".gitattributes")),
             "Crie o .gitattributes com '*.sh text eol=lf' — sem ele o deploy falha "
-            "com 'bad interpreter' (ver recursos/comandos-windows.md, seção 4)",
+            "com 'bad interpreter' (ver docs/ambiente-setup-windows.md, passo 11.2)",
         )
         autocrlf = subprocess.run(
             ["git", "config", "--get", "core.autocrlf"],
-            capture_output=True, text=True, shell=True,
+            capture_output=True, text=True,
         ).stdout.strip()
         check(
             "git core.autocrlf = input",
@@ -159,11 +176,25 @@ if WINDOWS:
     else:
         info("Fora de um repositório Git — verificação de finais de linha pulada")
 
-    # 3. Gunicorn não roda no Windows (só informativo; relevante no M16)
-    info("Gunicorn não roda no Windows. No M16, use: pip install waitress")
+    # 4. requirements.txt em UTF-16: o `>` do PowerShell 5.1 grava assim, e o
+    #    `pip install -r` falha com "Invalid requirement: 'ÿþd'" na máquina do colega.
+    for pasta in (".", "backend"):
+        req = os.path.join(pasta, "requirements.txt")
+        if os.path.isfile(req):
+            with open(req, "rb") as f:
+                inicio = f.read(4)
+            check(
+                f"{req} em texto puro (não UTF-16)",
+                not inicio.startswith((b"\xff\xfe", b"\xfe\xff")),
+                "Gerado com '>' no PowerShell 5.1, que grava UTF-16. Refaça com: "
+                "pip freeze | Out-File -FilePath requirements.txt -Encoding ascii",
+            )
+            break
 
-    # 4. Variáveis de ambiente inline não existem
+    # 5. Avisos que não são verificáveis por script, mas custam caro quando ignorados
+    info("Gunicorn não roda no Windows. No M16, use: pip install waitress")
     info('Variáveis inline: use $env:DEBUG="False"; python ... (e limpe depois)')
+    info("Ao gerar arquivo de texto, use Out-File -Encoding ascii — nunca '>'")
 
 # --- Docker (opcional até o M04) -----------------------------------------
 if shutil.which("docker"):
@@ -181,7 +212,8 @@ print("-" * 62)
 if falhas == 0:
     print("Ambiente pronto. Bom curso!")
     if WINDOWS:
-        print("Antes da primeira aula, leia: recursos/comandos-windows.md (seção 2)")
+        print("Antes da primeira aula, leia as seis armadilhas do Windows:")
+        print("  recursos/comandos-windows.md (seção 2)")
 else:
     print(f"{falhas} item(ns) precisam de correção antes da aula.")
 print("-" * 62)

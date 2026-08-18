@@ -94,55 +94,69 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 
 ### Passo 1 — Instalar e verificar (30 min)
 
-Siga [`../../docs/ambiente-setup.md`](../../docs/ambiente-setup.md), seções 3 a 5, e rode
-o script `verifica_ambiente.py` da seção 8. **Só avance com todos os itens em OK.**
+**Escolha o seu guia — são independentes, siga só um:**
 
-> 🪟 **No Windows, leia antes a seção 1.1** — você precisa escolher entre PowerShell, Git
-> Bash e WSL2, e conhecer as quatro armadilhas que não são tradução de comando.
+| Seu sistema | Guia | Observação |
+|---|---|---|
+| 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) | Completo, do zero, com cada linha explicada. Passos 0 a 7 e 9 |
+| 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) | Seções 3 a 5, depois a verificação da seção 8 |
+| 🪟→🐧 **WSL2** | o guia **Linux**, dentro do Ubuntu | Instale o WSL2 pelo passo 8.1 do guia Windows e siga o guia Linux de lá em diante |
+
+Ao final, rode o `verifica_ambiente.py`. **Só avance com todos os itens em OK.**
+
+> 🪟 **Quem está no Windows não deve seguir o guia Linux "adaptando".** Metade dos problemas
+> da primeira semana vem daí. O guia próprio existe justamente para você não precisar
+> traduzir nada.
 
 ### Passo 2 — Criar o repositório do BiblioCom (30 min)
 
-```bash
-# Linux/macOS/WSL/Git Bash
-mkdir bibliocom && cd bibliocom
-git init
-python3 -m venv .venv
-source .venv/bin/activate
+Se você seguiu o guia de setup até o fim, a pasta e o ambiente virtual já existem. Aqui
+transformamos isso num **repositório Git publicado**.
 
-pip install --upgrade pip
-pip install "django>=5.0,<6.0" python-dotenv
-pip freeze > requirements.txt
+#### 🐧 Linux / 🍎 macOS / WSL2 / Git Bash
+
+```bash
+cd ~/dev/bibliocom          # ou onde você criou a pasta
+git init
 ```
+
+#### 🪟 Windows (PowerShell)
 
 ```powershell
-# Windows PowerShell
-mkdir bibliocom; cd bibliocom
+Set-Location C:\dev\bibliocom
 git init
-git config core.autocrlf input        # evita CRLF quebrar o deploy no M16
-python -m venv .venv
-.venv\Scripts\Activate.ps1            # se bloquear: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-
-python -m pip install --upgrade pip
-pip install "django>=5.0,<6.0" python-dotenv
-pip freeze > requirements.txt
+git config core.autocrlf input
 ```
 
-Crie o `.gitignore` (seção 10 do setup), o **`.gitattributes`** e o `README.md`.
+| Linha | O que faz |
+|---|---|
+| `Set-Location C:\dev\bibliocom` | Entra na pasta do projeto (`cd` é apelido deste comando) |
+| `git init` | Cria o repositório: passa a existir a pasta oculta `.git` com todo o histórico |
+| `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Sem isto, o deploy do M16 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
 
-> 🪟 **O `.gitattributes` não é opcional se alguém da equipe usa Windows.** Sem ele, um
-> `build.sh` salvo com CRLF quebra o deploy no M16 com a mensagem `bad interpreter` — e
-> ninguém relaciona a causa ao efeito. Conteúdo em
-> [`../../docs/ambiente-setup.md`](../../docs/ambiente-setup.md#gitattributes--obrigatório-se-alguém-da-equipe-usa-windows-).
+#### Os três arquivos da raiz (todos os sistemas)
 
-```markdown
+Crie no editor — **não** com `echo ... >`, que no PowerShell 5.1 grava em UTF-16:
+
+| Arquivo | Conteúdo | Por quê |
+|---|---|---|
+| `.gitignore` | [seção 10 do setup](../../docs/ambiente-setup.md#10-gitignore-do-repositório) | Mantém `.venv/`, `.env` e `node_modules/` fora do Git |
+| `.gitattributes` | [seção 10 do setup](../../docs/ambiente-setup.md#gitattributes--obrigatório-se-alguém-da-equipe-usa-windows-) | **Não é opcional.** Protege a equipe inteira do problema de finais de linha, inclusive quem nunca configurou nada |
+| `README.md` | modelo abaixo | Como subir o projeto em ≤ 5 comandos |
+
+Modelo do `README.md` — repare que ele traz **as duas plataformas**, porque quem clona o
+repositório pode estar em qualquer uma:
+
+````markdown
 # BiblioCom
 
 Sistema de gestão para bibliotecas comunitárias — estudo de caso da disciplina DPW.
 
 ## Como rodar
 
+### Linux / macOS
+
 ```bash
-# Linux / macOS / WSL / Git Bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
@@ -150,10 +164,11 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+### Windows (PowerShell)
+
 ```powershell
-# Windows PowerShell
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 Copy-Item .env.example .env
 python manage.py migrate
@@ -161,14 +176,23 @@ python manage.py runserver
 ```
 
 Acesse <http://localhost:8000>.
-```
+````
 
-Primeiro commit:
+Primeiro commit (idêntico nos três sistemas):
 
 ```bash
 git add .
 git commit -m "chore: inicializa projeto com venv e dependencias"
 ```
+
+| Linha | O que faz |
+|---|---|
+| `git add .` | Move para a *staging area* tudo que mudou e não está no `.gitignore` |
+| `git commit -m "..."` | Grava o snapshot com a mensagem |
+
+⚠️ Confira com `git status` **antes** do commit: se `.venv/`, `.env` ou `db.sqlite3`
+aparecerem na lista, seu `.gitignore` está errado ou incompleto. Corrija agora — depois de
+commitado, o arquivo continua no histórico mesmo que você o remova.
 
 ### Passo 3 — Publicar no GitHub (20 min)
 
@@ -222,14 +246,17 @@ aprovação. Isso passa a valer para o projeto da equipe.
 | `.env` aparece em `git status` | Falta a linha no `.gitignore` |
 | Push rejeitado | Alguém enviou antes; `git pull --rebase origin main` |
 | Commit "wip" a cada 3 minutos | Commits devem ser unidades coerentes de mudança |
-| 🪟 `Activate.ps1 cannot be loaded` | Política do PowerShell: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| 🪟 Git marca o arquivo inteiro como alterado | Finais de linha; falta `.gitattributes` + `core.autocrlf input` |
+
+🪟 **Erros de Windows** (política de execução, `python` abrindo a Microsoft Store, `pip install -r`
+falhando com `Invalid requirement: 'ÿþd'`, OneDrive travando o Git) estão catalogados em
+[`docs/ambiente-setup-windows.md`, passo 12](../../docs/ambiente-setup-windows.md#passo-12--erros-e-diagnóstico).
 
 ## ✅ Checklist de saída
 
 - [ ] `python verifica_ambiente.py` termina com "Ambiente pronto"
 - [ ] Repositório `bibliocom` no GitHub, com `.gitignore`, `.gitattributes` e `README.md`
-- [ ] 🪟 Windows: caminho escolhido (PowerShell / Git Bash / WSL2) e `core.autocrlf input`
+- [ ] 🪟 Windows: terminal escolhido, projeto em `C:\dev` (fora do OneDrive), `core.autocrlf input`
+      e `requirements.txt` legível com `Get-Content`
 - [ ] `.venv/` **não** versionado
 - [ ] Ao menos 2 commits com mensagem no padrão Conventional Commits
 - [ ] Ao menos 1 Pull Request revisado e mesclado por outra pessoa
@@ -245,4 +272,5 @@ Ver [`exercicios.md`](exercicios.md).
 - [Learn Git Branching (visual e interativo)](https://learngitbranching.js.org/?locale=pt_BR)
 - [Conventional Commits](https://www.conventionalcommits.org/pt-br/)
 - [Python venv — documentação oficial](https://docs.python.org/pt-br/3/library/venv.html)
-- 🪟 [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md) — equivalências e armadilhas do Windows
+- 🪟 [`../../docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) — setup completo do Windows, passo a passo
+- 🪟 [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md) — tabela de equivalências, para consulta durante o curso

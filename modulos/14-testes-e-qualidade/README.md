@@ -148,10 +148,14 @@ pnpm add -D vitest @vitest/ui jsdom @testing-library/react \
 ```
 
 ```powershell
-# Windows PowerShell (crase no lugar da barra invertida)
-pnpm add -D vitest @vitest/ui jsdom @testing-library/react `
-            @testing-library/user-event @testing-library/jest-dom msw
+# Windows PowerShell — linha única de propósito (ver nota abaixo)
+pnpm add -D vitest @vitest/ui jsdom @testing-library/react @testing-library/user-event @testing-library/jest-dom msw
 ```
+
+> 🪟 A quebra de linha no PowerShell é a **crase** (`` ` ``), não a barra invertida — e ela
+> precisa ser o **último caractere da linha**. Um espaço depois dela encerra o comando em
+> silêncio: metade dos pacotes é instalada e não há mensagem de erro. Por isso os comandos
+> de instalação deste material vêm em linha única, por mais longos que fiquem.
 
 ```ts
 // frontend/vite.config.ts

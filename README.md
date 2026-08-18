@@ -144,16 +144,20 @@ Se você encontrar um bloco sem alternativa, é falha do material — abra uma i
 
 ## Desenvolvimento no Windows 🪟
 
-Os roteiros usam comandos no formato Linux/macOS. Há três caminhos no Windows — PowerShell
-nativo, Git Bash ou WSL2 — todos válidos para a disciplina inteira.
+O Windows tem **guia de setup próprio e independente** — não é tradução do guia Linux:
 
-**Cinco coisas quebram em silêncio e não são resolvidas trocando o comando:** `curl` é
-alias de `Invoke-WebRequest`; variáveis de ambiente inline não existem; o operador `&&` não
-existe no PowerShell 5.1; Gunicorn não roda no Windows; e finais de linha CRLF quebram o
-deploy.
+📖 **[`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md)** — do zero até os
+dois servidores rodando, com **cada linha explicada** e a conferência de cada etapa.
 
-📖 [`recursos/comandos-windows.md`](recursos/comandos-windows.md) — **leia a seção 2 antes
-da primeira aula.**
+Quem usa Windows segue só esse arquivo. Quem usa Linux/macOS segue
+[`docs/ambiente-setup.md`](docs/ambiente-setup.md). Não é preciso alternar entre os dois.
+
+Durante o curso, quando um roteiro trouxer comando em formato Linux,
+[`recursos/comandos-windows.md`](recursos/comandos-windows.md) traz a tabela de
+equivalências e as **seis armadilhas** que não se resolvem trocando o comando: `curl` é
+alias de `Invoke-WebRequest`; variáveis de ambiente inline não existem; `&&` não existe no
+PowerShell 5.1; Gunicorn não roda no Windows; `>` grava arquivos em UTF-16; e um espaço
+depois da crase de continuação corta o comando em silêncio.
 
 ## Pré-requisito de JavaScript
 

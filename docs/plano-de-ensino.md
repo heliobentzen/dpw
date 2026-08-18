@@ -54,7 +54,7 @@
 
 Conteúdos **complementares** (não exigidos pela ementa, incluídos por demanda de mercado):
 M00 (ambiente), M03 (bootstrap), M14 (testes), M15 (Admin), M17 (observabilidade). Podem
-ser comprimidos — ver [`guia-do-docente.md`](guia-do-docente.md#compressão-do-conteúdo).
+ser comprimidos — ver [`guia-do-docente.md`](guia-do-docente.md#5-compressão-do-conteúdo).
 
 ## 4. Objetivo geral
 
