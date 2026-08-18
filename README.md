@@ -4,15 +4,18 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 (**40h teóricas + 60h práticas**), com projeto integrador em equipe e **atividades
 extensionistas** curricularizadas.
 
-> **Stack:** arquitetura desacoplada.
-> **Backend** — Python 3.12 · Django 5 · Django REST Framework · PostgreSQL 16
+> **Stack:** TypeScript ponta a ponta, em arquitetura desacoplada.
+> **Backend** — Node 20 · TypeScript · NestJS 11 · TypeORM · PostgreSQL 16
 > **Frontend** — React 19 · TypeScript · Vite · Tailwind CSS 4 · React Router · TanStack Query
-> **Comum** — Git/GitHub · Docker · CI (GitHub Actions) · deploy em PaaS
+> **Comum** — monorepo pnpm · tipos compartilhados · Git/GitHub · Docker · CI · deploy em PaaS
+>
+> **Uma linguagem em toda a stack.** A transição backend→frontend na semana 8 deixa de ser
+> troca de idioma e passa a ser troca de camada — o maior amortecedor pedagógico do curso.
 >
 > A ementa fala em "framework escolhido". Ver
 > [`docs/decisoes-tecnicas.md`](docs/decisoes-tecnicas.md) para a justificativa completa,
-> a **ressalva sobre o item "Templates"** e o **modo híbrido** (Django + templates +
-> Tailwind + ilhas de React), caso sua instituição exija leitura estrita da ementa.
+> incluindo **por que TypeORM e não Prisma** (a ementa pede *classes* que geram o banco) e
+> a **ressalva sobre o item "Templates"**.
 
 ---
 
@@ -43,19 +46,19 @@ extensionistas** curricularizadas.
 | 01 | [Fundamentos da web e HTTP](modulos/01-fundamentos-web-http/) | 5 | 3 | 2 |
 | 02 | [Arquitetura desacoplada e contrato de API](modulos/02-arquitetura-desacoplada/) | 2 | 2 | 0 |
 
-### Backend — 23h
+### Backend — 24h
 | # | Módulo | CH | T | P |
 |---|---|---:|---:|---:|
-| 03 | [Django + DRF: primeiros passos](modulos/03-django-drf-primeiros-passos/) | 3 | 1 | 2 |
-| 04 | [Model: classes que geram o banco](modulos/04-models-orm/) | 6 | 3 | 3 |
+| 03 | [NestJS: módulos, controllers e providers](modulos/03-nestjs-primeiros-passos/) | 4 | 2 | 2 |
+| 04 | [Entidades: classes que geram o banco](modulos/04-entidades-typeorm/) | 6 | 3 | 3 |
 | 05 | [Migrações](modulos/05-migracoes/) | 3 | 1 | 2 |
-| 06 | [ORM: consultas e CRUD](modulos/06-orm-consultas-crud/) | 5 | 2 | 3 |
-| 07 | [API: URLs, views e serializers](modulos/07-api-urls-views-serializers/) | 6 | 3 | 3 |
+| 06 | [Repository e QueryBuilder: consultas e CRUD](modulos/06-orm-consultas-crud/) | 5 | 2 | 3 |
+| 07 | [API: rotas, controllers e DTOs](modulos/07-api-controllers-dtos/) | 6 | 3 | 3 |
 
-### Frontend — 15h
+### Frontend — 14h
 | # | Módulo | CH | T | P |
 |---|---|---:|---:|---:|
-| 08 | [React: fundamentos](modulos/08-react-fundamentos/) | 5 | 2 | 3 |
+| 08 | [React: fundamentos](modulos/08-react-fundamentos/) | 4 | 1 | 3 |
 | 09 | [Tailwind e construção de interfaces](modulos/09-tailwind-e-interface/) | 4 | 1 | 3 |
 | 10 | [Rotas e navegação](modulos/10-rotas-e-navegacao/) | 2 | 1 | 1 |
 | 11 | [Dados e formulários no cliente](modulos/11-dados-e-formularios/) | 4 | 2 | 2 |
@@ -66,7 +69,7 @@ extensionistas** curricularizadas.
 | 12 | [Autenticação e gestão de usuários](modulos/12-autenticacao-usuarios/) | 5 | 2 | 3 |
 | 13 | [Segurança](modulos/13-seguranca/) | 5 | 3 | 2 |
 | 14 | [Testes e qualidade](modulos/14-testes-e-qualidade/) | 3 | 1 | 2 |
-| 15 | [Django Admin (back-office)](modulos/15-django-admin/) | 2 | 1 | 1 |
+| 15 | [Tipos compartilhados entre as camadas](modulos/15-tipos-compartilhados/) | 2 | 1 | 1 |
 | 16 | [Deploy dos dois artefatos](modulos/16-deploy/) | 4 | 2 | 2 |
 | 17 | [Observabilidade e manutenção](modulos/17-observabilidade-e-manutencao/) | 2 | 1 | 1 |
 | — | Avaliação teórica integrada (semana 10) | 1 | 1 | 0 |
@@ -95,14 +98,15 @@ Todos os módulos evoluem **um mesmo sistema**, construído incrementalmente:
 > acervo, associados, empréstimos, devoluções, reservas e relatórios.
 
 ```
-bibliocom/
-├── backend/          Django + DRF + PostgreSQL     (M03–M07, M15)
-└── frontend/         React + TS + Vite + Tailwind  (M08–M11)
+bibliocom/                    monorepo (workspaces do pnpm)
+├── backend/       NestJS + TypeORM + PostgreSQL   (M03–M07)
+├── frontend/      React + Vite + Tailwind         (M08–M11)
+└── pacotes/tipos/ @bibliocom/tipos — DTOs e enums (M15)
 ```
 
-O domínio é o mesmo nas duas camadas: quando a turma troca de linguagem na semana 8, o
-único elemento novo é a tecnologia — as entidades e as regras já são conhecidas. Essa
-continuidade é intencional e é o principal amortecedor da transição backend→frontend.
+O domínio **e a linguagem** são os mesmos nas duas camadas. Quando a turma troca de camada
+na semana 8, não troca de idioma: o TypeScript do M04 é o mesmo do M11. Essa continuidade é
+intencional e é o principal amortecedor da transição backend→frontend.
 
 O projeto da equipe é **outro sistema**, de tema livre, definido na Etapa 1. O BiblioCom é
 referência de código, não o entregável.
@@ -137,29 +141,30 @@ Todo bloco **executável** que difere entre plataformas aparece em pares:
 
 Nunca um comentário `# Windows: ...` **dentro** de um bloco Unix — isso impede copiar e
 colar, que é justamente o que o roteiro pede. Blocos idênticos nas três plataformas (`git`,
-`pip install`, `pnpm`) aparecem uma vez só; blocos que são **conteúdo de arquivo** (`.env`,
+`pnpm`, `npx`) aparecem uma vez só; blocos que são **conteúdo de arquivo** (`.env`,
 `.gitattributes`) usam ` ```ini `, não ` ```bash `.
 
 Se você encontrar um bloco sem alternativa, é falha do material — abra uma issue.
 
 ## Montagem do ambiente
 
-O ambiente é montado **pela turma, comando a comando** — criar um ambiente virtual, instalar
-dependência e versionar código são conteúdo da disciplina, não preparação para ela. Não há
+O ambiente é montado **pela turma, comando a comando** — instalar dependência, configurar o
+projeto e versionar código são conteúdo da disciplina, não preparação para ela. Não há
 script que faça isso no lugar do aluno; há um que **confere** o resultado
-([`verifica_ambiente.py`](recursos/codigo/verifica_ambiente.py)).
+([`verifica-ambiente.mjs`](recursos/codigo/verifica-ambiente.mjs)).
 
 Em compensação, **nada é instalado antes da hora**. A montagem acontece em três momentos,
 cada peça chegando junto com o problema que ela resolve:
 
 | Momento | O que entra | Conferir com |
 |---|---|---|
-| **Semana 1** (M00) | Python, Git, VS Code, ambiente virtual, **só o Django**, primeiro commit | `verifica_ambiente.py` |
-| **Antes do M03** | Node 20 + pnpm; DRF, CORS, dotenv, spectacular | `--etapa m03` |
-| **Antes do M05** | Docker + PostgreSQL; dj-database-url, psycopg | `--etapa m05` |
+| **Semana 1** (M00) | Node 20, pnpm, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
+| **Antes do M03** | NestJS CLI e as dependências do backend | `--etapa m03` |
+| **Antes do M05** | Docker + PostgreSQL | `--etapa m05` |
 
-Na semana 1 a turma instala **um único pacote Python**. O `requirements.txt` cresce ao longo
-do curso, junto com o que o sistema faz — que é como gestão de dependência se aprende.
+**A stack só tem um runtime.** Não há Python, `venv` nem `pip`: a semana 1 instala **Node e
+pnpm**, e é isso. Foi o maior ganho colateral da mudança para TypeScript ponta a ponta — o
+setup que antes tinha dois ecossistemas paralelos passou a ter um.
 
 Guias: [`docs/ambiente-setup.md`](docs/ambiente-setup.md) (Linux/macOS) ou
 [`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md) (Windows).
