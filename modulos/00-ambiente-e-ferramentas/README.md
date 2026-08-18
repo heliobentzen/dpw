@@ -92,117 +92,202 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 
 ## 🛠️ Roteiro prático (2h)
 
-### Passo 1 — Montar o ambiente (30 min)
+### Passo 1 — Instalar as ferramentas (25 min)
 
-Um script faz a montagem inteira: instala o que falta, cria a pasta, o repositório, o
-ambiente virtual, as dependências e os arquivos de configuração.
+Só três coisas hoje: **Python, Git e VS Code**. Node, Docker e PostgreSQL entram nos módulos
+em que passam a ser usados — instalar tudo agora seria montar seis peças de uma vez, sem
+saber para que servem.
+
+Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
+
+| Seu sistema | Guia | O que fazer hoje |
+|---|---|---|
+| 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) | Passos 0 a 4 e 7 |
+| 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) | Seções 2, 3, 5 e 6 |
+| 🪟→🐧 **WSL2** | instale o WSL2 pelo passo 8.1 do guia Windows, depois siga o guia **Linux** dentro do Ubuntu | — |
+
+> 🪟 **Quem está no Windows não deve seguir o guia Linux "adaptando".** Metade dos problemas
+> da primeira semana vem daí. O guia próprio existe para você não precisar traduzir nada.
+
+**Deu certo se:** os três comandos abaixo respondem uma versão.
+
+```bash
+python3 --version      # 🪟 Windows: python --version
+git --version
+code --version
+```
+
+### Passo 2 — Criar o ambiente virtual (20 min)
+
+Aqui começa o conteúdo do módulo. **Digite os comandos, não copie sem ler** — cada linha
+corresponde a um conceito que a avaliação teórica cobra.
+
+#### 🐧 Linux / 🍎 macOS / WSL2 / Git Bash
+
+```bash
+mkdir -p ~/dev/bibliocom/backend
+cd ~/dev/bibliocom/backend
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
 #### 🪟 Windows (PowerShell)
 
 ```powershell
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
-git clone https://github.com/heliobentzen/dpw.git $HOME\dpw
-& $HOME\dpw\recursos\codigo\setup.ps1
+New-Item -ItemType Directory -Force -Path C:\dev\bibliocom\backend
+Set-Location C:\dev\bibliocom\backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-#### 🐧 Linux / 🍎 macOS / WSL2
-
-```bash
-git clone https://github.com/heliobentzen/dpw.git ~/dpw
-bash ~/dpw/recursos/codigo/setup.sh
-```
-
-**Deu certo se:** apareceu `Ambiente básico pronto.` no final.
-
-O script é **idempotente**: se parar no meio, ou se você quiser conferir depois, rode de
-novo — ele pula o que já existe. Quando algo falta, ele diz exatamente o quê e para, em vez
-de seguir e quebrar três passos adiante.
-
-> 🔍 **Abra o script e leia antes de rodar** — ele está comentado justamente para isso.
-> Executar script vindo da internet sem ler é um hábito ruim, e este é um bom lugar para não
-> adquiri-lo. É também a forma mais rápida de entender o que compõe um ambiente Python.
-
-#### Você instala em três momentos, não de uma vez
-
-| Quando | O que entra | 🪟 Windows | 🐧 Linux/macOS |
-|---|---|---|---|
-| **Hoje** | Git, Python, VS Code, projeto, venv | `.\setup.ps1` | `./setup.sh` |
-| Antes do **M03** | Node 20 + pnpm | `.\setup.ps1 -Etapa frontend` | `./setup.sh frontend` |
-| Antes do **M05** | Docker + PostgreSQL | `.\setup.ps1 -Etapa banco` | `./setup.sh banco` |
-
-Menos software na máquina hoje significa menos coisa dando errado ao mesmo tempo. O docente
-avisa na aula anterior a cada momento; o próprio módulo também lembra na abertura.
-
-#### Se o script falhar — ou se você quiser fazer à mão
-
-Os guias trazem o passo a passo completo, com **cada linha explicada** e critério de
-conferência. São independentes: siga só o do seu sistema.
-
-| Seu sistema | Guia |
+| Linha | O que faz |
 |---|---|
-| 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) |
-| 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) |
-| 🪟→🐧 **WSL2** | instale o WSL2 pelo passo 8.1 do guia Windows, depois siga o guia **Linux** dentro do Ubuntu |
+| criar a pasta | O projeto fica em `dev/bibliocom`. 🪟 **Fora do OneDrive e sem espaço ou acento no caminho** — o OneDrive sincroniza o `.venv` e trava o Git |
+| entrar na pasta | Todo o resto acontece daqui |
+| `python -m venv .venv` | Roda o **módulo** `venv` (`-m`) e cria o ambiente na pasta `.venv`. É este comando que materializa o conceito da teoria: um Python e uma biblioteca **só deste projeto** |
+| ativar | Põe o `.venv` na frente do PATH desta janela. 🪟 O `.\` é obrigatório no PowerShell, e o executável fica em `Scripts\`, não em `bin/` |
 
-> 🪟 **Quem está no Windows não deve seguir o guia Linux "adaptando".** Metade dos problemas
-> da primeira semana vem daí.
+**Deu certo se:** o prompt passou a mostrar `(.venv)` na frente.
 
-#### Conferir
+⚠️ **Se `(.venv)` não aparecer, PARE.** Tudo que instalar daqui em diante vai para o Python
+global, e o erro só se manifesta lá na frente, quando o projeto não roda na máquina de outra
+pessoa. 🪟 Se falhou com `Activate.ps1 cannot be loaded`, rode
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+
+> **Terminal novo, ativação nova.** O ambiente vale para a janela, não para a máquina. É a
+> segunda causa mais comum de `ModuleNotFoundError: No module named 'django'`.
+
+#### Instalar a primeira dependência
 
 ```bash
-python recursos/codigo/verifica_ambiente.py
+python -m pip install --upgrade pip
+pip install "django>=5.0,<6.0"
+pip freeze > requirements.txt
 ```
 
-**Só avance com todos os itens em OK.** O script de verificação diz, para cada falha, o
-comando exato que a corrige.
+🪟 **No PowerShell, a última linha é outra:**
 
-### Passo 2 — Entender e publicar o repositório (30 min)
+```powershell
+pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
+```
 
-O script já criou a estrutura. Agora você vai **entender o que ele fez** e transformar isso
-num repositório publicado.
+| Linha | O que faz |
+|---|---|
+| `python -m pip` | Chama o pip **através do Python ativo** — garante que é o do `.venv` |
+| `pip install "django>=5.0,<6.0"` | Instala o Django 5.x. As aspas fixam a faixa de versão e, no PowerShell, impedem que o `>` seja lido como redirecionamento |
+| `pip freeze > requirements.txt` | Congela as versões exatas. É este arquivo que faz o projeto rodar igual na máquina de outra pessoa |
+| 🪟 `Out-File -Encoding ascii` | No PowerShell 5.1 o `>` grava **UTF-16**, e o `pip install -r` falha depois com `Invalid requirement: 'ÿþd'` — na máquina do colega, dias depois |
+
+**Um pacote só, de propósito.** DRF, `python-dotenv` e as outras dependências entram no
+**M03**, cada uma quando o projeto passa a usá-la. Você vai ver o `requirements.txt` crescer
+junto com o que o sistema faz — que é como gestão de dependência se aprende.
+
+**Deu certo se:** `python -c "import django; print(django.get_version())"` responde `5.x`, e
+`requirements.txt` tem poucas linhas. Se tiver 200, o `pip freeze` rodou **fora** do
+ambiente virtual e capturou o Python do sistema inteiro.
+
+
+### Passo 3 — Versionar o projeto (25 min)
+
+O ambiente existe, mas nada dele está versionado. Agora criamos o repositório — e, antes do
+primeiro commit, decidimos **o que não entra nele**.
+
+#### 3a. Iniciar o repositório
+
+```bash
+cd ~/dev/bibliocom            # 🪟 Windows: Set-Location C:\dev\bibliocom
+git init
+git config core.autocrlf input
+```
+
+| Linha | O que faz |
+|---|---|
+| `cd ~/dev/bibliocom` | Sobe um nível: a raiz do repositório é `bibliocom`, não `backend`. O repositório abraça as duas camadas |
+| `git init` | Cria o repositório — passa a existir a pasta oculta `.git` com todo o histórico |
+| `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Relevante sobretudo no Windows: sem isto, o deploy do M16 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
+
+A estrutura agora:
 
 ```
-bibliocom/                 ← raiz do repositório (o git init rodou aqui)
-├── .git/                  histórico
-├── .gitignore             o que NÃO entra no Git
-├── .gitattributes         normalização de finais de linha
+bibliocom/                 ← raiz do repositório
 └── backend/
-    ├── .venv/             ambiente virtual — ignorado pelo Git
-    └── requirements.txt   dependências com versão fixada
+    ├── .venv/             ambiente virtual — NÃO pode entrar no Git
+    └── requirements.txt   dependências — PRECISA entrar no Git
 ```
 
-Repare: o `.venv` fica **dentro de `backend/`**, não na raiz.
+Essas duas últimas linhas resumem o próximo arquivo.
 
-#### 2a. O que o script fez, e por quê
+#### 3b. `.gitignore` — o que não entra
 
-| O que ele fez | Por que importa |
+Crie `.gitignore` **na raiz** (`bibliocom/`):
+
+```gitignore
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Django
+*.log
+db.sqlite3
+/backend/media/
+/backend/staticfiles/
+
+# Node (a partir do M03)
+node_modules/
+dist/
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Editores e sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+```
+
+| Padrão | Por que fica de fora |
 |---|---|
-| `git init` | Cria o repositório — a pasta oculta `.git` com todo o histórico |
-| `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Sem isto, o deploy do M16 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
-| Criou o `.gitignore` | Mantém `.venv/`, `.env` e `node_modules/` fora do Git |
-| Criou o `.gitattributes` | Mesma proteção de finais de linha, mas para **a equipe inteira** — inclusive quem clonar sem ter configurado nada |
-| `python -m venv .venv` | Um Python e uma biblioteca só deste projeto. Sem ele, o projeto A precisa de Django 4.2, o B de 5.1, e um sobrescreve o outro |
-| `pip freeze > requirements.txt` | Congela as versões. É o que faz o projeto rodar igual na máquina de outra pessoa |
+| `.venv/`, `node_modules/` | São **reconstruíveis** a partir do `requirements.txt` e do `package.json`. Versionar cópias de dependência incha o repositório e gera conflito a cada `pip install` |
+| `db.sqlite3` | É o **seu** banco local. O banco de outra pessoa é outro; o de produção é outro ainda |
+| `.env` | Contém segredo. **Segredo que entra no Git é segredo vazado** — mesmo removido depois, continua nos commits anteriores |
+| `!.env.example` | A `!` **desfaz** o ignore da linha acima. O `.env.example` entra sim: ele documenta *quais* variáveis existem, sem os valores |
 
-Confirme você mesmo:
+> 🪟 **Não crie este arquivo pelo Bloco de Notas.** Ele acrescenta `.txt` ao salvar e o
+> Explorer esconde a extensão: você digita `.gitignore`, ele grava `.gitignore.txt`, a tela
+> mostra "`.gitignore`" — e o Git ignora o arquivo. Use o VS Code (`code .gitignore`) e
+> confira os nomes reais com `Get-ChildItem -Force`.
 
-```bash
-cd ~/dev/bibliocom          # 🪟 Windows: Set-Location C:\dev\bibliocom
-git status
+#### 3c. `.gitattributes` — proteção da equipe
+
+Crie também `.gitattributes` na raiz:
+
+```gitattributes
+* text=auto eol=lf
+
+*.sh     text eol=lf
+*.py     text eol=lf
+*.yml    text eol=lf
+Procfile text eol=lf
+
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary
 ```
 
-**Deu certo se:** responde `On branch main` e **não** lista `.venv/`. Se listar, o
-`.gitignore` não está sendo respeitado — chame o docente antes de commitar.
+O `core.autocrlf` do passo 3a protege **você**; o `.gitattributes` protege **quem clonar**,
+inclusive sem ter configurado nada. Por isso ele é versionado e aquele não.
 
-> 🪟 Por que o script cria esses arquivos em vez de mandar você criar: o Bloco de Notas
-> acrescenta `.txt` ao salvar e o Explorer esconde a extensão. Você digita `.gitignore`, ele
-> grava `.gitignore.txt`, a tela mostra "`.gitignore`" — e o Git ignora o arquivo. Para
-> conferir nomes reais no PowerShell: `Get-ChildItem -Force`.
+Ele precisa estar no **primeiro commit**: arquivos já commitados com CRLF continuam assim.
 
-#### 2b. Escrever o README
+#### 3d. README — como rodar o projeto
 
-Este é seu, o script não escreve por você — descrever como rodar o projeto é parte do
-trabalho. Crie `README.md` na raiz:
+Crie `README.md` na raiz:
 
 ````markdown
 # BiblioCom
@@ -217,9 +302,6 @@ Sistema de gestão para bibliotecas comunitárias — estudo de caso da discipli
 cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
-python manage.py migrate
-python manage.py runserver
 ```
 
 ### Windows (PowerShell)
@@ -229,22 +311,14 @@ Set-Location backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-Copy-Item .env.example .env
-python manage.py migrate
-python manage.py runserver
 ```
-
-Acesse <http://localhost:8000>.
 ````
 
-> O `.env.example` e o `manage.py` só passam a existir no **M03**, quando o projeto Django é
-> criado. Até lá o README descreve o destino, não o presente — e é assim mesmo: escrever o
-> "como rodar" antes ajuda a perceber quando um passo a mais se tornou necessário.
-
 💼 **No mercado:** a primeira tarefa de quem entra num time é *rodar o projeto localmente*.
-Times maduros medem esse tempo — a meta é minutos, não dias. Seu README é o que decide isso.
+Times maduros medem esse tempo — a meta é minutos, não dias. O README é o que decide isso.
+Ele cresce junto com o projeto: no M03 ganha `migrate` e `runserver`, no M05 o banco.
 
-#### 2c. Primeiro commit
+#### 3e. Primeiro commit
 
 ```bash
 git status
@@ -258,14 +332,29 @@ git commit -m "chore: inicializa estrutura do projeto"
 | `git add .` | Move para a *staging area* tudo que mudou e não está no `.gitignore` |
 | `git commit -m "..."` | Grava o snapshot com a mensagem |
 
-⚠️ Se `.venv/`, `.env` ou `db.sqlite3` aparecerem no `git status`, pare e corrija o
-`.gitignore`. Depois de commitado, o arquivo continua no histórico mesmo que você o remova.
+**Deu certo se:** o `git status` listou **4 itens** — `.gitignore`, `.gitattributes`,
+`README.md` e `backend/requirements.txt`.
+
+⚠️ Se `.venv/`, `.env` ou `db.sqlite3` aparecerem, pare e corrija o `.gitignore` antes de
+commitar. Depois de commitado, o arquivo continua no histórico mesmo que você o remova.
 
 > 🪟 **`warning: CRLF will be replaced by LF` não é erro.** É o `core.autocrlf input`
 > guardando o arquivo com finais de linha do Linux. Na sua pasta ele continua com CRLF.
 
+#### 3f. Conferir o ambiente
 
-### Passo 3 — Publicar no GitHub (20 min)
+```bash
+python ~/dpw/recursos/codigo/verifica_ambiente.py
+```
+
+Este script **não instala nada** — ele confere e, para cada falha, diz o comando exato que
+corrige. Rode-o sempre que algo parar de funcionar.
+
+**Só avance com os itens da semana 1 em OK.** Node, pnpm e Docker aparecem como pendentes
+até os módulos em que entram; isso é esperado.
+
+
+### Passo 4 — Publicar no GitHub (20 min)
 
 Crie o repositório **vazio** em github.com (sem README, sem .gitignore — você já tem) e:
 
@@ -275,7 +364,7 @@ git branch -M main
 git push -u origin main
 ```
 
-### Passo 4 — Ciclo de branch e Pull Request (40 min, em duplas)
+### Passo 5 — Ciclo de branch e Pull Request (30 min, em duplas)
 
 Uma pessoa é dona do repositório e adiciona a outra como colaboradora
 (*Settings → Collaborators*).
@@ -301,7 +390,7 @@ git branch -d docs/instrucoes-de-uso
 
 Inverta os papéis e repita.
 
-### Passo 5 — Proteger a branch principal (extra, 5 min)
+### Passo 6 — Proteger a branch principal (extra, 5 min)
 
 Em *Settings → Branches → Add rule*: exija Pull Request antes do merge e ao menos 1
 aprovação. Isso passa a valer para o projeto da equipe.
@@ -324,7 +413,9 @@ falhando com `Invalid requirement: 'ÿþd'`, OneDrive travando o Git) estão cat
 
 ## ✅ Checklist de saída
 
-- [ ] `python verifica_ambiente.py` termina com "Ambiente pronto"
+- [ ] `python verifica_ambiente.py` termina com "Ambiente da etapa M00 pronto"
+- [ ] Ambiente virtual ativa e mostra `(.venv)` no prompt
+- [ ] `requirements.txt` com **poucas** linhas (só Django e suas dependências diretas)
 - [ ] Repositório `bibliocom` no GitHub, com `.gitignore`, `.gitattributes` e `README.md`
 - [ ] 🪟 Windows: terminal escolhido, projeto em `C:\dev` (fora do OneDrive), `core.autocrlf input`
       e `requirements.txt` legível com `Get-Content`

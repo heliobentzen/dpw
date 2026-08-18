@@ -171,6 +171,12 @@ python manage.py makemigrations --merge     # cria 0004_merge_... unindo os ramo
 
 ## 🛠️ Roteiro prático (2h)
 
+> 📦 **Instale o Docker antes desta aula** — ele entra no Passo 5, quando trocamos o SQLite
+> pelo PostgreSQL. Até aqui não era necessário.
+> 🐧 [`ambiente-setup.md`, seção 7](../../docs/ambiente-setup.md#7-postgresql-via-docker-a-partir-do-m05) ·
+> 🪟 [`ambiente-setup-windows.md`, passo 8](../../docs/ambiente-setup-windows.md#passo-8--docker-e-postgresql)
+> — no Windows, o Docker exige o WSL2, então **não deixe para a hora da aula**.
+
 ### Passo 1 — Ciclo básico (20 min)
 
 Adicione ao model `Obra`:

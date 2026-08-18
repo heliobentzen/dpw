@@ -1,14 +1,19 @@
 """
-Verificação do ambiente da disciplina DPW — material de apoio do M00.
+Verificação do ambiente da disciplina DPW.
 
-Confere as DUAS camadas: Python/Django/DRF (backend) e Node/pnpm (frontend).
+Este script CONFERE o ambiente; ele não instala nem configura nada. Montar o
+ambiente é conteúdo da disciplina e os comandos são digitados por você — aqui
+só entra o diagnóstico, com a dica de correção de cada falha.
 
-Rode com o ambiente virtual ativo:
+A instalação acontece em três momentos, e o script confere só o que já deveria
+existir naquele ponto do curso:
 
-    python verifica_ambiente.py
+    python verifica_ambiente.py                 semana 1  (M00)
+    python verifica_ambiente.py --etapa m03     antes do M03: + Node e pnpm
+    python verifica_ambiente.py --etapa m05     antes do M05: + Docker
 
-Saída: um relatório com OK/FALHA por item e a dica de correção quando falhar.
-Código de saída 0 se tudo passar, 1 caso contrário (útil em CI).
+Rode com o ambiente virtual ativo. Código de saída 0 se tudo passar, 1 caso
+contrário (útil em CI).
 """
 
 import os
@@ -19,6 +24,19 @@ import sys
 
 falhas = 0
 WINDOWS = platform.system() == "Windows"
+
+ETAPAS = ("m00", "m03", "m05")
+etapa = "m00"
+for i, arg in enumerate(sys.argv):
+    if arg == "--etapa" and i + 1 < len(sys.argv):
+        etapa = sys.argv[i + 1].lower()
+if etapa not in ETAPAS:
+    print(f"Etapa desconhecida: {etapa}. Use uma de {', '.join(ETAPAS)}.")
+    sys.exit(2)
+
+# A partir de que etapa cada camada passa a ser exigida.
+EXIGE_NODE = ETAPAS.index(etapa) >= ETAPAS.index("m03")
+EXIGE_DOCKER = ETAPAS.index(etapa) >= ETAPAS.index("m05")
 
 
 def check(nome: str, condicao: bool, dica: str) -> None:
@@ -37,6 +55,9 @@ print("=" * 62)
 print("  Verificação do ambiente — Desenvolvimento de Projeto Web")
 print("=" * 62)
 info(f"Sistema: {platform.system()} {platform.release()}")
+info(f"Etapa verificada: {etapa.upper()}")
+if not EXIGE_NODE:
+    info("Node, pnpm e Docker ainda nao sao exigidos — use --etapa m03 / m05 depois")
 if WINDOWS:
     info("Guia de setup do Windows: docs/ambiente-setup-windows.md")
     info("Tabela de equivalências:  recursos/comandos-windows.md")
@@ -86,41 +107,43 @@ try:
 except ImportError:
     check("Django instalado", False, "pip install 'django>=5.0,<6.0'")
 
-# --- DRF e python-dotenv --------------------------------------------------
-try:
-    import rest_framework
-
-    check("Django REST Framework", True, "")
-    info(f"DRF {rest_framework.VERSION}")
-except ImportError:
-    check("Django REST Framework", False, "pip install djangorestframework")
-
-try:
-    import dotenv  # noqa: F401
-
-    check("python-dotenv instalado", True, "")
-except ImportError:
-    check("python-dotenv instalado", False, "pip install python-dotenv")
-
-# --- Node e pnpm (frontend) ----------------------------------------------
-node = shutil.which("node")
-check("Node.js instalado", node is not None, "Instale o Node 20 LTS (https://nodejs.org)")
-
-if node:
-    versao = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout.strip()
-    info(f"Node {versao}")
+# --- DRF e python-dotenv (a partir do M03) --------------------------------
+if EXIGE_NODE:
     try:
-        maior = int(versao.lstrip("v").split(".")[0])
-        check("Node >= 20", maior >= 20, "Atualize para o Node 20 LTS (use fnm ou nvm)")
-    except ValueError:
-        check("Node >= 20", False, "Não foi possível ler a versão do Node")
+        import rest_framework
 
-pnpm = shutil.which("pnpm")
-check("pnpm instalado", pnpm is not None, "corepack enable; corepack prepare pnpm@latest --activate")
-if pnpm:
-    # `pnpm` é um .cmd no Windows: usar o caminho resolvido evita depender de shell=True
-    versao_pnpm = subprocess.run([pnpm, "--version"], capture_output=True, text=True)
-    info(f"pnpm {versao_pnpm.stdout.strip()}")
+        check("Django REST Framework", True, "")
+        info(f"DRF {rest_framework.VERSION}")
+    except ImportError:
+        check("Django REST Framework", False, "pip install djangorestframework")
+
+    try:
+        import dotenv  # noqa: F401
+
+        check("python-dotenv instalado", True, "")
+    except ImportError:
+        check("python-dotenv instalado", False, "pip install python-dotenv")
+
+# --- Node e pnpm (a partir do M03) ---------------------------------------
+if EXIGE_NODE:
+    node = shutil.which("node")
+    check("Node.js instalado", node is not None, "Instale o Node 20 LTS (https://nodejs.org)")
+
+    if node:
+        versao = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout.strip()
+        info(f"Node {versao}")
+        try:
+            maior = int(versao.lstrip("v").split(".")[0])
+            check("Node >= 20", maior >= 20, "Atualize para o Node 20 LTS (use fnm ou nvm)")
+        except ValueError:
+            check("Node >= 20", False, "Não foi possível ler a versão do Node")
+
+    pnpm = shutil.which("pnpm")
+    check("pnpm instalado", pnpm is not None, "corepack enable; corepack prepare pnpm@latest --activate")
+    if pnpm:
+        # `pnpm` é um .cmd no Windows: usar o caminho resolvido evita depender de shell=True
+        versao_pnpm = subprocess.run([pnpm, "--version"], capture_output=True, text=True)
+        info(f"pnpm {versao_pnpm.stdout.strip()}")
 
 # --- Específico do Windows ------------------------------------------------
 if WINDOWS:
@@ -196,24 +219,33 @@ if WINDOWS:
     info('Variáveis inline: use $env:DEBUG="False"; python ... (e limpe depois)')
     info("Ao gerar arquivo de texto, use Out-File -Encoding ascii — nunca '>'")
 
-# --- Docker (opcional até o M04) -----------------------------------------
-if shutil.which("docker"):
+# --- Docker (a partir do M05) --------------------------------------------
+if not EXIGE_DOCKER:
+    pass
+elif shutil.which("docker"):
     rodando = subprocess.run(["docker", "info"], capture_output=True).returncode == 0
     check(
         "Docker em execução",
         rodando,
-        "Abra o Docker Desktop (opcional até o M04)",
+        "Abra o Docker Desktop pelo menu Iniciar e espere a baleia estabilizar",
     )
 else:
-    info("Docker não instalado — opcional até o M04")
+    check(
+        "Docker instalado",
+        False,
+        "No Windows exige o WSL2 antes — ver ambiente-setup-windows.md, passo 8",
+    )
 
 # --- Resultado ------------------------------------------------------------
 print("-" * 62)
 if falhas == 0:
-    print("Ambiente pronto. Bom curso!")
+    print(f"Ambiente da etapa {etapa.upper()} pronto. Bom curso!")
+    if etapa == "m00":
+        print("Antes do M03, rode de novo com: --etapa m03")
+    elif etapa == "m03":
+        print("Antes do M05, rode de novo com: --etapa m05")
     if WINDOWS:
-        print("Antes da primeira aula, leia as seis armadilhas do Windows:")
-        print("  recursos/comandos-windows.md (seção 2)")
+        print("Leia as seis armadilhas do Windows: recursos/comandos-windows.md (secao 2)")
 else:
     print(f"{falhas} item(ns) precisam de correção antes da aula.")
 print("-" * 62)

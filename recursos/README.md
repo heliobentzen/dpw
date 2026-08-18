@@ -9,12 +9,10 @@
 
 | Arquivo | Módulo | Para quê |
 |---|---|---|
-| [`setup.ps1`](codigo/setup.ps1) | M00, M03, M05 | 🪟 Monta o ambiente no Windows. Idempotente, em 3 etapas: `base`, `frontend`, `banco` |
-| [`setup.sh`](codigo/setup.sh) | M00, M03, M05 | 🐧 Monta o ambiente no Linux/macOS/WSL2. Mesmas 3 etapas |
 | [`servidor_minimo.py`](codigo/servidor_minimo.py) | M01 | Servidor HTTP sem framework: mostra o que o Django faz por você |
 | [`vulneravel.py`](codigo/vulneravel.py) | M13 | 🔵 Laboratório com 10 vulnerabilidades de backend |
 | [`vulneravel.tsx`](codigo/vulneravel.tsx) | M13 | 🟣 Laboratório com 8 vulnerabilidades de frontend |
-| [`verifica_ambiente.py`](codigo/verifica_ambiente.py) | M00 | Valida as duas camadas antes da primeira aula |
+| [`verifica_ambiente.py`](codigo/verifica_ambiente.py) | M00, M03, M05 | **Confere** o ambiente (não instala nada). `--etapa m00\|m03\|m05` cobra só o que já deveria existir |
 | [`popular.py`](codigo/popular.py) | M06 | Comando de gestão que gera dados de volume |
 | [`settings_producao.py`](codigo/settings_producao.py) | M13, M16 | Referência de configuração segura para produção |
 

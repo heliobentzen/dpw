@@ -142,29 +142,27 @@ colar, que é justamente o que o roteiro pede. Blocos idênticos nas três plata
 
 Se você encontrar um bloco sem alternativa, é falha do material — abra uma issue.
 
-## Montagem do ambiente — um comando
+## Montagem do ambiente
 
-```bash
-# Linux / macOS / WSL2
-git clone https://github.com/heliobentzen/dpw.git ~/dpw
-bash ~/dpw/recursos/codigo/setup.sh
-```
+O ambiente é montado **pela turma, comando a comando** — criar um ambiente virtual, instalar
+dependência e versionar código são conteúdo da disciplina, não preparação para ela. Não há
+script que faça isso no lugar do aluno; há um que **confere** o resultado
+([`verifica_ambiente.py`](recursos/codigo/verifica_ambiente.py)).
 
-```powershell
-# Windows PowerShell
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
-git clone https://github.com/heliobentzen/dpw.git $HOME\dpw
-& $HOME\dpw\recursos\codigo\setup.ps1
-```
+Em compensação, **nada é instalado antes da hora**. A montagem acontece em três momentos,
+cada peça chegando junto com o problema que ela resolve:
 
-O script instala o que falta, cria o projeto, o repositório, o ambiente virtual e as
-dependências. É **idempotente** — rodar de novo só completa o que faltou.
+| Momento | O que entra | Conferir com |
+|---|---|---|
+| **Semana 1** (M00) | Python, Git, VS Code, ambiente virtual, **só o Django**, primeiro commit | `verifica_ambiente.py` |
+| **Antes do M03** | Node 20 + pnpm; DRF, CORS, dotenv, spectacular | `--etapa m03` |
+| **Antes do M05** | Docker + PostgreSQL; dj-database-url, psycopg | `--etapa m05` |
 
-A instalação acontece em **três momentos**, não de uma vez: o básico agora, `frontend`
-(Node + pnpm) antes do M03 e `banco` (Docker + PostgreSQL) antes do M05.
+Na semana 1 a turma instala **um único pacote Python**. O `requirements.txt` cresce ao longo
+do curso, junto com o que o sistema faz — que é como gestão de dependência se aprende.
 
-Quem preferir instalar à mão, ou precisar diagnosticar: [`docs/ambiente-setup.md`](docs/ambiente-setup.md)
-(Linux/macOS) ou [`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md) (Windows).
+Guias: [`docs/ambiente-setup.md`](docs/ambiente-setup.md) (Linux/macOS) ou
+[`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md) (Windows).
 
 ## Desenvolvimento no Windows 🪟
 

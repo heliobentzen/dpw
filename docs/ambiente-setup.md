@@ -8,34 +8,29 @@
 > alternar entre os dois. Vale também se você optou por **Git Bash**; se optou por **WSL2**,
 > instale-o pelo guia do Windows e siga **este** arquivo lá dentro, porque o WSL2 é Linux.
 
-## ⚡ Caminho rápido — 2 comandos
+## O que entra em cada momento
 
-Um script faz a montagem inteira: confere o que falta, cria a pasta, o repositório, o
-ambiente virtual, as dependências e os arquivos de configuração. **~10 minutos.**
+Você **não** instala tudo na primeira aula. Cada coisa entra na aula em que passa a ser
+necessária — assim você monta menos peças de uma vez, e cada uma chega com o problema que
+ela resolve à vista.
 
-```bash
-git clone https://github.com/heliobentzen/dpw.git ~/dpw
-bash ~/dpw/recursos/codigo/setup.sh
-```
-
-O script diz o que está fazendo a cada etapa e **pode ser rodado quantas vezes quiser**: ele
-pula o que já existe. Se algo faltar, ele diz exatamente o quê — e o comando de instalação
-correto para a sua distribuição.
-
-> 🔍 **Antes de rodar, abra o script e leia** — está comentado justamente para isso:
-> [`recursos/codigo/setup.sh`](../recursos/codigo/setup.sh).
-
-**Deu certo se:** apareceu `Ambiente básico pronto.` no final.
-
-## Os três momentos da instalação
-
-Você **não** instala tudo na primeira aula. Cada coisa entra quando passa a ser necessária:
-
-| Quando | O que entra | Comando |
+| Momento | O que entra | Seções |
 |---|---|---|
-| **Semana 1** (M00) | Git, Python, VS Code, projeto e ambiente virtual | `./setup.sh` |
-| **Antes do M03** | Node 20 + pnpm | `./setup.sh frontend` |
-| **Antes do M05** | Docker + PostgreSQL | `./setup.sh banco` |
+| **Semana 1** (M00) | Python, Git, VS Code, ambiente virtual, Django, primeiro commit | 2, 3, 5, 6, 8, 10 |
+| **Antes do M03** | Node 20 + pnpm; DRF e as demais dependências do backend | 4 |
+| **Antes do M05** | Docker + PostgreSQL | 7 |
+| **A partir do M08** | Rodar os dois servidores juntos | 9 |
+
+Na semana 1 você instala **um único pacote Python: o Django**. As outras dependências entram
+no M03, quando o projeto passa a usá-las — e você vê o `requirements.txt` crescer junto com
+o que o sistema faz. É assim que gestão de dependência se aprende.
+
+> **Você digita tudo.** Não há script que monte o ambiente por você — criar um ambiente
+> virtual, instalar dependência e versionar código *são* conteúdo da disciplina, não
+> preparação para ela. O que existe é um script que **confere** o resultado (seção 8): ele
+> diagnostica, não faz.
+
+**Tempo da semana 1:** 30–45 min.
 
 ## Como trabalhar no dia a dia
 
@@ -51,10 +46,7 @@ O prompt passa a mostrar `(.venv)`. **Isso vale por janela** — terminal novo, 
 
 ---
 
-## 🔧 Caminho manual — passo a passo
-
-Use esta parte quando o script falhar, quando quiser entender o que ele fez, ou se preferir
-instalar tudo à mão. Ao final, rode a **verificação** da seção 8.
+## Passo a passo
 
 > São **dois** ambientes: Python (backend) e Node (frontend). Eles são independentes —
 > cada um com seu gerenciador de pacotes, seu arquivo de dependências e seu diretório.
@@ -126,15 +118,19 @@ python3 --version
 ### Ambiente virtual e dependências
 
 ```bash
-mkdir -p bibliocom/backend && cd bibliocom/backend
+mkdir -p ~/dev/bibliocom/backend && cd ~/dev/bibliocom/backend
 python3 -m venv .venv
 source .venv/bin/activate
 
 python -m pip install --upgrade pip
-pip install "django>=5.0,<6.0" djangorestframework django-cors-headers \
-            python-dotenv dj-database-url drf-spectacular
+pip install "django>=5.0,<6.0"
 pip freeze > requirements.txt
 ```
+
+**Um pacote só, de propósito.** DRF, `django-cors-headers`, `python-dotenv`,
+`dj-database-url` e `drf-spectacular` entram no **M03**, cada um no momento em que o projeto
+passa a usá-lo. Instalar seis pacotes hoje seria decorar uma lista; instalar cada um quando
+ele resolve um problema concreto é aprender para que serve.
 
 O prompt passa a mostrar `(.venv)`. Se não mostrar, o ambiente **não** está ativo e tudo
 que você instalar vai para o lugar errado. Para sair: `deactivate`.
@@ -144,7 +140,6 @@ que você instalar vai para o lugar errado. Para sair: `deactivate`.
 ## 4. Node.js e pnpm (frontend)
 
 > ⏭️ **Só é necessário a partir do M03.** Na semana 1, pule para a seção 5.
-> Pelo script: `./setup.sh frontend`
 
 ### Instalação recomendada: via `fnm` (gerencia versões)
 
@@ -208,18 +203,26 @@ ssh -T git@github.com       # deve responder "Hi <usuario>!"
 
 ## 6. VS Code
 
-Extensões recomendadas:
+**Agora, duas:**
 
-| Extensão | Camada | Para quê |
+```bash
+code --install-extension ms-python.python
+code --install-extension charliermarsh.ruff
+```
+
+| Extensão | Para quê |
+|---|---|
+| **Python** (Microsoft) | Reconhece o interpretador do `.venv`, dá autocomplete e depurador |
+| **Ruff** (Astral) | Lint e formatação de Python |
+
+**Depois, quando o módulo pedir** — não instale hoje o que só vai usar em seis semanas:
+
+| Extensão | Instale antes do | Para quê |
 |---|---|---|
-| **Python** (Microsoft) | 🔵 | Interpretador, debug |
-| **Ruff** (Astral) | 🔵 | Lint e formatação Python |
-| **ESLint** | 🟣 | Lint JavaScript/TypeScript |
-| **Prettier** | 🟣 | Formatação |
-| **Tailwind CSS IntelliSense** | 🟣 | Autocomplete de classes — praticamente obrigatória |
-| **ES7+ React snippets** | 🟣 | Atalhos de componente |
-| **SQLite Viewer** | 🔵 | Inspecionar `db.sqlite3` |
-| **GitLens** | ambos | Histórico e blame |
+| **SQLite Viewer** | M04 | Inspecionar o `db.sqlite3` gerado pelo Model |
+| **ESLint** · **Prettier** | M08 | Lint e formatação de TypeScript |
+| **Tailwind CSS IntelliSense** | M09 | Autocomplete de classes — praticamente obrigatória |
+| **GitLens** | quando quiser | Histórico e autoria linha a linha |
 
 `.vscode/settings.json` sugerido:
 
@@ -241,7 +244,6 @@ Extensões recomendadas:
 ## 7. PostgreSQL via Docker (a partir do M05)
 
 > ⏭️ Até o M04 usamos SQLite, que não exige instalação.
-> Pelo script: `./setup.sh banco`
 
 `docker-compose.yml` na raiz:
 

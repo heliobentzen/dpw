@@ -31,23 +31,28 @@ combine com a turma **um** caminho e mantenha-o:
 | **Git Bash** | ⭐ Menor atrito: os comandos do material funcionam colados |
 | WSL2 | Turma mais madura; obrigatório se quiser paridade com produção |
 
-**Mande a turma rodar o script antes da aula**, não instalar à mão:
+**A turma digita todos os comandos.** Não há script de montagem, e isso é deliberado: criar
+ambiente virtual, instalar dependência e versionar código são objetivos de aprendizagem do
+M00 e caem na avaliação teórica. Um script que fizesse isso entregaria o ambiente e levaria
+o conteúdo junto.
 
-| Sistema | Comando |
-|---|---|
-| 🪟 Windows | `git clone https://github.com/heliobentzen/dpw.git $HOME\dpw` <br> `& $HOME\dpw\recursos\codigo\setup.ps1` |
-| 🐧 Linux/macOS | `git clone https://github.com/heliobentzen/dpw.git ~/dpw` <br> `bash ~/dpw/recursos/codigo/setup.sh` |
+O que reduz o atrito da semana 1 não é automatizar — é **não pedir o que ainda não é
+necessário**:
 
-O script é idempotente e para com mensagem clara quando algo falta — quem travar pode rodar
-de novo depois de resolver, sem desfazer nada. Isso transforma a aula 1 de "duas horas de
-instalação em ritmos diferentes" em "quinze minutos e um problema pontual aqui e ali".
+| Momento | O que entra | Avise na aula anterior |
+|---|---|---|
+| **Semana 1** (M00) | Python, Git, VS Code, venv, **só o Django**, 1º commit | — |
+| **Antes do M03** | Node 20 + pnpm; DRF, CORS, dotenv, spectacular | sim |
+| **Antes do M05** | Docker + PostgreSQL | **sim, com folga** — no Windows exige WSL2 e, às vezes, virtualização na BIOS |
 
-**A instalação acontece em três momentos**, não de uma vez: `base` na semana 1,
-`-Etapa frontend` antes do M03, `-Etapa banco` antes do M05. Avise na aula anterior a cada
-um. Menos software instalado de uma vez é menos coisa quebrando ao mesmo tempo.
+Na semana 1 a turma instala **um único pacote Python**. Antes, eram seis mais Node, pnpm e
+Docker — a maior parte sem uso por semanas, e cada um um ponto de falha na primeira aula.
 
-Quem preferir instalar à mão, ou precisar diagnosticar, usa o guia do seu sistema —
-[`ambiente-setup-windows.md`](ambiente-setup-windows.md) ou
+Para conferir, `verifica_ambiente.py` aceita `--etapa m00|m03|m05` e cobra só o que já
+deveria existir. Ele **diagnostica e não instala**: para cada falha, imprime o comando exato
+que corrige, e quem executa é o aluno.
+
+Guias por sistema: [`ambiente-setup-windows.md`](ambiente-setup-windows.md) ou
 [`ambiente-setup.md`](ambiente-setup.md). Não peça para a turma do Windows "adaptar" o guia
 Linux: é a origem da maior parte do atrito da primeira semana.
 

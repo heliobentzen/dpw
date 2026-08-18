@@ -3,54 +3,54 @@
 Se você usa Windows, este é o **único** arquivo de instalação que precisa abrir — não
 alterne entre ele e [`ambiente-setup.md`](ambiente-setup.md), que é Linux/macOS.
 
-## ⚡ Caminho rápido — 3 comandos
+> **Como ler.** Cada passo tem três partes: o **bloco de comandos** (cole inteiro), a
+> **tabela linha a linha** (o que cada comando faz) e o **"deu certo se…"** (como conferir
+> antes de seguir). Não pule a conferência: no Windows, quase todo erro de setup só aparece
+> três aulas depois, disfarçado de outra coisa.
+>
+> **Você digita tudo.** Não há script que monte o ambiente por você — criar um ambiente
+> virtual, instalar dependência e versionar código *são* conteúdo da disciplina, não
+> preparação para ela. O que existe é um script que **confere** o resultado (passo 9): ele
+> diagnostica, não faz.
 
-Um script faz a montagem inteira: instala o que falta, cria a pasta, o repositório, o
-ambiente virtual, as dependências e os arquivos de configuração. **~15 minutos**, quase
-todos de download.
+## O que entra em cada momento
 
-Abra o **PowerShell** (tecle `Win`, digite `powershell`) e cole:
+Você **não** instala tudo na primeira semana. Cada coisa entra na aula em que passa a ser
+necessária — assim você monta menos peças de uma vez, e cada uma chega com o problema que
+ela resolve à vista.
 
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
-git clone https://github.com/heliobentzen/dpw.git $HOME\dpw
-& $HOME\dpw\recursos\codigo\setup.ps1
-```
-
-| Linha | O que faz |
-|---|---|
-| `Set-ExecutionPolicy ... RemoteSigned` | Libera a execução de scripts **do seu usuário**. Sem isto, o Windows bloqueia tanto o `setup.ps1` quanto o ativador do ambiente virtual |
-| `git clone ...` | Baixa o material da disciplina para `C:\Users\<você>\dpw` |
-| `& ...\setup.ps1` | Roda a montagem. O `&` manda o PowerShell **executar** o caminho, em vez de imprimi-lo como texto |
-
-**Não tem o Git ainda?** Instale antes com `winget install --id Git.Git --scope user`, feche
-e reabra o terminal.
-
-O script diz o que está fazendo a cada etapa e **pode ser rodado quantas vezes quiser**: ele
-pula o que já existe. Se algo faltar, ele diz exatamente o quê e para.
-
-> 🔍 **Antes de rodar, abra o script e leia** — está comentado justamente para isso:
-> [`recursos/codigo/setup.ps1`](../recursos/codigo/setup.ps1). Executar script que veio da
-> internet sem ler é um hábito ruim, e este é um bom lugar para não adquiri-lo.
-
-**Deu certo se:** apareceu `Ambiente básico pronto.` no final.
-
----
-
-## Os três momentos da instalação
-
-Você **não** instala tudo na primeira aula. Cada coisa entra quando passa a ser necessária —
-menos software na sua máquina, menos coisa para dar errado de uma vez:
-
-| Quando | O que entra | Comando |
+| Momento | O que entra | Passos |
 |---|---|---|
-| **Semana 1** (M00) | Git, Python, VS Code, projeto e ambiente virtual | `.\setup.ps1` |
-| **Antes do M03** | Node 20 + pnpm | `.\setup.ps1 -Etapa frontend` |
-| **Antes do M05** | Docker + PostgreSQL | `.\setup.ps1 -Etapa banco` |
+| **Semana 1** (M00) | Terminal, Python, Git, VS Code, ambiente virtual, Django, primeiro commit | 0 a 5, 7, 9, 11 |
+| **Antes do M03** | Node 20 + pnpm; DRF e as demais dependências do backend | 6 |
+| **Antes do M05** | Docker + PostgreSQL | 8 |
+| **A partir do M08** | Rodar os dois servidores juntos | 10 |
 
-O docente avisa na aula anterior. Se esquecer, o próprio módulo lembra no começo.
+Na semana 1 você instala **um único pacote Python: o Django**. As outras dependências entram
+no M03, quando o projeto passa a usá-las — e você vê o `requirements.txt` crescer junto com
+o que o sistema faz. É assim que gestão de dependência se aprende.
+
+**Tempo da semana 1:** 40–60 min.
 
 ---
+
+## Índice
+
+| Passo | Assunto | Quando |
+|---|---|---|
+| [0](#passo-0--decisões-antes-de-digitar-qualquer-coisa) | Decisões antes de digitar | semana 1 |
+| [1](#passo-1--abrir-o-powershell-e-liberar-scripts) | PowerShell e política de scripts | semana 1 |
+| [2](#passo-2--criar-a-pasta-de-trabalho) | Pasta de trabalho | semana 1 |
+| [3](#passo-3--instalar-o-python) | Python 3.12 | semana 1 |
+| [4](#passo-4--instalar-e-configurar-o-git) | Git + SSH | semana 1 |
+| [5](#passo-5--ambiente-virtual-e-dependências-do-backend) | venv + Django | semana 1 |
+| [6](#passo-6--nodejs-e-pnpm-frontend) | Node 20 + pnpm | **antes do M03** |
+| [7](#passo-7--vs-code) | VS Code | semana 1 |
+| [8](#passo-8--docker-e-postgresql) | Docker + PostgreSQL | **antes do M05** |
+| [9](#passo-9--verificação-final) | Verificação | semana 1 |
+| [10](#passo-10--rodar-o-sistema-completo) | Rodar os dois servidores | a partir do M08 |
+| [11](#passo-11--gitignore-e-gitattributes) | `.gitignore` e `.gitattributes` | no primeiro commit |
+| [12](#passo-12--erros-e-diagnóstico) | **Erros e diagnóstico** | quando quebrar |
 
 ## Como trabalhar no dia a dia
 
@@ -63,32 +63,6 @@ Set-Location C:\dev\bibliocom\backend
 
 O prompt passa a mostrar `(.venv)` na frente. **Isso vale por janela** — terminal novo,
 ativação nova. É a causa nº 1 de `ModuleNotFoundError: No module named 'django'`.
-
----
-
-## 🔧 Caminho manual — passo a passo
-
-Use esta parte quando o script falhar, quando quiser entender o que ele fez, ou se preferir
-instalar tudo à mão. Cada passo tem três partes: o **bloco de comandos** (cole inteiro), a
-**tabela linha a linha** (o que cada comando faz) e o **"deu certo se…"**.
-
-**Tempo:** 60–90 min.
-
-| Passo | Assunto | Quando |
-|---|---|---|
-| [0](#passo-0--decisões-antes-de-digitar-qualquer-coisa) | Decisões antes de digitar | semana 1 |
-| [1](#passo-1--abrir-o-powershell-e-liberar-scripts) | PowerShell e política de scripts | semana 1 |
-| [2](#passo-2--criar-a-pasta-de-trabalho) | Pasta de trabalho | semana 1 |
-| [3](#passo-3--instalar-o-python) | Python 3.12 | semana 1 |
-| [4](#passo-4--instalar-e-configurar-o-git) | Git + SSH | semana 1 |
-| [5](#passo-5--ambiente-virtual-e-dependências-do-backend) | venv + Django/DRF | semana 1 |
-| [6](#passo-6--nodejs-e-pnpm-frontend) | Node 20 + pnpm | **antes do M03** |
-| [7](#passo-7--vs-code) | VS Code | semana 1 |
-| [8](#passo-8--docker-e-postgresql) | Docker + PostgreSQL | **antes do M05** |
-| [9](#passo-9--verificação-final) | Verificação | semana 1 |
-| [10](#passo-10--rodar-o-sistema-completo) | Rodar os dois servidores | a partir do M08 |
-| [11](#passo-11--gitignore-e-gitattributes) | `.gitignore` e `.gitattributes` | no primeiro commit |
-| [12](#passo-12--erros-e-diagnóstico) | **Erros e diagnóstico** | quando quebrar |
 
 ---
 
@@ -473,7 +447,7 @@ Para sair do ambiente, algum dia: `deactivate`.
 
 ```powershell
 python -m pip install --upgrade pip
-pip install "django>=5.0,<6.0" djangorestframework django-cors-headers python-dotenv dj-database-url drf-spectacular
+pip install "django>=5.0,<6.0"
 ```
 
 | Trecho | O que faz |
@@ -481,24 +455,26 @@ pip install "django>=5.0,<6.0" djangorestframework django-cors-headers python-do
 | `python -m pip` | Chama o pip **através do Python ativo**. Garante que é o pip do `.venv`, e não outro que esteja no PATH. Escrever `pip` direto quase sempre dá no mesmo, mas quando não dá, o erro é obscuro |
 | `--upgrade pip` | Atualiza o próprio pip. O `venv` costuma criar o ambiente com uma versão antiga |
 | `"django>=5.0,<6.0"` | Fixa a faixa de versão: 5.x sim, 6.0 não. As **aspas** são obrigatórias, senão o PowerShell interpreta o `>` como redirecionamento para arquivo e cria um arquivo chamado `=5.0,` |
-| `djangorestframework` | Camada de API (usada do M03 em diante) |
-| `django-cors-headers` | Libera o navegador a chamar a API de outra origem (M02, M16) |
-| `python-dotenv` | Lê variáveis do arquivo `.env` |
-| `dj-database-url` | Converte a `DATABASE_URL` da hospedagem em configuração do Django (M16) |
-| `drf-spectacular` | Gera o schema OpenAPI, de onde saem os tipos do frontend (M07) |
 
-Repare que **está tudo em uma linha só**. Se quiser quebrar em várias, use a **crase**
-(`` ` ``) no fim de cada linha:
+**Um pacote só, de propósito.** DRF, `django-cors-headers`, `python-dotenv`,
+`dj-database-url` e `drf-spectacular` entram no **M03**, cada um no momento em que o projeto
+passa a usá-lo. Instalar seis pacotes hoje seria decorar uma lista; instalar cada um quando
+ele resolve um problema concreto é aprender para que serve.
 
-```powershell
-pip install "django>=5.0,<6.0" djangorestframework `
-            django-cors-headers python-dotenv
-```
+**Deu certo se:** `python -c "import django; print(django.get_version())"` responde `5.x`.
 
-⚠️ A crase precisa ser **o último caractere da linha**. Um único espaço depois dela e o
-PowerShell trata a linha como terminada — e o comando roda pela metade, sem erro visível.
-Como isso é difícil de ver na tela, **este material usa linha única** nos comandos de
-instalação.
+> Se algum dia precisar quebrar um `pip install` longo em várias linhas, o PowerShell usa a
+> **crase** (`` ` ``) no fim de cada linha:
+
+> ```powershell
+> pip install djangorestframework django-cors-headers `
+>             python-dotenv
+> ```
+>
+> ⚠️ A crase precisa ser **o último caractere da linha**. Um único espaço depois dela e o
+> PowerShell trata a linha como terminada — o comando roda pela metade, **sem erro
+> visível**. Como isso não dá para ver na tela, este material usa linha única nos comandos
+> de instalação.
 
 ### 5.4 Congelar as dependências — o erro do `>` ⚠️
 
@@ -547,8 +523,6 @@ Get-Content requirements.txt
 
 > ⏭️ **Só é necessário a partir do M03.** Se você está na semana 1, pule para o
 > [Passo 7](#passo-7--vs-code) — você volta aqui quando o docente avisar.
->
-> Pelo script: `.\setup.ps1 -Etapa frontend`
 
 ### 6.1 Instalar o Node 20 LTS
 
@@ -636,25 +610,29 @@ winget install --id Microsoft.VisualStudioCode --scope user
 
 ### 7.2 Extensões
 
-| Extensão | Camada | Para quê |
-|---|---|---|
-| **Python** (Microsoft) | 🔵 | Interpretador, depurador |
-| **Ruff** (Astral) | 🔵 | Lint e formatação Python |
-| **ESLint** | 🟣 | Lint JavaScript/TypeScript |
-| **Prettier** | 🟣 | Formatação |
-| **Tailwind CSS IntelliSense** | 🟣 | Autocomplete de classes — praticamente obrigatória |
-| **SQLite Viewer** | 🔵 | Abrir o `db.sqlite3` |
-| **GitLens** | ambos | Histórico e autoria linha a linha |
-
-Instale pela interface (`Ctrl+Shift+X`) ou pelo terminal:
+**Agora, duas:**
 
 ```powershell
 code --install-extension ms-python.python
 code --install-extension charliermarsh.ruff
-code --install-extension dbaeumer.vscode-eslint
-code --install-extension esbenp.prettier-vscode
-code --install-extension bradlc.vscode-tailwindcss
 ```
+
+| Extensão | Para quê |
+|---|---|
+| **Python** (Microsoft) | Reconhece o interpretador do `.venv`, dá autocomplete e depurador |
+| **Ruff** (Astral) | Lint e formatação de Python |
+
+**Depois, quando o módulo pedir** — não instale hoje o que você não vai usar por seis
+semanas:
+
+| Extensão | Instale antes do | Para quê |
+|---|---|---|
+| **SQLite Viewer** | M04 | Abrir o `db.sqlite3` e ver as tabelas que o Model gerou |
+| **ESLint** · **Prettier** | M08 | Lint e formatação de TypeScript |
+| **Tailwind CSS IntelliSense** | M09 | Autocomplete de classes — praticamente obrigatória |
+| **GitLens** | quando quiser | Histórico e autoria linha a linha |
+
+Todas se instalam pela interface (`Ctrl+Shift+X`) ou por `code --install-extension <id>`.
 
 ### 7.3 Configurar o projeto ⚠️
 
@@ -691,8 +669,6 @@ inferior mostra o interpretador com `(.venv)` no nome.
 
 > ⏭️ **Só é necessário a partir do M05.** Se você está fazendo o M00, pule para o
 > [Passo 9](#passo-9--verificação-final). Até o M04 usamos SQLite, que não exige instalação.
->
-> Pelo script: `.\setup.ps1 -Etapa banco`
 
 ### 8.1 Pré-requisito: WSL2
 

@@ -91,12 +91,18 @@ navegador.
 
 ### Passo 1 — Backend: projeto, app e DRF (35 min)
 
+> 📦 **Instale o Node 20 + pnpm antes desta aula** — eles entram no Passo 2.
+> 🐧 [`ambiente-setup.md`, seção 4](../../docs/ambiente-setup.md#4-nodejs-e-pnpm-frontend) ·
+> 🪟 [`ambiente-setup-windows.md`, passo 6](../../docs/ambiente-setup-windows.md#passo-6--nodejs-e-pnpm-frontend)
+
+A pasta e o ambiente virtual existem desde o M00, com o Django instalado. Agora
+acrescentamos **as dependências que este módulo passa a usar**.
+
 ```bash
-# Linux/macOS/WSL
-mkdir -p bibliocom/backend && cd bibliocom/backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install "django>=5.0,<6.0" djangorestframework django-cors-headers \
-            python-dotenv dj-database-url drf-spectacular
+# Linux/macOS/WSL/Git Bash
+cd ~/dev/bibliocom/backend
+source .venv/bin/activate
+pip install djangorestframework django-cors-headers python-dotenv drf-spectacular
 pip freeze > requirements.txt
 
 django-admin startproject config .     # o ponto evita a pasta duplicada
@@ -105,16 +111,25 @@ python manage.py startapp acervo
 
 ```powershell
 # Windows PowerShell
-New-Item -ItemType Directory -Force -Path C:\dev\bibliocom\backend
 Set-Location C:\dev\bibliocom\backend
-python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install "django>=5.0,<6.0" djangorestframework django-cors-headers python-dotenv dj-database-url drf-spectacular
+pip install djangorestframework django-cors-headers python-dotenv drf-spectacular
 pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
 
 django-admin startproject config .
 python manage.py startapp acervo
 ```
+
+| Pacote | Para que serve, **neste** módulo |
+|---|---|
+| `djangorestframework` | A camada de API — é o assunto do módulo |
+| `django-cors-headers` | Permite ao navegador chamar a API de outra origem, necessário quando o frontend sobe na porta 5173 |
+| `python-dotenv` | Lê o `.env`, que tira a `SECRET_KEY` de dentro do código |
+| `drf-spectacular` | Gera o schema OpenAPI, de onde sairão os tipos do frontend no M07 |
+
+Repare que o `requirements.txt` **cresceu**: de uma linha no M00 para cinco. Ele é o retrato
+do que o sistema precisa hoje, e é o que faz o projeto rodar igual na máquina de outra
+pessoa. `dj-database-url` e `psycopg` entram no M05, junto com o PostgreSQL.
 
 > 🪟 **Três detalhes do bloco acima**, todos explicados em
 > [`ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md):
