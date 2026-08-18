@@ -1,8 +1,7 @@
 # DPW — Desenvolvimento de Projeto Web
 
 Material didático completo da disciplina **Desenvolvimento de Projeto Web** — 100 horas
-(**40h teóricas + 60h práticas**), com projeto integrador em equipe e **atividades
-extensionistas** curricularizadas.
+
 
 > **Stack:** TypeScript ponta a ponta, em arquitetura desacoplada.
 > **Backend** — Node 20 · TypeScript · NestJS 11 · TypeORM · PostgreSQL 16
