@@ -113,16 +113,28 @@ Ao final, rode o `verifica_ambiente.py`. **Só avance com todos os itens em OK.*
 Se você seguiu o guia de setup até o fim, a pasta e o ambiente virtual já existem. Aqui
 transformamos isso num **repositório Git publicado**.
 
-#### 🐧 Linux / 🍎 macOS / WSL2 / Git Bash
+A estrutura a esta altura — repare que o `.venv` fica **dentro de `backend/`**, não na raiz:
+
+```
+bibliocom/            ← a raiz do repositório, onde rodamos o git init
+└── backend/
+    ├── .venv/        ← criado no setup
+    └── requirements.txt
+```
+
+#### 2a. Iniciar o repositório
+
+##### 🐧 Linux / 🍎 macOS / WSL2 / Git Bash
 
 ```bash
 cd ~/dev/bibliocom          # ou onde você criou a pasta
 git init
 ```
 
-#### 🪟 Windows (PowerShell)
+##### 🪟 Windows (PowerShell)
 
 ```powershell
+New-Item -ItemType Directory -Force -Path C:\dev\bibliocom
 Set-Location C:\dev\bibliocom
 git init
 git config core.autocrlf input
@@ -130,22 +142,51 @@ git config core.autocrlf input
 
 | Linha | O que faz |
 |---|---|
-| `Set-Location C:\dev\bibliocom` | Entra na pasta do projeto (`cd` é apelido deste comando) |
+| `New-Item -ItemType Directory -Force` | Garante que a pasta existe. Sem esta linha, se você tiver pulado ou interrompido o setup, o `Set-Location` falha com `Cannot find path ... because it does not exist` — e o `git init` seguinte criaria um repositório **na pasta errada** |
+| `Set-Location C:\dev\bibliocom` | Entra na pasta (`cd` é apelido deste comando) |
 | `git init` | Cria o repositório: passa a existir a pasta oculta `.git` com todo o histórico |
 | `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Sem isto, o deploy do M16 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
 
-#### Os três arquivos da raiz (todos os sistemas)
+**Deu certo se:** `git status` responde `On branch main` e lista `backend/` como não rastreado.
+Se responder `not a git repository`, o `git init` rodou em outro lugar — confira com
+`Get-Location`.
 
-Crie no editor — **não** com `echo ... >`, que no PowerShell 5.1 grava em UTF-16:
+#### 2b. Criar os três arquivos da raiz
 
 | Arquivo | Conteúdo | Por quê |
 |---|---|---|
-| `.gitignore` | [seção 10 do setup](../../docs/ambiente-setup.md#10-gitignore-do-repositório) | Mantém `.venv/`, `.env` e `node_modules/` fora do Git |
-| `.gitattributes` | [seção 10 do setup](../../docs/ambiente-setup.md#gitattributes--obrigatório-se-alguém-da-equipe-usa-windows-) | **Não é opcional.** Protege a equipe inteira do problema de finais de linha, inclusive quem nunca configurou nada |
+| `.gitignore` | 🐧 [setup, seção 10](../../docs/ambiente-setup.md#10-gitignore-do-repositório) · 🪟 [setup Windows, 11.1](../../docs/ambiente-setup-windows.md#111-gitignore) | Mantém `.venv/`, `.env` e `node_modules/` fora do Git |
+| `.gitattributes` | 🐧 [setup, seção 10](../../docs/ambiente-setup.md#gitattributes--obrigatório-se-alguém-da-equipe-usa-windows-) · 🪟 [setup Windows, 11.2](../../docs/ambiente-setup-windows.md#112-gitattributes--obrigatório-) | **Não é opcional.** Protege a equipe inteira do problema de finais de linha, inclusive quem nunca configurou nada |
 | `README.md` | modelo abaixo | Como subir o projeto em ≤ 5 comandos |
 
-Modelo do `README.md` — repare que ele traz **as duas plataformas**, porque quem clona o
-repositório pode estar em qualquer uma:
+> 🪟 **Não crie esses arquivos pelo Bloco de Notas.** O Windows esconde extensões conhecidas
+> e o Bloco de Notas acrescenta `.txt` ao salvar: você digita `.gitignore`, ele grava
+> `.gitignore.txt`, o Explorer mostra "`.gitignore`" — e o Git **ignora o arquivo**, porque
+> o nome está errado. Como a tela não denuncia nada, o sintoma vira "meu `.gitignore` não
+> funciona".
+>
+> Crie pelo terminal e edite no VS Code:
+>
+> ```powershell
+> New-Item -ItemType File -Path .gitignore, .gitattributes, README.md
+> code .
+> ```
+>
+> | Trecho | O que faz |
+> |---|---|
+> | `New-Item -ItemType File -Path a, b, c` | Cria os três arquivos vazios de uma vez, com o nome exato |
+> | `code .` | Abre a pasta inteira no VS Code, para você colar o conteúdo de cada um |
+>
+> Confira os nomes reais com `Get-ChildItem -Force` (o `-Force` mostra arquivos ocultos —
+> tudo que começa com ponto). Se aparecer `.gitignore.txt`, renomeie:
+> `Rename-Item .gitignore.txt .gitignore`.
+
+Também **não** use `echo ... > arquivo` para gerar esses arquivos: no PowerShell 5.1 o `>`
+grava em UTF-16, e o Git lê a primeira linha como lixo.
+
+Modelo do `README.md` — ele traz **as duas plataformas**, porque quem clona o repositório
+pode estar em qualquer uma, e todos os comandos rodam a partir de `backend/`, que é onde
+vive o ambiente virtual:
 
 ````markdown
 # BiblioCom
@@ -157,6 +198,7 @@ Sistema de gestão para bibliotecas comunitárias — estudo de caso da discipli
 ### Linux / macOS
 
 ```bash
+cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
@@ -167,6 +209,7 @@ python manage.py runserver
 ### Windows (PowerShell)
 
 ```powershell
+Set-Location backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -178,11 +221,23 @@ python manage.py runserver
 Acesse <http://localhost:8000>.
 ````
 
-Primeiro commit (idêntico nos três sistemas):
+> O `.env.example` e o `manage.py` só passam a existir no **M03**, quando o projeto Django é
+> criado. Até lá, o `README.md` descreve o destino, não o presente — e é assim mesmo:
+> escrever o "como rodar" antes ajuda a perceber quando um passo a mais se tornou necessário.
+
+#### 2c. Primeiro commit
+
+```bash
+git status
+```
+
+⚠️ **Leia a saída antes de commitar.** Se `.venv/`, `.env`, `db.sqlite3` ou `node_modules/`
+aparecerem, seu `.gitignore` está errado, incompleto ou salvou com o nome trocado. Corrija
+agora: depois de commitado, o arquivo continua no histórico mesmo que você o remova.
 
 ```bash
 git add .
-git commit -m "chore: inicializa projeto com venv e dependencias"
+git commit -m "chore: inicializa estrutura do projeto"
 ```
 
 | Linha | O que faz |
@@ -190,9 +245,9 @@ git commit -m "chore: inicializa projeto com venv e dependencias"
 | `git add .` | Move para a *staging area* tudo que mudou e não está no `.gitignore` |
 | `git commit -m "..."` | Grava o snapshot com a mensagem |
 
-⚠️ Confira com `git status` **antes** do commit: se `.venv/`, `.env` ou `db.sqlite3`
-aparecerem na lista, seu `.gitignore` está errado ou incompleto. Corrija agora — depois de
-commitado, o arquivo continua no histórico mesmo que você o remova.
+> 🪟 **`warning: CRLF will be replaced by LF` não é erro.** É o `core.autocrlf input`
+> fazendo exatamente o que você pediu em 2a: guardando o arquivo com finais de linha do
+> Linux. Na sua pasta o arquivo continua com CRLF. Pode seguir.
 
 ### Passo 3 — Publicar no GitHub (20 min)
 
