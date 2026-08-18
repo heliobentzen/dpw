@@ -1,132 +1,106 @@
 # M05 — Exercícios
 
-## E04.1 — Diário de migrações (individual)
+## E05.1 — Ler antes de aplicar (individual)
 
-Execute a sequência abaixo, registrando para **cada passo**: o comando, o nome do arquivo
-gerado, as operações contidas e o SQL correspondente.
+Gere uma migração para cada mudança, **abra o arquivo** e responda sem aplicar:
 
-1. Adicionar `Obra.numero_paginas` (opcional).
-2. Adicionar `Obra.destaque` (booleano, padrão `False`).
-3. Tornar `Obra.isbn` único.
-4. Criar índice composto em `(autor, ano_publicacao)`.
-5. Remover `Obra.subtitulo`.
-6. Reverter o passo 5.
+| # | Mudança na entidade | O SQL gerado é reversível? | Perde dado? |
+|---|---|---|---|
+| 1 | Adicionar `Obra.destaque` (boolean, default false) | | |
+| 2 | Adicionar `Obra.codigoInterno` (`unique`) | | |
+| 3 | Remover `Obra.subtitulo` | | |
+| 4 | Trocar `Exemplar.estado` de texto para enum | | |
+| 5 | Adicionar índice em `Obra.anoPublicacao` | | |
 
-**Entrega:** tabela `passo | arquivo | operações | SQL resumido`.
-
-> No passo 3 você provavelmente vai tomar um erro de valores duplicados. Isso é parte do
-> exercício: descreva como resolveu.
+O caso 2 é o interessante: `unique` numa tabela com linhas existentes. O que o SQL faz com
+os valores repetidos — ou com os vazios?
 
 ---
 
-## E04.2 — Migração de dados com reversão (individual) ⭐
+## E05.2 — Migração de dados (individual) ⭐
 
-O campo `Associado.nome` guarda o nome completo. A biblioteca agora quer separar em
-`primeiro_nome` e `sobrenome`.
+Crie uma migração **vazia** (`migration:create`) que:
 
-1. **Expandir:** adicione os dois campos como `blank=True`.
-2. **Migrar:** `RunPython` que divide `nome` no **primeiro espaço** (cuidado com nomes
-   compostos e com nomes de uma palavra só).
-3. **Contrair:** torne `primeiro_nome` obrigatório.
-4. Escreva o `reverse_code` que reconstrói `nome` a partir dos dois campos.
-5. Prove que funciona nos dois sentidos: `migrate` → confira → `migrate <anterior>` →
-   confira → `migrate` de novo.
+1. Preencha `Obra.destaque = true` para obras anteriores a 1900;
+2. Normalize `Exemplar.tombo` para maiúsculas;
+3. Tenha um `down` **honesto** — e, se não for perfeitamente reversível, um comentário
+   dizendo exatamente o que se perde.
 
-**Casos de borda a tratar:** `"Ana"`, `"Ana Maria de Souza"`, `""`, `"  Ana  "`.
-
----
-
-## E04.3 — Conflito de migração provocado (em duplas) ⭐
-
-1. Ambos partem da mesma `main`.
-2. A pessoa A adiciona `Obra.idioma` e envia para `main`.
-3. A pessoa B, **sem dar pull**, adiciona `Obra.edicao_revisada` e tenta enviar.
-4. B faz `git pull` e roda `migrate` — capture a mensagem de conflito.
-5. Resolva com `makemigrations --merge`.
-6. Verifique com `showmigrations` que o grafo ficou consistente e que os **dois** campos
-   existem.
-
-**Entrega:** log dos comandos + explicação em 5 linhas de por que o conflito ocorreu e
-como preveni-lo no projeto da equipe.
+**Verificação:**
+- [ ] Usou `migration:create`, não `migration:generate` — e sabe dizer por quê
+- [ ] `migration:run` aplica; `migration:revert` desfaz sem erro
+- [ ] O `down` está comentado quando não é fiel
 
 ---
 
-## E04.4 — Cenário de produção (individual, sem código)
+## E05.3 — Expandir e contrair (em duplas) ⭐⭐
 
-A biblioteca tem 80.000 empréstimos registrados. Você precisa adicionar
-`Emprestimo.canal` (obrigatório, valores `BALCAO` / `ONLINE`), sabendo que:
+Renomeie `Associado.telefone` para `Associado.celular` sem perder dados, em quatro
+migrações separadas. Ao final, revertam todas e confiram os dados.
 
-- os registros anteriores a 2025 são todos de balcão;
-- o sistema não pode ficar fora do ar;
-- há duas instâncias da aplicação rodando ao mesmo tempo durante o deploy.
+Respondam por escrito:
 
-Escreva o **plano de migração** com: número de migrações, ordem, o que cada uma faz, em
-que momento cada versão do código é publicada e como reverter se algo falhar no meio.
-
-Dica: pense no que acontece se a migração rodar **antes** do código novo subir — e depois
-no caso inverso.
+1. Depois do passo 1 (expandir), o **código antigo** ainda funciona com o banco novo?
+2. E depois do passo 4 (contrair)?
+3. Entre quais passos o deploy pode ser revertido com segurança?
+4. Se o passo 3 (trocar a leitura) falhar em produção, qual é o plano?
 
 ---
 
-## E04.5 — Migração destrutiva e recuperação (individual)
+## E05.4 — Conflito de migração (em duplas)
 
-Em um branch descartável:
+Simulem o que acontece toda semana num time real:
 
-1. Crie uma obra com `sinopse` preenchida.
-2. Renomeie `sinopse` → `resumo` respondendo **N** ao prompt.
-3. Aplique e verifique: o dado sobreviveu?
-4. Reverta a migração. O dado voltou?
-5. Repita respondendo **y**. Compare.
+1. Cada pessoa cria uma branch a partir de `main`.
+2. A pessoa A adiciona `Obra.editora`; a B adiciona `Obra.idioma`.
+3. Ambas geram migração e commitam.
+4. A mescla a dela. B tenta mesclar a sua.
 
-**Entrega:** comparação das duas migrações geradas (operações) + conclusão em 3 linhas.
+Respondam:
 
----
+- O Git acusou conflito? Nos arquivos de migração, ou em outro lugar?
+- Rodar `migration:run` depois do merge funciona? Por quê?
+- Qual é o procedimento correto de resolução?
 
-## E04.6 — SQLite × PostgreSQL (individual)
-
-Rode `sqlmigrate acervo 0001` com cada banco configurado e preencha:
-
-| Aspecto | SQLite | PostgreSQL |
-|---|---|---|
-| Tipo gerado para `CharField(200)` | | |
-| Tipo gerado para `BooleanField` | | |
-| Tipo da chave primária | | |
-| Como declara a FK | | |
-| Como declara a `CheckConstraint` | | |
-| Suporte a `ALTER COLUMN` | | |
-
-Responda: **qual erro só apareceria em PostgreSQL, nunca em SQLite?** (dica: pense em
-tipagem e em transações em DDL)
+> Não há conflito de texto: são arquivos diferentes. O problema é de **ordem** — e o timestamp
+> é que decide. Esta é a armadilha que só aparece em equipe.
 
 ---
 
-## E04.7 — Comando de verificação (individual)
+## E05.5 — Recuperar um banco quebrado (individual)
 
-Escreva um script/comando que a equipe rodará antes de todo deploy, verificando:
+Provoque e resolva:
 
-1. Existe migração pendente não gerada? (`makemigrations --check --dry-run`)
-2. Existe migração gerada e não aplicada? (`showmigrations --plan`)
-3. Todas as migrações têm `reverse_code` quando usam `RunPython`?
-
-Integre ao CI no M14.
-
-```bash
-# esqueleto
-python manage.py makemigrations --check --dry-run || {
-  echo "ERRO: ha alteracoes de model sem migracao gerada"; exit 1;
-}
-```
+1. Rode `migration:run`, depois **apague à mão** uma coluna criada por ela.
+2. Rode `migration:run` de novo. O que acontece?
+3. Rode `migration:revert`. E agora?
+4. Recupere o banco para um estado consistente e descreva os passos.
 
 ---
 
-## Critérios de verificação
+## E05.6 — Trocar de banco (individual)
 
-| Exercício | Evidência |
-|---|---|
-| E04.1 | Tabela dos 6 passos |
-| E04.2 | 3 migrações + prova de ida e volta |
-| E04.3 | Log + migração de merge no repositório |
-| E04.4 | Plano escrito (1 página) |
-| E04.5 | Comparação + conclusão |
-| E04.6 | Tabela + resposta |
-| E04.7 | Script funcionando |
+Depois de migrar para PostgreSQL, responda:
+
+1. Quantos arquivos de aplicação (entidade, service, controller) você alterou?
+2. As migrações geradas no SQLite rodaram no PostgreSQL? Por quê?
+3. `simple-enum` virou o quê?
+4. O que isso ensina sobre o que o ORM abstrai e o que ele não abstrai?
+
+---
+
+## Gabarito parcial
+
+**E05.1** — 2: adicionar `unique` numa coluna com valores repetidos **falha na aplicação**,
+não na geração. A migração é gerada sem erro e quebra no `run` — motivo pelo qual se testa
+migração contra uma cópia dos dados reais, nunca contra banco vazio. 3: remover coluna é
+reversível no esquema (o `down` a recria) mas **não nos dados**: eles não voltam.
+
+**E05.3** — (1) Sim: a coluna antiga continua lá. (2) Não: o código antigo procura
+`telefone`, que não existe mais. (3) Entre 1 e 3 com segurança total; depois do 4, reverter o
+código exige reverter a migração. (4) Como o passo 1 manteve as duas colunas, basta reverter
+o deploy do código — o banco não precisa mudar.
+
+**E05.6** — (1) Zero, fora a linha de conexão. É a promessa do ORM se cumprindo. (2)
+Provavelmente não: o SQL gerado é do dialeto do SQLite. (4) O ORM abstrai o **código de
+aplicação**, não o **SQL gerado**. Por isso migração se gera contra o banco de produção.

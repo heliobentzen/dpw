@@ -22,10 +22,10 @@
 | Critério | 4 | 3 | 2 | 0–1 | Nota |
 |---|---|---|---|---|:---:|
 | **B1. MVP entregue** | Todas as *Must*, mais alguma *Should* | Todas as *Must* funcionando | Faltou uma *Must* | Faltou mais de uma | |
-| **B2. CRUD** | 3+ recursos completos, com serializers de leitura e escrita separados | CRUD completo em 2 recursos | CRUD parcial | Não funciona | |
+| **B2. CRUD** | 3+ recursos completos, com DTOs de entrada e de saída separados | CRUD completo em 2 recursos | CRUD parcial | Não funciona | |
 | **B3. Validação** | Validação por campo e entre campos, com mensagens úteis; erros no formato do contrato | Validação de servidor cobrindo as regras | Validação incompleta | Sem validação de servidor | |
 | **B4. Consultas** | Filtros, busca, ordenação declarada e paginação; nenhum N+1 (medido) | Filtros e paginação funcionando | Consulta simples | Sem paginação; N+1 evidente | |
-| **B5. Regras de negócio** | No model/service, consultadas pelo serializer; bem testadas | Implementadas no lugar certo | Espalhadas nas views | Ausentes ou incorretas | |
+| **B5. Regras de negócio** | No model/service, consultadas pelo controller; bem testadas | Implementadas no lugar certo | Espalhadas nas views | Ausentes ou incorretas | |
 | **B6. Documentação** | OpenAPI navegável, com descrições e exemplos; contrato confrontado com a implementação | `/api/docs/` coerente | Gerada mas não revisada | Ausente | |
 
 ## Bloco C — Frontend (peso 4) 🟣
@@ -46,10 +46,10 @@
 | Critério | 4 | 3 | 2 | 0–1 | Nota |
 |---|---|---|---|---|:---:|
 | **D1. Autenticação** | Fluxo completo, incluindo recuperação de senha e política de senha forte | Login, logout e 2+ papéis funcionando | Autenticação frágil ou papel único | Ausente | |
-| **D2. Autorização** | Permissões + autorização por objeto; recurso alheio devolve 404 | Permissões por papel e filtro de queryset | Só `login_required` | Sem controle; IDOR presente | |
+| **D2. Autorização** | Permissões + autorização por objeto; recurso alheio devolve 404 | Permissões por papel e filtro na consulta | Só exige autenticação | Sem controle; IDOR presente | |
 | **D3. Configuração** | `check --deploy` limpo, cabeçalhos de segurança nota A | `check --deploy` sem avisos | Alguns avisos | `DEBUG=True` ou segredo no repositório | |
 | **D4. Entrada e saída** | Nenhum `|safe` indevido, SQL parametrizado, upload validado, `fields` explícito | Sem vulnerabilidades identificadas nas verificações do M13 | 1 problema médio | Vulnerabilidade explorável | |
-| **D6. Dados pessoais** | Mapa de dados, minimização aplicada **no serializer** (a API não devolve o que a tela não usa), aviso publicado | Mapa preenchido e aviso escrito | Mapa incompleto | Ausente; coleta sem finalidade | |
+| **D6. Dados pessoais** | Mapa de dados, minimização aplicada **no DTO de saída** (a API não devolve o que a tela não usa), aviso publicado | Mapa preenchido e aviso escrito | Mapa incompleto | Ausente; coleta sem finalidade | |
 
 ## Bloco E — Qualidade e testes (peso 3)
 

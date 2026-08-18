@@ -4,12 +4,14 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 
 ## Antes (local) — 🔵 backend
 
-- [ ] `pytest` verde
+- [ ] `pnpm test` verde nas duas camadas
 - [ ] `ruff check .` sem erros
-- [ ] `python manage.py makemigrations --check --dry-run` sem pendências
-- [ ] `DEBUG=False python manage.py check --deploy` sem avisos
+- [ ] `pnpm migration:generate` não gera nada novo (esquema em dia com as entidades)
+- [ ] `pnpm lint` e `pnpm tsc --noEmit` sem erros
 - [ ] `requirements.txt` atualizado, com versões fixadas
-- [ ] `DEBUG=False ... gunicorn config.wsgi` roda localmente
+- [ ] `pnpm build` conclui e `node dist/main.js` sobe localmente
+      (mesmo comando nas três plataformas)
+- [ ] 🪟 `.gitattributes` com `*.sh text eol=lf` (senão o deploy falha com `bad interpreter`)
 - [ ] `collectstatic` roda sem erro
 - [ ] `.env.example` reflete todas as variáveis necessárias
 - [ ] Nenhum segredo no diff (`git diff --staged`)
@@ -27,7 +29,7 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 ## Primeiro deploy
 
 - [ ] Banco PostgreSQL criado (gerenciado, não SQLite)
-- [ ] `SECRET_KEY` **nova**, gerada só para produção
+- [ ] `SESSION_SECRET` **nova**, gerada só para produção
 - [ ] `DEBUG=False`
 - [ ] `ALLOWED_HOSTS` com o domínio real
 - [ ] `DATABASE_URL` configurada
@@ -59,13 +61,26 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 
 ## Comandos de verificação
 
+> 🪟 **No PowerShell, use `curl.exe`** em todos os comandos abaixo.
+
 ```bash
+# Linux / macOS / WSL / Git Bash
 curl -I https://SEU-DOMINIO/
 curl -I https://SEU-DOMINIO/ | grep -iE "strict-transport|x-frame|x-content|referrer"
 curl -s -o /dev/null -w "%{http_code} %{time_total}s\n" https://SEU-DOMINIO/
 curl -I http://SEU-DOMINIO/            # deve redirecionar para https
 curl -s -o /dev/null -w "%{http_code}\n" https://SEU-DOMINIO/obras/42   # fallback: 200
 curl -s https://SEU-DOMINIO/api/obras/ | head -c 200                     # API respondendo
+```
+
+```powershell
+# Windows PowerShell
+curl.exe -I https://SEU-DOMINIO/
+curl.exe -I https://SEU-DOMINIO/ | Select-String "strict-transport|x-frame|x-content|referrer"
+curl.exe -s -o NUL -w "%{http_code} %{time_total}s`n" https://SEU-DOMINIO/
+curl.exe -I http://SEU-DOMINIO/
+curl.exe -s -o NUL -w "%{http_code}`n" https://SEU-DOMINIO/obras/42
+(Invoke-WebRequest https://SEU-DOMINIO/api/obras/).Content.Substring(0, 200)
 ```
 
 ## Se der errado
@@ -82,8 +97,9 @@ curl -s https://SEU-DOMINIO/api/obras/ | head -c 200                     # API r
 
 ### 🔵 Backend (tempo de execução — secretas)
 
-```bash
-SECRET_KEY=            # >= 50 caracteres aleatórios, exclusiva de produção
+```ini
+# valores configurados no painel da PaaS (ou no .env local)
+SESSION_SECRET=            # >= 50 caracteres aleatórios, exclusiva de produção
 DEBUG=False
 ALLOWED_HOSTS=seu-dominio.com
 CSRF_TRUSTED_ORIGINS=https://seu-dominio.com
@@ -98,7 +114,7 @@ SENTRY_DSN=
 
 ### 🟣 Frontend (tempo de **build** — públicas)
 
-```bash
+```ini
 VITE_API_URL=/api      # caminho relativo: mesmo site, sem CORS
 VITE_SENTRY_DSN=       # desenhado para ser público
 ```

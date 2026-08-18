@@ -4,248 +4,321 @@ Documento que registra **por que** cada escolha foi feita e **como adaptá-la**.
 também de exemplo de ADR (*Architecture Decision Record*) — formato que as equipes vão
 reproduzir na Etapa 2 do projeto.
 
-> **Histórico:** a primeira versão deste material usava Django com renderização no
-> servidor (templates DTL). A partir da revisão de 2026, a arquitetura passou a ser
-> **desacoplada**: API REST em Django/DRF e SPA em React + TypeScript + Tailwind.
-> Os ADR-01 e ADR-04 registram a mudança e o que ela custa.
+> **Histórico.** Este material passou por três versões:
+>
+> 1. Django com renderização no servidor (templates DTL);
+> 2. Django/DRF como API + SPA em React (ADR-01, superado);
+> 3. **TypeScript ponta a ponta**: NestJS + TypeORM no backend, React no frontend
+>    (**ADR-10**, vigente).
+>
+> Os ADRs superados foram mantidos: entender por que uma decisão foi revista é parte do
+> que a Etapa 2 do projeto cobra.
 
 ---
 
-## ADR-01 — Arquitetura desacoplada: API REST + SPA
+## ADR-10 — TypeScript ponta a ponta: NestJS + TypeORM + React
 
-- **Status:** aceito · **Data:** 2026-08-11 · **Substitui:** ADR-04 (versão anterior)
+- **Status:** aceito · **Data:** 2026-08-18 · **Substitui:** ADR-01
 
-**Contexto.** A ementa exige um framework que ofereça: classes que geram o banco,
-atualização do banco a partir das classes, API de consulta/CRUD, mapeamento de URLs, views
-como classes/métodos/funções, criação de interfaces com o usuário, gestão de usuários,
-segurança e deploy. A instituição optou por alinhar o material às tecnologias de frontend
-predominantes no mercado brasileiro (React e Tailwind).
+**Contexto.** A escolha anterior (Django/DRF + React) resolvia bem a ementa, mas carregava
+duas premissas que foram reexaminadas:
 
-**Decisão.** Arquitetura em dois artefatos:
+1. **Mercado.** Nas pesquisas de uso mais recentes, Django aparece por volta da 4ª a 6ª
+   posição entre frameworks de backend, atrás de Node/Express, ASP.NET Core e Spring Boot.
+   No mercado brasileiro o descolamento é maior: Java/Spring domina o *enterprise*,
+   Node/NestJS domina *startups* e *scale-ups*, PHP/Laravel domina PME e e-commerce, e o
+   Python brasileiro pende mais para dados e ML do que para web.
+2. **Duas linguagens em 100h.** O material ensinava Python **e** TypeScript. Como o
+   pré-requisito de JavaScript está atendido por esta turma, metade dessa carga era
+   redundante: a turma já traz o modelo mental da linguagem que o frontend usa.
+
+**Decisão.** Uma linguagem em toda a stack.
 
 ```
 ┌──────────────────────────────┐        ┌──────────────────────────────┐
 │  FRONTEND (SPA)              │  HTTP  │  BACKEND (API REST)          │
-│  React 19 + TypeScript       │ ◀────▶ │  Django 5 + DRF              │
-│  Vite · Tailwind 4           │  JSON  │  PostgreSQL                  │
-│  React Router · TanStack     │        │  drf-spectacular (OpenAPI)   │
-│  React Hook Form + Zod       │        │                              │
+│  React 19 + TypeScript       │ ◀────▶ │  NestJS 11 + TypeScript      │
+│  Vite · Tailwind 4           │  JSON  │  TypeORM · PostgreSQL        │
+│  React Router · TanStack     │        │  class-validator · Swagger   │
+│  React Hook Form + Zod       │        │  Passport · Argon2           │
 └──────────────────────────────┘        └──────────────────────────────┘
+              └──────────── @bibliocom/tipos ────────────┘
+                     tipos compartilhados (M15)
 ```
 
-**Justificativa.**
+**Justificativa — o mapa da ementa.**
 
 | Item da ementa | Onde é atendido |
 |---|---|
-| Classes geram o banco | `models.Model` + `makemigrations` (M04) |
-| Atualizar o banco pelas classes | Sistema de migrações (M05) |
-| Consultas e CRUD via API do framework | ORM (M06) + DRF ViewSets (M07) |
-| Mapeamento de URLs | `urls.py` + `DefaultRouter` (M07) **e** React Router (M10) |
-| Classes / métodos / funções para requisições | FBV, CBV, `APIView` e `ViewSet` (M07) |
-| **Templates: criação de interfaces com o usuário** | **Componentes React + Tailwind (M08, M09)** — ver ressalva abaixo |
-| Gestão de usuários | `contrib.auth` + fluxo no cliente (M12) |
-| Segurança | M13 (OWASP adaptado a SPA) |
+| Classes geram o banco | Classes `@Entity()` do TypeORM + `synchronize` em dev (M04) |
+| Atualizar o banco pelas classes | `migration:generate` compara entidades × banco (M05) |
+| Consultas e CRUD via API do framework | `Repository` e `QueryBuilder` (M06) |
+| Mapeamento de URLs | `@Controller('obras')` + `@Get(':id')` (M07) **e** React Router (M10) |
+| Classes / métodos / funções para requisições | Controllers são **classes**, *handlers* são **métodos**, Providers são serviços injetados (M07) |
+| **Templates: criação de interfaces** | Componentes React + Tailwind (M08, M09) — ver ADR-11 |
+| Gestão de usuários | Passport + Guards + entidade `Usuario` (M12) |
+| Segurança | M13 (OWASP aplicado a API + SPA) |
 | Implantação | M16 (dois artefatos) |
 
-**⚠️ Ressalva sobre o item "Templates".** A ementa diz *"Templates: criação de interfaces
-com o usuário utilizando o framework escolhido"*. Nesta arquitetura **não existem templates
-Django**: a interface é construída com componentes React. A leitura adotada é que o item
-está atendido — o objetivo pedagógico ("criar a interface com o usuário usando o framework
-escolhido") é cumprido, com JSX no lugar do DTL e o framework escolhido para a camada de
-interface sendo o React.
+**Por que TypeORM e não Prisma.** Prisma é excelente e cresce rápido, mas seu schema é uma
+**DSL própria** (`schema.prisma`), não classes. A ementa pede literalmente *"classes para
+geração automática do banco de dados"*. No TypeORM, `@Entity()` decora uma classe
+TypeScript comum, e é essa classe que gera a tabela — o item central da ementa fica
+atendido ao pé da letra, não por interpretação. Drizzle tem o mesmo descasamento de Prisma.
 
-Se a coordenação exigir leitura estrita (um único framework cobrindo Model–View–Template),
-use o **modo híbrido** descrito no ADR-04. A decisão é institucional, não técnica; o
-material suporta as duas.
+**Por que NestJS e não Express puro.** Express não tem opinião sobre estrutura: em 100h,
+uma turma iniciante produziria um `app.js` de 800 linhas. NestJS traz módulos, injeção de
+dependência e camadas explícitas — que é justamente o que a disciplina precisa **ensinar**.
+E é o framework TypeScript de backend com maior adoção corporativa.
 
 **Consequências.**
 
-*Fica melhor:* alinhamento com o mercado; separação clara de responsabilidades; a mesma API
-serve web, mobile e integrações; o estudante sai com duas competências vendáveis.
-
-*Fica pior:* dois projetos, dois deploys, dois conjuntos de dependências e dois ecossistemas
-de teste. A complexidade cresce, e ela é real — não decorativa. Ver ADR-09 sobre o custo em
-carga horária.
-
-**Adaptação a outras stacks.** A teoria (M01, M02, M13, M16, M17) é independente. Backend:
-Laravel + API Resources, Rails + Jbuilder, Spring Boot + `@RestController`, FastAPI +
-Pydantic. Frontend: Vue 3 + Pinia, Svelte, Angular. Mantenha os módulos, roteiros e
-rubricas; troque os comandos e os trechos de código.
+| Ganho | Custo |
+|---|---|
+| Uma linguagem só: a transição backend→frontend na semana 8 deixa de ser troca de idioma | NestJS exige entender **injeção de dependência e decorators** já no M03 — conceitos que o Django não cobrava tão cedo |
+| Tipos compartilhados entre as camadas (M15), impossível na stack anterior | Perdemos o **Django Admin**: não há back-office pronto (ver ADR-12) |
+| `class-validator` no backend e Zod no frontend têm o mesmo modelo mental | `contrib.auth` some: autenticação vira Passport + hash explícito (mais horas em M12) |
+| Alinhamento com vagas de Node/TypeScript, o segmento que mais contrata júnior | Segurança deixa de ser "o framework já protege" e passa a ser configuração explícita (M13 muda de tom) |
 
 ---
 
-## ADR-04 — Modo híbrido como alternativa documentada
+## ADR-11 — O item "Templates" da ementa
 
-- **Status:** aceito (alternativa) · **Data:** 2026-08-11
+- **Status:** aceito · **Herdado do ADR-01, revalidado**
 
-**Contexto.** Nem toda instituição aceita que a interface saia do framework do backend, e
-nem toda turma tem base de JavaScript para absorver React em 15h.
+A ementa diz *"Templates: criação de interfaces com o usuário utilizando o framework
+escolhido"*. Nesta arquitetura **não existe motor de templates no servidor**: a interface é
+construída com componentes React.
 
-> **Nesta oferta:** o pré-requisito de JavaScript **está atendido**, então a segunda razão
-> não se aplica. O modo híbrido permanece documentado por causa da primeira — leitura
-> estrita da ementa — e para outras instituições que adotem o material.
+A leitura adotada é que o item **está atendido** — o objetivo pedagógico ("criar a interface
+do usuário com o framework escolhido") é cumprido, com JSX no lugar de um DTL/Blade, e o
+framework escolhido para a camada de interface sendo o React.
 
-**Decisão.** Documentar o **modo híbrido** como caminho alternativo, sem material próprio:
-Django com templates DTL renderizando as telas de CRUD, Tailwind via CLI para o estilo, e
-React montado apenas em "ilhas" de interatividade (busca com filtros, painel de
-indicadores), consumindo a API do M07.
+> ⚠️ **Esta é a única decisão que depende da sua coordenação.** Se a instituição exigir
+> leitura estrita — um único framework cobrindo Model–View–Template — a alternativa é usar
+> um *template engine* do próprio NestJS (Handlebars ou EJS via `@nestjs/serve-static`)
+> para duas ou três telas administrativas, mantendo o React para o restante. O material
+> registra a alternativa, mas **não a recomenda**: rendimento pedagógico baixo e nenhum
+> alinhamento de mercado.
 
-**Quando escolher o híbrido:** leitura estrita da ementa; turma sem base de JS; menos de
-15h disponíveis para frontend; projeto extensionista cujo parceiro precisa de algo simples
-e durável de manter por terceiros.
+---
 
-**O que muda:** M08 cai para 3h (React só como ilha), M09 vira "Tailwind + templates
-Django" e M10/M11 saem, liberando ~8h. Os módulos de backend não mudam.
+## ADR-12 — Back-office: construído, não herdado
 
-**Consequências.** O híbrido entrega mais rápido e é mais fácil de manter por terceiros —
-argumento relevante num projeto extensionista. Em troca, o estudante não pratica gestão de
-estado e roteamento no cliente, que é o que as vagas de frontend pedem.
+- **Status:** aceito · **Data:** 2026-08-18 · **Consequência do ADR-10**
+
+**Contexto.** O Django Admin dava, de graça, um painel administrativo completo — e o
+material dedicava 2h (M15) a customizá-lo. NestJS não tem equivalente.
+
+**Alternativas consideradas.**
+
+| Opção | Por que não |
+|---|---|
+| AdminJS (painel automático para Node) | Adiciona uma dependência pesada e opinativa para ensinar a customizá-la — conhecimento que não transfere |
+| Construir um CRUD administrativo em React | Duplica exatamente o que M07–M11 já ensinam. Repetição sem conceito novo |
+
+**Decisão.** As 2h do M15 passam a ensinar **tipos compartilhados entre backend e
+frontend** — um pacote `@bibliocom/tipos` no monorepo, consumido pelas duas camadas, com
+teste de contrato no CI.
+
+**Justificativa.** É o ganho que *só* existe nesta stack e que justifica tê-la escolhido:
+mudar um campo na entidade quebra a compilação do frontend **antes** do deploy, não em
+produção. Ensinar isso vale mais que customizar um painel que a turma não levaria consigo.
+
+A "gestão de usuários" da ementa continua atendida pelo M12, que ganhou o CRUD
+administrativo de usuários e papéis que antes ficava implícito no Admin.
+
+---
+
+## ADR-13 — Monorepo com workspaces do pnpm
+
+- **Status:** aceito · **Data:** 2026-08-18
+
+**Contexto.** Com as duas camadas na mesma linguagem, elas podem compartilhar código.
+Compartilhar exige que estejam no mesmo repositório e que o gerenciador de pacotes entenda
+essa relação.
+
+**Decisão.**
+
+```
+bibliocom/
+├── package.json          workspaces + scripts na raiz
+├── pnpm-workspace.yaml
+├── backend/              NestJS + TypeORM
+├── frontend/             React + Vite
+└── pacotes/tipos/        @bibliocom/tipos — DTOs e enums compartilhados
+```
+
+**Consequências.** Um `pnpm install` na raiz resolve as três. Um PR mostra a mudança
+completa (entidade → DTO → tipo → tela). Em contrapartida, a turma precisa entender
+*workspaces* — 20 minutos no M03, que se pagam no M15.
 
 ---
 
 ## ADR-02 — Banco: SQLite → PostgreSQL
 
-**Decisão.** SQLite nos módulos M03–M04; PostgreSQL a partir do M05 e obrigatório em
-produção.
+- **Status:** aceito · **Atualizado para o TypeORM**
 
-**Justificativa.** SQLite remove atrito no começo. Mas tem tipagem dinâmica, suporte parcial
-a `ALTER TABLE` e concorrência de escrita limitada — características que **escondem** erros
-que só aparecem em produção. Trocar de banco no M05 ensina, de graça, a lição central do
-ORM: *o código da aplicação não muda*.
+**Decisão.** SQLite nos módulos M03–M04, PostgreSQL a partir do M05.
+
+**Justificativa.** SQLite não exige instalação: a turma escreve entidades e vê tabelas
+nascerem na primeira aula de backend. A troca no M05 é feita mudando o `type` do
+`DataSource` — e é exatamente aí que a promessa do ORM ("o código da aplicação não muda")
+se demonstra sozinha.
+
+**Consequência declarada.** SQLite e PostgreSQL divergem em tipos e em migrações. O M05
+mostra a divergência em vez de escondê-la: é conteúdo, não acidente.
 
 ---
 
 ## ADR-03 — Configuração por variáveis de ambiente, nos dois artefatos
 
-**Decisão.** Backend: `SECRET_KEY`, `DEBUG`, `DATABASE_URL`, `ALLOWED_HOSTS`,
-`CORS_ALLOWED_ORIGINS` via ambiente (`python-dotenv` em dev). Frontend: `VITE_API_URL` via
-`.env`, lido em tempo de **build**.
+- **Status:** aceito
 
-**Justificativa.** Fator III do [12-Factor](https://12factor.net/pt_br/config).
+**Decisão.** Nenhum segredo no código. Backend lê via `@nestjs/config`; frontend via
+`import.meta.env`.
 
-**⚠️ Diferença crítica que a turma precisa entender:** variável de ambiente no backend é
-**secreta e lida em tempo de execução**; variável `VITE_*` é **pública e embutida no bundle
-em tempo de build**. Qualquer pessoa abre o DevTools e lê. Por isso **nunca** coloque chave
-de API, token ou segredo em `VITE_*`. Tratado no M13.
+**A distinção que mais gera bug:**
+
+| | Backend (`.env` do NestJS) | Frontend (`VITE_*`) |
+|---|---|---|
+| Quando é lida | **Execução** | **Build** |
+| Quem enxerga | Só o servidor | **Qualquer pessoa**, no bundle |
+| Pode conter segredo | Sim | **Nunca** |
+| Mudar exige | Reiniciar | **Rebuild** |
 
 ---
 
-## ADR-05 — TypeScript no frontend
+## ADR-05 — TypeScript nas duas camadas
 
-**Decisão.** React com **TypeScript**, não JavaScript puro.
+- **Status:** aceito · **Reforçado pelo ADR-10**
 
-**Justificativa.** É o padrão do mercado em projetos React novos, e resolve um problema
-específico desta arquitetura: o contrato da API deixa de ser suposição. Os tipos gerados a
-partir do schema OpenAPI (`openapi-typescript`, M07) fazem o compilador acusar quando o
-backend muda um campo — exatamente a classe de erro mais comum em projeto desacoplado de
-equipe iniciante.
+**Decisão.** TypeScript no backend e no frontend, com `strict: true`.
 
-**Consequências.** Curva de aprendizado maior nas primeiras aulas. Mitigação: o material usa
-TS "de superfície" (tipos de props, retorno de API e formulários), sem genéricos avançados,
-e o `tsconfig` começa com `strict: false` no M08, endurecendo no M11.
+**Justificativa.** Antes, TypeScript era só do frontend e custava horas de aprendizado
+isoladas. Agora ele é o idioma único da disciplina: o que a turma aprende sobre tipos no
+M04 (entidades) vale no M11 (formulários). O custo de aprender TS é pago uma vez e rende
+nas duas camadas.
 
 ---
 
 ## ADR-06 — Estado do servidor com TanStack Query
 
-**Decisão.** **TanStack Query** para dados vindos da API; `useState`/`useContext` para
-estado local de UI. **Sem** Redux, Zustand ou MobX.
+- **Status:** aceito
 
-**Justificativa.** A maior parte do "estado global" de um CRUD é, na verdade, cache de dados
-do servidor — e é isso que o TanStack Query resolve, com cache, revalidação, estados de
-carregamento e erro prontos. Introduzir uma biblioteca de estado global levaria a turma a
-reimplementar mal o que o Query já faz. A regra ensinada é: *estado do servidor no Query;
-estado de UI no componente; contexto só para sessão e tema*.
+**Decisão.** TanStack Query para dados vindos da API. Sem Redux, sem Zustand.
+
+**Justificativa.** A maior parte do "estado global" de um CRUD é **cache de servidor**, não
+estado de cliente. TanStack Query resolve carregamento, erro, revalidação e invalidação —
+os quatro estados de tela que o M08 ensina.
 
 ---
 
 ## ADR-07 — Autenticação por sessão com cookie, não JWT em `localStorage`
 
-- **Status:** aceito · **Relevante para:** M12, M13
+- **Status:** aceito · **Atualizado para NestJS**
 
-**Decisão.** Autenticação por **sessão do Django com cookie `HttpOnly`**, com frontend e
-API servidos sob o **mesmo site** (mesmo domínio, caminhos diferentes: `/` e `/api/`).
+**Decisão.** Sessão com cookie `HttpOnly`, `Secure`, `SameSite=Lax`, via
+`express-session` + `passport-local`. **Não** JWT guardado em `localStorage`.
 
-**Alternativas consideradas.**
+**Justificativa.** Token em `localStorage` é legível por qualquer JavaScript da página: um
+XSS vira roubo de sessão. Cookie `HttpOnly` não é acessível por script. Como os dois
+artefatos são publicados no mesmo domínio (M16), não há motivo para JWT.
 
-| Opção | Prós | Contras | Por que não |
-|---|---|---|---|
-| Sessão + cookie `HttpOnly` (escolhida) | JS não lê o token (imune a roubo via XSS); revogação imediata; nativo do Django | Exige mesmo site ou CORS com credenciais; precisa de CSRF | — |
-| JWT em `localStorage` | Simples; funciona entre domínios | **Qualquer XSS rouba o token**; revogação difícil; renovação manual | Padrão mais comum em tutoriais e um dos mais inseguros |
-| JWT em cookie `HttpOnly` | Seguro contra XSS | Volta a precisar de CSRF; complexidade de refresh sem ganho real aqui | Complexidade sem benefício no nosso cenário |
-
-**Justificativa.** O argumento de "JWT é stateless e escala" não se aplica a um sistema de
-biblioteca comunitária, e o custo — token legível por qualquer script injetado — é real. A
-disciplina ensina a decisão pelo modelo de ameaça, não pela moda. JWT é apresentado no M12
-com os *trade-offs*, e é a escolha correta quando existe app mobile ou consumidor de outro
-domínio.
-
-**Consequências.** Deploy precisa servir SPA e API sob o mesmo site (M16). Em
-desenvolvimento, o proxy do Vite resolve; em produção, o roteamento da PaaS.
+**O raciocínio é o conteúdo.** O M13 ensina a decidir pelo modelo de ameaça, não a decorar
+que "JWT é melhor". JWT é a escolha certa quando há múltiplos domínios ou clientes móveis —
+não é o nosso caso, e o material diz por quê.
 
 ---
 
 ## ADR-08 — Tailwind, sem biblioteca de componentes
 
-**Decisão.** **Tailwind CSS 4**, com componentes próprios. Sem Material UI, Chakra ou
-Bootstrap. `shadcn/ui` é citado como referência de padrões acessíveis, para consulta.
+- **Status:** aceito
 
-**Justificativa.** Biblioteca de componentes entrega telas bonitas rápido e ensina pouco:
-o estudante aprende a API da biblioteca, não CSS nem acessibilidade. Com Tailwind, cada
-componente é construído — e os requisitos de foco visível, contraste e semântica (cobrados
-na rubrica) precisam ser resolvidos, não herdados.
+**Decisão.** Tailwind puro, sem Material UI, Chakra ou shadcn/ui.
+
+**Justificativa.** Biblioteca de componentes esconde exatamente o que o M09 precisa
+ensinar: espaçamento, hierarquia visual, estados e responsividade. Quem aprendeu com
+utilitários consegue usar qualquer biblioteca depois; o contrário não vale.
 
 ---
 
 ## ADR-09 — O custo em carga horária
 
-- **Status:** aceito · **Registra um trade-off, não uma escolha técnica**
+- **Status:** aceito · **Revisado pelo ADR-10** · **Registra um trade-off**
 
-**Contexto.** A disciplina tem 100h fixas. Acrescentar React, TypeScript, Tailwind,
-roteamento e cache de dados exige ~15h que não existiam.
+**Contexto.** A disciplina tem 100h fixas.
 
-**Decisão.** As 15h saíram de: templates Django (−6h, removido), formulários Django
-(−4h, absorvido em serializers e React Hook Form), M01 HTTP (−1h), ORM (−1h), testes (−1h),
-Django Admin mantido em 2h e deploy reduzido de 5h para 4h.
+**O que a mudança para TypeScript ponta a ponta liberou e consumiu:**
+
+| Movimento | Horas |
+|---|---|
+| M08 (React) cai de 5h para 4h — TypeScript já é conhecido desde o M03 | **−1h** |
+| M03 sobe de 3h para 4h — injeção de dependência e decorators exigem mais | **+1h** |
+| M15 troca Django Admin por tipos compartilhados | 2h → 2h |
+| M12 absorve o CRUD de usuários que o Admin dava de graça | dentro das 5h |
+
+O total dos módulos segue **69h**, e a disciplina, **100h (40T + 60P)**.
 
 **Consequências — declaradas honestamente:**
 
-- O tempo por tecnologia caiu. A turma sai sabendo **construir** com React, não **dominar**
-  React. O material assume que a profundidade vem depois, no projeto e fora da disciplina.
-- **Testes ficaram apertados** (3h para pytest *e* Vitest). O módulo prioriza teste de
-  regra de negócio no backend e teste de componente crítico no frontend; e2e vira leitura.
-- Turma sem base de JavaScript **não** cabe em 100h. Isso não é opinião: é aritmética.
-  **Esta oferta tem o pré-requisito atendido**, e é isso que torna a alocação de 15h para o
-  bloco de frontend viável — elas são para o modelo mental do React, não para sintaxe. Para
-  turmas sem a base, o cronograma prevê 4h de nivelamento (retiradas de M06 e M15) ou o
-  modo híbrido do ADR-04.
-- O deploy ficou mais complexo (dois artefatos, CORS, variáveis de build) com menos tempo.
-  Mitigação: o M16 traz um roteiro único, testado, em vez de comparar plataformas.
+- **A transição da semana 8 deixou de ser um precipício.** Antes, a turma trocava de
+  linguagem no meio do curso. Agora troca de camada, no mesmo idioma. Este é o maior ganho
+  pedagógico do ADR-10.
+- **O M03 ficou mais denso.** Módulos, providers e injeção de dependência são abstratos, e
+  chegam antes de a turma ter um sistema para justificá-los. A mitigação é o M02, que
+  apresenta a arquitetura antes do código.
+- **Segurança dá mais trabalho.** O Django protegia por padrão; aqui, `helmet`,
+  `ValidationPipe` e CSRF são configuração explícita. Isso custa tempo no M13 — mas em
+  compensação a turma **vê** cada proteção, em vez de herdá-la sem saber.
+- **Testes seguem apertados** (3h para Jest no backend e Vitest no frontend). O módulo
+  prioriza teste de regra de negócio e de componente crítico; e2e vira leitura. Ganho
+  parcial: as duas ferramentas têm API quase idêntica, o que antes não acontecia com
+  pytest.
+- Turma **sem** base de JavaScript não cabe em 100h — e agora o risco é maior, porque não
+  há mais um bloco em outra linguagem para amortecer. Esta oferta tem o pré-requisito
+  atendido. Para outras, o cronograma prevê 4h de nivelamento.
 
-Registrar o custo é parte da decisão. Uma equipe que não sabe o que perdeu não pode
-compensar depois.
+---
+
+## ADR-01 — Arquitetura desacoplada: API REST + SPA *(superado)*
+
+- **Status:** superado pelo ADR-10 · **Data:** 2026-08-11
+
+Estabeleceu a separação em dois artefatos, com Django/DRF no backend. **A separação
+continua valendo**; o que mudou foi o framework do backend. Registrado porque a decisão de
+desacoplar é independente da linguagem escolhida — e é ela que o M02 ensina.
+
+---
+
+## ADR-04 — Modo híbrido *(superado)*
+
+- **Status:** superado pelo ADR-11
+
+Previa Django com templates + ilhas de React, caso a coordenação exigisse leitura estrita da
+ementa. Substituído pela alternativa registrada no ADR-11.
 
 ---
 
 ## Como escrever um ADR (modelo para a Etapa 2)
 
 ```markdown
-# ADR-NN — <decisão em uma linha>
+# ADR-00X — Título curto e afirmativo
 
-- **Status:** proposto | aceito | substituído por ADR-MM
+- **Status:** proposto | aceito | superado por ADR-00Y
 - **Data:** AAAA-MM-DD
-- **Decisores:** <nomes>
 
 ## Contexto
-Qual problema/força motiva a decisão? O que é fato, o que é restrição?
+O que é verdade hoje que torna esta decisão necessária.
 
 ## Decisão
-O que foi decidido, em voz ativa: "Vamos usar X".
+O que foi decidido, no presente do indicativo.
 
 ## Alternativas consideradas
-| Opção | Prós | Contras | Por que não |
-|---|---|---|---|
+O que mais foi avaliado e por que foi descartado.
+Uma alternativa sem motivo de descarte não foi avaliada de verdade.
 
 ## Consequências
-O que fica mais fácil e o que fica mais difícil a partir de agora.
+O que melhora e o que piora. **As duas colunas.**
+Um ADR só com vantagens é propaganda, não decisão.
 ```

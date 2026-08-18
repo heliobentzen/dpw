@@ -10,14 +10,14 @@
 
 | Nível | O que cobre | Ferramenta | Quantidade |
 |---|---|---|---|
-| Unitário | Regras de negócio nos models e services | pytest | |
-| Integração | Views + banco + template | pytest + Django test client | |
-| Permissões | Matriz papel × rota | pytest parametrizado | |
+| Unitário | Regras de negócio nos services | Jest | |
+| Integração | Controller + banco | Jest + Supertest | |
+| Permissões | Matriz papel × rota | Jest com `it.each` | |
 | Manual | Fluxos principais | Roteiro humano | |
 | Usuário real | Usabilidade | Observação | |
 | Carga simples | Desempenho com volume | Debug Toolbar | |
 
-**Ambiente de teste:** `<PostgreSQL 16, Python 3.12, dados gerados por manage.py popular>`
+**Ambiente de teste:** `<PostgreSQL 16, Node 20, dados gerados por src/semear.ts>`
 
 ## 2. Testes automatizados
 
@@ -27,7 +27,7 @@
 | 2 | | | |
 
 **Cobertura:** `<X>%` geral · `<Y>%` nas regras de negócio
-**Comando:** `pytest --cov=. --cov-report=term-missing`
+**Comando:** `pnpm test --coverage`
 
 ## 3. Matriz de acesso
 

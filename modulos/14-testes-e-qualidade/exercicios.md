@@ -23,14 +23,16 @@ exercício ensina a diferença entre ter testes e ter testes úteis.
 
 Reescreva estes 6 testes quase idênticos em **um** teste parametrizado:
 
-```python
-def test_isbn_13_digitos_valido(): ...
-def test_isbn_10_digitos_valido(): ...
-def test_isbn_com_hifens_valido(): ...
-def test_isbn_curto_invalido(): ...
-def test_isbn_com_letras_invalido(): ...
-def test_isbn_vazio_valido(): ...
+```ts
+it("aceita ISBN de 13 dígitos", ...);
+it("aceita ISBN de 10 dígitos", ...);
+it("aceita ISBN com hífens", ...);
+it("recusa ISBN curto", ...);
+it("recusa ISBN com letras", ...);
+it("aceita ISBN vazio", ...);
 ```
+
+Use `it.each` com uma tabela de casos.
 
 Depois acrescente 4 casos de borda que você não tinha pensado.
 
@@ -68,16 +70,24 @@ Este é o fluxo que impede que o mesmo bug volte na semana seguinte. Faça três
 
 Escreva testes para código que depende de tempo, sem depender do relógio real:
 
-```python
-from freezegun import freeze_time     # pip install freezegun
+```ts
+// Jest e Vitest têm relógio falso embutido — nenhuma dependência extra
+beforeEach(() => jest.useFakeTimers());
+afterEach(() => jest.useRealTimers());
 
-@freeze_time("2026-03-15")
-def test_emprestimo_vence_em_29_de_marco(exemplar, associado):
-    ...
+it("empréstimo de 15/03 vence em 29/03", async () => {
+  jest.setSystemTime(new Date("2026-03-15"));
+  const e = await service.emprestar(exemplar.id, associado.id);
+  expect(e.previsaoDevolucao).toEqual(new Date("2026-03-29"));
+});
 
-@freeze_time("2026-04-01")
-def test_emprestimo_de_15_de_marco_esta_atrasado(...):
-    ...
+it("empréstimo de 15/03 está atrasado em 01/04", async () => {
+  jest.setSystemTime(new Date("2026-03-15"));
+  const e = await service.emprestar(exemplar.id, associado.id);
+
+  jest.setSystemTime(new Date("2026-04-01"));
+  expect(service.estaAtrasado(e)).toBe(true);
+});
 ```
 
 Cubra: empréstimo feito hoje, vencendo hoje, vencido ontem, vencido há 30 dias, e a
@@ -89,11 +99,11 @@ Responda: **por que um teste que usa `date.today()` real é uma bomba-relógio?*
 
 ## E12.6 — Cobertura honesta (individual)
 
-1. Rode `pytest --cov --cov-report=html` e abra `htmlcov/index.html`.
+1. Rode `pnpm test --coverage` e abra `coverage/lcov-report/index.html`.
 2. Liste os 5 arquivos com menor cobertura.
 3. Para cada um, decida: *precisa de teste ou não?* Justifique.
 4. Escreva os testes que faltam nos que precisam.
-5. Adicione ao CI: `--cov-fail-under=60`.
+5. Adicione o piso ao CI: `--coverageThreshold='{"global":{"lines":60}}'`.
 
 Depois responda: **encontre um arquivo com 100% de cobertura e um bug.** (Se não achar,
 crie um: escreva um teste que executa a linha mas não verifica o resultado.) O que isso
@@ -106,7 +116,8 @@ prova sobre a métrica?
 Configure o pipeline do projeto da equipe com **todos** os estágios:
 
 ```
-lint (ruff) → migrações sem pendências → check --deploy → testes → cobertura → build
+lint (eslint) → tsc --noEmit → migrações sem pendências → testes → cobertura →
+contrato (tipos sincronizados) → build
 ```
 
 Requisitos:
@@ -123,17 +134,16 @@ Requisitos:
 
 Com Playwright, teste o fluxo completo pelo navegador:
 
-```python
-def test_fluxo_de_emprestimo(page, live_server, bibliotecario):
-    page.goto(f"{live_server.url}/contas/login/")
-    page.fill("#id_username", "bib")
-    page.fill("#id_password", "senha-de-teste-123")
-    page.click("button[type=submit]")
+```ts
+test("fluxo de empréstimo", async ({ page }) => {
+  await page.goto("http://localhost:5173/entrar");
+  await page.getByLabel("E-mail").fill("bib@exemplo.org");
+  await page.getByLabel("Senha").fill("senha-de-teste-123");
+  await page.getByRole("button", { name: "Entrar" }).click();
 
-    page.goto(f"{live_server.url}/obras/")
-    page.fill("input[name=q]", "Casmurro")
-    page.click("button[type=submit]")
-    page.click("text=Dom Casmurro")
+  await page.goto("http://localhost:5173/obras");
+  await page.getByPlaceholder("Buscar").fill("Casmurro");
+  await page.getByRole("link", { name: "Dom Casmurro" }).click();
     page.click("text=Emprestar")
     ...
     assert page.locator(".mensagem--success").is_visible()

@@ -1,6 +1,6 @@
 # M08 — React: fundamentos
 
-> **CH:** 5h (2h teóricas · 3h práticas) · **Semanas 8–9** · **Pré-requisitos:** M03, M07
+> **CH:** 4h (1h teórica · 3h práticas) · **Semanas 8–9** · **Pré-requisitos:** M03, M07
 > **Ementa:** *Templates: Criação de interfaces com o usuário utilizando o framework
 > escolhido* — aqui, componentes React no lugar de templates. Ver a
 > [ressalva no plano de ensino](../../docs/plano-de-ensino.md#3-rastreabilidade-ementa--módulos).
@@ -12,7 +12,7 @@ o **domínio é o mesmo** (BiblioCom).
 > **O que isso significa para o ritmo.** Como a turma já programa em JavaScript, este módulo
 > **não gasta tempo com sintaxe**. As 5h vão para o que é genuinamente novo e é onde os bugs
 > nascem: o modelo declarativo, imutabilidade do estado, o array de dependências do
-> `useEffect` e as chaves de lista. Quem precisar de uma ponte Python→JS para consulta tem
+> `useEffect` e as chaves de lista. Quem precisar de uma referência de JavaScript moderno tem
 > [`../../recursos/js-para-react.md`](../../recursos/js-para-react.md).
 
 ## 🎯 Objetivos
@@ -487,7 +487,7 @@ Trate os **quatro estados** com componentes próprios. Depois, force cada um:
 | Estado | Como forçar |
 |---|---|
 | Carregando | DevTools → Network → *Slow 3G* |
-| Vazio | `python manage.py shell` → `Obra.objects.all().delete()` |
+| Vazio | Apague as linhas pelo cliente de banco, ou recrie sem semear |
 | Erro de rede | Pare o `runserver` |
 | Erro 401 | Remova `AllowAny` do ViewSet |
 | Erro 500 | Provoque uma exceção na view |

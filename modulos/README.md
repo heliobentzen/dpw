@@ -20,19 +20,19 @@ cheatsheet.md      Referência rápida (quando o volume de sintaxe justifica)
 | [01](01-fundamentos-web-http/) | Fundamentos da web e HTTP | 5 | **E0** — relatório de inspeção HTTP |
 | [02](02-arquitetura-desacoplada/) | Arquitetura desacoplada e contrato de API | 2 | Contrato do BiblioCom |
 
-### Bloco 2 — Backend: dados e API (23h) 🔵
+### Bloco 2 — Backend: dados e API (24h) 🔵
 | # | Módulo | CH | Entrega |
 |---|---|---:|---|
-| [03](03-django-drf-primeiros-passos/) | Django + DRF: primeiros passos | 3 | API respondendo JSON |
-| [04](04-models-orm/) | Model: classes que geram o banco | 6 | **E1** — modelo de dados |
+| [03](03-nestjs-primeiros-passos/) | NestJS: módulos, controllers e providers | 4 | API respondendo JSON |
+| [04](04-entidades-typeorm/) | Entidades: classes que geram o banco | 6 | **E1** — modelo de dados |
 | [05](05-migracoes/) | Migrações | 3 | Migrações versionadas |
-| [06](06-orm-consultas-crud/) | ORM: consultas e CRUD | 5 | **E2** — caderno de consultas |
-| [07](07-api-urls-views-serializers/) | API: URLs, views e serializers | 6 | **E3** — API documentada |
+| [06](06-orm-consultas-crud/) | Repository e QueryBuilder: consultas e CRUD | 5 | **E2** — caderno de consultas |
+| [07](07-api-controllers-dtos/) | API: rotas, controllers e DTOs | 6 | **E3** — API documentada |
 
 ### Bloco 3 — Frontend: interface (15h) 🟣
 | # | Módulo | CH | Entrega |
 |---|---|---:|---|
-| [08](08-react-fundamentos/) | React: fundamentos | 5 | |
+| [08](08-react-fundamentos/) | React: fundamentos | 4 | |
 | [09](09-tailwind-e-interface/) | Tailwind e construção de interfaces | 4 | |
 | [10](10-rotas-e-navegacao/) | Rotas e navegação | 2 | |
 | [11](11-dados-e-formularios/) | Dados e formulários no cliente | 4 | **E4** — SPA consumindo a API |
@@ -43,7 +43,7 @@ cheatsheet.md      Referência rápida (quando o volume de sintaxe justifica)
 | [12](12-autenticacao-usuarios/) | Autenticação e gestão de usuários | 5 | **E5** — login e rotas protegidas |
 | [13](13-seguranca/) | Segurança | 5 | **E6** — checklist OWASP |
 | [14](14-testes-e-qualidade/) | Testes e qualidade | 3 | **E7** — suíte verde nas duas camadas |
-| [15](15-django-admin/) | Django Admin (back-office) | 2 | |
+| [15](15-tipos-compartilhados/) | Tipos compartilhados entre as camadas | 2 | |
 | [16](16-deploy/) | Deploy dos dois artefatos | 4 | **E8** — API e SPA no ar |
 | [17](17-observabilidade-e-manutencao/) | Observabilidade e manutenção | 2 | |
 
@@ -75,7 +75,7 @@ Todos os módulos constroem o mesmo sistema, incrementalmente.
 | Módulo | O que o BiblioCom ganha | Camada |
 |---|---|---|
 | M02 | Contrato de API definido (recursos, rotas, formatos) | ⚪ |
-| M03 | `backend/` (Django+DRF) e `frontend/` (Vite) rodando lado a lado | ⚪ |
+| M03 | `backend/` (NestJS) respondendo JSON, com o monorepo configurado | ⚪ |
 | M04 | `Autor`, `Editora`, `Obra`, `Exemplar`, `Associado`, `Emprestimo` | 🔵 |
 | M05 | Campos novos, migração de dados, PostgreSQL | 🔵 |
 | M06 | Consultas de catálogo, disponibilidade, atrasos, relatórios | 🔵 |
@@ -86,7 +86,7 @@ Todos os módulos constroem o mesmo sistema, incrementalmente.
 | M11 | Listagem com cache, busca com *debounce*, formulários validados | 🟣 |
 | M12 | Login, papéis, rotas protegidas, sessão ponta a ponta | ⚪ |
 | M13 | Correção de vulnerabilidades plantadas nas duas camadas | ⚪ |
-| M14 | pytest no backend, Vitest + Testing Library no frontend | ⚪ |
+| M14 | Jest no backend, Vitest + Testing Library no frontend | ⚪ |
 | M15 | Admin customizado para a coordenação da biblioteca | 🔵 |
 | M16 | API e SPA no ar, mesmo site, HTTPS, CI/CD | ⚪ |
 | M17 | Logs, healthcheck, backup e plano de manutenção | ⚪ |

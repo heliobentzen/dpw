@@ -1,368 +1,314 @@
-# M05 — Migrações: atualizar o banco a partir das classes
+# M05 — Migrações
 
-> **CH:** 3h (1h teórica · 2h práticas) · **Semanas 4–5** · **Pré-requisito:** M04
-> **Ementa:** *Atualização do banco de dados a partir das alterações nas classes geradoras.*
+> **CH:** 3h (1h teórica · 2h práticas) · **Semana 5** · **Pré-requisito:** M04
 
-Este módulo trata do que separa um projeto de laboratório de um sistema em produção: como
-mudar o esquema do banco **sem perder dados** e **sem quebrar o trabalho da equipe**.
+O `synchronize: true` do M04 foi um andaime. Aqui ele cai, e o banco passa a evoluir por
+arquivos versionados — que é como se altera um banco que tem dado dentro.
 
 ## 🎯 Objetivos
 
-1. Explicar o que é uma migração e por que ela é código versionado.
-2. Evoluir o esquema: adicionar, alterar, renomear e remover campos com segurança.
-3. Escrever migrações de dados (`RunPython`) com função reversa.
-4. Resolver conflitos de migração em equipe.
-5. Trocar de SGBD (SQLite → PostgreSQL) sem alterar o código da aplicação.
+Ao final você será capaz de:
+
+1. Explicar por que `synchronize` não pode ir para produção.
+2. Gerar, revisar e aplicar migrações; e reverter quando der errado.
+3. Escrever uma migração de **dados**, não só de esquema.
+4. Planejar uma mudança incompatível pela estratégia expandir/contrair.
 
 ---
 
 ## 📖 Teoria (1h)
 
-### 1. O que é uma migração
+### 1. O que o `synchronize` não sabe decidir
 
-Uma migração é um **arquivo Python versionado** que descreve uma mudança de esquema:
+O `synchronize` compara entidades × banco e aplica a diferença. Ele acerta o caso fácil
+(coluna nova, tabela nova) e **erra sozinho** o caso difícil:
 
-```python
-# acervo/migrations/0002_obra_isbn.py
-from django.db import migrations, models
+| Mudança | O que o `synchronize` faz | O que deveria acontecer |
+|---|---|---|
+| Renomear `sinopse` → `resumo` | Ele **não vê** renomeação: apaga `sinopse` e cria `resumo` vazia | Copiar os dados |
+| `varchar(200)` → `varchar(50)` | Trunca ou falha, dependendo do banco | Decidir o que fazer com os textos longos |
+| `nullable` → `NOT NULL` com linhas nulas | Falha | Preencher um padrão, depois apertar a regra |
 
+O problema não é o `synchronize` ser ruim; é que essas perguntas **não têm resposta
+automática**. Elas dependem do negócio. Migração é o lugar onde a resposta fica registrada,
+revisada em PR e aplicada na mesma ordem em toda máquina.
 
-class Migration(migrations.Migration):
-    dependencies = [("acervo", "0001_initial")]
+### 2. Uma migração é código versionado
 
-    operations = [
-        migrations.AddField(
-            model_name="obra",
-            name="isbn",
-            field=models.CharField(blank=True, db_index=True, max_length=13, verbose_name="ISBN"),
-        ),
-    ]
+```ts
+export class AdicionaDestaqueEmObra1738000000000 implements MigrationInterface {
+  public async up(queryRunner: QueryRunner): Promise<void> { /* aplicar */ }
+  public async down(queryRunner: QueryRunner): Promise<void> { /* desfazer */ }
+}
 ```
 
-Três propriedades que importam:
-
-- **É código** → entra no Git, é revisado em Pull Request, tem histórico e autoria.
-- **É ordenada** → `dependencies` forma um grafo; o Django aplica na ordem correta.
-- **É registrada** → a tabela `django_migrations` guarda o que já rodou, então `migrate`
-  é seguro de repetir.
-
-```
-models.py (o que eu quero)  ──makemigrations──▶  0002_....py (a receita)
-                                                        │
-                                                     migrate
-                                                        ▼
-                                             banco de dados (o que existe)
-```
-
-**`makemigrations` gera; `migrate` aplica.** Confundir os dois é o erro nº 1 do módulo.
-
-### 2. Por que não fazer `ALTER TABLE` na mão
-
-| Sem migrações | Com migrações |
+| Elemento | Função |
 |---|---|
-| Cada dev roda SQL diferente | Todos rodam a mesma coisa, na mesma ordem |
-| Produção diverge de desenvolvimento | Ambientes convergem |
-| Não há como voltar atrás | `migrate app 0003` reverte |
-| Deploy é ritual manual | Deploy roda `migrate` automaticamente |
-| Ninguém sabe o histórico do esquema | O Git conta a história |
+| O número no nome | *Timestamp*. Define a **ordem** de aplicação. Nunca o edite |
+| `up()` | O que a mudança faz |
+| `down()` | Como voltar atrás. `down` vazio significa "mudança irreversível" — declare isso de propósito, não por preguiça |
+| tabela `migrations` | O TypeORM registra ali o que já rodou. É assim que ele sabe o que falta |
 
-### 3. Operações mais comuns
+### 3. Migração de esquema × migração de dados
 
-| Operação | Gerada quando |
-|---|---|
-| `CreateModel` | Model novo |
-| `DeleteModel` | Model removido |
-| `AddField` / `RemoveField` | Campo adicionado/removido |
-| `AlterField` | Tipo ou opções de campo mudaram |
-| `RenameField` / `RenameModel` | Renomeação (o Django pergunta) |
-| `AddConstraint` / `RemoveConstraint` | Restrições |
-| `AddIndex` / `RemoveIndex` | Índices |
-| `RunPython` | Migração de **dados** (escrita por você) |
-| `RunSQL` | SQL bruto (último recurso) |
+```ts
+// esquema: muda a forma
+await queryRunner.query(`ALTER TABLE "obra" ADD "destaque" boolean NOT NULL DEFAULT false`);
 
-### 4. O caso do campo obrigatório novo
-
-Ao adicionar um campo `NOT NULL` numa tabela com dados, o Django pergunta:
-
-```
-You are trying to add a non-nullable field 'isbn' to obra without a default;
-we can't do that (the database needs something to populate existing rows).
+// dados: muda o conteúdo
+await queryRunner.query(`UPDATE "obra" SET destaque = true WHERE "anoPublicacao" < 1900`);
 ```
 
-O banco precisa saber **o que colocar nas linhas que já existem**. Três saídas:
+As duas são migrações. A segunda o TypeORM **não gera para você** — ela sai da sua cabeça,
+porque só você sabe a regra.
 
-| Estratégia | Quando |
-|---|---|
-| `null=True, blank=True` | O campo é mesmo opcional |
-| `default=...` | Existe um valor padrão sensato |
-| **Expandir → migrar → contrair** | O campo é obrigatório e precisa de valor real |
+### 4. Expandir e contrair
 
-O terceiro padrão, em três migrações:
-
-1. **Expandir** — adiciona o campo como `null=True`.
-2. **Migrar dados** — `RunPython` preenche as linhas existentes.
-3. **Contrair** — `AlterField` para `null=False`.
-
-É a única forma segura em produção com tabela grande — e é também o padrão que permite
-deploy **sem downtime**, porque em nenhum momento o banco fica incompatível com a versão
-da aplicação que está rodando.
-
-### 5. Migração de dados
-
-```python
-# acervo/migrations/0004_preenche_slug_categoria.py
-from django.db import migrations
-from django.utils.text import slugify
-
-
-def preencher_slugs(apps, schema_editor):
-    # Use apps.get_model, NUNCA o import direto do model!
-    Categoria = apps.get_model("acervo", "Categoria")
-    for categoria in Categoria.objects.filter(slug=""):
-        categoria.slug = slugify(categoria.nome)
-        categoria.save(update_fields=["slug"])
-
-
-def limpar_slugs(apps, schema_editor):
-    Categoria = apps.get_model("acervo", "Categoria")
-    Categoria.objects.update(slug="")
-
-
-class Migration(migrations.Migration):
-    dependencies = [("acervo", "0003_categoria_slug")]
-
-    operations = [
-        migrations.RunPython(preencher_slugs, reverse_code=limpar_slugs),
-    ]
-```
-
-> ⚠️ **Por que `apps.get_model` e não `from acervo.models import Categoria`?**
-> A migração precisa da versão **histórica** do model, como ele era naquele ponto do
-> tempo. Importar do `models.py` traz o model **atual** — e a migração quebra assim que
-> alguém alterar a classe. É a armadilha mais sutil deste módulo.
-
-Sempre forneça `reverse_code`. Migração sem reversão é uma porta que só abre.
-
-### 6. Migrações em equipe
-
-O conflito clássico:
+Como renomear uma coluna sem derrubar o sistema? Não de uma vez.
 
 ```
-main:      0002_obra_isbn
-             ├── Ana:   0003_obra_sinopse
-             └── Bruno: 0003_obra_edicao        ← dois "0003": conflito
+    ANTES              EXPANDIR             MIGRAR            CONTRAIR
+  ┌─────────┐      ┌─────────────┐     ┌─────────────┐     ┌─────────┐
+  │ sinopse │  →   │ sinopse     │  →  │ sinopse     │  →  │ resumo  │
+  └─────────┘      │ resumo (novo)│     │ resumo(cópia)│     └─────────┘
+                   └─────────────┘     └─────────────┘
+                    código escreve       código lê de
+                    nos dois              resumo
 ```
 
-Ao rodar `migrate`, o Django avisa: *Conflicting migrations detected; multiple leaf nodes*.
+| Passo | Migração | Deploy |
+|---|---|---|
+| 1. Expandir | Cria `resumo`, mantém `sinopse` | Código escreve nas duas |
+| 2. Migrar | `UPDATE resumo = sinopse` | — |
+| 3. Trocar leitura | — | Código lê só `resumo` |
+| 4. Contrair | Remove `sinopse` | — |
 
-```bash
-python manage.py makemigrations --merge     # cria 0004_merge_... unindo os ramos
-```
+Parece burocracia até a primeira vez que um deploy é revertido: com expandir/contrair, o
+código antigo continua funcionando com o banco novo. Sem ele, reverter significa restaurar
+backup.
 
-**Prevenção**, que custa menos que a cura:
-
-1. `git pull` **antes** de mexer em `models.py`.
-2. Uma pessoa por vez altera models no mesmo app, por sprint.
-3. Nomeie as migrações: `makemigrations acervo --name adiciona_isbn`.
-4. Revise migrações no Pull Request como revisa código.
-5. **Nunca** edite uma migração já aplicada por outra pessoa ou em produção — crie uma nova.
+💼 **No mercado:** "como você renomearia uma coluna de uma tabela com 10 milhões de linhas,
+sem downtime?" é pergunta clássica de entrevista pleno. A resposta é esta seção.
 
 ---
 
 ## 🛠️ Roteiro prático (2h)
 
-### Passo 1 — Ciclo básico (20 min)
+> 📦 **Instale o Docker antes desta aula** — ele entra no Passo 5.
+> 🐧 [`ambiente-setup.md`, seção 7](../../docs/ambiente-setup.md#7-postgresql-via-docker-a-partir-do-m05) ·
+> 🪟 [`ambiente-setup-windows.md`, passo 7](../../docs/ambiente-setup-windows.md#passo-7--docker-e-postgresql)
+> — no Windows o Docker exige o WSL2, então **não deixe para a hora da aula**.
 
-Adicione ao model `Obra`:
+### Passo 1 — Desligar o `synchronize` (20 min)
 
-```python
-edicao = models.PositiveSmallIntegerField("edição", null=True, blank=True)
+O TypeORM CLI precisa de um `DataSource` que ele consiga carregar sozinho, fora do Nest.
+Crie `backend/src/data-source.ts`:
+
+```ts
+import "dotenv/config";
+import { DataSource } from "typeorm";
+
+export default new DataSource({
+  type: "sqlite",
+  database: "bibliocom.sqlite",
+  entities: ["src/**/*.entity.ts"],
+  migrations: ["src/migracoes/*.ts"],
+  synchronize: false,
+});
+```
+
+| Linha | O que faz |
+|---|---|
+| `import "dotenv/config"` | Carrega o `.env`. A CLI roda fora do Nest, então o `ConfigModule` não está disponível |
+| `entities: [...]` | Onde procurar as classes. É delas que a migração é derivada |
+| `migrations: [...]` | Onde gravar e de onde ler os arquivos |
+| `synchronize: false` | **A linha do módulo.** A partir daqui, o banco só muda por migração |
+
+Em `app.module.ts`, troque `synchronize: true` por `synchronize: false` e acrescente
+`migrations: ["dist/migracoes/*.js"]`.
+
+> Repare no `dist/`: a aplicação roda **compilada**, a CLI roda o **fonte**. Caminhos
+> diferentes para a mesma coisa é a confusão nº 1 deste módulo.
+
+Acrescente ao `package.json` do backend:
+
+```json
+{
+  "scripts": {
+    "typeorm": "typeorm-ts-node-commonjs -d src/data-source.ts",
+    "migration:generate": "pnpm typeorm migration:generate",
+    "migration:run": "pnpm typeorm migration:run",
+    "migration:revert": "pnpm typeorm migration:revert"
+  }
+}
+```
+
+### Passo 2 — A migração inicial (25 min)
+
+Apague o `bibliocom.sqlite` — vamos recriar o banco pelo caminho oficial:
+
+```bash
+# Linux / macOS / WSL / Git Bash
+rm bibliocom.sqlite
+pnpm migration:generate src/migracoes/Inicial
+pnpm migration:run
+```
+
+```powershell
+# Windows PowerShell
+Remove-Item bibliocom.sqlite
+pnpm migration:generate src/migracoes/Inicial
+pnpm migration:run
+```
+
+**Abra o arquivo gerado e leia.** Ele é o M04 inteiro, em SQL: cada `CREATE TABLE`, cada
+chave estrangeira, cada índice.
+
+| Comando | O que faz |
+|---|---|
+| `migration:generate <caminho>` | Compara entidades × banco e **escreve** o arquivo. Não aplica |
+| `migration:run` | Aplica o que ainda não rodou, em ordem de timestamp |
+
+**Deu certo se:** a tabela `migrations` existe e tem uma linha.
+
+> ⚠️ **Gerar não é aplicar.** São dois comandos porque entre eles existe um passo humano:
+> **revisar**. Migração que ninguém leu é migração que apaga dados.
+
+### Passo 3 — Uma coluna nova, do jeito certo (20 min)
+
+Acrescente à entidade `Obra`:
+
+```ts
+@Column({ type: "boolean", default: false })
+destaque: boolean;
 ```
 
 ```bash
-python manage.py makemigrations acervo --name adiciona_edicao_obra
-python manage.py showmigrations acervo
-python manage.py sqlmigrate acervo 0002
-python manage.py migrate
-python manage.py showmigrations acervo      # agora com [X]
+pnpm migration:generate src/migracoes/AdicionaDestaque
+pnpm migration:run
 ```
 
-### Passo 2 — O prompt do campo obrigatório (20 min)
+Confira o arquivo: deve conter um `ADD "destaque"` com `DEFAULT false`. O `default` importa
+— sem ele, as linhas existentes ficariam nulas numa coluna `NOT NULL`, e a migração falharia.
 
-Adicione, **de propósito sem default**:
-
-```python
-codigo_interno = models.CharField(max_length=20)
-```
+Agora reverta e observe:
 
 ```bash
-python manage.py makemigrations acervo
+pnpm migration:revert
 ```
 
-Leia o prompt com atenção. Escolha a opção 1 e informe `"SEM-CODIGO"`. Depois:
+A coluna some. Rode `migration:run` de novo e ela volta. **É este par que torna o deploy
+reversível.**
+
+### Passo 4 — Migração de dados (25 min)
+
+Crie uma migração **vazia** e escreva o SQL você mesmo:
 
 ```bash
-python manage.py sqlmigrate acervo 0003     # veja o DEFAULT temporário no SQL
-python manage.py migrate
+pnpm typeorm migration:create src/migracoes/DestacaObrasAntigas
 ```
 
-No shell, confira que as obras existentes ficaram com `SEM-CODIGO`. Responda: **por que o
-default aparece no SQL mas não fica no model?**
+> `migration:create` (vazia) é diferente de `migration:generate` (derivada das entidades).
+> Migração de dados não pode ser gerada: a regra está na sua cabeça, não nas classes.
 
-### Passo 3 — Expandir → migrar → contrair (40 min) ⭐
+```ts
+export class DestacaObrasAntigas1738000000001 implements MigrationInterface {
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `UPDATE "obra" SET "destaque" = 1 WHERE "anoPublicacao" IS NOT NULL AND "anoPublicacao" < 1900`,
+    );
+  }
 
-Objetivo: dar a cada `Categoria` um `slug` obrigatório e único, **sem perder dados**.
-
-**3.1 — Expandir.** Em `models.py`:
-
-```python
-class Categoria(models.Model):
-    nome = models.CharField(max_length=80, unique=True)
-    slug = models.SlugField(max_length=90, null=True, blank=True)   # temporariamente opcional
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`UPDATE "obra" SET "destaque" = 0`);
+  }
+}
 ```
 
-```bash
-python manage.py makemigrations acervo --name expande_slug_categoria
-python manage.py migrate
-```
+⚠️ Repare no `down`: ele **não** restaura o estado anterior com fidelidade — zera tudo,
+inclusive destaques marcados à mão. Isso é honesto e deve estar comentado no arquivo.
+Migração de dados frequentemente não é perfeitamente reversível; declare isso em vez de
+fingir que é.
 
-**3.2 — Migrar dados.** Crie a migração vazia e escreva o `RunPython`:
-
-```bash
-python manage.py makemigrations acervo --empty --name preenche_slug_categoria
-```
-
-```python
-from django.db import migrations
-from django.utils.text import slugify
-
-
-def preencher(apps, schema_editor):
-    Categoria = apps.get_model("acervo", "Categoria")
-    usados = set()
-    for c in Categoria.objects.all():
-        base = slugify(c.nome) or f"categoria-{c.pk}"
-        slug, n = base, 1
-        while slug in usados:
-            n += 1
-            slug = f"{base}-{n}"
-        usados.add(slug)
-        c.slug = slug
-        c.save(update_fields=["slug"])
-
-
-def reverter(apps, schema_editor):
-    apps.get_model("acervo", "Categoria").objects.update(slug=None)
-
-
-class Migration(migrations.Migration):
-    dependencies = [("acervo", "0004_expande_slug_categoria")]
-    operations = [migrations.RunPython(preencher, reverse_code=reverter)]
-```
-
-```bash
-python manage.py migrate
-```
-
-**3.3 — Contrair.** Agora sim, torne obrigatório e único:
-
-```python
-slug = models.SlugField(max_length=90, unique=True)
-```
-
-```bash
-python manage.py makemigrations acervo --name contrai_slug_categoria
-python manage.py migrate
-```
-
-**3.4 — Reverter tudo e refazer**, para provar que o caminho de volta existe:
-
-```bash
-python manage.py migrate acervo 0003
-python manage.py migrate acervo
-```
-
-### Passo 4 — Renomear sem perder dados (15 min)
-
-Renomeie `Obra.sinopse` para `Obra.resumo`:
-
-```bash
-python manage.py makemigrations acervo
-# Did you rename obra.sinopse to obra.resumo (a TextField)? [y/N] -> y
-```
-
-Responda **y**. Se responder **N**, o Django gera `RemoveField` + `AddField` — e **todos
-os dados da coluna são perdidos**. Prove: crie uma obra com sinopse, faça o caminho
-errado num branch de teste e observe.
-
-### Passo 5 — Trocar SQLite por PostgreSQL (25 min)
+### Passo 5 — Trocar SQLite por PostgreSQL (20 min)
 
 Este passo demonstra a promessa central do ORM: **o código da aplicação não muda**.
 
 ```bash
-docker compose up -d          # arquivo em docs/ambiente-setup.md, seção 6
-pip install "psycopg[binary]" dj-database-url
-pip freeze > requirements.txt
+docker compose up -d          # docker-compose.yml nos guias de setup
+pnpm add pg
+pnpm remove sqlite3
 ```
 
-```bash
-# .env
+No `data-source.ts` e no `app.module.ts`, troque o bloco de conexão:
+
+```ts
+type: "postgres",
+url: process.env.DATABASE_URL,
+```
+
+`backend/.env`:
+
+```ini
 DATABASE_URL=postgres://bibliocom:devpassword@localhost:5432/bibliocom
 ```
 
-```python
-# config/settings.py
-import dj_database_url
-
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-    )
-}
-```
-
 ```bash
-python manage.py migrate                       # cria tudo do zero no PostgreSQL
-python manage.py loaddata exemplo              # recarrega a fixture do M04
-python manage.py runserver
+pnpm migration:run
 ```
 
-Compare o SQL nos dois bancos:
+**Deu certo se:** as tabelas nasceram no PostgreSQL, **sem nenhuma alteração em entidade,
+service ou controller**.
 
-```bash
-python manage.py sqlmigrate acervo 0001
-```
+> ⚠️ **As migrações que você gerou são SQL do SQLite.** Se `migration:run` falhar no
+> PostgreSQL, é esperado e é o conteúdo: apague `src/migracoes/`, apague o banco e gere de
+> novo contra o PostgreSQL. Cada banco tem seu dialeto — o ORM abstrai o **código**, não o
+> **SQL gerado**. Daqui em diante, gere migrações contra o mesmo banco que roda em produção.
 
-**Nenhuma linha de `models.py`, `views.py` ou template mudou.** Escreva 3 diferenças que
-você notou entre os SQLs gerados.
+Note também: `simple-enum` do M04 vira `enum` de verdade no PostgreSQL. O tipo que o SQLite
+não tinha existe aqui.
+
+### Passo 6 — Renomear com expandir/contrair (30 min, em duplas)
+
+Renomeie `Obra.sinopse` para `Obra.resumo` **sem perder dados**, nos quatro passos da
+teoria. Uma migração por passo:
+
+1. `ExpandeResumo` — adiciona `resumo`
+2. `CopiaSinopseParaResumo` — `UPDATE obra SET resumo = sinopse`
+3. *(sem migração — seria o deploy do código que lê `resumo`)*
+4. `RemoveSinopse` — remove `sinopse`
+
+Ao final, rode `migration:revert` quatro vezes e confira que o banco voltou ao início, com
+os dados intactos.
+
+**Pergunta para a dupla responder por escrito:** entre os passos 1 e 4, o sistema aceita
+ser revertido para a versão anterior do código? E entre 3 e 4? Justifiquem.
 
 ---
 
 ## ⚠️ Erros comuns
 
-| Erro | Correção |
+| Sintoma | Diagnóstico |
 |---|---|
-| Editar migração já aplicada em produção | Crie uma nova migração |
-| `from acervo.models import X` dentro de `RunPython` | Use `apps.get_model` |
-| Apagar `migrations/` para "resolver" | Destrói o histórico; use `migrate app zero` em dev |
-| Responder "N" ao prompt de rename | Perde os dados da coluna |
-| Não versionar migrações | O banco de cada pessoa fica diferente |
-| `migrate` sem `makemigrations` | Nada acontece — você não gerou a receita |
-| `makemigrations` sem `migrate` | O banco continua velho; erro só aparece na consulta |
-| `RunPython` sem `reverse_code` | Impede reverter o deploy |
-| Deploy sem `migrate` | `ProgrammingError: column does not exist` em produção |
+| `No changes in database schema were found` | As entidades já batem com o banco. Você salvou o arquivo? |
+| `Cannot find module 'src/data-source.ts'` | Rode o comando de dentro de `backend/` |
+| A migração roda pela CLI mas não na aplicação | Caminhos diferentes: `src/**/*.ts` na CLI, `dist/**/*.js` na app |
+| `QueryFailedError: relation already exists` | O banco já tinha as tabelas do `synchronize`. Apague e recrie pelas migrações |
+| Migração gerada no SQLite falha no PostgreSQL | Esperado — dialetos diferentes. Regenere contra o banco de produção |
+| `migration:revert` desfez a errada | Ele reverte **a última aplicada**, sempre. Não escolhe |
+| Conflito de merge em migração | Duas pessoas geraram no mesmo dia. Renomeie o timestamp da mais nova para depois |
+| Coluna nova `NOT NULL` falha | Faltou `default`, e há linhas existentes |
 
 ## ✅ Checklist de saída
 
-- [ ] Sei explicar a diferença entre `makemigrations` e `migrate` sem hesitar
-- [ ] Executei o padrão expandir → migrar → contrair completo
-- [ ] Escrevi um `RunPython` com `apps.get_model` e `reverse_code`
-- [ ] Revertei e reapliquei migrações
-- [ ] Renomeei um campo preservando os dados
-- [ ] Projeto rodando em PostgreSQL, com a fixture recarregada
-- [ ] Todas as migrações versionadas no Git
-- [ ] Simulei e resolvi um conflito de migração com `--merge`
+- [ ] `synchronize: false` nos dois lugares
+- [ ] Migração inicial gerada, **lida** e aplicada
+- [ ] Uma migração de esquema aplicada e revertida com sucesso
+- [ ] Uma migração de **dados**, escrita à mão, com `down` honesto
+- [ ] PostgreSQL rodando; nenhuma entidade ou service alterado na troca
+- [ ] Renomeação feita por expandir/contrair, sem perda de dados
+- [ ] Migrações versionadas no Git; `bibliocom.sqlite` **não**
+- [ ] Você sabe explicar por que gerar e aplicar são comandos separados
 
 ## 🧪 Exercícios
 
@@ -370,6 +316,6 @@ Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [Django — Migrations](https://docs.djangoproject.com/pt-br/5.0/topics/migrations/)
-- [Django — Writing database migrations](https://docs.djangoproject.com/en/5.0/howto/writing-migrations/)
-- [Zero-downtime migrations (padrão expand/contract)](https://martinfowler.com/bliki/ParallelChange.html)
+- [TypeORM — Migrations](https://typeorm.io/migrations)
+- [Expand/Contract pattern (Martin Fowler)](https://martinfowler.com/bliki/ParallelChange.html)
+- [PostgreSQL — ALTER TABLE](https://www.postgresql.org/docs/current/sql-altertable.html)

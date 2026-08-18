@@ -24,7 +24,7 @@ API, cache do cliente, roteamento e interface.
 |---|---|---|
 | Pergunta | *Quem é você?* | *O que você pode fazer?* |
 | Falha | `401` | `403` |
-| Backend | `authenticate()`, sessão | `permission_classes`, `get_queryset` |
+| Backend | `passport-local`, sessão | `Guard`, filtro na consulta |
 | Frontend | Tela de login, contexto de sessão | Esconder o que não pode usar |
 
 Papéis do BiblioCom:
@@ -49,7 +49,7 @@ segurança. Três opções reais:
 | Revogar acesso agora | ✅ Apagar a sessão | ❌ Difícil (só com lista de revogação) | ❌ Difícil |
 | Funciona entre domínios | Com CORS + credenciais | ✅ Naturalmente | Com CORS + credenciais |
 | Serve app mobile | Desajeitado | ✅ Sim | Desajeitado |
-| Complexidade | Baixa (nativo do Django) | Média (refresh, expiração) | Alta |
+| Complexidade | Baixa (`express-session` + `passport-local`) | Média (refresh, expiração) | Alta |
 
 **A escolha do material: sessão com cookie `HttpOnly`**, com SPA e API sob o **mesmo site**
 ([ADR-07](../../docs/decisoes-tecnicas.md#adr-07--autenticação-por-sessão-com-cookie-não-jwt-em-localstorage)).
@@ -58,200 +58,172 @@ O raciocínio, que é o que importa aprender:
 
 > A maioria dos tutoriais ensina JWT em `localStorage` porque é o mais fácil de fazer
 > funcionar. Mas `localStorage` é legível por **qualquer** JavaScript que rode na página —
-> inclusive o de um XSS, ou o de uma dependência do npm comprometida. Um cookie `HttpOnly`
-> não é. Como o BiblioCom não tem app mobile nem consumidor de outro domínio, o argumento
-> a favor do JWT ("stateless", "escala") não se aplica, e o custo (roubo de sessão via XSS,
-> revogação difícil) é real.
+> inclusive o que um XSS injetou, e inclusive o de uma dependência comprometida. Um cookie
+> `HttpOnly` simplesmente **não existe** para o JavaScript.
 >
-> **JWT é a escolha certa quando há app mobile ou cliente de outro domínio.** Aí o
-> *trade-off* muda, e a mitigação passa a ser: expiração curta, *refresh token* em cookie
-> `HttpOnly` e lista de revogação.
+> JWT é a resposta certa quando há vários domínios, clientes móveis ou serviços que não
+> compartilham sessão. **Não é o nosso caso.** Escolher pelo modelo de ameaça, e não pelo
+> tutorial mais popular, é o conteúdo desta seção.
 
-Decidir pelo modelo de ameaça — e não pelo que é mais comum no YouTube — é a competência
-que este módulo quer instalar.
+### 3. A entidade de usuário (20 min)
 
-### 3. Estendendo o usuário (20 min)
+O NestJS não traz modelo de usuário pronto — você o escreve, e isso torna cada decisão
+visível.
 
-| Estratégia | Quando | Custo |
-|---|---|---|
-| Perfil `OneToOne` | Projeto já em produção | Baixo; exige `select_related` |
-| **`AbstractUser`** | **Projeto novo** | Baixo, **se feito antes da 1ª migração** |
-| `AbstractBaseUser` | Login por e-mail/CPF, requisitos incomuns | Alto |
+```ts
+export enum Papel {
+  ASSOCIADO = "associado",
+  BIBLIOTECARIO = "bibliotecario",
+  COORDENACAO = "coordenacao",
+}
 
-> ⚠️ **Decida antes da primeira migração.** Trocar `AUTH_USER_MODEL` com o banco criado é
-> uma das operações mais dolorosas do Django.
+@Entity()
+export class Usuario {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-```python
-# contas/models.py
-from django.contrib.auth.models import AbstractUser
-from django.db import models
+  @Column({ unique: true })
+  email: string;
 
+  @Column({ select: false })
+  senhaHash: string;
 
-class Usuario(AbstractUser):
-    class Papel(models.TextChoices):
-        ASSOCIADO = "ASSOCIADO", "Associado"
-        BIBLIOTECARIO = "BIBLIOTECARIO", "Bibliotecário"
-        COORDENACAO = "COORDENACAO", "Coordenação"
+  @Column({ type: "simple-enum", enum: Papel, default: Papel.ASSOCIADO })
+  papel: Papel;
 
-    papel = models.CharField(max_length=15, choices=Papel.choices, default=Papel.ASSOCIADO)
-    telefone = models.CharField(max_length=20, blank=True)
-    email = models.EmailField("e-mail", unique=True)
+  @Column({ default: true })
+  ativo: boolean;
 
-    def __str__(self):
-        return self.get_full_name() or self.username
-
-    @property
-    def eh_equipe(self) -> bool:
-        return self.papel in {self.Papel.BIBLIOTECARIO, self.Papel.COORDENACAO}
+  @CreateDateColumn()
+  criadoEm: Date;
+}
 ```
 
-```python
-AUTH_USER_MODEL = "contas.Usuario"
+| Decisão | Por quê |
+|---|---|
+| `email` como identificador | Ninguém lembra de "nome de usuário". E-mail já é único por natureza |
+| `senhaHash`, nunca `senha` | O nome do campo documenta o que ele contém. Ver abaixo |
+| **`select: false`** | O campo **não vem** em `find()`. Precisa ser pedido de propósito. É a defesa contra vazá-lo sem querer num DTO malfeito |
+| `papel` como enum | Um papel por usuário resolve o BiblioCom. Se precisasse de vários, seria uma tabela `usuario_papel` |
+| `ativo` em vez de apagar | Desativar preserva o histórico de empréstimos. Apagar violaria o `RESTRICT` do M04 |
+
+**Senha nunca é guardada — só o hash.**
+
+```ts
+import * as argon2 from "argon2";
+
+const hash = await argon2.hash(senhaEmTexto);      // ao cadastrar
+const ok = await argon2.verify(hash, senhaEnviada); // ao autenticar
 ```
 
-No código, **nunca** importe `User` direto: use `settings.AUTH_USER_MODEL` em models e
-`get_user_model()` em views e scripts.
+| Regra | Motivo |
+|---|---|
+| Use **Argon2** ou **bcrypt** | São **lentos de propósito**: tornam a tentativa em massa cara |
+| **Nunca** MD5 ou SHA-256 | São rápidos. Uma GPU testa bilhões por segundo |
+| **Nunca** criptografia reversível | Se você consegue recuperar a senha, quem invadir também consegue |
+| O *salt* já vem embutido | Argon2 e bcrypt guardam o salt dentro do próprio hash |
 
-**Senhas** nunca são armazenadas — guarda-se um hash lento com sal:
-
-```python
-PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.Argon2PasswordHasher",
-    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
-]
-```
-```python
-user.set_password("nova")     # ✅ hasheia
-user.password = "nova"        # ❌ grava texto puro — nunca
-```
+> Se um site consegue **enviar sua senha por e-mail** quando você esquece, ele a guardou de
+> forma reversível. É motivo para não usar o site.
 
 ### 4. Endpoints de sessão (25 min)
 
-```python
-# contas/api.py
-from django.contrib.auth import authenticate, login, logout
-from django.views.decorators.csrf import ensure_csrf_cookie
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
+Quatro rotas, e um formato de resposta que o frontend consegue consumir sem adivinhar:
 
+| Rota | Método | Faz | Sucesso | Falha |
+|---|---|---|---|---|
+| `/api/auth/login` | POST | Cria a sessão | 200 + usuário | **401** |
+| `/api/auth/logout` | POST | Destrói a sessão | 204 | — |
+| `/api/auth/eu` | GET | Quem está logado | 200 + usuário | **401** |
+| `/api/auth/registrar` | POST | Cria conta | 201 + usuário | 400 / 409 |
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def login_view(request):
-    usuario = authenticate(
-        request,
-        username=request.data.get("username"),
-        password=request.data.get("password"),
-    )
-    if usuario is None:
-        # mensagem única: revelar "usuário não existe" permite enumerar contas
-        return Response({"detail": "Credenciais inválidas."}, status=401)
+Três detalhes que decidem se o frontend fica simples ou não:
 
-    login(request, usuario)        # rotaciona a sessão (defesa contra session fixation)
-    return Response(UsuarioSerializer(usuario).data)
+1. **`/eu` responde 401 quando não há sessão**, não 200 com `null`. O status é o que o
+   cliente checa; corpo nulo com 200 obriga a inspecionar o conteúdo.
+2. **`logout` é POST**, não GET. `GET` precisa ser seguro — um *prefetch* do navegador
+   deslogaria a pessoa.
+3. **A resposta nunca traz `senhaHash`.** Use DTO de saída (M07), sempre.
 
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def logout_view(request):
-    logout(request)
-    return Response(status=204)
-
-
-@ensure_csrf_cookie
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def eu_view(request):
-    """Quem é o usuário atual? Também entrega o cookie CSRF ao carregar a SPA."""
-    if not request.user.is_authenticated:
-        return Response({"detail": "Não autenticado."}, status=401)
-    return Response(UsuarioSerializer(request.user).data)
-```
-
-**O CSRF na SPA.** Com autenticação por sessão, o CSRF continua necessário (M13). O fluxo:
-
-1. A SPA chama `GET /api/auth/eu/` ao iniciar → o servidor devolve o cookie `csrftoken`.
-2. Em toda escrita, o cliente lê esse cookie e o envia no cabeçalho `X-CSRFToken`.
-
-```ts
-// src/api/client.ts
-function lerCookie(nome: string): string | null {
-  return document.cookie.split("; ").find((c) => c.startsWith(`${nome}=`))?.split("=")[1] ?? null;
-}
-
-export async function api<T>(caminho: string, init?: RequestInit): Promise<T> {
-  const metodo = (init?.method ?? "GET").toUpperCase();
-  const precisaCsrf = !["GET", "HEAD", "OPTIONS"].includes(metodo);
-
-  const r = await fetch(`/api${caminho}`, {
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-      ...(precisaCsrf ? { "X-CSRFToken": lerCookie("csrftoken") ?? "" } : {}),
-      ...init?.headers,
-    },
-    ...init,
-  });
-
-  if (!r.ok) throw new ApiError(r.status, await r.json().catch(() => null));
-  return r.status === 204 ? (null as T) : r.json();
-}
-```
-
-> Note que o cookie `csrftoken` **não** é `HttpOnly` — ele precisa ser lido pelo JS. Isso é
-> seguro porque ele não autentica ninguém sozinho: a autenticação está no `sessionid`, que
-> **é** `HttpOnly`. Os dois cookies têm papéis diferentes.
+⚠️ **A mensagem de erro do login é genérica**: `"Credenciais inválidas"`, nunca "esse e-mail
+não existe". Distinguir os dois casos entrega ao atacante uma lista de e-mails cadastrados —
+é **enumeração de usuários**, e o M13 volta a ela.
 
 ### 5. Autorização em quatro níveis (25 min)
 
 #### Nível 1 — exigir autenticação
 
-```python
-class ObraViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+```ts
+@UseGuards(AutenticadoGuard)
+@Post()
+criar(@Body() dto: CriarObraDto) {}
 ```
 
-#### Nível 2 — permissões por papel
+Um **Guard** roda antes do handler e responde `403` (ou `401`) sozinho quando devolve
+`false`. É a caixa "Guard" do diagrama do M03.
 
-```python
-class EhEquipeOuSomenteLeitura(BasePermission):
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        return request.user.is_authenticated and request.user.eh_equipe
-```
+#### Nível 2 — por papel
 
-#### Nível 3 — permissões do Django, por grupo
+```ts
+@Injectable()
+export class PapelGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
 
-```python
-# contas/management/commands/criar_grupos.py
-PAPEIS = {
-    "Associado": ["view_obra", "view_exemplar"],
-    "Bibliotecario": ["view_obra", "add_obra", "change_obra", "add_emprestimo",
-                      "registrar_devolucao", "view_associado", "add_associado"],
-    "Coordenacao": "__all__",
+  canActivate(ctx: ExecutionContext): boolean {
+    const exigidos = this.reflector.get<Papel[]>("papeis", ctx.getHandler());
+    if (!exigidos) return true;
+    const { user } = ctx.switchToHttp().getRequest();
+    return !!user && exigidos.includes(user.papel);
+  }
 }
+
+// uso
+@Papeis(Papel.BIBLIOTECARIO, Papel.COORDENACAO)
+@Delete(":id")
+remover(@Param("id", ParseIntPipe) id: number) {}
 ```
 
-Comando versionado > cliques no admin: reprodutível em qualquer ambiente e no CI.
+| Trecho | O que faz |
+|---|---|
+| `Reflector` | Lê o metadado que o decorator `@Papeis(...)` anexou ao método |
+| `if (!exigidos) return true` | Rota sem `@Papeis` não é restringida por este guard |
+| `ctx.switchToHttp().getRequest()` | Chega ao objeto de requisição, onde o Passport pôs o `user` |
+
+#### Nível 3 — o decorator que declara o papel
+
+```ts
+export const Papeis = (...papeis: Papel[]) => SetMetadata("papeis", papeis);
+```
+
+Uma linha. É o mesmo mecanismo de metadados do `@Get()` e do `@Entity()` — **um conceito,
+usado pela terceira vez** no curso.
+
+> Declarar o papel **junto da rota** é melhor que uma tabela central de permissões: quem lê
+> o controller vê quem pode chamar aquilo, sem abrir outro arquivo.
 
 #### Nível 4 — autorização por objeto ⭐
 
-Permissão de model diz "pode ver empréstimos". Não diz "pode ver **este** empréstimo".
+Papel diz "pode ver empréstimos". Não diz "pode ver **este** empréstimo".
 
-```python
-class EmprestimoViewSet(viewsets.ModelViewSet):
-    def get_queryset(self):
-        qs = Emprestimo.objects.select_related("exemplar__obra", "associado")
-        if self.request.user.eh_equipe:
-            return qs
-        return qs.filter(associado__user=self.request.user)
+```ts
+async listarDoUsuario(usuario: Usuario) {
+  const qb = this.emprestimos.createQueryBuilder("e")
+    .leftJoinAndSelect("e.exemplar", "ex")
+    .leftJoinAndSelect("ex.obra", "obra");
+
+  if (usuario.papel === Papel.ASSOCIADO) {
+    qb.where("e.associadoId = :id", { id: usuario.id });   // filtra, não checa depois
+  }
+  return qb.getMany();
+}
 ```
 
-**Filtrar o queryset** é melhor que checar depois: quem tenta `/api/emprestimos/999/` de
-outra pessoa recebe **404**, e não descobre nem que o registro existe. É a defesa contra
-**IDOR** (M13).
+**Filtrar a consulta** é melhor que checar depois de buscar: quem tenta
+`/api/emprestimos/999` de outra pessoa recebe **404**, e não descobre nem que o registro
+existe. É a defesa contra **IDOR** — *Insecure Direct Object Reference* — que o M13 retoma.
+
+> A diferença entre `403` e `404` aqui é deliberada. `403` confirma que o recurso existe;
+> `404` não confirma nada.
 
 ### 6. Sessão no cliente (25 min)
 
@@ -334,99 +306,210 @@ export function RotaProtegida({ papeis }: { papeis?: string[] }) {
 > ⚠️ **`RotaProtegida` não é segurança.** O código está no *bundle* que qualquer pessoa
 > baixa, e a API pode ser chamada por `curl`. Ela é **experiência do usuário**: evita
 > mostrar telas que resultariam em 403. A proteção real está nas `permission_classes` e no
-> `get_queryset` do DRF. Prove isso no roteiro prático.
+> filtro na consulta do backend. Prove isso no roteiro prático.
 
 ---
 
 ## 🛠️ Roteiro prático (3h)
 
-### Passo 1 — Model de usuário e grupos (40 min)
-
-> Se o projeto já tem migrações, o caminho de menor dor **em desenvolvimento** é: criar o
-> app, definir `AUTH_USER_MODEL`, apagar o banco e as migrações dos apps próprios, migrar
-> do zero. Faça agora — não em produção.
+### Passo 1 — Entidade de usuário e hash (35 min)
 
 ```bash
-cd backend && python manage.py startapp contas
+cd ~/dev/bibliocom/backend
+pnpm add @nestjs/passport passport passport-local express-session argon2
+pnpm add -D @types/passport-local @types/express-session
 ```
 
-Implemente `Usuario`, configure `AUTH_USER_MODEL`, migre, crie o superusuário e o comando
-`criar_grupos`. Crie 3 usuários de teste, um por papel.
-
-### Passo 2 — Endpoints de sessão (40 min)
-
-Implemente `login`, `logout` e `eu` conforme a teoria. Teste com `curl`, guardando cookies:
+Crie `src/contas/entidades/usuario.entity.ts` com a entidade da seção 3, gere a migração e
+aplique:
 
 ```bash
-# obtém o cookie CSRF
-curl -c cookies.txt http://localhost:8000/api/auth/eu/ -i
-
-# login (precisa do cabeçalho CSRF)
-CSRF=$(grep csrftoken cookies.txt | awk '{print $7}')
-curl -b cookies.txt -c cookies.txt -X POST http://localhost:8000/api/auth/login/ \
-     -H "Content-Type: application/json" -H "X-CSRFToken: $CSRF" \
-     -d '{"username":"bib","password":"senha-de-teste-123"}' -i
-
-# agora autenticado
-curl -b cookies.txt http://localhost:8000/api/auth/eu/
-
-# logout
-curl -b cookies.txt -X POST http://localhost:8000/api/auth/logout/ -H "X-CSRFToken: $CSRF" -i
+pnpm migration:generate src/migracoes/CriaUsuario
+pnpm migration:run
 ```
 
-Teste também: senha errada, usuário inexistente (**a mensagem é a mesma?**) e POST sem
-`X-CSRFToken` (deve dar 403).
+`src/contas/contas.service.ts`:
 
-### Passo 3 — Autorização no backend (40 min)
+```ts
+async registrar(dto: RegistrarDto): Promise<Usuario> {
+  const jaExiste = await this.usuarios.existsBy({ email: dto.email });
+  if (jaExiste) throw new ConflictException("E-mail já cadastrado");
 
-Aplique os quatro níveis:
+  const usuario = this.usuarios.create({
+    email: dto.email,
+    senhaHash: await argon2.hash(dto.senha),
+    papel: Papel.ASSOCIADO,
+  });
+  return this.usuarios.save(usuario);
+}
 
-| Recurso | Regra |
+async validar(email: string, senha: string): Promise<Usuario | null> {
+  const usuario = await this.usuarios.findOne({
+    where: { email },
+    select: { id: true, email: true, papel: true, ativo: true, senhaHash: true },
+  });
+  if (!usuario || !usuario.ativo) return null;
+  return (await argon2.verify(usuario.senhaHash, senha)) ? usuario : null;
+}
+```
+
+| Trecho | Por quê |
 |---|---|
-| `GET /api/obras/` | público |
-| `POST/PATCH/DELETE /api/obras/` | só equipe |
-| `GET /api/emprestimos/` | equipe vê tudo; associado vê só os seus |
-| `GET /api/emprestimos/{id}/` | **404** se não for seu |
-| `POST /api/emprestimos/` | só equipe |
-| `GET /api/relatorios/` | só coordenação |
+| `select: { …, senhaHash: true }` | O campo é `select: false` na entidade. Aqui ele é pedido **de propósito** — o único lugar do sistema que o lê |
+| `!usuario.ativo` cai no mesmo `return null` | Conta desativada e senha errada devolvem a **mesma** resposta. Distinguir informaria ao atacante que a conta existe |
+| `ConflictException` no registro | 409, não 400: a requisição está bem formada; o conflito é de estado |
 
-### Passo 4 — Sessão no cliente (40 min)
+⚠️ **O `registrar` sempre cria `ASSOCIADO`.** Se o papel viesse do DTO, qualquer pessoa se
+cadastraria como coordenação. É *mass assignment* com consequência de privilégio.
 
-Implemente `AuthProvider`, `useAuth`, `RotaProtegida` e a página de login (com React Hook
-Form + Zod, do M11). Requisitos:
+### Passo 2 — Sessão e endpoints (40 min)
 
-- ao entrar, volta para a rota pretendida (`state.de`)
-- o cabeçalho mostra o nome e o botão "Sair"
-- links de ações que a pessoa não pode fazer não aparecem
-- o logout limpa o cache e volta para o início
+Em `main.ts`:
 
-### Passo 5 — Matriz de acesso, verificada nas duas camadas (20 min) ⭐
+```ts
+import * as session from "express-session";
+import * as passport from "passport";
 
-Preencha executando **cada** célula. Duas colunas por caso: o que a **interface** faz e o
-que a **API** responde.
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 8,
+    },
+  }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
+```
+
+| Opção | O que faz |
+|---|---|
+| `httpOnly: true` | **A linha do módulo.** O cookie deixa de existir para o JavaScript |
+| `secure` só em produção | Exige HTTPS. Em `localhost` (HTTP) impediria o login |
+| `sameSite: "lax"` | O cookie não é enviado em requisição *cross-site* de escrita — mitiga CSRF |
+| `saveUninitialized: false` | Não cria sessão para quem só visitou. Menos lixo no armazenamento |
+| `maxAge` | Expira em 8 horas |
+
+⚠️ `SESSION_SECRET` vai no `.env`, e é **diferente** em produção. Com o segredo, qualquer
+pessoa forja um cookie de sessão válido.
+
+Implemente as quatro rotas da seção 4. O `/eu`:
+
+```ts
+@Get("eu")
+@UseGuards(AutenticadoGuard)
+eu(@Req() req: Request) {
+  return UsuarioResposta.de(req.user as Usuario);
+}
+```
+
+**Teste, e observe o cookie:**
+
+```bash
+# Linux / macOS / WSL / Git Bash
+curl -i -c cookies.txt -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"bib@exemplo.org","senha":"senha-de-teste-123"}'
+
+curl -i -b cookies.txt http://localhost:3000/api/auth/eu
+curl -i http://localhost:3000/api/auth/eu          # sem cookie: 401
+```
+
+```powershell
+# Windows PowerShell
+$s = $null
+Invoke-RestMethod -Uri "http://localhost:3000/api/auth/login" -Method Post -SessionVariable s `
+  -ContentType "application/json" `
+  -Body '{"email":"bib@exemplo.org","senha":"senha-de-teste-123"}'
+
+Invoke-RestMethod -Uri "http://localhost:3000/api/auth/eu" -WebSession $s
+Invoke-RestMethod -Uri "http://localhost:3000/api/auth/eu" -SkipHttpErrorCheck
+```
+
+**Deu certo se:** o cabeçalho `Set-Cookie` do login contém **`HttpOnly`**, e o `/eu` sem
+sessão responde **401**.
+
+Agora a prova do módulo: abra o DevTools do navegador, faça login e rode no console:
+
+```js
+document.cookie
+```
+
+O cookie de sessão **não aparece**. Esse é o `HttpOnly` funcionando — e é exatamente o que
+um XSS não conseguiria roubar. Compare mentalmente com `localStorage.getItem("token")`.
+
+### Passo 3 — Guards e autorização (40 min)
+
+Implemente `AutenticadoGuard`, `PapelGuard` e o decorator `@Papeis` da seção 5. Registre o
+`PapelGuard` globalmente em `app.module.ts`:
+
+```ts
+{ provide: APP_GUARD, useClass: PapelGuard }
+```
+
+Depois aplique a matriz:
 
 | Rota | Anônimo | Associado | Bibliotecário | Coordenação |
 |---|---|---|---|---|
-| `GET /api/obras/` | 200 | 200 | 200 | 200 |
-| `POST /api/obras/` | 401 | 403 | 201 | 201 |
-| `GET /api/emprestimos/` | 401 | só os seus | todos | todos |
-| `GET /api/emprestimos/{de-outro}/` | 401 | **404** | 200 | 200 |
-| `POST /api/emprestimos/` | 401 | 403 | 201 | 201 |
-| `GET /api/relatorios/` | 401 | 403 | 403 | 200 |
+| `GET /api/obras` | ✅ | ✅ | ✅ | ✅ |
+| `POST /api/obras` | ❌ 401 | ❌ 403 | ✅ | ✅ |
+| `DELETE /api/obras/:id` | ❌ 401 | ❌ 403 | ❌ 403 | ✅ |
+| `GET /api/emprestimos` | ❌ 401 | só os seus | todos | todos |
+| `POST /api/emprestimos` | ❌ 401 | ❌ 403 | ✅ | ✅ |
+| `GET /api/usuarios` | ❌ 401 | ❌ 403 | ❌ 403 | ✅ |
 
-**Agora o teste que fecha o módulo:** logado como associado, chame `POST /api/obras/` com
-`curl`, ignorando completamente a interface.
+A linha `GET /api/emprestimos` é o nível 4: não é permitir ou negar, é **filtrar**.
 
-```bash
-curl -b cookies-associado.txt -X POST http://localhost:8000/api/obras/ \
-     -H "Content-Type: application/json" -H "X-CSRFToken: $CSRF" \
-     -d '{"titulo":"Invasão"}' -i
+### Passo 4 — Sessão no cliente (40 min)
+
+No frontend, o cliente HTTP precisa enviar o cookie:
+
+```ts
+export const api = {
+  async get<T>(caminho: string): Promise<T> {
+    const r = await fetch(`/api${caminho}`, { credentials: "include" });
+    if (r.status === 401) throw new NaoAutenticado();
+    if (!r.ok) throw new ErroApi(r.status, await r.text());
+    return r.json();
+  },
+};
 ```
 
-Se vier **403**, sua segurança está no lugar certo. Se vier **201**, você estava confiando
-no `RotaProtegida` — e acabou de descobrir por que ele não é segurança.
+⚠️ **Sem `credentials: "include"`, o `fetch` não envia o cookie** — e todo endpoint
+autenticado responde 401 sem explicação aparente. É o erro nº 1 deste passo.
 
----
+Implemente, com o que o M10 e o M11 ensinaram:
+
+- `useSessao()` sobre TanStack Query, consultando `/auth/eu`
+- `<RotaProtegida papel={...}>` que redireciona para `/entrar` guardando o destino
+- Login que, ao dar certo, **invalida** a consulta da sessão para o cache atualizar
+- Logout que limpa o cache inteiro (`queryClient.clear()`)
+
+> **Esconder um botão não é segurança.** A proteção de rota no cliente melhora a experiência
+> — evita mostrar uma tela que falharia. Quem chama a API direto continua sendo barrado pelo
+> backend, e é lá que a segurança mora. O M13 demonstra isso com a API na mão.
+
+### Passo 5 — Verificar a matriz nas duas camadas (25 min) ⭐
+
+Para **cada célula** da tabela do Passo 3, confira as duas camadas:
+
+1. **Backend:** chame a rota com `curl.exe`/`Invoke-RestMethod`, usando a sessão de cada
+   papel. O status bate com a tabela?
+2. **Frontend:** logado com aquele papel, o elemento aparece na tela?
+
+Preencha e entregue:
+
+| Rota | Papel | Status esperado | Status obtido | UI coerente? |
+|---|---|---|---|---|
+
+⚠️ **Uma célula onde o frontend esconde e o backend permite é uma falha de segurança**, não
+um detalhe de interface. Marque-a em vermelho e corrija o backend — nunca "resolva"
+escondendo melhor.
 
 ## ⚠️ Erros comuns
 
@@ -437,7 +520,7 @@ no `RotaProtegida` — e acabou de descobrir por que ele não é segurança.
 | JWT em `localStorage` "porque é mais fácil" | Decida pelo modelo de ameaça |
 | Mensagem de login que revela se o usuário existe | Mensagem única |
 | Só esconder o link no React | Proteja a API |
-| Permissão de model sem checagem de objeto | Filtre o queryset (IDOR) |
+| Papel checado, objeto não | Filtre a consulta por dono (IDOR) |
 | Logout sem `queryClient.clear()` | Cache com dados da pessoa anterior |
 | `retry` na query `/auth/eu/` | Repete o 401 três vezes |
 | Faltou `X-CSRFToken` na escrita | 403 em todo POST |
@@ -451,7 +534,7 @@ no `RotaProtegida` — e acabou de descobrir por que ele não é segurança.
 - [ ] `login`, `logout` e `eu` funcionando, testados com `curl`
 - [ ] CSRF funcionando na SPA (cookie lido, cabeçalho enviado)
 - [ ] 3 grupos criados por comando versionado
-- [ ] Autorização nos 4 níveis, com queryset filtrado por usuário
+- [ ] Autorização nos 4 níveis, com a consulta filtrada por usuário
 - [ ] `AuthProvider`, `RotaProtegida` e página de login funcionando
 - [ ] Logout limpa o cache do Query
 - [ ] Matriz de acesso verificada nas duas camadas
@@ -469,8 +552,9 @@ Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [Django — Autenticação](https://docs.djangoproject.com/pt-br/5.0/topics/auth/)
-- [Django — Customizando autenticação](https://docs.djangoproject.com/en/5.0/topics/auth/customizing/)
-- [DRF — Authentication](https://www.django-rest-framework.org/api-guide/authentication/)
+- [NestJS — Authentication](https://docs.nestjs.com/security/authentication)
+- [NestJS — Guards](https://docs.nestjs.com/guards)
+- [Passport — estratégia local](https://www.passportjs.org/concepts/authentication/password/)
+- [OWASP — Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
 - [OWASP — Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
 - [OWASP — JWT for Java (o raciocínio vale para qualquer stack)](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html)

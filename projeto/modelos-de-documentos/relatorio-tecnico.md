@@ -58,9 +58,10 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 - Modelo de dados (diagrama ER + explicação das entidades e relações principais)
 - Decisões técnicas relevantes e alternativas descartadas
 
-> ❌ Não escreva "Django é um framework web em Python criado em 2005…".
-> ✅ Escreva "Escolhemos Django porque o sistema de migrações permitia evoluir o esquema
-> junto com o entendimento do domínio, que mudou três vezes ao longo do projeto."
+> ❌ Não escreva "NestJS é um framework Node.js que usa TypeScript…".
+> ✅ Escreva "Escolhemos manter as duas camadas em TypeScript porque, com 5 meses e uma
+> equipe pequena, compartilhar os tipos entre backend e frontend evitou a classe de erro que
+> mais nos custou tempo na primeira sprint: campo renomeado de um lado e não do outro."
 
 ## 6. Desenvolvimento (2–3 páginas)
 

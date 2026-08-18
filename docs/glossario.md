@@ -25,7 +25,7 @@ são idempotentes; `POST` não é (daí o "não reenviar formulário" do navegad
 
 **Método seguro (*safe*)** — Não altera estado no servidor. `GET` e `HEAD` são seguros.
 
-**Query string** — Parte da URL após `?`: `/busca?q=django&pagina=2`. Visível, logada,
+**Query string** — Parte da URL após `?`: `/busca?q=nestjs&pagina=2`. Visível, logada,
 compartilhável — nunca coloque senha ali.
 
 **Status code** — `2xx` sucesso, `3xx` redirecionamento, `4xx` erro do cliente, `5xx` erro
@@ -43,11 +43,11 @@ de simular memória.
 
 **DNS** — Traduz nome (`exemplo.com.br`) em endereço IP.
 
-**Porta** — Número que identifica o serviço na máquina: 80 (HTTP), 443 (HTTPS), 8000
-(`runserver`), 5432 (PostgreSQL).
+**Porta** — Número que identifica o serviço na máquina: 80 (HTTP), 443 (HTTPS), 3000
+(NestJS em desenvolvimento), 5173 (Vite), 5432 (PostgreSQL).
 
-**Servidor de aplicação (WSGI/ASGI)** — Processo que executa o código Python e conversa
-com o servidor web. Ex.: Gunicorn, Uvicorn.
+**Servidor de aplicação** — Processo que executa o seu código e responde a requisições. Em
+Node, é o próprio `node dist/main.js`: não há um processo separado entre ele e o proxy.
 
 **Proxy reverso** — Servidor à frente da aplicação (Nginx, load balancer da PaaS) que
 termina TLS, serve estáticos e distribui carga.
@@ -59,15 +59,16 @@ oferecendo estrutura pronta. Diferente de biblioteca, que você chama.
 
 **MVC** — *Model–View–Controller*.
 
-**MTV** — *Model–Template–View*, nomenclatura do Django. O "View" do Django é o
-*controller* do MVC; o "Template" do Django é a *view* do MVC.
+**MVC** — *Model–View–Controller*. No NestJS: a **entidade** é o Model, o **controller** é
+o Controller, e a **View** é o React — que roda no navegador, não no servidor.
 
-**Projeto vs. app (Django)** — Projeto é a configuração global; app é um módulo funcional
+**Módulo (NestJS)** — Unidade que agrupa controllers e providers de um domínio, e declara
+o que expõe. O `AppModule` é a raiz da árvore; cada domínio (acervo, contas) é um módulo
 reutilizável dentro do projeto.
 
-**`settings.py`** — Configuração central do projeto Django.
+**`app.module.ts`** — Módulo raiz: onde a configuração global e os demais módulos entram.
 
-**`manage.py`** — Utilitário de linha de comando do projeto.
+**`main.ts`** — Ponto de entrada: cria a aplicação, aplica pipes e middlewares globais, sobe o servidor.
 
 **Middleware** — Camada que processa toda requisição/resposta, antes/depois da view.
 
@@ -89,19 +90,19 @@ migração.
 
 **`migrate`** — **Aplica** as migrações pendentes ao banco.
 
-**Chave primária (PK)** — Identificador único da linha. O Django cria `id` automaticamente.
+**Chave primária (PK)** — Identificador único da linha. `@PrimaryGeneratedColumn()` a cria.
 
-**Chave estrangeira (FK)** — Referência a outra tabela; no Django, `ForeignKey` (relação
+**Chave estrangeira (FK)** — Referência a outra tabela; no TypeORM, `@ManyToOne` (relação
 1-N).
 
-**Relação N-N** — `ManyToManyField`; o Django cria a tabela intermediária.
+**Relação N-N** — `@ManyToMany` + `@JoinTable`; o TypeORM cria a tabela intermediária.
 
 **Relação 1-1** — `OneToOneField`; típico para estender o usuário com um perfil.
 
 **`related_name`** — Nome do acesso reverso: de `Emprestimo.associado` para
 `associado.emprestimos`.
 
-**QuerySet** — Objeto que representa uma consulta. É **preguiçoso** (*lazy*): só vai ao
+**QueryBuilder** — Objeto que monta uma consulta por encadeamento. É **preguiçoso**: só vai ao
 banco quando os dados são realmente usados.
 
 **Manager** — Interface de consulta do model, acessível por `Model.objects`.
@@ -113,7 +114,7 @@ banco quando os dados são realmente usados.
 
 **Agregação** — `Count`, `Sum`, `Avg`, `Max`, `Min` calculados pelo banco.
 
-**Anotação (`annotate`)** — Adiciona um valor calculado a cada objeto do QuerySet.
+**Agregação** — Valor calculado pelo banco (`COUNT`, `AVG`), obtido com `addSelect` + `groupBy`.
 
 **Transação** — Bloco atômico: ou tudo é gravado, ou nada. `transaction.atomic()`.
 
@@ -128,7 +129,7 @@ banco quando os dados são realmente usados.
 **View genérica** — CBV pronta para um caso comum: `ListView`, `DetailView`, `CreateView`,
 `UpdateView`, `DeleteView`.
 
-**URLconf** — Arquivo `urls.py` que mapeia padrões de URL para views.
+**Roteamento** — Mapeamento de URL para método, feito pelos decorators `@Controller` e `@Get`.
 
 **Path converter** — Tipagem no padrão da URL: `<int:pk>`, `<slug:slug>`, `<uuid:id>`.
 
@@ -137,7 +138,7 @@ banco quando os dados são realmente usados.
 **`reverse()` / `{% url %}`** — Constroem a URL a partir do **nome** da rota. Nunca escreva
 URL na mão.
 
-**Slug** — Identificador textual amigável para URL: `guia-de-django-para-iniciantes`.
+**Slug** — Identificador textual amigável para URL: `guia-de-nestjs-para-iniciantes`.
 
 **Template** — Arquivo de texto (geralmente HTML) com marcações que o framework preenche.
 
@@ -160,7 +161,7 @@ F5 não reenvie o formulário.
 **`Form` / `ModelForm`** — Classes que declaram campos, validam entrada e renderizam HTML.
 `ModelForm` deriva os campos de um model.
 
-**`cleaned_data`** — Dados já validados e convertidos para tipos Python.
+**DTO validado** — Instância da classe do DTO, já validada e com os tipos convertidos pelo `ValidationPipe`.
 
 **`clean_<campo>()` / `clean()`** — Validações customizadas de um campo / entre campos.
 
@@ -191,7 +192,7 @@ aplicações web.
 f-strings em SQL, não.
 
 **XSS** — *Cross-Site Scripting*: script do atacante executado no navegador da vítima. O
-Django escapa por padrão; `|safe` e `mark_safe` desligam a proteção.
+React escapa por padrão; `dangerouslySetInnerHTML` desliga a proteção.
 
 **CSRF** — *Cross-Site Request Forgery*: site malicioso dispara ação autenticada no seu
 site. Mitigado pelo token `{% csrf_token %}`.
@@ -215,7 +216,7 @@ finalidade, direitos do titular.
 **Teste unitário / de integração / e2e** — Testam uma unidade isolada / a combinação de
 peças / o fluxo pelo navegador.
 
-**Fixture (pytest)** — Preparação reutilizável para testes.
+**Fixture** — Preparação reutilizável para testes; em Jest, `beforeEach` e funções de apoio.
 
 **Cobertura** — Percentual de linhas executadas pelos testes. Métrica de apoio, não meta.
 
@@ -232,8 +233,8 @@ e trechos de banco. É a falha de configuração mais comum.
 **`collectstatic`** — Reúne os estáticos de todos os apps num diretório para o servidor
 web.
 
-**Gunicorn / WhiteNoise** — Servidor WSGI de produção / servidor de estáticos embutido na
-aplicação.
+**`node dist/main.js`** — Como a aplicação sobe em produção. É o mesmo comando em Windows,
+macOS, Linux e na plataforma de hospedagem — não há servidor de produção separado.
 
 **PaaS** — *Platform as a Service*: você entrega código, a plataforma cuida de servidor,
 TLS e banco.

@@ -6,11 +6,11 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 ## Configuração
 
 - [ ] `DEBUG = False` em produção
-- [ ] `SECRET_KEY` vem de variável de ambiente, com ≥ 50 caracteres aleatórios
-- [ ] `SECRET_KEY` de produção **nunca** foi usada em desenvolvimento nem versionada
+- [ ] `SESSION_SECRET` vem de variável de ambiente, com ≥ 50 caracteres aleatórios
+- [ ] `SESSION_SECRET` de produção **nunca** foi usada em desenvolvimento nem versionada
 - [ ] `ALLOWED_HOSTS` com os domínios reais (nada de `["*"]`)
 - [ ] `.env` no `.gitignore`; `.env.example` sem valores
-- [ ] `python manage.py check --deploy` sem avisos
+- [ ] `helmet` aplicado e cabeçalhos conferidos na resposta
 - [ ] Caminho do admin alterado (`/admin/` → algo não óbvio)
 - [ ] Acesso ao admin restrito (IP, VPN ou MFA), se possível
 
@@ -32,7 +32,7 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 
 - [ ] Toda view não pública exige autenticação
 - [ ] Toda view de escrita exige permissão específica
-- [ ] Todo acesso a objeto de usuário filtra o queryset (sem IDOR)
+- [ ] Todo acesso a objeto de usuário filtra a consulta (sem IDOR)
 - [ ] Recurso privado inexistente para quem não pode vê-lo devolve **404**
 - [ ] Todo `ModelForm` tem `fields` explícito
 - [ ] Campos sensíveis definidos no servidor, nunca vindos do cliente
@@ -53,14 +53,14 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 - [ ] `X-CSRFToken` enviado em toda escrita
 - [ ] Cache do TanStack Query limpo no logout (`queryClient.clear()`)
 - [ ] CSP com `connect-src` restrito
-- [ ] Serializers minimizados: a API não devolve campo que a tela não usa
+- [ ] DTOs de saída minimizados: a API não devolve campo que a tela não usa
 - [ ] Controle de acesso **não** depende de `RotaProtegida` — provado com `curl`
 
 ## Entrada e saída
 
 - [ ] Nenhum SQL montado com f-string/concatenação
 - [ ] Nenhum `|safe` / `mark_safe` sobre dado do usuário
-- [ ] `format_html` em vez de concatenação ao gerar HTML em Python
+- [ ] Nenhum `dangerouslySetInnerHTML` sem sanitização (DOMPurify)
 - [ ] URLs informadas pelo usuário têm o esquema validado (só http/https)
 - [ ] Upload valida tipo (conteúdo, não extensão) e tamanho
 - [ ] Diretório de mídia não executa código; `X-Content-Type-Options: nosniff`
@@ -93,7 +93,7 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 
 - [ ] `pip-audit` sem vulnerabilidades críticas ou altas
 - [ ] `pnpm audit` sem vulnerabilidades críticas ou altas
-- [ ] Dependências fixadas nos dois projetos (`requirements.txt` e `pnpm-lock.yaml`)
+- [ ] Dependências fixadas nos dois projetos (`pnpm-lock.yaml` das duas camadas)
 - [ ] `detect-secrets scan` limpo, inclusive no histórico do Git
 - [ ] Backup automatizado do banco **e restauração testada**
 - [ ] Logs de segurança (login, falha, acesso negado, erro 5xx) sendo gravados
@@ -103,19 +103,32 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 ## Verificação final
 
 ```bash
-# backend
+# ---- Linux / macOS / WSL / Git Bash ----
 cd backend
-DEBUG=False python manage.py check --deploy
+pnpm audit --audit-level=high
 pip-audit
 
-# frontend
 cd ../frontend
 pnpm audit
 pnpm build && grep -rEi "secret|password|api[_-]?key|AKIA" dist/ || echo "nenhum segredo no bundle"
 
-# geral
 detect-secrets scan
 curl -I https://seu-dominio/ | grep -iE "strict-transport|x-frame|x-content|referrer|content-security"
+```
+
+```powershell
+# ---- Windows PowerShell ----
+cd backend
+pnpm audit --audit-level=high
+pip-audit
+
+cd ..\frontend
+pnpm audit
+pnpm build
+Select-String -Recurse -Pattern "secret|password|api[_-]?key|AKIA" dist/*
+
+detect-secrets scan
+curl.exe -I https://seu-dominio/ | Select-String "strict-transport|x-frame|x-content|referrer|content-security"
 ```
 
 Depois, tente, **no seu próprio sistema**:

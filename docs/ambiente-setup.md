@@ -1,118 +1,121 @@
-# Setup do ambiente de desenvolvimento
+# Setup do ambiente — Linux e macOS
 
-Guia único de instalação. Siga na ordem; ao final, rode a **verificação** da seção 8.
+> ## 🪟 Está no Windows?
+>
+> **Use o guia próprio: [`ambiente-setup-windows.md`](ambiente-setup-windows.md).**
+>
+> Ele é completo e independente. Não é tradução deste arquivo, e você **não** precisa
+> alternar entre os dois. Vale também se você optou por **Git Bash**; se optou por **WSL2**,
+> instale-o pelo guia do Windows e siga **este** arquivo lá dentro, porque o WSL2 é Linux.
 
-> São **dois** ambientes: Python (backend) e Node (frontend). Eles são independentes —
-> cada um com seu gerenciador de pacotes, seu arquivo de dependências e seu diretório.
+## Um runtime só
+
+A stack é **TypeScript ponta a ponta**. Você instala **Node e pnpm**, e nada além disso do
+lado de linguagem — não há Python, `venv`, `pip` nem um segundo ecossistema de pacotes para
+manter. O backend e o frontend compartilham runtime, gerenciador de pacotes e sintaxe.
+
+## O que entra em cada momento
+
+| Momento | O que entra | Seções |
+|---|---|---|
+| **Semana 1** (M00) | Git, Node 20, pnpm, VS Code, monorepo, primeiro commit | 1 a 5, 8, 9 |
+| **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
+| **Antes do M05** | Docker + PostgreSQL | 7 |
+| **A partir do M08** | Rodar os dois servidores juntos | 10 |
+
+> **Você digita tudo.** Não há script que monte o ambiente por você — configurar projeto,
+> instalar dependência e versionar código *são* conteúdo da disciplina, não preparação para
+> ela. O que existe é um script que **confere** o resultado (seção 8): ele diagnostica, não faz.
+
+**Tempo da semana 1:** 20–30 min.
+
+## Como trabalhar no dia a dia
+
+```bash
+cd ~/dev/bibliocom
+pnpm dev:api      # backend  → http://localhost:3000
+pnpm dev:web      # frontend → http://localhost:5173
+```
+
+Sem ativar ambiente virtual, sem `source` nenhum: as dependências vivem em `node_modules/`
+dentro do projeto, e o `pnpm` as encontra pela pasta em que você está.
+
+---
 
 ## 1. O que será instalado
 
 | Ferramenta | Versão mínima | Camada | Para quê |
 |---|---|---|---|
-| Python | 3.12 | 🔵 | Linguagem do backend |
-| pip / venv | (vem com Python) | 🔵 | Dependências e isolamento |
-| **Node.js** | **20 LTS** | 🟣 | Runtime do frontend |
-| **pnpm** | 9 | 🟣 | Gerenciador de pacotes |
-| Git | 2.40 | ambos | Versionamento |
-| VS Code (ou PyCharm/WebStorm) | atual | ambos | Editor |
-| Docker Desktop | atual | 🔵 | PostgreSQL local (a partir do M05) |
+| Node.js | **20 LTS** | ambas | Runtime do backend **e** do frontend |
+| pnpm | 9 | ambas | Gerenciador de pacotes e de *workspaces* |
+| Git | 2.40 | ambas | Versionamento |
+| VS Code (ou WebStorm) | atual | ambas | Editor |
+| Docker | atual | 🔵 | PostgreSQL local (a partir do M05) |
 | PostgreSQL | 16 | 🔵 | Banco de produção-like |
 
-> Até o M04 usamos **SQLite** (embutido, zero instalação). PostgreSQL entra no M05, para
+> Até o M04 usamos **SQLite** (um arquivo, zero instalação). PostgreSQL entra no M05, para
 > que a diferença entre "banco de brinquedo" e "banco de verdade" seja sentida na prática.
 
 ## 2. Estrutura do repositório
 
 ```
-bibliocom/
-├── backend/            projeto Django + DRF
-│   ├── .venv/          ambiente virtual Python (fora do Git)
-│   ├── config/
-│   ├── acervo/
-│   ├── manage.py
-│   ├── requirements.txt
-│   └── .env
-├── frontend/           projeto React + Vite
-│   ├── node_modules/   (fora do Git)
+bibliocom/                    monorepo (workspaces do pnpm)
+├── package.json              scripts da raiz
+├── pnpm-workspace.yaml
+├── backend/                  NestJS + TypeORM
 │   ├── src/
-│   ├── package.json
-│   ├── pnpm-lock.yaml
+│   ├── openapi.json          contrato gerado (M07)
 │   └── .env
+├── frontend/                 React + Vite
+│   ├── src/
+│   └── .env
+├── pacotes/tipos/            @bibliocom/tipos — DTOs e enums (M15)
 ├── docker-compose.yml
 ├── .gitignore
 └── README.md
 ```
 
-**Um repositório, dois projetos** (*monorepo*). Para uma equipe de 4 pessoas numa
-disciplina, isso é mais simples que dois repositórios: um único PR mostra a mudança
-completa (campo novo no model → serializer → tipo no cliente → tela), e não há
-dessincronização entre repositórios.
+**Um repositório, três projetos.** Um `pnpm install` na raiz resolve os três, e um PR mostra
+a mudança completa: entidade → DTO → tipo → tela.
 
 ---
 
-## 3. Python (backend)
-
-### Windows
-
-1. Baixe em <https://www.python.org/downloads/> a versão 3.12+.
-2. Na primeira tela, **marque "Add python.exe to PATH"**. É o erro nº 1 da turma.
-3. Verifique no PowerShell: `python --version`
-
-### macOS
+## 3. Git e GitHub
 
 ```bash
-brew install python@3.12
-python3 --version
+git --version
+git config --global user.name "Seu Nome"
+git config --global user.email "seu-email@exemplo.com"
+git config --global init.defaultBranch main
+git config --global pull.rebase false
 ```
 
-### Linux (Debian/Ubuntu)
+Use no `user.email` **o mesmo e-mail da conta do GitHub**, senão os commits não são
+atribuídos a você.
+
+Chave SSH (evita digitar token a cada push):
 
 ```bash
-sudo apt update
-sudo apt install -y python3.12 python3.12-venv python3-pip
-python3 --version
+ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
+cat ~/.ssh/id_ed25519.pub   # cole em github.com > Settings > SSH and GPG keys
+ssh -T git@github.com       # deve responder "Hi <usuario>!"
 ```
 
-### Ambiente virtual e dependências
-
-```bash
-mkdir -p bibliocom/backend && cd bibliocom/backend
-python3 -m venv .venv
-
-source .venv/bin/activate        # Linux/macOS
-.venv\Scripts\Activate.ps1       # Windows PowerShell
-
-python -m pip install --upgrade pip
-pip install "django>=5.0,<6.0" djangorestframework django-cors-headers \
-            python-dotenv dj-database-url drf-spectacular
-pip freeze > requirements.txt
-```
-
-O prompt passa a mostrar `(.venv)`. Se não mostrar, o ambiente **não** está ativo e tudo
-que você instalar vai para o lugar errado. Para sair: `deactivate`.
-
----
-
-## 4. Node.js e pnpm (frontend)
+## 4. Node.js e pnpm
 
 ### Instalação recomendada: via `fnm` (gerencia versões)
 
 ```bash
-# Linux/macOS
 curl -fsSL https://fnm.vercel.app/install | bash
 exec $SHELL
 fnm install 20 && fnm use 20
-
-# Windows (PowerShell, com winget)
-winget install Schniz.fnm
-fnm install 20; fnm use 20
 ```
 
-Alternativa simples: instalador oficial em <https://nodejs.org> (escolha **LTS**).
+Alternativa simples: instalador oficial em <https://nodejs.org> (escolha **LTS**), ou o
+gerenciador de pacotes da sua distribuição.
 
 ```bash
 node --version    # v20.x ou superior
-npm --version
 ```
 
 ### pnpm
@@ -124,75 +127,68 @@ pnpm --version
 ```
 
 > **Por que pnpm e não npm?** Instala mais rápido e usa muito menos disco (links para um
-> armazém compartilhado) — diferença sentida num laboratório com 40 máquinas e projetos de
-> vários semestres. Tudo neste material funciona com `npm` trocando `pnpm` por `npm`; só o
-> `pnpm dlx` vira `npx`.
+> armazém compartilhado) — diferença sentida num laboratório com 40 máquinas, e maior ainda
+> num monorepo com duas árvores de dependências. Ele também é quem gerencia os *workspaces*
+> do M03. Tudo funciona com `npm`, mas os workspaces exigem configuração diferente.
 
-### Criar o projeto React (feito no M03; aqui só para conferir a instalação)
+## 5. VS Code
 
-```bash
-cd bibliocom
-pnpm create vite@latest frontend -- --template react-ts
-cd frontend
-pnpm install
-pnpm dev            # abre em http://localhost:5173
-```
-
----
-
-## 5. Git e GitHub
+**Agora, duas extensões:**
 
 ```bash
-git --version
-git config --global user.name "Seu Nome"
-git config --global user.email "seu-email@exemplo.com"
-git config --global init.defaultBranch main
-git config --global pull.rebase false
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension esbenp.prettier-vscode
 ```
 
-Chave SSH (evita digitar token a cada push):
+| Extensão | Para quê |
+|---|---|
+| **ESLint** | Lint de TypeScript nas duas camadas |
+| **Prettier** | Formatação |
 
-```bash
-ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
-cat ~/.ssh/id_ed25519.pub   # cole em github.com > Settings > SSH and GPG keys
-ssh -T git@github.com       # deve responder "Hi <usuario>!"
-```
+**Depois, quando o módulo pedir:**
 
----
-
-## 6. VS Code
-
-Extensões recomendadas:
-
-| Extensão | Camada | Para quê |
+| Extensão | Antes do | Para quê |
 |---|---|---|
-| **Python** (Microsoft) | 🔵 | Interpretador, debug |
-| **Ruff** (Astral) | 🔵 | Lint e formatação Python |
-| **ESLint** | 🟣 | Lint JavaScript/TypeScript |
-| **Prettier** | 🟣 | Formatação |
-| **Tailwind CSS IntelliSense** | 🟣 | Autocomplete de classes — praticamente obrigatória |
-| **ES7+ React snippets** | 🟣 | Atalhos de componente |
-| **SQLite Viewer** | 🔵 | Inspecionar `db.sqlite3` |
-| **GitLens** | ambos | Histórico e blame |
+| **SQLite Viewer** | M04 | Ver as tabelas que as entidades geraram |
+| **Tailwind CSS IntelliSense** | M09 | Autocomplete de classes — praticamente obrigatória |
+| **GitLens** | quando quiser | Histórico e autoria linha a linha |
 
 `.vscode/settings.json` sugerido:
 
 ```json
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
   "editor.formatOnSave": true,
-  "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },
-  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "typescript.tsdk": "node_modules/typescript/lib",
   "tailwindCSS.experimental.classRegex": [["cn\\(([^)]*)\\)", "'([^']*)'"]],
-  "files.exclude": { "**/__pycache__": true, "**/*.pyc": true, "**/node_modules": true }
+  "files.exclude": { "**/node_modules": true, "**/dist": true }
 }
 ```
 
+`typescript.tsdk` faz o editor usar o TypeScript **do projeto**, não o embutido. Sem isto,
+o editor pode acusar erros que o `tsc` não acusa — e vice-versa.
+
 ---
 
+## 6. Dependências do backend
+
+> ⏭️ **Só a partir do M03.** Na semana 1, pule para a seção 8.
+
+O M03 conduz a criação do projeto NestJS e do monorepo:
+
+```bash
+pnpm dlx @nestjs/cli new backend --package-manager pnpm --skip-git
+```
+
+`pnpm dlx` executa a CLI sem instalá-la globalmente (é o `npx` do pnpm). O `--skip-git` é
+importante: sem ele, a CLI cria um segundo repositório dentro do seu.
+
+Siga o roteiro do [M03](../modulos/03-nestjs-primeiros-passos/).
+
 ## 7. PostgreSQL via Docker (a partir do M05)
+
+> ⏭️ Até o M04 usamos SQLite, que não exige instalação.
 
 `docker-compose.yml` na raiz:
 
@@ -220,76 +216,53 @@ volumes:
 ```bash
 docker compose up -d
 docker compose ps          # deve estar "healthy"
-pip install "psycopg[binary]"
+pnpm --filter backend add pg
 ```
-
----
 
 ## 8. Verificação do ambiente
 
-Rode o script de [`../recursos/codigo/verifica_ambiente.py`](../recursos/codigo/verifica_ambiente.py):
-
 ```bash
-python recursos/codigo/verifica_ambiente.py
+node recursos/codigo/verifica-ambiente.mjs
 ```
 
-Ele confere Python, venv, Django, DRF, **Node, pnpm**, Git e Docker. **Só avance com todos
-os itens em OK.**
+Confere Node, pnpm, Git configurado e Docker. Aceita `--etapa m00|m03|m05` e cobra só o que
+já deveria existir naquele ponto do curso. Ele **diagnostica e não instala**: para cada
+falha, imprime o comando exato que corrige.
 
----
+**Só avance com todos os itens da etapa em `OK`.**
 
 ## 9. Rodar o sistema completo (dois terminais)
 
+> ⏭️ A partir do **M08**, quando o frontend passa a existir.
+
 ```bash
 # terminal 1 — backend
-cd backend && source .venv/bin/activate
-python manage.py runserver          # http://localhost:8000
+cd ~/dev/bibliocom/backend
+pnpm start:dev            # http://localhost:3000
 
 # terminal 2 — frontend
-cd frontend
-pnpm dev                            # http://localhost:5173
+cd ~/dev/bibliocom/frontend
+pnpm dev                  # http://localhost:5173
 ```
 
-O Vite é configurado (M03) para encaminhar `/api` ao Django, de modo que o navegador veja
-tudo na mesma origem — o que evita CORS em desenvolvimento e reproduz a topologia de
-produção:
+Ou, da raiz, usando os scripts do workspace: `pnpm dev:api` e `pnpm dev:web`.
 
-```ts
-// frontend/vite.config.ts
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  server: {
-    proxy: {
-      "/api": { target: "http://localhost:8000", changeOrigin: true },
-      "/admin": { target: "http://localhost:8000", changeOrigin: true },
-    },
-  },
-});
-```
-
----
+O Vite encaminha `/api` ao NestJS, então o navegador vê tudo na mesma origem — evita CORS em
+desenvolvimento e reproduz a topologia de produção.
 
 ## 10. `.gitignore` do repositório
 
 ```gitignore
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-
-# Django
-*.log
-db.sqlite3
-db.sqlite3-journal
-/backend/media/
-/backend/staticfiles/
-
 # Node
 node_modules/
 dist/
 .vite/
 *.tsbuildinfo
+coverage/
+
+# Banco local
+*.sqlite
+*.sqlite-journal
 
 # Ambiente
 .env
@@ -302,9 +275,34 @@ dist/
 .DS_Store
 ```
 
-> **Nunca** comite `.env`, `db.sqlite3`, `node_modules/` ou `SECRET_KEY`. Segredo que entra
-> no histórico do Git é segredo vazado — mesmo depois de removido, continua nos commits
-> anteriores.
+> **Nunca** comite `.env`, `node_modules/` ou o `SESSION_SECRET`. Segredo que entra no
+> histórico do Git é segredo vazado — mesmo removido, continua nos commits anteriores.
+
+### `.gitattributes` — obrigatório se alguém da equipe usa Windows 🪟
+
+```gitattributes
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
+
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+```
+
+Sem isso, um `.sh` salvo no Windows chega ao servidor com `\r\n` e o deploy falha com
+`bad interpreter: No such file or directory` — mensagem que não diz nada sobre a causa real.
+**Crie o arquivo no primeiro commit**, junto com o `.gitignore`.
+
+> Este arquivo é responsabilidade de **quem cria o repositório**, mesmo que essa pessoa use
+> Linux: ele protege a equipe inteira, inclusive quem entra depois sem configurar nada.
 
 **Atenção ao `.env` do frontend:** ele **não** é secreto (é embutido no bundle em tempo de
 build e qualquer pessoa lê no DevTools), mas segue fora do Git porque muda por ambiente.
@@ -316,15 +314,18 @@ Nunca coloque chave de API nele. Detalhado no M13.
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
-| `python: command not found` (Windows) | PATH não configurado | Reinstale marcando "Add to PATH", ou use `py` |
-| `Activate.ps1 cannot be loaded` | Política do PowerShell | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| `ModuleNotFoundError: django` | venv não ativo | Ative o venv e reinstale |
 | `pnpm: command not found` | Corepack não habilitado | `corepack enable` |
+| `Cannot find module` após clonar | Faltou instalar | `pnpm install` **na raiz** |
+| `Cannot find module '@bibliocom/tipos'` | Workspace não resolvido | `pnpm install` na raiz; confira o `pnpm-workspace.yaml` |
 | `EACCES` ao instalar pacote global | Permissão | Use `fnm`/`corepack`, nunca `sudo npm -g` |
-| `npm ERR! network` no laboratório | Proxy/firewall | `npm config set proxy http://...` e libere `registry.npmjs.org` |
-| `Cannot find module 'react'` | Faltou `pnpm install` | Rode na pasta `frontend/` |
+| `npm ERR! network` no laboratório | Proxy/firewall | Libere `registry.npmjs.org` |
 | `port 5173 already in use` | Outro Vite rodando | `pnpm dev --port 5174` |
+| `port 3000 already in use` | Outro Nest rodando | `PORT=3001 pnpm start:dev` |
 | `port 5432 already in use` | PostgreSQL local ativo | Pare o serviço ou use `5433:5432` |
-| Requisição do front dá **CORS error** | Chamou `localhost:8000` direto | Use o caminho `/api` (proxy do Vite) |
+| Requisição do front dá **CORS error** | Chamou `localhost:3000` direto | Use o caminho `/api` (proxy do Vite) |
+| Editor acusa erro que o `tsc` não acusa | Versões diferentes de TypeScript | `"typescript.tsdk"` no `settings.json` |
+
+🪟 **Erros de Windows** têm tabela própria:
+[`ambiente-setup-windows.md`, passo 11](ambiente-setup-windows.md#passo-11--erros-e-diagnóstico).
 
 Mais casos em [`faq-troubleshooting.md`](faq-troubleshooting.md).

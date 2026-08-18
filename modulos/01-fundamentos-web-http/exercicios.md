@@ -78,7 +78,7 @@ Para cada situação, diga qual status você esperaria e o que investigaria prim
 
 ## E01.4 — Estender o servidor mínimo (individual) ⭐
 
-A partir do `servidor_minimo.py` do roteiro prático, implemente:
+A partir do `servidor-minimo.mjs` do roteiro prático, implemente:
 
 1. Rota `GET /recados/<n>` que mostra apenas o recado de índice `n`, com **404** se não
    existir.

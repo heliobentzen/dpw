@@ -9,14 +9,69 @@ Como conduzir a disciplina com este material.
 | −6 semanas | Mapear organizações parceiras candidatas para a extensão (ver [`../projeto/extensao/README.md`](../projeto/extensao/README.md)) |
 | −4 semanas | Formalizar parceria com 2–4 organizações (carta de anuência) |
 | −3 semanas | Criar a organização GitHub da turma e o repositório-modelo |
-| −2 semanas | Validar o laboratório: Python 3.12, **Node 20**, Git, Docker, portas 8000/5432/5173 |
-| −2 semanas | ⚠️ **Confirmar acesso a `registry.npmjs.org` e ao PyPI** — proxy bloqueando `npm install` é a falha logística nº 1 |
+| −2 semanas | Validar o laboratório: **Node 20**, pnpm, Git, Docker, portas 3000/5432/5173 |
+| −2 semanas | ⚠️ **Confirmar acesso a `registry.npmjs.org`** — proxy bloqueando `pnpm install` é a falha logística nº 1 |
+| −2 semanas | 🪟 Se o laboratório é Windows: instalar Git (traz o Git Bash), habilitar WSL2 e excluir a pasta de projetos do Windows Defender |
 | −2 semanas | Criar contas de PaaS ou solicitar GitHub Student Pack |
 | −1 semana | Enviar [`ambiente-setup.md`](ambiente-setup.md) aos estudantes com o script de verificação |
 
 > **A falha nº 1 desta disciplina é logística, não técnica**: proxy do laboratório
-> bloqueando `pip` ou `npm`, antivírus bloqueando o `runserver`, ou parceria extensionista
+> bloqueando o registro do npm, antivírus tornando o `pnpm install` lentíssimo, ou parceria extensionista
 > fechada tarde demais. Resolva isso antes da aula 1.
+
+### 🪟 Turma no Windows
+
+Os roteiros usam comandos Linux/macOS, com equivalências em
+[`../recursos/comandos-windows.md`](../recursos/comandos-windows.md). Na **aula 1**,
+combine com a turma **um** caminho e mantenha-o:
+
+| Caminho | Recomende quando |
+|---|---|
+| PowerShell nativo | Turma acostumada ao Windows; use as equivalências |
+| **Git Bash** | ⭐ Menor atrito: os comandos do material funcionam colados |
+| WSL2 | Turma mais madura; obrigatório se quiser paridade com produção |
+
+**A turma digita todos os comandos.** Não há script de montagem, e isso é deliberado:
+configurar projeto, instalar dependência e versionar código são objetivos de aprendizagem do
+M00 e caem na avaliação teórica. Um script que fizesse isso entregaria o ambiente e levaria
+o conteúdo junto.
+
+O que reduz o atrito da semana 1 não é automatizar — é **não pedir o que ainda não é
+necessário**:
+
+| Momento | O que entra | Avise na aula anterior |
+|---|---|---|
+| **Semana 1** (M00) | Node 20, pnpm, Git, VS Code, monorepo, 1º commit | — |
+| **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | sim |
+| **Antes do M05** | Docker + PostgreSQL | **sim, com folga** — no Windows exige WSL2 e, às vezes, virtualização na BIOS |
+
+A semana 1 instala **um runtime só**. Antes da mudança de stack, eram dois ecossistemas mais
+Docker — a maior parte sem uso por semanas, e cada um um ponto de falha na primeira aula.
+
+Para conferir, `verifica-ambiente.mjs` aceita `--etapa m00|m03|m05` e cobra só o que já
+deveria existir. Ele **diagnostica e não instala**: para cada falha, imprime o comando exato
+que corrige, e quem executa é o aluno.
+
+Guias por sistema: [`ambiente-setup-windows.md`](ambiente-setup-windows.md) ou
+[`ambiente-setup.md`](ambiente-setup.md). Não peça para a turma do Windows "adaptar" o guia
+Linux: é a origem da maior parte do atrito da primeira semana.
+
+**Cinco coisas quebram em silêncio** e valem 10 minutos de aula na semana 1: `curl` é alias
+no PowerShell (use `curl.exe`); variáveis inline não existem (`$env:VAR="x";`); `&&` não
+existe no PowerShell 5.1; `>` grava arquivos em UTF-16, corrompendo qualquer arquivo de
+texto gerado; e um espaço depois
+da crase de continuação corta o comando pela metade. Nenhuma delas gera erro que aponte a
+causa.
+
+**Duas verificações valem mais que qualquer aviso**, porque previnem dias de problema:
+
+1. **A pasta do projeto está fora do OneDrive?** O `Documents` é sincronizado por padrão em
+   máquina nova e em conta institucional. Com `node_modules` dentro dele, o Git
+   acusa mudanças fantasma, arquivos ficam bloqueados e o `pnpm install` trava. Peça
+   `C:\dev` — sem espaço e sem acento no caminho.
+2. **`git config --get core.longpaths` responde `true`?** Um monorepo tem duas árvores de
+   `node_modules`, e o limite de 260 caracteres do Windows é atingido com facilidade — o
+   sintoma é `Filename too long` no meio de um `pnpm install`.
 
 ### Diagnóstico de JavaScript — semana 1
 
@@ -34,7 +89,7 @@ Uma turma "com base" costuma ter 2 ou 3 pessoas que na prática não têm. Encon
 semana 1 custa uma monitoria; encontrá-las na semana 8 custa o bloco de frontend delas.
 
 **O que fazer com o pré-requisito atendido:** não acelere o M08 achando que sobra tempo.
-As 5h já foram dimensionadas para o que é difícil em React mesmo para quem sabe JS —
+As 4h já foram dimensionadas para o que é difícil em React mesmo para quem sabe JS —
 imutabilidade do estado, array de dependências do `useEffect` e chaves de lista. Gaste-as
 ali, não em sintaxe.
 
@@ -64,8 +119,8 @@ dos problemas de acompanhamento e de "eu perdi meu código".
 - Tenha **dois repositórios**: o `inicio-mXX` (estado antes da aula) e o `fim-mXX`
   (estado final). Se a demo travar, faça checkout do final e siga em frente.
 - Digite o código, não cole. A turma acompanha o ritmo dos dedos, não o do clipboard.
-- **Erre de propósito** pelo menos uma vez por aula: esqueça o `{% csrf_token %}`, esqueça
-  o `makemigrations`. Mostrar a mensagem de erro e o caminho até a correção vale mais que
+- **Erre de propósito** pelo menos uma vez por aula: esqueça de registrar o provider no
+  módulo, esqueça o `migration:run`. Mostrar a mensagem de erro e o caminho até a correção vale mais que
   o código correto de primeira.
 - Fonte ≥ 16pt, tema claro, terminal e editor lado a lado.
 
@@ -91,12 +146,12 @@ A nota do projeto é individualizável por fator de participação (0,7–1,1).
 Se precisar reduzir a carga sem ferir a ementa, corte nesta ordem:
 
 1. M17 Observabilidade (2h) — complementar
-2. M15 Admin (2h) — pode virar leitura assíncrona
+2. M15 Tipos compartilhados (2h) — pode virar leitura assíncrona
 3. M14 Testes: 3h → 2h (mantenha regra de negócio e matriz de acesso)
 4. M00 Ambiente: transforme em pré-atividade assíncrona
 5. M10 Rotas (2h) — pode ser absorvido pelo M11, com perda
 
-**Antes de cortar, considere o modo híbrido** ([ADR-04](decisoes-tecnicas.md#adr-04--modo-híbrido-como-alternativa-documentada)):
+**Antes de cortar, considere o modo híbrido** ([ADR-04](decisoes-tecnicas.md#adr-11--o-item-templates-da-ementa)):
 ele libera ~8h de uma vez. Com o pré-requisito de JS atendido, porém, a única razão que
 resta para adotá-lo é a **leitura estrita da ementa** — não a capacidade da turma.
 
@@ -136,7 +191,7 @@ a extensão: são eliminatórias.
 - Estudantes sem máquina própria: garanta laboratório com horário estendido ou use
   GitHub Codespaces / Gitpod (o material roda sem alterações).
 - Internet instável: os módulos M00–M15 funcionam offline após a primeira instalação;
-  baixe os pacotes com `pip download -r requirements.txt -d pacotes/` e distribua.
+  use `pnpm fetch` num espelho local, ou distribua o `pnpm-store` já populado.
 - Requisitos de acessibilidade das interfaces (WCAG básico) são cobrados no M09 e na
   rubrica da Etapa 3.
 

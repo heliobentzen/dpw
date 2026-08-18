@@ -20,44 +20,48 @@
 Log existe para responder perguntas depois que o problema aconteceu. Um log que ninguém
 consegue pesquisar não é log — é ruído.
 
-```python
-# config/settings.py
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verboso": {
-            "format": "{asctime} {levelname} {name} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "console": {"class": "logging.StreamHandler", "formatter": "verboso"},
-    },
-    "root": {"handlers": ["console"], "level": "INFO"},
-    "loggers": {
-        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
-        "django.security": {"handlers": ["console"], "level": "WARNING", "propagate": False},
-        "acervo": {"handlers": ["console"], "level": "INFO", "propagate": False},
-    },
-}
+```bash
+pnpm --filter backend add nestjs-pino pino-http
+pnpm --filter backend add -D pino-pretty
 ```
+
+```ts
+// backend/src/app.module.ts
+LoggerModule.forRoot({
+  pinoHttp: {
+    level: process.env.LOG_LEVEL ?? "info",
+    // legível no terminal em desenvolvimento; JSON puro em produção
+    transport: process.env.NODE_ENV !== "production"
+      ? { target: "pino-pretty" }
+      : undefined,
+    redact: ["req.headers.cookie", "req.headers.authorization", "req.body.senha"],
+  },
+}),
+```
+
+| Opção | O que faz |
+|---|---|
+| `level` por variável | Subir para `debug` em produção sem alterar código, durante um incidente |
+| `transport: pino-pretty` só fora de produção | Colorido para você ler; JSON para a plataforma indexar |
+| **`redact`** | Apaga campos sensíveis **antes** de escrever. Sem isto, o cookie de sessão de cada requisição vai para o log — e quem lê o log assume a sessão |
+
+> ⚠️ `redact` é a linha mais importante do bloco. Log é lido por mais gente do que o banco:
+> equipe de suporte, plataforma de agregação, e quem tiver acesso ao painel.
 
 Para **stdout**, não arquivo (fator XI do 12-factor): a plataforma coleta, agrega e permite
 buscar.
 
-```python
-import logging
+```ts
+private readonly logger = new Logger(EmprestimosService.name);
 
-logger = logging.getLogger(__name__)
-
-logger.debug("detalhe de desenvolvimento")
-logger.info("emprestimo registrado id=%s exemplar=%s", emprestimo.pk, exemplar.pk)
-logger.warning("tentativa de acesso negada usuario=%s rota=%s", request.user.pk, request.path)
-logger.error("falha ao consultar ISBN %s", isbn, exc_info=True)
+this.logger.debug("detalhe de desenvolvimento");
+this.logger.log({ emprestimoId: e.id, exemplarId: ex.id }, "emprestimo registrado");
+this.logger.warn({ usuarioId, rota }, "tentativa de acesso negada");
+this.logger.error({ isbn, err }, "falha ao consultar ISBN");
 ```
 
-**Regras:** use `%s` (o logging só formata se o nível estiver ativo); nunca registre senha,
+**Regras:** registre **objeto**, não string concatenada — assim a plataforma indexa cada
+campo e você consegue filtrar por `emprestimoId`. Nunca registre senha,
 token, cookie ou dado pessoal desnecessário; registre **identificadores**, não nomes;
 inclua contexto suficiente para reconstruir o caso.
 
@@ -81,19 +85,24 @@ Quatro perguntas, quatro instrumentos:
 
 Healthcheck:
 
-```python
-# config/views.py
-from django.db import connection
-from django.http import JsonResponse
+```bash
+pnpm --filter backend add @nestjs/terminus
+```
 
+```ts
+@Controller("saude")
+export class SaudeController {
+  constructor(
+    private saude: HealthCheckService,
+    private db: TypeOrmHealthIndicator,
+  ) {}
 
-def healthcheck(request):
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-        return JsonResponse({"status": "ok"})
-    except Exception:
-        return JsonResponse({"status": "erro"}, status=503)
+  @Get()
+  @HealthCheck()
+  verificar() {
+    return this.saude.check([() => this.db.pingCheck("banco", { timeout: 1500 })]);
+  }
+}
 ```
 
 Um healthcheck que só devolve `200 OK` sem tocar no banco não detecta a falha mais comum
@@ -102,32 +111,46 @@ Um healthcheck que só devolve `200 OK` sem tocar no banco não detecta a falha 
 Sentry em 5 linhas:
 
 ```bash
-pip install "sentry-sdk[django]"
+pnpm --filter backend add @sentry/node
 ```
 
-```python
-if not DEBUG and os.getenv("SENTRY_DSN"):
-    import sentry_sdk
-
-    sentry_sdk.init(
-        dsn=os.environ["SENTRY_DSN"],
-        traces_sample_rate=0.1,
-        send_default_pii=False,      # NÃO envie dados pessoais para fora
-    )
+```ts
+// backend/src/main.ts — antes de criar a aplicação
+if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    tracesSampleRate: 0.1,
+    sendDefaultPii: false,        // NÃO envie dados pessoais para fora
+  });
+}
 ```
 
-`send_default_pii=False` não é detalhe: enviar dados pessoais para um serviço externo é
+`sendDefaultPii: false` não é detalhe: enviar dados pessoais para um serviço externo é
 tratamento de dados sob a LGPD, com todas as obrigações que isso implica.
 
 ### 3. Backup (10 min)
 
 ```bash
-# backup
+# Linux / macOS / WSL / Git Bash
 pg_dump "$DATABASE_URL" | gzip > backup-$(date +%F).sql.gz
 
 # restauração (teste em ambiente SEPARADO)
 gunzip -c backup-2026-08-11.sql.gz | psql "$DATABASE_URL_TESTE"
 ```
+
+```powershell
+# Windows PowerShell — o formato customizado (-Fc) ja e comprimido,
+# o que evita depender de gzip/gunzip
+$data = Get-Date -Format "yyyy-MM-dd"
+pg_dump --dbname=$env:DATABASE_URL -Fc --file="backup-$data.dump"
+
+# restauração (ambiente SEPARADO)
+pg_restore --dbname=$env:DATABASE_URL_TESTE --clean "backup-2026-08-11.dump"
+```
+
+> 🪟 Se o `pg_dump` não estiver no PATH, ele fica em
+> `C:\Program Files\PostgreSQL\16\bin`. Usando o PostgreSQL via Docker, o caminho mais
+> simples é `docker compose exec db pg_dump ...`, idêntico nas três plataformas.
 
 Regra 3-2-1: **3** cópias, em **2** mídias diferentes, com **1** fora do local.
 
@@ -214,7 +237,7 @@ traceback, URL e contexto — **sem** dados pessoais.
 
 1. Escreva 5 consultas que você faria nos logs para investigar "o empréstimo do usuário X
    sumiu". Seus logs respondem a todas?
-2. Implemente um comando `manage.py relatorio_saude` que verifique: banco acessível,
+2. Implemente um script `pnpm relatorio:saude` que verifique: banco acessível,
    migrações aplicadas, espaço em disco, tamanho do banco, e nº de erros nas últimas 24h.
 3. Calcule o custo mensal real de manter o sistema no ar por 3 anos (hospedagem, domínio,
    backup, horas de manutenção). Apresente à organização parceira.
@@ -223,7 +246,9 @@ traceback, URL e contexto — **sem** dados pessoais.
 
 ## 📚 Para aprofundar
 
-- [Django — Logging](https://docs.djangoproject.com/pt-br/5.0/topics/logging/)
-- [Sentry para Django](https://docs.sentry.io/platforms/python/integrations/django/)
+- [NestJS — Logger](https://docs.nestjs.com/techniques/logger)
+- [nestjs-pino](https://github.com/iamolegga/nestjs-pino)
+- [NestJS — Healthchecks (Terminus)](https://docs.nestjs.com/recipes/terminus)
+- [Sentry para Node](https://docs.sentry.io/platforms/javascript/guides/node/)
 - [Google SRE Book — capítulo de monitoramento](https://sre.google/sre-book/monitoring-distributed-systems/)
 - [12-Factor — Logs](https://12factor.net/pt_br/logs)

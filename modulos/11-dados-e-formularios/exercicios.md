@@ -49,9 +49,9 @@ digitados; exclusão com modal de confirmação.
 
 ## E11.4 — Validação nas duas camadas (individual) ⭐
 
-Para cada regra, implemente no Zod **e** no serializer, e demonstre os dois caminhos:
+Para cada regra, implemente no Zod **e** no DTO de saída, e demonstre os dois caminhos:
 
-| # | Regra | Zod pega? | Serializer pega? | Como testar o servidor |
+| # | Regra | Zod pega? | DTO pega? | Como testar o servidor |
 |---|---|---|---|---|
 | 1 | Título obrigatório | ✅ | ✅ | `curl` sem título |
 | 2 | ISBN com 10 ou 13 dígitos | ✅ | ✅ | `curl` com `isbn=abc` |
@@ -86,7 +86,7 @@ Implemente o mapeamento completo dos erros do DRF e teste:
 ## E11.6 — Tipos gerados protegem (individual) ⭐
 
 1. Troque os tipos manuais por `schema.d.ts` gerado.
-2. No backend, renomeie `titulo` para `nome` no `ObraSerializer`.
+2. No backend, renomeie `titulo` para `nome` no `ObraResposta`.
 3. Regenere o schema e os tipos.
 4. Rode `pnpm build`. Copie a mensagem de erro.
 5. Agora repita **sem** regenerar os tipos. O build passa? O que o usuário vê em produção?
@@ -137,7 +137,7 @@ resultado precisa estar nela.
 **E11.4** — As regras 4, 5 e 6 dependem do **estado do banco**, que o cliente não conhece e
 que pode mudar entre a validação e o envio. Mesmo que o cliente consultasse a API para
 verificar, haveria uma janela de corrida — e é por isso que a garantia final está nas
-`constraints` do banco (M04) e no serializer (M07).
+`constraints` do banco (M04) e no DTO de saída (M07).
 
 **E11.8** — Vale a pena em ações de alta probabilidade de sucesso e baixo custo de erro
 (marcar como lido, curtir, devolver). É perigosa quando o erro é provável ou o custo é

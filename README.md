@@ -4,15 +4,18 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 (**40h teóricas + 60h práticas**), com projeto integrador em equipe e **atividades
 extensionistas** curricularizadas.
 
-> **Stack:** arquitetura desacoplada.
-> **Backend** — Python 3.12 · Django 5 · Django REST Framework · PostgreSQL 16
+> **Stack:** TypeScript ponta a ponta, em arquitetura desacoplada.
+> **Backend** — Node 20 · TypeScript · NestJS 11 · TypeORM · PostgreSQL 16
 > **Frontend** — React 19 · TypeScript · Vite · Tailwind CSS 4 · React Router · TanStack Query
-> **Comum** — Git/GitHub · Docker · CI (GitHub Actions) · deploy em PaaS
+> **Comum** — monorepo pnpm · tipos compartilhados · Git/GitHub · Docker · CI · deploy em PaaS
+>
+> **Uma linguagem em toda a stack.** A transição backend→frontend na semana 8 deixa de ser
+> troca de idioma e passa a ser troca de camada — o maior amortecedor pedagógico do curso.
 >
 > A ementa fala em "framework escolhido". Ver
 > [`docs/decisoes-tecnicas.md`](docs/decisoes-tecnicas.md) para a justificativa completa,
-> a **ressalva sobre o item "Templates"** e o **modo híbrido** (Django + templates +
-> Tailwind + ilhas de React), caso sua instituição exija leitura estrita da ementa.
+> incluindo **por que TypeORM e não Prisma** (a ementa pede *classes* que geram o banco) e
+> a **ressalva sobre o item "Templates"**.
 
 ---
 
@@ -24,11 +27,11 @@ extensionistas** curricularizadas.
 | [`modulos/`](modulos/) | 18 módulos de conteúdo (69h), cada um com teoria, roteiro prático, exercícios e checklist |
 | [`projeto/`](projeto/) | Projeto integrador em 4 etapas (20h) + trilha extensionista (10h) |
 | [`avaliacao/`](avaliacao/) | Rubricas, pesos, política de recuperação e critérios de correção |
-| [`recursos/`](recursos/) | Código de apoio, nivelamento de JS, checklists imprimíveis |
+| [`recursos/`](recursos/) | Código de apoio, guia do Windows, referência de JS/TS, checklists imprimíveis |
 
 **Comece por aqui:**
 
-1. Estudante → [`docs/plano-de-ensino.md`](docs/plano-de-ensino.md) → [`docs/ambiente-setup.md`](docs/ambiente-setup.md) → [`modulos/00-ambiente-e-ferramentas/`](modulos/00-ambiente-e-ferramentas/)
+1. Estudante → [`docs/plano-de-ensino.md`](docs/plano-de-ensino.md) → [monte o ambiente](#montagem-do-ambiente) → [`modulos/00-ambiente-e-ferramentas/`](modulos/00-ambiente-e-ferramentas/)
 2. Docente → [`docs/guia-do-docente.md`](docs/guia-do-docente.md) → [`docs/cronograma.md`](docs/cronograma.md)
 3. Equipe de projeto → [`projeto/README.md`](projeto/README.md)
 
@@ -43,19 +46,19 @@ extensionistas** curricularizadas.
 | 01 | [Fundamentos da web e HTTP](modulos/01-fundamentos-web-http/) | 5 | 3 | 2 |
 | 02 | [Arquitetura desacoplada e contrato de API](modulos/02-arquitetura-desacoplada/) | 2 | 2 | 0 |
 
-### Backend — 23h
+### Backend — 24h
 | # | Módulo | CH | T | P |
 |---|---|---:|---:|---:|
-| 03 | [Django + DRF: primeiros passos](modulos/03-django-drf-primeiros-passos/) | 3 | 1 | 2 |
-| 04 | [Model: classes que geram o banco](modulos/04-models-orm/) | 6 | 3 | 3 |
+| 03 | [NestJS: módulos, controllers e providers](modulos/03-nestjs-primeiros-passos/) | 4 | 2 | 2 |
+| 04 | [Entidades: classes que geram o banco](modulos/04-entidades-typeorm/) | 6 | 3 | 3 |
 | 05 | [Migrações](modulos/05-migracoes/) | 3 | 1 | 2 |
-| 06 | [ORM: consultas e CRUD](modulos/06-orm-consultas-crud/) | 5 | 2 | 3 |
-| 07 | [API: URLs, views e serializers](modulos/07-api-urls-views-serializers/) | 6 | 3 | 3 |
+| 06 | [Repository e QueryBuilder: consultas e CRUD](modulos/06-orm-consultas-crud/) | 5 | 2 | 3 |
+| 07 | [API: rotas, controllers e DTOs](modulos/07-api-controllers-dtos/) | 6 | 3 | 3 |
 
-### Frontend — 15h
+### Frontend — 14h
 | # | Módulo | CH | T | P |
 |---|---|---:|---:|---:|
-| 08 | [React: fundamentos](modulos/08-react-fundamentos/) | 5 | 2 | 3 |
+| 08 | [React: fundamentos](modulos/08-react-fundamentos/) | 4 | 1 | 3 |
 | 09 | [Tailwind e construção de interfaces](modulos/09-tailwind-e-interface/) | 4 | 1 | 3 |
 | 10 | [Rotas e navegação](modulos/10-rotas-e-navegacao/) | 2 | 1 | 1 |
 | 11 | [Dados e formulários no cliente](modulos/11-dados-e-formularios/) | 4 | 2 | 2 |
@@ -66,7 +69,7 @@ extensionistas** curricularizadas.
 | 12 | [Autenticação e gestão de usuários](modulos/12-autenticacao-usuarios/) | 5 | 2 | 3 |
 | 13 | [Segurança](modulos/13-seguranca/) | 5 | 3 | 2 |
 | 14 | [Testes e qualidade](modulos/14-testes-e-qualidade/) | 3 | 1 | 2 |
-| 15 | [Django Admin (back-office)](modulos/15-django-admin/) | 2 | 1 | 1 |
+| 15 | [Tipos compartilhados entre as camadas](modulos/15-tipos-compartilhados/) | 2 | 1 | 1 |
 | 16 | [Deploy dos dois artefatos](modulos/16-deploy/) | 4 | 2 | 2 |
 | 17 | [Observabilidade e manutenção](modulos/17-observabilidade-e-manutencao/) | 2 | 1 | 1 |
 | — | Avaliação teórica integrada (semana 10) | 1 | 1 | 0 |
@@ -95,14 +98,15 @@ Todos os módulos evoluem **um mesmo sistema**, construído incrementalmente:
 > acervo, associados, empréstimos, devoluções, reservas e relatórios.
 
 ```
-bibliocom/
-├── backend/          Django + DRF + PostgreSQL     (M03–M07, M15)
-└── frontend/         React + TS + Vite + Tailwind  (M08–M11)
+bibliocom/                    monorepo (workspaces do pnpm)
+├── backend/       NestJS + TypeORM + PostgreSQL   (M03–M07)
+├── frontend/      React + Vite + Tailwind         (M08–M11)
+└── pacotes/tipos/ @bibliocom/tipos — DTOs e enums (M15)
 ```
 
-O domínio é o mesmo nas duas camadas: quando a turma troca de linguagem na semana 8, o
-único elemento novo é a tecnologia — as entidades e as regras já são conhecidas. Essa
-continuidade é intencional e é o principal amortecedor da transição backend→frontend.
+O domínio **e a linguagem** são os mesmos nas duas camadas. Quando a turma troca de camada
+na semana 8, não troca de idioma: o TypeScript do M04 é o mesmo do M11. Essa continuidade é
+intencional e é o principal amortecedor da transição backend→frontend.
 
 O projeto da equipe é **outro sistema**, de tema livre, definido na Etapa 1. O BiblioCom é
 referência de código, não o entregável.
@@ -120,6 +124,68 @@ referência de código, não o entregável.
 - 💼 **No mercado** — como o assunto aparece em vagas, code reviews e produção.
 - 🔵 **Backend** / 🟣 **Frontend** — camada tratada no trecho.
 
+### Convenção dos blocos de comando
+
+Todo bloco **executável** que difere entre plataformas aparece em pares:
+
+````markdown
+```bash
+# Linux / macOS / WSL / Git Bash
+...
+```
+```powershell
+# Windows PowerShell
+...
+```
+````
+
+Nunca um comentário `# Windows: ...` **dentro** de um bloco Unix — isso impede copiar e
+colar, que é justamente o que o roteiro pede. Blocos idênticos nas três plataformas (`git`,
+`pnpm`, `npx`) aparecem uma vez só; blocos que são **conteúdo de arquivo** (`.env`,
+`.gitattributes`) usam ` ```ini `, não ` ```bash `.
+
+Se você encontrar um bloco sem alternativa, é falha do material — abra uma issue.
+
+## Montagem do ambiente
+
+O ambiente é montado **pela turma, comando a comando** — instalar dependência, configurar o
+projeto e versionar código são conteúdo da disciplina, não preparação para ela. Não há
+script que faça isso no lugar do aluno; há um que **confere** o resultado
+([`verifica-ambiente.mjs`](recursos/codigo/verifica-ambiente.mjs)).
+
+Em compensação, **nada é instalado antes da hora**. A montagem acontece em três momentos,
+cada peça chegando junto com o problema que ela resolve:
+
+| Momento | O que entra | Conferir com |
+|---|---|---|
+| **Semana 1** (M00) | Node 20, pnpm, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
+| **Antes do M03** | NestJS CLI e as dependências do backend | `--etapa m03` |
+| **Antes do M05** | Docker + PostgreSQL | `--etapa m05` |
+
+**A stack só tem um runtime.** Não há Python, `venv` nem `pip`: a semana 1 instala **Node e
+pnpm**, e é isso. Foi o maior ganho colateral da mudança para TypeScript ponta a ponta — o
+setup que antes tinha dois ecossistemas paralelos passou a ter um.
+
+Guias: [`docs/ambiente-setup.md`](docs/ambiente-setup.md) (Linux/macOS) ou
+[`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md) (Windows).
+
+## Desenvolvimento no Windows 🪟
+
+O Windows tem **guia de setup próprio e independente** — não é tradução do guia Linux:
+
+📖 **[`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md)** — do zero até os
+dois servidores rodando, com **cada linha explicada** e a conferência de cada etapa.
+
+Quem usa Windows segue só esse arquivo. Quem usa Linux/macOS segue
+[`docs/ambiente-setup.md`](docs/ambiente-setup.md). Não é preciso alternar entre os dois.
+
+Durante o curso, quando um roteiro trouxer comando em formato Linux,
+[`recursos/comandos-windows.md`](recursos/comandos-windows.md) traz a tabela de
+equivalências e as **seis armadilhas** que não se resolvem trocando o comando: `curl` é
+alias de `Invoke-WebRequest`; variáveis de ambiente inline não existem; `&&` não existe no
+PowerShell 5.1; `>` grava arquivos em UTF-16; e um espaço
+depois da crase de continuação corta o comando em silêncio.
+
 ## Pré-requisito de JavaScript
 
 Os módulos 08–11 assumem **JavaScript moderno** (`const/let`, arrow functions,
@@ -127,7 +193,7 @@ destructuring, *spread*, `map`/`filter`, módulos ES, Promises e `async/await`) 
 atendido pela turma a que este material se destina.
 
 Para apoio individual de quem chegar com lacunas, e para outras turmas que venham a usar
-este material, há uma referência de ponte Python→JavaScript em
+este material, há uma referência de JavaScript moderno em
 [`recursos/js-para-react.md`](recursos/js-para-react.md), com um diagnóstico de 20 minutos
 e a compensação de carga prevista em
 [`docs/cronograma.md`](docs/cronograma.md#6-variações-de-calendário).

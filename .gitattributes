@@ -1,0 +1,17 @@
+# Normaliza finais de linha. Sem isto, um .sh salvo no Windows chega ao
+# servidor com CRLF e o deploy falha com "bad interpreter".
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.mjs  text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
+
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary
+*.pdf binary

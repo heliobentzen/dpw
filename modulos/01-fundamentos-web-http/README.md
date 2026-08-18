@@ -9,7 +9,7 @@ este módulo decora o framework; quem entende este módulo aprende a web.
 
 > Numa arquitetura desacoplada (M02), o HTTP deixa de ser detalhe de infraestrutura e vira
 > **a interface entre as duas metades do sistema**. Cada tela do React conversa com o
-> Django por requisições que você mesmo vai projetar. Cada erro de integração que a turma
+> o framework por requisições que você mesmo vai projetar. Cada erro de integração que a turma
 > encontrar da semana 8 em diante se explica com o que está neste módulo.
 
 ## 🎯 Objetivos
@@ -304,15 +304,25 @@ semântica; a versão é responsabilidade da infraestrutura.
 
 ### Prática 2 — Falar HTTP na mão com `curl` (40 min)
 
+> 🪟 **Windows (PowerShell): escreva `curl.exe`, não `curl`.** No PowerShell, `curl` é
+> apelido de `Invoke-WebRequest`, que tem outros parâmetros — os comandos abaixo falham com
+> erro confuso. O `curl.exe` já vem no Windows 10/11. No Git Bash e no WSL, `curl` funciona
+> normalmente. Ver
+> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#21-curl-no-powershell-não-é-o-curl-).
+
+> No PowerShell, troque `curl` por **`curl.exe`** em todos os comandos abaixo e use a crase
+> (`` ` ``) no lugar da barra invertida para quebrar linha. No Git Bash e no WSL, cole como
+> está.
+
 ```bash
 # 1. Só os cabeçalhos
-curl -I https://www.djangoproject.com/
+curl -I https://nodejs.org/
 
 # 2. Requisição completa, mostrando o que foi enviado e recebido
 curl -v https://httpbin.org/get
 
 # 3. GET com query string
-curl "https://httpbin.org/get?q=django&pagina=2"
+curl "https://httpbin.org/get?q=nestjs&pagina=2"
 
 # 4. POST com formulário
 curl -X POST https://httpbin.org/post \
@@ -339,65 +349,49 @@ corpo) e **qual `Content-Type`**.
 
 ### Prática 3 — Servidor HTTP mínimo, sem framework (40 min)
 
-Entender o framework exige ver o que ele esconde. Este servidor faz, em 40 linhas, o que o
-Django faz em milhares:
+Entender o framework exige ver o que ele esconde. Este servidor faz, em ~80 linhas, o que o
+NestJS faz em milhares:
 
-```python
-"""Servidor HTTP mínimo — M01. Rode: python servidor_minimo.py e acesse localhost:8000"""
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import parse_qs, urlparse
+O código está em
+[`../../recursos/codigo/servidor-minimo.mjs`](../../recursos/codigo/servidor-minimo.mjs).
+Copie-o para uma pasta qualquer e rode:
 
-RECADOS = []
-
-
-class Handler(BaseHTTPRequestHandler):
-    def _responder(self, status, corpo, content_type="text/html; charset=utf-8"):
-        corpo = corpo.encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(corpo)))
-        self.end_headers()
-        self.wfile.write(corpo)
-
-    def do_GET(self):
-        url = urlparse(self.path)              # roteamento na unha
-        params = parse_qs(url.query)           # query string -> dict
-
-        if url.path == "/":
-            itens = "".join(f"<li>{r}</li>" for r in RECADOS) or "<li><i>vazio</i></li>"
-            nome = params.get("nome", ["visitante"])[0]
-            self._responder(200, f"""
-                <h1>Mural — olá, {nome}</h1>
-                <ul>{itens}</ul>
-                <form method="post" action="/recado">
-                  <input name="texto" required>
-                  <button>Enviar (POST)</button>
-                </form>
-                <form method="get" action="/">
-                  <input name="nome" placeholder="seu nome">
-                  <button>Saudar (GET)</button>
-                </form>
-            """)
-        else:
-            self._responder(404, "<h1>404 — não encontrado</h1>")
-
-    def do_POST(self):
-        if self.path == "/recado":
-            tamanho = int(self.headers.get("Content-Length", 0))
-            dados = parse_qs(self.rfile.read(tamanho).decode("utf-8"))
-            RECADOS.append(dados.get("texto", [""])[0])
-            # PRG: redireciona em vez de responder o POST com HTML
-            self.send_response(302)
-            self.send_header("Location", "/")
-            self.end_headers()
-        else:
-            self._responder(405, "<h1>405 — método não permitido</h1>")
-
-
-if __name__ == "__main__":
-    print("Servindo em http://localhost:8000 (Ctrl+C para parar)")
-    HTTPServer(("", 8000), Handler).serve_forever()
+```bash
+node servidor-minimo.mjs
 ```
+
+Explore com o que você aprendeu nas práticas 1 e 2:
+
+```bash
+# Linux / macOS / WSL / Git Bash
+curl -i http://localhost:8000/
+curl -i http://localhost:8000/obras
+curl -i http://localhost:8000/nao-existe
+curl -i -X POST http://localhost:8000/eco -d '{"titulo":"teste"}'
+```
+
+```powershell
+# Windows PowerShell
+curl.exe -i http://localhost:8000/
+curl.exe -i http://localhost:8000/obras
+curl.exe -i http://localhost:8000/nao-existe
+curl.exe -i -X POST http://localhost:8000/eco -d '{\"titulo\":\"teste\"}'
+```
+
+Os pontos a observar — todos comentados no arquivo:
+
+| Trecho do código | O que o framework fará por você |
+|---|---|
+| `new URL(req.url, ...)` + a tabela `rotas` | **Roteamento.** No M03 vira `@Get(":id")` |
+| `req.on("data", ...)` juntando pedaços | **Ler o corpo.** Vira `@Body()` |
+| `JSON.parse` dentro de `try` | **Validação.** Vira o `ValidationPipe` (M07) |
+| `responder(res, 404, ...)` escrito à mão | **Status HTTP.** Vira `NotFoundException` |
+| `X-Content-Type-Options` digitado | **Cabeçalhos de segurança.** Vira `helmet` (M13) |
+
+⚠️ Repare no que **não** existe aqui: nada valida a entrada, nada trata erro de forma
+uniforme, nada impede uma rota de derrubar o processo. Cada uma dessas ausências é uma
+linha de código que você escreveria — e é exatamente isso que o M03 mostra o framework
+fazendo.
 
 **Experimentos obrigatórios** (anote a resposta de cada um):
 
@@ -408,7 +402,7 @@ if __name__ == "__main__":
    Este é o motivo de existir o padrão PRG.
 4. Acesse `/qualquer-coisa`. Qual status? Onde no código ele é definido?
 5. Acesse `/recado` no navegador (que faz GET). Qual status? Por quê?
-6. Compare com o Django: quem faz o roteamento? Quem lê a query string? Quem monta a
+6. Compare com o NestJS: quem faz o roteamento? Quem lê a query string? Quem monta a
    resposta? Liste as três responsabilidades que o framework vai assumir por você.
 
 ---

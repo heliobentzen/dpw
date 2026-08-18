@@ -11,7 +11,7 @@
 | Carga horária extensionista | 10 horas (creditadas dentro da CH total) |
 | Modalidade sugerida | Presencial ou híbrida, com laboratório de informática |
 | Pré-requisitos | Lógica de programação; POO; banco de dados relacional; **JavaScript moderno** (atendido — ver §11) |
-| Stack — backend | Python 3.12, Django 5, Django REST Framework, PostgreSQL 16 |
+| Stack — backend | Node 20, TypeScript, NestJS 11, TypeORM, PostgreSQL 16 |
 | Stack — frontend | React 19, TypeScript, Vite, Tailwind CSS 4, React Router, TanStack Query |
 | Stack — comum | Git/GitHub, Docker, GitHub Actions, deploy em PaaS |
 
@@ -35,7 +35,7 @@
 | Protocolo HTTP: métodos POST e GET | M01 (+ M07 na prática da API) | — |
 | Model: classes que geram o banco automaticamente | M04 | 🔵 |
 | Atualização do banco a partir das alterações nas classes | M05 (migrações) | 🔵 |
-| Consultas ao BD e CRUD pela API do framework | M06 (ORM) + M07 (ViewSets) | 🔵 |
+| Consultas ao BD e CRUD pela API do framework | M06 (Repository/QueryBuilder) + M07 (Controllers) | 🔵 |
 | Views: mapeamento de URLs | M07 (`urls.py`, `DefaultRouter`) + M10 (React Router) | 🔵🟣 |
 | Views: classes/métodos/funções de processamento de requisições | M07 (FBV, `APIView`, `ViewSet`) | 🔵 |
 | **Templates: interfaces com o usuário** | **M08, M09, M11 (componentes React + Tailwind)** ⚠️ | 🟣 |
@@ -44,17 +44,17 @@
 | Implantação (deploy) | M16 (+ M17 pós-deploy) | 🔵🟣 |
 | Atividades extensionistas | `projeto/extensao/` | — |
 
-> ⚠️ **Ressalva sobre "Templates".** Nesta arquitetura não há templates Django: a interface
+> ⚠️ **Ressalva sobre "Templates".** Nesta arquitetura não há motor de templates no servidor: a interface
 > é feita com componentes React. A leitura adotada é que o objetivo pedagógico do item —
 > *criar a interface com o usuário usando o framework escolhido* — está cumprido, com JSX
 > no lugar do DTL. Se a coordenação exigir leitura estrita, adote o **modo híbrido**
-> (ADR-04 em [`decisoes-tecnicas.md`](decisoes-tecnicas.md)), que mantém templates Django
+> (ADR-11 em [`decisoes-tecnicas.md`](decisoes-tecnicas.md)), que usa um template engine do NestJS
 > estilizados com Tailwind e usa React apenas em ilhas de interatividade. A decisão é
 > institucional; o material suporta as duas.
 
 Conteúdos **complementares** (não exigidos pela ementa, incluídos por demanda de mercado):
 M00 (ambiente), M03 (bootstrap), M14 (testes), M15 (Admin), M17 (observabilidade). Podem
-ser comprimidos — ver [`guia-do-docente.md`](guia-do-docente.md#compressão-do-conteúdo).
+ser comprimidos — ver [`guia-do-docente.md`](guia-do-docente.md#5-compressão-do-conteúdo).
 
 ## 4. Objetivo geral
 
@@ -94,15 +94,15 @@ Ao final da disciplina, o estudante será capaz de:
 
 | Competência | Evidência avaliável | Como aparece em vagas |
 |---|---|---|
-| Modelagem com ORM | Modelo do projeto + migrações limpas | "Django", "ORM", "modelagem relacional" |
-| Construção de API REST | API documentada em OpenAPI | "REST", "DRF", "API design" |
+| Modelagem com ORM | Entidades do projeto + migrações limpas | "TypeORM", "ORM", "modelagem relacional" |
+| Construção de API REST | API documentada em OpenAPI | "REST", "NestJS", "API design" |
 | React + TypeScript | Interface do projeto | "React", "TypeScript", "SPA" |
 | CSS utilitário | Interface responsiva e acessível | "Tailwind", "responsivo", "acessibilidade" |
 | Estado e cache no cliente | Listagens com carregamento e erro tratados | "TanStack Query", "state management" |
 | Integração entre camadas | Sistema funcionando ponta a ponta | "full stack" |
 | Versionamento colaborativo | Histórico de commits/PRs | "Git", "code review" |
 | Segurança aplicada | Checklist OWASP do projeto | "OWASP", "LGPD" |
-| Testes automatizados | Suíte verde no CI | "pytest", "Vitest", "Testing Library" |
+| Testes automatizados | Suíte verde no CI | "Jest", "Vitest", "Testing Library" |
 | Deploy e configuração | Dois artefatos no ar | "CI/CD", "cloud", "12-factor" |
 | Comunicação técnica | Relatório + apresentação | Toda vaga |
 
@@ -119,7 +119,7 @@ só entra depois que existe uma API real** (semana 8, após o M07).
 
 ## 8. Recursos necessários
 
-- Laboratório com Python 3.12+, **Node.js 20+**, Git, editor e acesso à internet.
+- Laboratório com **Node.js 20+**, pnpm, Git, editor e acesso à internet.
 - ⚠️ Acesso liberado ao registro npm e ao PyPI. Proxy corporativo bloqueando `npm install`
   é a falha logística nº 1 desta disciplina.
 - Conta GitHub por estudante; organização GitHub para as equipes.
@@ -147,16 +147,16 @@ obrigatória das Etapas 3 e 4 e das atividades extensionistas (itens eliminatór
 
 ### Básica
 
-1. DJANGO SOFTWARE FOUNDATION. *Django Documentation* (5.x). <https://docs.djangoproject.com/pt-br/5.0/>
-2. ENCODE. *Django REST Framework Documentation*. <https://www.django-rest-framework.org/>
+1. NESTJS. *NestJS Documentation*. <https://docs.nestjs.com/>
+2. TYPEORM. *TypeORM Documentation*. <https://typeorm.io/>
 3. META PLATFORMS. *React Documentation*. <https://react.dev/>
-4. MELÉ, Antonio. **Django 5 By Example**. 5. ed. Birmingham: Packt, 2024.
+4. MAGALHÃES, Kamil. **NestJS: A Progressive Node.js Framework**. Packt, 2024.
 
 ### Complementar
 
 5. TAILWIND LABS. *Tailwind CSS Documentation*. <https://tailwindcss.com/docs>
 6. BANKS, Alex; PORCELLO, Eve. **Learning React**. 2. ed. O'Reilly, 2020.
-7. VINCENT, William S. **Django for APIs**. WelcomeToCode, 2024.
+7. CHERNY, Boris. **Programming TypeScript**. Sebastopol: O'Reilly, 2019.
 8. MOZILLA. *MDN Web Docs — HTTP*. <https://developer.mozilla.org/pt-BR/docs/Web/HTTP>
 9. OWASP FOUNDATION. *OWASP Top 10:2021*. <https://owasp.org/Top10/>
 10. BRASIL. **Lei nº 13.709/2018 (LGPD)**.
@@ -182,7 +182,7 @@ O que ainda vale fazer:
    [`../recursos/js-para-react.md`](../recursos/js-para-react.md). Não é para decidir o
    cronograma — é para identificar **quem individualmente** chega com lacuna e direcionar
    monitoria, antes da semana 8.
-2. Manter o mesmo material como referência de consulta (ponte Python→JavaScript) durante os
+2. Manter o mesmo material como referência de consulta durante os
    módulos 08–11.
 
 **Para outras turmas ou instituições que adotem este material** e não tenham o

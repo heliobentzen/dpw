@@ -32,7 +32,7 @@ navegador                          servidor
 ```
 
 Cada navegação é uma requisição nova, e o servidor devolve **HTML completo**. É como
-funcionam Django com templates, Rails com ERB, Laravel com Blade e PHP puro.
+funcionam Rails com ERB, Laravel com Blade, Django com templates e PHP puro.
 
 #### Aplicação de página única (SPA)
 
@@ -88,7 +88,7 @@ O conteúdo precisa ser indexado por buscadores?
 ```
 
 > **O BiblioCom cabe nos dois modelos.** Adotamos SPA + API por decisão pedagógica e de
-> mercado, registrada em [ADR-01](../../docs/decisoes-tecnicas.md#adr-01--arquitetura-desacoplada-api-rest--spa) —
+> mercado, registrada em [ADR-01](../../docs/decisoes-tecnicas.md#adr-10--typescript-ponta-a-ponta-nestjs--typeorm--react) —
 > e com o custo declarado no [ADR-09](../../docs/decisoes-tecnicas.md#adr-09--o-custo-em-carga-horária).
 > Reconhecer que a alternativa era viável é parte de decidir bem.
 
@@ -199,8 +199,8 @@ precisa de um tratamento por endpoint — e não terá.
 #### Decisões que o contrato precisa fixar
 
 - [ ] Prefixo e versão (`/api/` ou `/api/v1/`)
-- [ ] Barra final nas rotas — sim ou não, **consistentemente** (o Django usa; mantenha)
-- [ ] Convenção de nomes dos campos (`snake_case`, como o Python)
+- [ ] Barra final nas rotas — sim ou não, **consistentemente** (o NestJS não usa; mantenha)
+- [ ] Convenção de nomes dos campos (`camelCase`, como o TypeScript)
 - [ ] Formato de datas (**sempre** ISO 8601: `2026-08-11T14:32:07-03:00`)
 - [ ] Formato de valores monetários (string decimal `"12.50"`, nunca `float`)
 - [ ] Paginação: estilo e tamanho padrão
@@ -210,7 +210,7 @@ precisa de um tratamento por endpoint — e não terá.
 
 > A última decisão é a que mais gera retrabalho. Regra prática do material: **aninhe na
 > leitura, use id na escrita.** A tela quer o nome do autor sem uma segunda requisição; o
-> formulário só precisa mandar o id. O DRF faz isso com serializers diferentes para
+> formulário só precisa mandar o id. Resolve-se com DTOs diferentes para
 > leitura e escrita (M07).
 
 ### 4. Documentação como fonte de verdade (20 min)
@@ -227,7 +227,7 @@ código do DRF  ──drf-spectacular──▶  schema.yml (OpenAPI)
                   (documentação)    (tipos do front)     contrato
 ```
 
-Com isso, renomear um campo no serializer muda o schema, que muda os tipos do frontend,
+Com isso, renomear um campo no DTO de saída muda o schema, que muda os tipos do frontend,
 que faz o TypeScript acusar erro **na compilação** — antes de chegar ao usuário. É a
 defesa concreta contra o problema descrito na seção 2. Implementado no M07.
 

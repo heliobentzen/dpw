@@ -24,7 +24,10 @@ resultado de cada item, com evidência:
 Depois, rode e cole a saída:
 
 ```bash
-curl -I https://SEU-DOMINIO/
+curl -I https://SEU-DOMINIO/          # Linux/macOS/WSL/Git Bash
+```
+```powershell
+curl.exe -I https://SEU-DOMINIO/      # Windows PowerShell
 ```
 
 E o relatório do securityheaders.com. Meta: **nota A**.
@@ -38,10 +41,10 @@ Provoque cada falha em produção, capture a evidência e corrija:
 | # | Falha | Como provocar | Sintoma | Correção |
 |---|---|---|---|---|
 | 1 | `ALLOWED_HOSTS` errado | Remover o domínio | | |
-| 2 | Estáticos não coletados | Remover `collectstatic` do build | | |
+| 2 | SPA não construída | Remover `pnpm --filter frontend build` do comando de build | | |
 | 3 | Migração não aplicada | Remover `migrate` do release | | |
-| 4 | Variável de ambiente faltando | Remover `SECRET_KEY` | | |
-| 5 | Porta errada no Gunicorn | Fixar `8000` em vez de `$PORT` | | |
+| 4 | Variável de ambiente faltando | Remover `SESSION_SECRET` | | |
+| 5 | Porta fixa no código | Trocar `process.env.PORT` por `3000` | | |
 
 Objetivo: reconhecer o sintoma antes de precisar procurar a causa. Em produção, essa
 associação vale horas.
@@ -107,7 +110,7 @@ Requisitos: imagem final < 200 MB; não roda como root; usa cache de camadas
 eficientemente (dependências antes do código); `healthcheck` configurado; funciona com
 `docker compose up` sem passo manual.
 
-Responda: **por que copiar o `requirements.txt` antes do resto do código?**
+Responda: **por que copiar o `package.json` e o `pnpm-lock.yaml` antes do resto do código?**
 
 ---
 
@@ -119,7 +122,7 @@ concretos (não intenções):
 1. O banco foi apagado por engano. Qual o procedimento? Quanto se perde?
 2. A conta da PaaS foi suspensa. Como sobe em outro lugar? Quanto tempo leva?
 3. A pessoa que fez o deploy saiu da equipe. Quem tem acesso? Onde estão as credenciais?
-4. Vazou a `SECRET_KEY`. O que fazer, em que ordem, nas primeiras 2 horas?
+4. Vazou a `SESSION_SECRET`. O que fazer, em que ordem, nas primeiras 2 horas?
 5. O site está fora do ar há 30 minutos e ninguém percebeu. Como isso deixa de acontecer?
 6. Um usuário reporta que perdeu dados. Como você investiga?
 
@@ -134,7 +137,7 @@ Etapa 4 — e cuja resposta "não pensamos nisso" custa caro.
 plataforma envia tráfego para a porta de `$PORT`. Sintoma: build e start com sucesso nos
 logs, mas toda requisição devolve "Application failed to respond" ou 502.
 
-**E14.7** — As camadas do Docker são cacheadas em ordem. Copiando `requirements.txt`
+**E14.7** — As camadas do Docker são cacheadas em ordem. Copiando os manifestos de dependência
 primeiro e instalando as dependências antes de copiar o código, uma alteração em
-`views.py` invalida apenas a última camada — o `pip install` é reaproveitado do cache.
+`obras.service.ts` invalida apenas a última camada — o `pnpm install` é reaproveitado do cache.
 Copiando tudo de uma vez, cada alteração de código reinstala todas as dependências.
