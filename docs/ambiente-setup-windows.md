@@ -1,36 +1,94 @@
 # Setup do ambiente no Windows 🪟
 
-Guia **completo e independente**. Não é tradução do guia Linux: é o caminho do Windows do
-começo ao fim, com **cada linha explicada**. Se você usa Windows, este é o único arquivo de
-instalação que precisa abrir — não alterne entre ele e
-[`ambiente-setup.md`](ambiente-setup.md) (que é Linux/macOS).
+Se você usa Windows, este é o **único** arquivo de instalação que precisa abrir — não
+alterne entre ele e [`ambiente-setup.md`](ambiente-setup.md), que é Linux/macOS.
 
-> **Como ler.** Cada passo tem três partes: o **bloco de comandos** (cole inteiro), a
-> **tabela linha a linha** (o que cada comando faz) e o **"deu certo se…"** (como conferir
-> antes de seguir). Não pule a conferência: no Windows, quase todo erro de setup só aparece
-> três aulas depois, disfarçado de outra coisa.
+## ⚡ Caminho rápido — 3 comandos
 
-**Tempo:** 60–90 min na primeira vez.
+Um script faz a montagem inteira: instala o que falta, cria a pasta, o repositório, o
+ambiente virtual, as dependências e os arquivos de configuração. **~15 minutos**, quase
+todos de download.
+
+Abra o **PowerShell** (tecle `Win`, digite `powershell`) e cole:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+git clone https://github.com/heliobentzen/dpw.git $HOME\dpw
+& $HOME\dpw\recursos\codigo\setup.ps1
+```
+
+| Linha | O que faz |
+|---|---|
+| `Set-ExecutionPolicy ... RemoteSigned` | Libera a execução de scripts **do seu usuário**. Sem isto, o Windows bloqueia tanto o `setup.ps1` quanto o ativador do ambiente virtual |
+| `git clone ...` | Baixa o material da disciplina para `C:\Users\<você>\dpw` |
+| `& ...\setup.ps1` | Roda a montagem. O `&` manda o PowerShell **executar** o caminho, em vez de imprimi-lo como texto |
+
+**Não tem o Git ainda?** Instale antes com `winget install --id Git.Git --scope user`, feche
+e reabra o terminal.
+
+O script diz o que está fazendo a cada etapa e **pode ser rodado quantas vezes quiser**: ele
+pula o que já existe. Se algo faltar, ele diz exatamente o quê e para.
+
+> 🔍 **Antes de rodar, abra o script e leia** — está comentado justamente para isso:
+> [`recursos/codigo/setup.ps1`](../recursos/codigo/setup.ps1). Executar script que veio da
+> internet sem ler é um hábito ruim, e este é um bom lugar para não adquiri-lo.
+
+**Deu certo se:** apareceu `Ambiente básico pronto.` no final.
 
 ---
 
-## Índice
+## Os três momentos da instalação
+
+Você **não** instala tudo na primeira aula. Cada coisa entra quando passa a ser necessária —
+menos software na sua máquina, menos coisa para dar errado de uma vez:
+
+| Quando | O que entra | Comando |
+|---|---|---|
+| **Semana 1** (M00) | Git, Python, VS Code, projeto e ambiente virtual | `.\setup.ps1` |
+| **Antes do M03** | Node 20 + pnpm | `.\setup.ps1 -Etapa frontend` |
+| **Antes do M05** | Docker + PostgreSQL | `.\setup.ps1 -Etapa banco` |
+
+O docente avisa na aula anterior. Se esquecer, o próprio módulo lembra no começo.
+
+---
+
+## Como trabalhar no dia a dia
+
+Duas linhas, sempre as mesmas, toda vez que abrir um terminal:
+
+```powershell
+Set-Location C:\dev\bibliocom\backend
+.\.venv\Scripts\Activate.ps1
+```
+
+O prompt passa a mostrar `(.venv)` na frente. **Isso vale por janela** — terminal novo,
+ativação nova. É a causa nº 1 de `ModuleNotFoundError: No module named 'django'`.
+
+---
+
+## 🔧 Caminho manual — passo a passo
+
+Use esta parte quando o script falhar, quando quiser entender o que ele fez, ou se preferir
+instalar tudo à mão. Cada passo tem três partes: o **bloco de comandos** (cole inteiro), a
+**tabela linha a linha** (o que cada comando faz) e o **"deu certo se…"**.
+
+**Tempo:** 60–90 min.
 
 | Passo | Assunto | Quando |
 |---|---|---|
-| [0](#passo-0--decisões-antes-de-digitar-qualquer-coisa) | Decisões antes de digitar | agora |
-| [1](#passo-1--abrir-o-powershell-e-liberar-scripts) | PowerShell e política de scripts | agora |
-| [2](#passo-2--criar-a-pasta-de-trabalho) | Pasta de trabalho | agora |
-| [3](#passo-3--instalar-o-python) | Python 3.12 | agora |
-| [4](#passo-4--instalar-e-configurar-o-git) | Git + SSH | agora |
-| [5](#passo-5--ambiente-virtual-e-dependências-do-backend) | venv + Django/DRF | agora |
-| [6](#passo-6--nodejs-e-pnpm-frontend) | Node 20 + pnpm | agora |
-| [7](#passo-7--vs-code) | VS Code | agora |
-| [8](#passo-8--docker-e-postgresql) | Docker + PostgreSQL | **a partir do M05** |
-| [9](#passo-9--verificação-final) | Verificação | agora |
+| [0](#passo-0--decisões-antes-de-digitar-qualquer-coisa) | Decisões antes de digitar | semana 1 |
+| [1](#passo-1--abrir-o-powershell-e-liberar-scripts) | PowerShell e política de scripts | semana 1 |
+| [2](#passo-2--criar-a-pasta-de-trabalho) | Pasta de trabalho | semana 1 |
+| [3](#passo-3--instalar-o-python) | Python 3.12 | semana 1 |
+| [4](#passo-4--instalar-e-configurar-o-git) | Git + SSH | semana 1 |
+| [5](#passo-5--ambiente-virtual-e-dependências-do-backend) | venv + Django/DRF | semana 1 |
+| [6](#passo-6--nodejs-e-pnpm-frontend) | Node 20 + pnpm | **antes do M03** |
+| [7](#passo-7--vs-code) | VS Code | semana 1 |
+| [8](#passo-8--docker-e-postgresql) | Docker + PostgreSQL | **antes do M05** |
+| [9](#passo-9--verificação-final) | Verificação | semana 1 |
 | [10](#passo-10--rodar-o-sistema-completo) | Rodar os dois servidores | a partir do M08 |
 | [11](#passo-11--gitignore-e-gitattributes) | `.gitignore` e `.gitattributes` | no primeiro commit |
-| [12](#passo-12--erros-e-diagnóstico) | Erros e diagnóstico | quando quebrar |
+| [12](#passo-12--erros-e-diagnóstico) | **Erros e diagnóstico** | quando quebrar |
 
 ---
 
@@ -487,6 +545,11 @@ Get-Content requirements.txt
 
 ## Passo 6 — Node.js e pnpm (frontend)
 
+> ⏭️ **Só é necessário a partir do M03.** Se você está na semana 1, pule para o
+> [Passo 7](#passo-7--vs-code) — você volta aqui quando o docente avisar.
+>
+> Pelo script: `.\setup.ps1 -Etapa frontend`
+
 ### 6.1 Instalar o Node 20 LTS
 
 ```powershell
@@ -628,6 +691,8 @@ inferior mostra o interpretador com `(.venv)` no nome.
 
 > ⏭️ **Só é necessário a partir do M05.** Se você está fazendo o M00, pule para o
 > [Passo 9](#passo-9--verificação-final). Até o M04 usamos SQLite, que não exige instalação.
+>
+> Pelo script: `.\setup.ps1 -Etapa banco`
 
 ### 8.1 Pré-requisito: WSL2
 

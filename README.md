@@ -28,7 +28,7 @@ extensionistas** curricularizadas.
 
 **Comece por aqui:**
 
-1. Estudante → [`docs/plano-de-ensino.md`](docs/plano-de-ensino.md) → [`docs/ambiente-setup.md`](docs/ambiente-setup.md) → [`modulos/00-ambiente-e-ferramentas/`](modulos/00-ambiente-e-ferramentas/)
+1. Estudante → [`docs/plano-de-ensino.md`](docs/plano-de-ensino.md) → monte o ambiente com **um comando** (abaixo) → [`modulos/00-ambiente-e-ferramentas/`](modulos/00-ambiente-e-ferramentas/)
 2. Docente → [`docs/guia-do-docente.md`](docs/guia-do-docente.md) → [`docs/cronograma.md`](docs/cronograma.md)
 3. Equipe de projeto → [`projeto/README.md`](projeto/README.md)
 
@@ -141,6 +141,30 @@ colar, que é justamente o que o roteiro pede. Blocos idênticos nas três plata
 `.gitattributes`) usam ` ```ini `, não ` ```bash `.
 
 Se você encontrar um bloco sem alternativa, é falha do material — abra uma issue.
+
+## Montagem do ambiente — um comando
+
+```bash
+# Linux / macOS / WSL2
+git clone https://github.com/heliobentzen/dpw.git ~/dpw
+bash ~/dpw/recursos/codigo/setup.sh
+```
+
+```powershell
+# Windows PowerShell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+git clone https://github.com/heliobentzen/dpw.git $HOME\dpw
+& $HOME\dpw\recursos\codigo\setup.ps1
+```
+
+O script instala o que falta, cria o projeto, o repositório, o ambiente virtual e as
+dependências. É **idempotente** — rodar de novo só completa o que faltou.
+
+A instalação acontece em **três momentos**, não de uma vez: o básico agora, `frontend`
+(Node + pnpm) antes do M03 e `banco` (Docker + PostgreSQL) antes do M05.
+
+Quem preferir instalar à mão, ou precisar diagnosticar: [`docs/ambiente-setup.md`](docs/ambiente-setup.md)
+(Linux/macOS) ou [`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md) (Windows).
 
 ## Desenvolvimento no Windows 🪟
 

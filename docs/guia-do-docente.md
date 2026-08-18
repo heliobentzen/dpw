@@ -31,10 +31,25 @@ combine com a turma **um** caminho e mantenha-o:
 | **Git Bash** | ⭐ Menor atrito: os comandos do material funcionam colados |
 | WSL2 | Turma mais madura; obrigatório se quiser paridade com produção |
 
-**Mande a turma do Windows para o guia próprio**,
-[`ambiente-setup-windows.md`](ambiente-setup-windows.md) — completo, do zero, com cada linha
-explicada. Não peça para "adaptar" o guia Linux: é a origem da maior parte do atrito da
-primeira semana.
+**Mande a turma rodar o script antes da aula**, não instalar à mão:
+
+| Sistema | Comando |
+|---|---|
+| 🪟 Windows | `git clone https://github.com/heliobentzen/dpw.git $HOME\dpw` <br> `& $HOME\dpw\recursos\codigo\setup.ps1` |
+| 🐧 Linux/macOS | `git clone https://github.com/heliobentzen/dpw.git ~/dpw` <br> `bash ~/dpw/recursos/codigo/setup.sh` |
+
+O script é idempotente e para com mensagem clara quando algo falta — quem travar pode rodar
+de novo depois de resolver, sem desfazer nada. Isso transforma a aula 1 de "duas horas de
+instalação em ritmos diferentes" em "quinze minutos e um problema pontual aqui e ali".
+
+**A instalação acontece em três momentos**, não de uma vez: `base` na semana 1,
+`-Etapa frontend` antes do M03, `-Etapa banco` antes do M05. Avise na aula anterior a cada
+um. Menos software instalado de uma vez é menos coisa quebrando ao mesmo tempo.
+
+Quem preferir instalar à mão, ou precisar diagnosticar, usa o guia do seu sistema —
+[`ambiente-setup-windows.md`](ambiente-setup-windows.md) ou
+[`ambiente-setup.md`](ambiente-setup.md). Não peça para a turma do Windows "adaptar" o guia
+Linux: é a origem da maior parte do atrito da primeira semana.
 
 **Seis coisas quebram em silêncio** e valem 10 minutos de aula na semana 1: `curl` é alias
 no PowerShell (use `curl.exe`); variáveis inline não existem (`$env:VAR="x";`); `&&` não

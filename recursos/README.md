@@ -9,6 +9,8 @@
 
 | Arquivo | Módulo | Para quê |
 |---|---|---|
+| [`setup.ps1`](codigo/setup.ps1) | M00, M03, M05 | 🪟 Monta o ambiente no Windows. Idempotente, em 3 etapas: `base`, `frontend`, `banco` |
+| [`setup.sh`](codigo/setup.sh) | M00, M03, M05 | 🐧 Monta o ambiente no Linux/macOS/WSL2. Mesmas 3 etapas |
 | [`servidor_minimo.py`](codigo/servidor_minimo.py) | M01 | Servidor HTTP sem framework: mostra o que o Django faz por você |
 | [`vulneravel.py`](codigo/vulneravel.py) | M13 | 🔵 Laboratório com 10 vulnerabilidades de backend |
 | [`vulneravel.tsx`](codigo/vulneravel.tsx) | M13 | 🟣 Laboratório com 8 vulnerabilidades de frontend |

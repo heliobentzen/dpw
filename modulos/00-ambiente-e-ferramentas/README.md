@@ -92,101 +92,117 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 
 ## 🛠️ Roteiro prático (2h)
 
-### Passo 1 — Instalar e verificar (30 min)
+### Passo 1 — Montar o ambiente (30 min)
 
-**Escolha o seu guia — são independentes, siga só um:**
+Um script faz a montagem inteira: instala o que falta, cria a pasta, o repositório, o
+ambiente virtual, as dependências e os arquivos de configuração.
 
-| Seu sistema | Guia | Observação |
-|---|---|---|
-| 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) | Completo, do zero, com cada linha explicada. Passos 0 a 7 e 9 |
-| 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) | Seções 3 a 5, depois a verificação da seção 8 |
-| 🪟→🐧 **WSL2** | o guia **Linux**, dentro do Ubuntu | Instale o WSL2 pelo passo 8.1 do guia Windows e siga o guia Linux de lá em diante |
-
-Ao final, rode o `verifica_ambiente.py`. **Só avance com todos os itens em OK.**
-
-> 🪟 **Quem está no Windows não deve seguir o guia Linux "adaptando".** Metade dos problemas
-> da primeira semana vem daí. O guia próprio existe justamente para você não precisar
-> traduzir nada.
-
-### Passo 2 — Criar o repositório do BiblioCom (30 min)
-
-Se você seguiu o guia de setup até o fim, a pasta e o ambiente virtual já existem. Aqui
-transformamos isso num **repositório Git publicado**.
-
-A estrutura a esta altura — repare que o `.venv` fica **dentro de `backend/`**, não na raiz:
-
-```
-bibliocom/            ← a raiz do repositório, onde rodamos o git init
-└── backend/
-    ├── .venv/        ← criado no setup
-    └── requirements.txt
-```
-
-#### 2a. Iniciar o repositório
-
-##### 🐧 Linux / 🍎 macOS / WSL2 / Git Bash
-
-```bash
-cd ~/dev/bibliocom          # ou onde você criou a pasta
-git init
-```
-
-##### 🪟 Windows (PowerShell)
+#### 🪟 Windows (PowerShell)
 
 ```powershell
-New-Item -ItemType Directory -Force -Path C:\dev\bibliocom
-Set-Location C:\dev\bibliocom
-git init
-git config core.autocrlf input
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+git clone https://github.com/heliobentzen/dpw.git $HOME\dpw
+& $HOME\dpw\recursos\codigo\setup.ps1
 ```
 
-| Linha | O que faz |
+#### 🐧 Linux / 🍎 macOS / WSL2
+
+```bash
+git clone https://github.com/heliobentzen/dpw.git ~/dpw
+bash ~/dpw/recursos/codigo/setup.sh
+```
+
+**Deu certo se:** apareceu `Ambiente básico pronto.` no final.
+
+O script é **idempotente**: se parar no meio, ou se você quiser conferir depois, rode de
+novo — ele pula o que já existe. Quando algo falta, ele diz exatamente o quê e para, em vez
+de seguir e quebrar três passos adiante.
+
+> 🔍 **Abra o script e leia antes de rodar** — ele está comentado justamente para isso.
+> Executar script vindo da internet sem ler é um hábito ruim, e este é um bom lugar para não
+> adquiri-lo. É também a forma mais rápida de entender o que compõe um ambiente Python.
+
+#### Você instala em três momentos, não de uma vez
+
+| Quando | O que entra | 🪟 Windows | 🐧 Linux/macOS |
+|---|---|---|---|
+| **Hoje** | Git, Python, VS Code, projeto, venv | `.\setup.ps1` | `./setup.sh` |
+| Antes do **M03** | Node 20 + pnpm | `.\setup.ps1 -Etapa frontend` | `./setup.sh frontend` |
+| Antes do **M05** | Docker + PostgreSQL | `.\setup.ps1 -Etapa banco` | `./setup.sh banco` |
+
+Menos software na máquina hoje significa menos coisa dando errado ao mesmo tempo. O docente
+avisa na aula anterior a cada momento; o próprio módulo também lembra na abertura.
+
+#### Se o script falhar — ou se você quiser fazer à mão
+
+Os guias trazem o passo a passo completo, com **cada linha explicada** e critério de
+conferência. São independentes: siga só o do seu sistema.
+
+| Seu sistema | Guia |
 |---|---|
-| `New-Item -ItemType Directory -Force` | Garante que a pasta existe. Sem esta linha, se você tiver pulado ou interrompido o setup, o `Set-Location` falha com `Cannot find path ... because it does not exist` — e o `git init` seguinte criaria um repositório **na pasta errada** |
-| `Set-Location C:\dev\bibliocom` | Entra na pasta (`cd` é apelido deste comando) |
-| `git init` | Cria o repositório: passa a existir a pasta oculta `.git` com todo o histórico |
+| 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) |
+| 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) |
+| 🪟→🐧 **WSL2** | instale o WSL2 pelo passo 8.1 do guia Windows, depois siga o guia **Linux** dentro do Ubuntu |
+
+> 🪟 **Quem está no Windows não deve seguir o guia Linux "adaptando".** Metade dos problemas
+> da primeira semana vem daí.
+
+#### Conferir
+
+```bash
+python recursos/codigo/verifica_ambiente.py
+```
+
+**Só avance com todos os itens em OK.** O script de verificação diz, para cada falha, o
+comando exato que a corrige.
+
+### Passo 2 — Entender e publicar o repositório (30 min)
+
+O script já criou a estrutura. Agora você vai **entender o que ele fez** e transformar isso
+num repositório publicado.
+
+```
+bibliocom/                 ← raiz do repositório (o git init rodou aqui)
+├── .git/                  histórico
+├── .gitignore             o que NÃO entra no Git
+├── .gitattributes         normalização de finais de linha
+└── backend/
+    ├── .venv/             ambiente virtual — ignorado pelo Git
+    └── requirements.txt   dependências com versão fixada
+```
+
+Repare: o `.venv` fica **dentro de `backend/`**, não na raiz.
+
+#### 2a. O que o script fez, e por quê
+
+| O que ele fez | Por que importa |
+|---|---|
+| `git init` | Cria o repositório — a pasta oculta `.git` com todo o histórico |
 | `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Sem isto, o deploy do M16 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
+| Criou o `.gitignore` | Mantém `.venv/`, `.env` e `node_modules/` fora do Git |
+| Criou o `.gitattributes` | Mesma proteção de finais de linha, mas para **a equipe inteira** — inclusive quem clonar sem ter configurado nada |
+| `python -m venv .venv` | Um Python e uma biblioteca só deste projeto. Sem ele, o projeto A precisa de Django 4.2, o B de 5.1, e um sobrescreve o outro |
+| `pip freeze > requirements.txt` | Congela as versões. É o que faz o projeto rodar igual na máquina de outra pessoa |
 
-**Deu certo se:** `git status` responde `On branch main` e lista `backend/` como não rastreado.
-Se responder `not a git repository`, o `git init` rodou em outro lugar — confira com
-`Get-Location`.
+Confirme você mesmo:
 
-#### 2b. Criar os três arquivos da raiz
+```bash
+cd ~/dev/bibliocom          # 🪟 Windows: Set-Location C:\dev\bibliocom
+git status
+```
 
-| Arquivo | Conteúdo | Por quê |
-|---|---|---|
-| `.gitignore` | 🐧 [setup, seção 10](../../docs/ambiente-setup.md#10-gitignore-do-repositório) · 🪟 [setup Windows, 11.1](../../docs/ambiente-setup-windows.md#111-gitignore) | Mantém `.venv/`, `.env` e `node_modules/` fora do Git |
-| `.gitattributes` | 🐧 [setup, seção 10](../../docs/ambiente-setup.md#gitattributes--obrigatório-se-alguém-da-equipe-usa-windows-) · 🪟 [setup Windows, 11.2](../../docs/ambiente-setup-windows.md#112-gitattributes--obrigatório-) | **Não é opcional.** Protege a equipe inteira do problema de finais de linha, inclusive quem nunca configurou nada |
-| `README.md` | modelo abaixo | Como subir o projeto em ≤ 5 comandos |
+**Deu certo se:** responde `On branch main` e **não** lista `.venv/`. Se listar, o
+`.gitignore` não está sendo respeitado — chame o docente antes de commitar.
 
-> 🪟 **Não crie esses arquivos pelo Bloco de Notas.** O Windows esconde extensões conhecidas
-> e o Bloco de Notas acrescenta `.txt` ao salvar: você digita `.gitignore`, ele grava
-> `.gitignore.txt`, o Explorer mostra "`.gitignore`" — e o Git **ignora o arquivo**, porque
-> o nome está errado. Como a tela não denuncia nada, o sintoma vira "meu `.gitignore` não
-> funciona".
->
-> Crie pelo terminal e edite no VS Code:
->
-> ```powershell
-> New-Item -ItemType File -Path .gitignore, .gitattributes, README.md
-> code .
-> ```
->
-> | Trecho | O que faz |
-> |---|---|
-> | `New-Item -ItemType File -Path a, b, c` | Cria os três arquivos vazios de uma vez, com o nome exato |
-> | `code .` | Abre a pasta inteira no VS Code, para você colar o conteúdo de cada um |
->
-> Confira os nomes reais com `Get-ChildItem -Force` (o `-Force` mostra arquivos ocultos —
-> tudo que começa com ponto). Se aparecer `.gitignore.txt`, renomeie:
-> `Rename-Item .gitignore.txt .gitignore`.
+> 🪟 Por que o script cria esses arquivos em vez de mandar você criar: o Bloco de Notas
+> acrescenta `.txt` ao salvar e o Explorer esconde a extensão. Você digita `.gitignore`, ele
+> grava `.gitignore.txt`, a tela mostra "`.gitignore`" — e o Git ignora o arquivo. Para
+> conferir nomes reais no PowerShell: `Get-ChildItem -Force`.
 
-Também **não** use `echo ... > arquivo` para gerar esses arquivos: no PowerShell 5.1 o `>`
-grava em UTF-16, e o Git lê a primeira linha como lixo.
+#### 2b. Escrever o README
 
-Modelo do `README.md` — ele traz **as duas plataformas**, porque quem clona o repositório
-pode estar em qualquer uma, e todos os comandos rodam a partir de `backend/`, que é onde
-vive o ambiente virtual:
+Este é seu, o script não escreve por você — descrever como rodar o projeto é parte do
+trabalho. Crie `README.md` na raiz:
 
 ````markdown
 # BiblioCom
@@ -222,32 +238,32 @@ Acesse <http://localhost:8000>.
 ````
 
 > O `.env.example` e o `manage.py` só passam a existir no **M03**, quando o projeto Django é
-> criado. Até lá, o `README.md` descreve o destino, não o presente — e é assim mesmo:
-> escrever o "como rodar" antes ajuda a perceber quando um passo a mais se tornou necessário.
+> criado. Até lá o README descreve o destino, não o presente — e é assim mesmo: escrever o
+> "como rodar" antes ajuda a perceber quando um passo a mais se tornou necessário.
+
+💼 **No mercado:** a primeira tarefa de quem entra num time é *rodar o projeto localmente*.
+Times maduros medem esse tempo — a meta é minutos, não dias. Seu README é o que decide isso.
 
 #### 2c. Primeiro commit
 
 ```bash
 git status
-```
-
-⚠️ **Leia a saída antes de commitar.** Se `.venv/`, `.env`, `db.sqlite3` ou `node_modules/`
-aparecerem, seu `.gitignore` está errado, incompleto ou salvou com o nome trocado. Corrija
-agora: depois de commitado, o arquivo continua no histórico mesmo que você o remova.
-
-```bash
 git add .
 git commit -m "chore: inicializa estrutura do projeto"
 ```
 
 | Linha | O que faz |
 |---|---|
+| `git status` | Mostra o que entraria no commit. **Leia antes de commitar** |
 | `git add .` | Move para a *staging area* tudo que mudou e não está no `.gitignore` |
 | `git commit -m "..."` | Grava o snapshot com a mensagem |
 
+⚠️ Se `.venv/`, `.env` ou `db.sqlite3` aparecerem no `git status`, pare e corrija o
+`.gitignore`. Depois de commitado, o arquivo continua no histórico mesmo que você o remova.
+
 > 🪟 **`warning: CRLF will be replaced by LF` não é erro.** É o `core.autocrlf input`
-> fazendo exatamente o que você pediu em 2a: guardando o arquivo com finais de linha do
-> Linux. Na sua pasta o arquivo continua com CRLF. Pode seguir.
+> guardando o arquivo com finais de linha do Linux. Na sua pasta ele continua com CRLF.
+
 
 ### Passo 3 — Publicar no GitHub (20 min)
 
