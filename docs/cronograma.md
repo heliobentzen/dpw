@@ -3,7 +3,7 @@
 Este arquivo é a **fonte canônica de carga horária**. Se algum outro documento divergir,
 vale o que está aqui.
 
-> **Stack:** Django + Django REST Framework (backend) · React + TypeScript + Tailwind
+> **Stack:** NestJS + TypeORM (backend) · React + TypeScript + Tailwind
 > (frontend). Ver [`decisoes-tecnicas.md`](decisoes-tecnicas.md).
 
 ## 1. Distribuição global
@@ -23,11 +23,11 @@ vale o que está aqui.
 | M00 Ambiente e ferramentas | ambos | 3 | 1 | 2 | 1 |
 | M01 Fundamentos da web e HTTP | — | 5 | 3 | 2 | 1–2 |
 | M02 Arquitetura desacoplada e contrato de API | — | 2 | 2 | 0 | 2 |
-| M03 Django + DRF: primeiros passos | back | 3 | 1 | 2 | 3 |
+| M03 NestJS: módulos, controllers e providers | back | 4 | 2 | 2 | 3 |
 | M04 Model: classes que geram o banco | back | 6 | 3 | 3 | 3–4 |
 | M05 Migrações | back | 3 | 1 | 2 | 4–5 |
 | M06 ORM: consultas e CRUD | back | 5 | 2 | 3 | 5–6 |
-| M07 API: URLs, views e serializers | back | 6 | 3 | 3 | 6–7 |
+| M07 API: rotas, controllers e DTOs | back | 6 | 3 | 3 | 6–7 |
 | M08 React: fundamentos | front | 5 | 2 | 3 | 8–9 |
 | M09 Tailwind e construção de interfaces | front | 4 | 1 | 3 | 9–10 |
 | M10 Rotas e navegação | front | 2 | 1 | 1 | 10 |
@@ -35,7 +35,7 @@ vale o que está aqui.
 | M12 Autenticação e gestão de usuários | ambos | 5 | 2 | 3 | 12 |
 | M13 Segurança | ambos | 5 | 3 | 2 | 13 |
 | M14 Testes e qualidade | ambos | 3 | 1 | 2 | 14 |
-| M15 Django Admin (back-office) | back | 2 | 1 | 1 | 15 |
+| M15 Tipos compartilhados entre as camadas | ambas | 2 | 1 | 1 | 15 |
 | M16 Deploy dos dois artefatos | ambos | 4 | 2 | 2 | 16 |
 | M17 Observabilidade e manutenção | ambos | 2 | 1 | 1 | 17 |
 | **Total** | | **69** | **32** | **37** | |
@@ -46,21 +46,21 @@ vale o que está aqui.
 
 | Sem | Conteúdo | h | Entregas / marcos |
 |---:|---|---:|---|
-| 1 | M00 Ambiente — Python + Node (3h) · M01 Web e HTTP — parte 1 (2h) | 5 | Ambiente validado (`django-admin` e `pnpm` ok) |
+| 1 | M00 Ambiente — Node + monorepo (3h) · M01 Web e HTTP — parte 1 (2h) | 5 | Ambiente validado (`node` e `pnpm` ok) |
 | 2 | M01 Web e HTTP — parte 2 (3h) · M02 Arquitetura desacoplada (2h) | 5 | **E0**: relatório de inspeção HTTP |
-| 3 | M03 Django + DRF (3h) · M04 Models (2h) | 5 | API respondendo JSON |
+| 3 | M03 NestJS (4h) · M04 Entidades (1h) | 5 | API respondendo JSON |
 | 4 | M04 Models (4h) · M05 Migrações (1h) | 5 | **E1**: modelo de dados do BiblioCom |
 | 5 | M05 Migrações (2h) · M06 ORM (3h) | 5 | Migrações versionadas · PostgreSQL |
 | 6 | M06 ORM (2h) · M07 API (2h) · **Projeto Etapa 1** (1h) | 5 | **E2**: caderno de consultas ORM |
-| 7 | M07 API — serializers, validação, filtros (4h) · **Etapa 1** (1h) | 5 | **E3**: API CRUD documentada (OpenAPI) |
+| 7 | M07 API — DTOs, validação, filtros (4h) · **Etapa 1** (1h) | 5 | **E3**: API CRUD documentada (OpenAPI) |
 | 8 | M08 React — componentes e estado (3h) · **Etapa 1** (2h) · **Etapa 2** (0h) | 5 | **P1**: tema do projeto aprovado |
 | 9 | M08 React (2h) · M09 Tailwind (2h) · **Etapa 2** (1h) | 5 | |
 | 10 | M09 Tailwind (2h) · M10 Rotas (2h) · **Avaliação teórica** (1h) | 5 | **A1**: prova (HTTP, ORM, arquitetura) |
 | 11 | M11 Dados e formulários (4h) · **Etapa 2** (1h) | 5 | **E4**: SPA consumindo a API · **P2**: planejamento |
 | 12 | M12 Autenticação ponta a ponta (5h) | 5 | **E5**: login, papéis e rotas protegidas |
 | 13 | M13 Segurança (5h) | 5 | **E6**: checklist OWASP aplicado |
-| 14 | M14 Testes (3h) · **Etapa 2** (2h) | 5 | **E7**: suíte verde (pytest + Vitest) |
-| 15 | M15 Django Admin (2h) · **Extensão** — diagnóstico e plano (3h) | 5 | **X1**: plano de ação extensionista |
+| 14 | M14 Testes (3h) · **Etapa 2** (2h) | 5 | **E7**: suíte verde (Jest + Vitest) |
+| 15 | M15 Tipos compartilhados (2h) · **Extensão** — diagnóstico e plano (3h) | 5 | **X1**: plano de ação extensionista |
 | 16 | M16 Deploy — API + SPA (4h) · **Extensão** (1h) | 5 | **E8**: os dois artefatos no ar |
 | 17 | M17 Observabilidade (2h) · **Etapa 3** (3h) | 5 | |
 | 18 | **Etapa 3** — desenvolvimento e testes (5h) | 5 | **P3**: sistema entregue e implantado |

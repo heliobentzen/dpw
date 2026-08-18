@@ -9,23 +9,22 @@
 
 | Arquivo | Módulo | Para quê |
 |---|---|---|
-| [`servidor_minimo.py`](codigo/servidor_minimo.py) | M01 | Servidor HTTP sem framework: mostra o que o Django faz por você |
-| [`vulneravel.py`](codigo/vulneravel.py) | M13 | 🔵 Laboratório com 10 vulnerabilidades de backend |
+| [`servidor-minimo.mjs`](codigo/servidor-minimo.mjs) | M01 | Servidor HTTP sem framework: mostra o que o NestJS faz por você |
+| [`vulneravel.ts`](codigo/vulneravel.ts) | M13 | 🔵 Laboratório com 10 vulnerabilidades de backend |
 | [`vulneravel.tsx`](codigo/vulneravel.tsx) | M13 | 🟣 Laboratório com 8 vulnerabilidades de frontend |
-| [`verifica_ambiente.py`](codigo/verifica_ambiente.py) | M00, M03, M05 | **Confere** o ambiente (não instala nada). `--etapa m00\|m03\|m05` cobra só o que já deveria existir |
-| [`popular.py`](codigo/popular.py) | M06 | Comando de gestão que gera dados de volume |
-| [`settings_producao.py`](codigo/settings_producao.py) | M13, M16 | Referência de configuração segura para produção |
+| [`verifica-ambiente.mjs`](codigo/verifica-ambiente.mjs) | M00, M03, M05 | **Confere** o ambiente (não instala nada). `--etapa m00\|m03\|m05` cobra só o que já deveria existir |
+| [`semear.ts`](codigo/semear.ts) | M06 | Script que gera dados de volume para os exercícios |
 
-> ⚠️ `vulneravel.py` e `vulneravel.tsx` são **deliberadamente inseguros** e servem apenas
+> ⚠️ `vulneravel.ts` e `vulneravel.tsx` são **deliberadamente inseguros** e servem apenas
 > para estudo. Nunca use nada deles em produção.
 
 ## Ambiente e plataforma
 
 | Arquivo | Quando usar |
 |---|---|
-| [`comandos-windows.md`](comandos-windows.md) | 🪟 **Leia a seção 2 antes da primeira aula.** Equivalências PowerShell/Git Bash/WSL2 e as cinco armadilhas do Windows: `curl` como alias, variáveis inline, `&&` no PowerShell 5.1, Gunicorn e finais de linha (CRLF) |
+| [`comandos-windows.md`](comandos-windows.md) | 🪟 **Leia a seção 2 antes da primeira aula.** Equivalências PowerShell/Git Bash/WSL2 e as cinco armadilhas do Windows: `curl` como alias, variáveis inline, `&&` no PowerShell 5.1, `>` em UTF-16 e finais de linha (CRLF) |
 
-## Ponte Python → JavaScript
+## Ponte para JavaScript moderno
 
 | Arquivo | Quando usar |
 |---|---|
@@ -44,12 +43,12 @@
 
 | Categoria | Ferramenta | Para quê |
 |---|---|---|
-| Editor | VS Code / PyCharm | Desenvolvimento |
-| Lint e formatação | 🔵 Ruff · 🟣 ESLint + Prettier | Padrão de código |
-| Testes | 🔵 pytest, pytest-django, model-bakery · 🟣 Vitest, Testing Library, MSW | Testes automatizados |
-| Depuração | 🔵 Django Debug Toolbar · 🟣 React DevTools, TanStack Query Devtools | Consultas, estado, cache |
+| Editor | VS Code / WebStorm | Desenvolvimento |
+| Lint e formatação | ESLint + Prettier, nas duas camadas | Padrão de código |
+| Testes | 🔵 Jest, Supertest · 🟣 Vitest, Testing Library, MSW | Testes automatizados |
+| Depuração | 🔵 logging do TypeORM, Pino · 🟣 React DevTools, TanStack Query Devtools | Consultas, estado, cache |
 | Tipos | openapi-typescript | Contrato garantido pelo compilador |
-| Segurança | pip-audit, detect-secrets, axe DevTools | Dependências, segredos, acessibilidade |
+| Segurança | `pnpm audit`, detect-secrets, axe DevTools | Dependências, segredos, acessibilidade |
 | Diagramas | Mermaid, dbdiagram.io, Excalidraw | ER, arquitetura, protótipo |
 | Gestão | GitHub Projects, GitHub Issues | Backlog e sprints |
 | Monitoramento | UptimeRobot, Sentry/GlitchTip | Disponibilidade e erros |
@@ -58,10 +57,9 @@
 ## Links de referência rápida
 
 **Documentação — backend**
-- [Django (pt-br)](https://docs.djangoproject.com/pt-br/5.0/)
-- [Django REST Framework](https://www.django-rest-framework.org/)
-- [Classy DRF](https://www.cdrf.co/) — o que cada classe do DRF faz
-- [Django Packages](https://djangopackages.org/) — comparar bibliotecas
+- [NestJS](https://docs.nestjs.com/)
+- [TypeORM](https://typeorm.io/)
+- [npm trends](https://npmtrends.com/) — comparar bibliotecas
 
 **Documentação — frontend**
 - [React](https://react.dev/learn)

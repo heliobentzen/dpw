@@ -10,9 +10,9 @@ as armadilhas em detalhe (seções 2 e 4).
 
 | Preciso de… | Vá para |
 |---|---|
-| Instalar Python, Node, Git, Docker | [`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md) |
+| Instalar Node, pnpm, Git, Docker | [`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md) |
 | Traduzir um comando do roteiro | [seção 3](#3-tabela-de-equivalências) deste arquivo |
-| Entender por que algo quebrou | [seção 2](#2-as-seis-armadilhas-que-não-são-tradução) deste arquivo |
+| Entender por que algo quebrou | [seção 2](#2-as-cinco-armadilhas-que-não-são-tradução) deste arquivo |
 | Instalar o WSL2 | [seção 1.1](#instalar-o-wsl2-opcional-10-min) deste arquivo |
 
 ---
@@ -45,7 +45,7 @@ integra com a extensão *WSL*, e o Docker Desktop usa o WSL2 como backend.
 
 ---
 
-## 2. As seis armadilhas que não são tradução
+## 2. As cinco armadilhas que não são tradução
 
 Nenhuma delas se resolve trocando o comando por um equivalente — todas exigem entender o
 que o Windows faz de diferente.
@@ -55,9 +55,12 @@ que o Windows faz de diferente.
 | [2.1](#21-curl-no-powershell-não-é-o-curl-) | `curl` é apelido de `Invoke-WebRequest` | M01, M07, M12, M13, M16 |
 | [2.2](#22-variáveis-de-ambiente-inline-não-existem-) | Variáveis inline não existem — e ficam na sessão | M13, M16 |
 | [2.3](#23--não-existe-no-powershell-51-) | `&&` não existe no PowerShell 5.1 | todos |
-| [2.4](#24-gunicorn-não-roda-no-windows-) | Gunicorn não roda no Windows | M16 |
-| [2.5](#25--grava-arquivo-em-utf-16-) | `>` grava arquivo em UTF-16 | M00, M16 |
-| [2.6](#26-a-crase-de-continuação-e-o-espaço-invisível-) | Espaço depois da crase corta o comando | todos |
+| [2.4](#24--grava-arquivo-em-utf-16-) | `>` grava arquivo em UTF-16 | M07, M15, M16 |
+| [2.5](#25-a-crase-de-continuação-e-o-espaço-invisível-) | Espaço depois da crase corta o comando | todos |
+
+> 🎉 **Uma armadilha desapareceu com a mudança de stack.** O servidor de produção do Python
+> (Gunicorn) não rodava no Windows, e exigia um substituto só para a verificação local do
+> M16. Com Node, `node dist/main.js` é o mesmo comando em Windows, macOS, Linux e na PaaS.
 
 ### 2.1 `curl` no PowerShell não é o `curl` ⚠️
 
@@ -65,8 +68,8 @@ No PowerShell, `curl` é **apelido de `Invoke-WebRequest`**, que tem outros par�
 Comandos do material como `curl -X POST -d '...'` falham com erro confuso.
 
 ```powershell
-curl -X POST http://localhost:8000/api/obras/     # ❌ erro de parâmetro
-curl.exe -X POST http://localhost:8000/api/obras/ # ✅ o curl de verdade
+curl -X POST http://localhost:3000/api/obras     # ❌ erro de parâmetro
+curl.exe -X POST http://localhost:3000/api/obras # ✅ o curl de verdade
 ```
 
 **Regra:** no PowerShell, escreva sempre **`curl.exe`**. O binário existe em todo Windows
@@ -75,41 +78,37 @@ curl.exe -X POST http://localhost:8000/api/obras/ # ✅ o curl de verdade
 Alternativa nativa, se preferir:
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:8000/api/obras/" -Method Get
-Invoke-RestMethod -Uri "http://localhost:8000/api/obras/" -Method Post `
+Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Get
+Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Post `
   -ContentType "application/json" `
-  -Body '{"titulo":"Dom Casmurro","autor":1}'
+  -Body '{"titulo":"Dom Casmurro","autorId":1}'
 ```
 
 `Invoke-RestMethod` já converte o JSON em objeto — bom para inspecionar, ruim para ver a
 resposta crua. Para os exercícios do M01, que pedem para **ver os cabeçalhos e o corpo**,
-use `curl.exe -i` ou `curl.exe -v`.
+use `curl.exe -i` ou `curl.exe -v`. Para ver o corpo de uma resposta de **erro**, acrescente
+`-SkipHttpErrorCheck`, senão o `Invoke-RestMethod` lança exceção e você não lê a mensagem.
 
 ### 2.2 Variáveis de ambiente inline não existem ⚠️
 
 ```bash
 # Linux/macOS — define a variável só para este comando
-DEBUG=False python manage.py check --deploy
+NODE_ENV=production node dist/main.js
 ```
 
 ```powershell
 # Windows PowerShell — define, executa, e a variável PERMANECE na sessão
-$env:DEBUG="False"; python manage.py check --deploy
+$env:NODE_ENV="production"; node dist/main.js
 
 # para limpar depois:
-Remove-Item Env:\DEBUG
-```
-
-```cmd
-:: Windows CMD
-set DEBUG=False && python manage.py check --deploy
+Remove-Item Env:\NODE_ENV
 ```
 
 > ⚠️ **A diferença que causa bug:** no Linux a variável vale só para aquele comando; no
-> PowerShell ela **fica na sessão**. Se você rodar `$env:DEBUG="False"` e depois
-> `python manage.py runserver`, o servidor sobe com `DEBUG=False` — sem páginas de erro
-> detalhadas, sem servir estáticos — e você vai perder tempo procurando a causa. **Feche o
-> terminal ou limpe a variável** depois de testar.
+> PowerShell ela **fica na sessão**. Se você rodar `$env:NODE_ENV="production"` e depois
+> `pnpm start:dev`, o servidor sobe em modo produção — sem recarregar, com log diferente —
+> e você vai perder tempo procurando a causa. **Feche o terminal ou limpe a variável**
+> depois de testar.
 
 ### 2.3 `&&` não existe no PowerShell 5.1 ⚠️
 
@@ -117,7 +116,7 @@ O Windows 10/11 vem com **PowerShell 5.1**. O operador `&&` só foi adicionado n
 **PowerShell 7**. Ou seja: metade dos comandos encadeados de qualquer tutorial falha.
 
 ```powershell
-cd backend && python manage.py runserver     # ❌ PowerShell 5.1: erro de sintaxe
+cd backend && pnpm start:dev     # ❌ PowerShell 5.1: erro de sintaxe
 ```
 
 Três saídas:
@@ -125,10 +124,10 @@ Três saídas:
 ```powershell
 # 1. linhas separadas (o que este material usa)
 cd backend
-python manage.py runserver
+pnpm start:dev
 
 # 2. ponto e vírgula — executa o segundo INDEPENDENTE de o primeiro falhar
-cd backend; python manage.py runserver
+cd backend; pnpm start:dev
 
 # 3. instale o PowerShell 7, e aí o && funciona como no Linux
 winget install Microsoft.PowerShell
@@ -144,55 +143,34 @@ Descubra sua versão:
 $PSVersionTable.PSVersion
 ```
 
-### 2.4 Gunicorn não roda no Windows ⚠️
-
-O Gunicorn depende de módulos POSIX (`fcntl`) que não existem no Windows. O comando
-simplesmente falha na importação.
-
-**Isso não é problema em produção** — a PaaS roda Linux, e o `Procfile` continua com
-Gunicorn. O problema é só na **verificação local** que o M16 pede.
-
-Solução: use **Waitress**, servidor WSGI de produção que roda no Windows.
-
-```powershell
-pip install waitress
-$env:DEBUG="False"; $env:SECRET_KEY="teste"; $env:ALLOWED_HOSTS="localhost"
-waitress-serve --port=8000 config.wsgi:application
-```
-
-O objetivo da verificação local é provar que a aplicação funciona **fora do `runserver`**,
-com `DEBUG=False` e estáticos coletados. Waitress cumpre isso.
-
-> Se estiver no WSL2, use Gunicorn normalmente — é Linux.
-
-### 2.5 `>` grava arquivo em UTF-16 ⚠️
+### 2.4 `>` grava arquivo em UTF-16 ⚠️
 
 No **PowerShell 5.1** — o que vem instalado no Windows — o operador `>` não grava texto
 puro: grava **UTF-16**, com dois bytes por caractere e um marcador BOM no início. O arquivo
 parece normal no editor, mas outras ferramentas leem lixo.
 
 ```powershell
-pip freeze > requirements.txt        # ❌ arquivo em UTF-16
+pnpm gerar:schema > openapi.json     # ❌ arquivo em UTF-16
 ```
 
 O erro aparece depois, na máquina de **outra pessoa**, quando ela clona o repositório:
 
 ```
-ERROR: Invalid requirement: 'ÿþd'
+SyntaxError: Unexpected token 'ÿ', "..." is not valid JSON
 ```
 
 Forma correta, que funciona no PowerShell 5.1 **e** no 7:
 
 ```powershell
-pip freeze | Out-File -FilePath requirements.txt -Encoding ascii
+pnpm gerar:schema | Out-File -FilePath openapi.json -Encoding utf8
 ```
 
 | Trecho | O que faz |
 |---|---|
 | `\| Out-File` | Grava a saída num arquivo, com controle explícito de codificação |
-| `-Encoding ascii` | Texto puro, 1 byte por caractere, sem BOM |
+| `-Encoding utf8` | UTF-8. Use `ascii` quando o conteúdo for garantidamente sem acento |
 
-Vale para **todo** `>` que gere arquivo de texto lido por outra ferramenta: `requirements.txt`,
+Vale para **todo** `>` que gere arquivo de texto lido por outra ferramenta: `openapi.json`,
 `.env`, `.txt`, `.json`. Para criar arquivo de configuração, prefira o editor:
 
 ```powershell
@@ -203,18 +181,18 @@ code .gitignore
 > No **PowerShell 7** o `>` já grava UTF-8 e o problema não existe. Mas como você não sabe
 > em qual versão o colega está, use sempre `Out-File -Encoding ascii`.
 
-### 2.6 A crase de continuação e o espaço invisível ⚠️
+### 2.5 A crase de continuação e o espaço invisível ⚠️
 
 Para quebrar um comando longo em várias linhas, o Linux usa `\` e o PowerShell usa a crase
 (`` ` ``). A diferença perigosa é que a crase precisa ser **o último caractere da linha**:
 
 ```powershell
-pip install django `
-            djangorestframework
+pnpm add @nestjs/typeorm `
+          typeorm
 ```
 
 Se houver **um único espaço depois da crase**, o PowerShell trata a linha como terminada.
-O comando roda pela metade — instala `django`, ignora o resto — e **não há mensagem de
+O comando roda pela metade — instala `@nestjs/typeorm`, ignora o resto — e **não há mensagem de
 erro**. Como espaço em branco no fim da linha é invisível, o diagnóstico é penoso.
 
 Por isso este material escreve comandos de instalação em **linha única**, por mais longos
@@ -229,10 +207,10 @@ que fiquem. Se precisar quebrar, ative "renderizar espaços em branco" no editor
 
 | Linux/macOS | PowerShell | Git Bash |
 |---|---|---|
-| `python3 -m venv .venv` | `python -m venv .venv` | `python -m venv .venv` |
-| `source .venv/bin/activate` | `.venv\Scripts\Activate.ps1` | `source .venv/Scripts/activate` |
+| `pnpm install` | `pnpm install` | `pnpm install` |
+| `pnpm --filter backend dev` | idem | idem |
 | `deactivate` | `deactivate` | `deactivate` |
-| `which python` | `Get-Command python` | `which python` |
+| `which node` | `Get-Command node` | `which node` |
 
 Se `Activate.ps1` for bloqueado:
 
@@ -279,7 +257,7 @@ Select-String -Recurse "minha-chave-secreta" dist/*
 | Linux/macOS | PowerShell |
 |---|---|
 | `lsof -ti:8000 \| xargs kill -9` | `Get-NetTCPConnection -LocalPort 8000 \| Select-Object -Expand OwningProcess \| Stop-Process -Force` |
-| `ps aux \| grep python` | `Get-Process python` |
+| `ps aux \| grep node` | `Get-Process node` |
 
 Ou, mais simples:
 
@@ -381,8 +359,7 @@ git config --global core.autocrlf input
 
 | Situação | No Windows |
 |---|---|
-| **Pasta do projeto** | ⚠️ Use `C:\dev`. Dentro do `Documents` o OneDrive sincroniza `node_modules` e `.venv`, travando `pnpm install` e produzindo mudanças fantasma no Git. Espaços e acentos no caminho também quebram ferramentas |
-| **Aliases de execução** | ⚠️ `python.exe` e `python3.exe` vêm como atalhos que abrem a Microsoft Store. Desligue em *Gerenciar aliases de execução de aplicativo* |
+| **Pasta do projeto** | ⚠️ Use `C:\dev`. Dentro do `Documents` o OneDrive sincroniza `node_modules`, travando `pnpm install` e produzindo mudanças fantasma no Git. Espaços e acentos no caminho também quebram ferramentas |
 | **Docker Desktop** | Exige WSL2 habilitado. Instale o WSL antes do Docker |
 | **PostgreSQL local** | Prefira o container Docker ao instalador nativo |
 | **Caminhos longos** | `node_modules` pode passar de 260 caracteres. Habilite: `git config --system core.longpaths true` e ative *Long Paths* no Windows |
@@ -390,21 +367,19 @@ git config --global core.autocrlf input
 | **Node e pnpm** | Funcionam nativamente, sem ressalva |
 | **`make`** | Não existe. Use scripts do `package.json` (`pnpm <script>`) |
 | **Emoji/acentos no terminal** | Se aparecerem quebrados: `chcp 65001` ou use o Windows Terminal |
-| **`python` × `python3`** | No Windows é `python` (ou `py -3.12`); no material aparece `python3` |
 
 ---
 
 ## 6. Verificação: o ambiente está pronto?
 
 ```powershell
-python --version           # 3.12+
 node --version             # v20+
-pnpm --version
+pnpm --version             # 9+
 git --version
 curl.exe --version         # note o .exe
-docker info                # opcional até o M05
+docker info                # só a partir do M05
 
-python recursos\codigo\verifica_ambiente.py
+node recursos\codigo\verifica-ambiente.mjs
 ```
 
 O script detecta o sistema operacional e ajusta as dicas de correção.
@@ -413,7 +388,7 @@ O script detecta o sistema operacional e ajusta as dicas de correção.
 
 ## 7. Se algo do material não funcionar
 
-1. Confira se o comando cai em uma das **seis armadilhas** da seção 2.
+1. Confira se o comando cai em uma das **cinco armadilhas** da seção 2.
 2. Procure o equivalente na tabela da seção 3.
 3. Ainda assim travou? **Abra o Git Bash** e cole o comando original — resolve a maioria
    dos casos, sem tradução.

@@ -11,7 +11,7 @@
 
 18 casos, nas duas camadas:
 
-- [`vulneravel.py`](../../recursos/codigo/vulneravel.py) — 10 casos de backend
+- [`vulneravel.ts`](../../recursos/codigo/vulneravel.ts) — 10 casos de backend
 - [`vulneravel.tsx`](../../recursos/codigo/vulneravel.tsx) — 8 casos de frontend
 
 Para cada um:
