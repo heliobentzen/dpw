@@ -70,8 +70,8 @@ esconder no cliente nunca é proteção.
 2. Logado como A, descubra o id de um empréstimo de B.
 3. Acesse `/emprestimos/<id-de-B>` na interface e `GET /api/emprestimos/<id-de-B>/` na API.
 4. Se conseguiu ver, corrija de **duas** formas e compare:
-   - `has_object_permission` numa `BasePermission`
-   - filtro no `get_queryset`
+   - checagem de dono **depois** de buscar, lançando `ForbiddenException`
+   - filtro por dono **dentro** da consulta (`QueryBuilder`)
 5. Qual devolve 403 e qual devolve 404? **Qual é preferível e por quê?**
 6. Repita para edição e exclusão.
 
@@ -114,7 +114,7 @@ Implemente bloqueio após 5 tentativas falhas em 15 minutos:
 
 - chave de bloqueio por **usuário + IP** (por que não só por um dos dois?)
 - resposta `429` com cabeçalho `Retry-After`
-- armazenamento no cache do Django, não no banco
+- armazenamento em cache (`@nestjs/cache-manager` ou Redis), não no banco
 - log de cada tentativa falha, **sem** a senha
 - a interface mostra quanto tempo falta
 
@@ -149,10 +149,10 @@ a se justificar. Note que a API pode aceitar **os dois** mecanismos simultaneame
 de 15 minutos: não exige CSRF, não exige mesmo domínio, não exige entender cookies. O custo
 só aparece quando há um XSS — e aí não aparece no tutorial.
 
-**E12.4 (5)** — `has_object_permission` devolve **403** e, com isso, confirma que o objeto
-existe. Filtrar o queryset devolve **404**: quem não pode ver não descobre nem a
+**E12.4 (5)** — Checar depois de buscar devolve **403** e, com isso, confirma que o objeto
+existe. Filtrar dentro da consulta devolve **404**: quem não pode ver não descobre nem a
 existência. Para recursos privados, 404 é preferível.
 
-**E12.6** — Se `papel` estiver no serializer de perfil, o PATCH promove o usuário. Correções:
-serializer com `fields` explícito e restrito; campos sensíveis definidos no servidor
-(`perform_update`); e nunca confiar em campo vindo do cliente para decisão de autorização.
+**E12.6** — Se `papel` estiver no DTO de perfil, o PATCH promove o próprio usuário.
+Correções: DTO de entrada sem o campo, `whitelist: true` no `ValidationPipe` (M07), papel
+definido **no servidor**; e nunca confiar em campo vindo do cliente para decidir autorização.
