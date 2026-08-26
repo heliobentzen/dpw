@@ -155,19 +155,56 @@ completa (entidade → DTO → tipo → tela). Em contrapartida, a turma precisa
 
 ---
 
-## ADR-02 — Banco: SQLite → PostgreSQL
+## ADR-14 — PostgreSQL desde o M04, sem etapa em SQLite
 
-- **Status:** aceito · **Atualizado para o TypeORM**
+- **Status:** aceito · **Data:** 2026-08-26 · **Supera a [ADR-02](#adr-02--banco-sqlite-até-o-m04-postgresql-a-partir-do-m05)**
 
-**Decisão.** SQLite nos módulos M03–M04, PostgreSQL a partir do M05.
+**Contexto.** A ADR-02 usava SQLite no M04 para evitar instalação, e trocava para PostgreSQL
+no M05. Na prática, a troca invalidava o trabalho anterior: as migrações geradas contra o
+SQLite não rodam no PostgreSQL, e o próprio roteiro mandava apagar `src/migracoes/`, apagar
+o banco e gerar tudo de novo. Cerca de 70 minutos de aula produziam artefatos descartados
+uma hora depois.
 
-**Justificativa.** SQLite não exige instalação: a turma escreve entidades e vê tabelas
-nascerem na primeira aula de backend. A troca no M05 é feita mudando o `type` do
-`DataSource` — e é exatamente aí que a promessa do ORM ("o código da aplicação não muda")
-se demonstra sozinha.
+Havia mais efeitos colaterais do que se supunha ao escrever a ADR-02: `simple-enum` no M04
+virando `enum` no M05, a migração de dados escrita à mão com `= 1` em vez de `= true`,
+notas de rodapé "no SQLite use `LIKE`" espalhadas por quatro arquivos, e um módulo de testes
+que mandava usar SQLite em memória enquanto seu próprio gabarito explicava por que isso é má
+ideia.
 
-**Consequência declarada.** SQLite e PostgreSQL divergem em tipos e em migrações. O M05
-mostra a divergência em vez de escondê-la: é conteúdo, não acidente.
+**Decisão.** PostgreSQL em Docker desde o passo 1 do M04. O Docker sai da lista "antes do
+M05" e entra na "antes do M04". SQLite deixa de aparecer no material.
+
+**Alternativas consideradas.**
+
+| Alternativa | Por que não |
+|---|---|
+| Manter SQLite e adiar a troca para o M16 | Piora: a divergência só apareceria no deploy, com o projeto inteiro em cima |
+| SQLite no curso, PostgreSQL só em produção | As migrações nunca seriam testadas contra o banco real. É a origem do "funciona local, falha no deploy" |
+| PostgreSQL nativo, sem Docker | Instalação diferente em cada sistema operacional, e o M16 usa contêiner de qualquer forma |
+
+**Consequências.**
+
+*A favor:* um único dialeto do M04 ao M16; nada do que a turma escreve é descartado; o enum
+nativo do PostgreSQL torna o M04 mais rico (o `CREATE TYPE` antes do `CREATE TABLE` vira
+conteúdo); as migrações de desenvolvimento são as mesmas que rodam em produção.
+
+*Contra:* a turma precisa de Docker uma semana antes — o que, no Windows, significa WSL2 uma
+semana antes. É o custo real desta decisão, e os guias de setup passam a avisá-lo com a
+antecedência correspondente. A demonstração "troque o `type` e nada mais muda" deixa de ser
+um exercício e vira um parágrafo na teoria do M04, mais o exercício E05.6, que persegue o
+mesmo aprendizado lendo o SQL gerado em vez de refazendo o trabalho.
+
+---
+
+## ADR-02 — Banco: SQLite até o M04, PostgreSQL a partir do M05
+
+- **Status:** ❌ **superado pela [ADR-14](#adr-14--postgresql-desde-o-m04-sem-etapa-em-sqlite)**
+
+**Decisão original.** SQLite nos módulos M03–M04, PostgreSQL a partir do M05, com a troca
+servindo de demonstração de que "o código da aplicação não muda".
+
+**Por que foi revista.** A demonstração custava caro: as migrações geradas contra o SQLite
+não rodavam no PostgreSQL, e o próprio material mandava apagá-las e regerar. Ver a ADR-14.
 
 ---
 

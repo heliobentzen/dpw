@@ -88,7 +88,7 @@ export class Usuario {
   @Column({ select: false })
   senhaHash: string;
 
-  @Column({ type: "simple-enum", enum: Papel, default: Papel.ASSOCIADO })
+  @Column({ type: "enum", enum: Papel, default: Papel.ASSOCIADO })
   papel: Papel;
 
   @Column({ default: true })
@@ -462,6 +462,11 @@ Depois aplique a matriz:
 | `GET /api/emprestimos` | ❌ 401 | só os seus | todos | todos |
 | `POST /api/emprestimos` | ❌ 401 | ❌ 403 | ✅ | ✅ |
 | `GET /api/usuarios` | ❌ 401 | ❌ 403 | ❌ 403 | ✅ |
+| `POST /api/obras/:id/capa` | ❌ 401 | ❌ 403 | ✅ | ✅ |
+
+> A última linha é uma **dívida do M07**. A rota de upload nasceu aberta lá, com um
+> `// TODO(M12)` marcando o lugar. É agora. Procure o comentário no código, aplique o
+> `@UseGuards` e apague o `TODO` — dívida técnica anotada e não paga é só dívida técnica.
 
 A linha `GET /api/emprestimos` é o nível 4: não é permitir ou negar, é **filtrar**.
 
@@ -517,7 +522,7 @@ escondendo melhor.
 | Erro | Correção |
 |---|---|
 | `user.password = "x"` | `user.set_password("x")` |
-| Trocar `AUTH_USER_MODEL` após a 1ª migração | Decida antes |
+| Trocar a entidade `Usuario` depois de a 1ª migração rodar | Decida antes |
 | JWT em `localStorage` "porque é mais fácil" | Decida pelo modelo de ameaça |
 | Mensagem de login que revela se o usuário existe | Mensagem única |
 | Só esconder o link no React | Proteja a API |
@@ -530,15 +535,16 @@ escondendo melhor.
 
 ## ✅ Checklist de saída
 
-- [ ] `AUTH_USER_MODEL` customizado, migrado desde o início
+- [ ] Entidade `Usuario` própria, criada por migração desde o início
 - [ ] Argon2 configurado; nenhuma senha em texto puro
 - [ ] `login`, `logout` e `eu` funcionando, testados com `curl`
 - [ ] CSRF funcionando na SPA (cookie lido, cabeçalho enviado)
-- [ ] 3 grupos criados por comando versionado
+- [ ] Os três papéis criados por migração de dados, não à mão no banco
 - [ ] Autorização nos 4 níveis, com a consulta filtrada por usuário
 - [ ] `AuthProvider`, `RotaProtegida` e página de login funcionando
 - [ ] Logout limpa o cache do Query
-- [ ] Matriz de acesso verificada nas duas camadas
+- [ ] Matriz de acesso verificada nas duas camadas, upload de capa incluído
+- [ ] O `// TODO(M12)` do M07 foi resolvido e apagado
 - [ ] **Provei com `curl` que a API recusa o que a interface esconde**
 
 ## 📦 Entrega E5 — Autenticação ponta a ponta

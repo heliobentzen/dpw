@@ -159,7 +159,7 @@ cada peça chegando junto com o problema que ela resolve:
 |---|---|---|
 | **Semana 1** (M00) | Node 20, pnpm, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
 | **Antes do M03** | NestJS CLI e as dependências do backend | `--etapa m03` |
-| **Antes do M05** | Docker + PostgreSQL | `--etapa m05` |
+| **Antes do M04** | Docker + PostgreSQL | `--etapa m04` |
 
 **A stack tem um runtime só.** A semana 1 instala **Node e pnpm**, e acabou: não há segundo
 ecossistema de pacotes para manter, nem ambiente virtual para lembrar de ativar.

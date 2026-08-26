@@ -20,7 +20,7 @@ manter. O backend e o frontend compartilham runtime, gerenciador de pacotes e si
 |---|---|---|
 | **Semana 1** (M00) | Git, Node 20, pnpm, VS Code, monorepo, primeiro commit | 1 a 5, 8, 9 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
-| **Antes do M05** | Docker + PostgreSQL | 7 |
+| **Antes do M04** | Docker + PostgreSQL | 7 |
 | **A partir do M08** | Rodar os dois servidores juntos | 10 |
 
 > **Você digita tudo.** Não há script que monte o ambiente por você — configurar projeto,
@@ -50,11 +50,12 @@ dentro do projeto, e o `pnpm` as encontra pela pasta em que você está.
 | pnpm | 9 | ambas | Gerenciador de pacotes e de *workspaces* |
 | Git | 2.40 | ambas | Versionamento |
 | VS Code (ou WebStorm) | atual | ambas | Editor |
-| Docker | atual | 🔵 | PostgreSQL local (a partir do M05) |
+| Docker | atual | 🔵 | PostgreSQL local (a partir do M04) |
 | PostgreSQL | 16 | 🔵 | Banco de produção-like |
 
-> Até o M04 usamos **SQLite** (um arquivo, zero instalação). PostgreSQL entra no M05, para
-> que a diferença entre "banco de brinquedo" e "banco de verdade" seja sentida na prática.
+> O banco entra só no M04, quando há entidade para gerar tabela. Usamos **PostgreSQL desde
+> o primeiro dia de banco**: é o mesmo que roda em produção (M16), então nada do que você
+> escrever precisa ser refeito depois por diferença de dialeto.
 
 ## 2. Estrutura do repositório
 
@@ -149,7 +150,7 @@ code --install-extension esbenp.prettier-vscode
 
 | Extensão | Antes do | Para quê |
 |---|---|---|
-| **SQLite Viewer** | M04 | Ver as tabelas que as entidades geraram |
+| **PostgreSQL** (ms-ossdata.vscode-pgsql) | M04 | Ver as tabelas que as entidades geraram, sem sair do editor |
 | **Tailwind CSS IntelliSense** | M09 | Autocomplete de classes — praticamente obrigatória |
 | **GitLens** | quando quiser | Histórico e autoria linha a linha |
 
@@ -186,9 +187,9 @@ importante: sem ele, a CLI cria um segundo repositório dentro do seu.
 
 Siga o roteiro do [M03](../modulos/03-nestjs-primeiros-passos/).
 
-## 7. PostgreSQL via Docker (a partir do M05)
+## 7. PostgreSQL via Docker (a partir do M04)
 
-> ⏭️ Até o M04 usamos SQLite, que não exige instalação.
+> ⏭️ Só é preciso antes do M04 — até lá não há entidade nem tabela.
 
 `docker-compose.yml` na raiz:
 
@@ -261,8 +262,6 @@ dist/
 coverage/
 
 # Banco local
-*.sqlite
-*.sqlite-journal
 
 # Ambiente
 .env

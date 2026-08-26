@@ -33,6 +33,10 @@ um *crawler* ou o *prefetch* do navegador percorre essa URL.
 
 Os dois últimos merecem discussão: 422 ou 400? 500 vaza informação?
 
+> ⚠️ As duas linhas sobre autenticação são para **responder no papel**, não para testar: a
+> API do M07 ainda é aberta, e os guards chegam no M12. Saber qual status usar é conteúdo do
+> M01; implementá-lo é de lá.
+
 ---
 
 ## E07.3 — DTOs completos (individual) ⭐

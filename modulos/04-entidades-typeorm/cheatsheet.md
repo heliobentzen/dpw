@@ -30,7 +30,7 @@ export class Obra {
 | `@Column({ type: "boolean", default: false })` | `boolean NOT NULL DEFAULT false` |
 | `@Column({ type: "date" })` | `date` (sem hora) |
 | `@Column({ type: "timestamptz" })` | `timestamp with time zone` |
-| `@Column({ type: "enum", enum: Estado })` | `enum` — no SQLite use `simple-enum` |
+| `@Column({ type: "enum", enum: Estado })` | `enum` nativo. O TypeORM cria um `CREATE TYPE` antes da tabela |
 | `@CreateDateColumn()` | preenchido na criação |
 | `@UpdateDateColumn()` | atualizado a cada `save` |
 | `@DeleteDateColumn()` | exclusão lógica (`softDelete`) |
@@ -113,8 +113,8 @@ TypeOrmModule.forRoot({
 ## Conferir o que foi gerado
 
 ```bash
-pnpm dlx sqlite3 bibliocom.sqlite ".schema obra"     # SQLite
-docker compose exec db psql -U bibliocom -c "\d obra" # PostgreSQL
+docker compose exec db psql -U bibliocom -d bibliocom -c "\d obra"    # uma tabela
+docker compose exec db psql -U bibliocom -d bibliocom -c "\dt"          # todas
 ```
 
 ## Erros
@@ -123,6 +123,6 @@ docker compose exec db psql -U bibliocom -c "\d obra" # PostgreSQL
 |---|---|
 | `Entity metadata for X#y was not found` | Falta no `forFeature` |
 | `Cannot read properties of undefined (reading 'name')` | Importação circular — use `() => Entidade` |
-| `DataTypeNotSupportedError` | Tipo inexistente no banco (`enum` no SQLite) |
+| `ECONNREFUSED ::1:5432` | O contêiner do banco não subiu. `docker compose ps` |
 | Tudo virou `varchar(255)` | Faltou `type`/`length` |
-| `NOT NULL constraint failed` | Campo obrigatório sem valor ou sem `default` |
+| `null value in column "x" violates not-null constraint` | Campo obrigatório sem valor ou sem `default` |

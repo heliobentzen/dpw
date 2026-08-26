@@ -110,7 +110,7 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 
 ### Passo 1 — Instalar as ferramentas (20 min)
 
-Só três coisas hoje: **Node 20, Git e VS Code**. Docker e PostgreSQL entram no M05, quando
+Só três coisas hoje: **Node 20, Git e VS Code**. Docker e PostgreSQL entram no M04, quando
 passam a servir para alguma coisa. Instalar tudo agora só antecipa problemas.
 
 Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
@@ -251,8 +251,6 @@ dist/
 coverage/
 
 # Banco local (a partir do M04)
-*.sqlite
-*.sqlite-journal
 
 # Logs
 *.log
@@ -272,7 +270,6 @@ Thumbs.db
 | Padrão | Por que fica de fora |
 |---|---|
 | `node_modules/` | É **reconstruível** a partir do `package.json` + `pnpm-lock.yaml`. São dezenas de milhares de arquivos: versioná-los incha o repositório e gera conflito a cada instalação |
-| `*.sqlite` | É o **seu** banco local. O de outra pessoa é outro; o de produção é outro ainda |
 | `dist/`, `coverage/` | Saída de build e de teste. Geradas por comando, não escritas por pessoa |
 | `.env` | Contém segredo. **Segredo que entra no Git é segredo vazado** — mesmo removido depois, continua nos commits anteriores |
 | `!.env.example` | A `!` **desfaz** o ignore da linha acima. O `.env.example` entra sim: ele documenta *quais* variáveis existem, sem os valores |
@@ -331,7 +328,7 @@ Os mesmos comandos valem no Windows, no macOS e no Linux.
 ````
 
 Este arquivo é o que decide se alguém consegue rodar seu projeto. Ele cresce junto com o
-código: no M03 ganha os comandos de migração, no M05 o banco em Docker. Um README
+código: no M03 ganha os comandos do backend, no M04 o banco em Docker. Um README
 desatualizado é pior que nenhum, porque manda a pessoa por um caminho que não existe mais.
 
 #### 3e. Primeiro commit
@@ -351,7 +348,7 @@ git commit -m "chore: inicializa estrutura do projeto"
 **Deu certo se:** o `git status` listou **seis itens**: `.gitignore`, `.gitattributes`,
 `README.md`, `package.json`, `pnpm-lock.yaml` e `pnpm-workspace.yaml`.
 
-⚠️ Se `node_modules/`, `.env` ou algum `.sqlite` aparecerem, pare e corrija o `.gitignore`
+⚠️ Se `node_modules/` ou `.env` aparecerem, pare e corrija o `.gitignore`
 antes de commitar. Depois de commitado, o arquivo fica no histórico mesmo que você o apague
 no commit seguinte.
 

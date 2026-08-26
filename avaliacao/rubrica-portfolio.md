@@ -88,7 +88,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 - [ ] 6+ componentes base próprios, acessíveis
 
 ### E5 — Autenticação ponta a ponta ⚪
-- [ ] `AUTH_USER_MODEL` customizado
+- [ ] Entidade `Usuario` própria, criada por migração
 - [ ] Login, logout e `eu` funcionando, testados com `curl`
 - [ ] CSRF funcionando na SPA
 - [ ] 3 grupos criados por comando versionado

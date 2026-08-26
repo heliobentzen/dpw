@@ -103,13 +103,19 @@ await this.obras.createQueryBuilder("obra")
 ## N+1
 
 ```ts
-// ❌ 1 + N consultas
-const obras = await this.obras.find();
-for (const o of obras) o.autor = await this.autores.findOneBy({ id: o.autorId });
+// ❌ N+1: com take 50 são 51 consultas; com 200, são 201
+const obras = await this.obras.find({ take: 50 });
+for (const o of obras) {
+  const autor = await this.autores.findOneBy({ id: o.autorId });
+  if (autor) o.autor = autor;
+}
 
-// ✅ 1 consulta
-await this.obras.find({ relations: { autor: true } });
+// ✅ 2 consultas, e continuam 2 com take 200
+await this.obras.find({ take: 50, relations: { autor: true } });
 ```
+
+São 2 e não 1 porque, com `take` + relação, o TypeORM busca primeiro os ids da página e
+depois os dados. O que importa não é 1 ou 2: é que **2 não cresce**.
 
 **Detectar:** com `logging: true`, se o número de SELECTs cresce com o tamanho da lista, é N+1.
 
@@ -138,5 +144,5 @@ console.log(qb.getSql()); // consulta específica
 | relação `undefined` | Faltou `relations` / `leftJoinAndSelect` |
 | `syntax error at or near` | Parâmetro como `$x` ou `?x`; no TypeORM é `:x` |
 | `save()` criou em vez de atualizar | Objeto sem `id` |
-| `ILIKE` falha | É do PostgreSQL; no SQLite use `LIKE` |
+| `ILIKE` falha | É do PostgreSQL. Em outro banco: `LOWER(a) LIKE LOWER(b)` |
 | Transação não desfez | Usou `this.repo` em vez do `manager` |

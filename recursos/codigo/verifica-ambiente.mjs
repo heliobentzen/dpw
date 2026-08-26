@@ -11,7 +11,7 @@
  *
  *     node verifica-ambiente.mjs                 semana 1  (M00)
  *     node verifica-ambiente.mjs --etapa m03     antes do M03: + backend
- *     node verifica-ambiente.mjs --etapa m05     antes do M05: + Docker
+ *     node verifica-ambiente.mjs --etapa m04     antes do M04: + Docker
  *
  * Código de saída 0 se tudo passar, 1 caso contrário (útil em CI).
  */
@@ -22,7 +22,7 @@ import { join } from "node:path";
 import { platform, release } from "node:os";
 
 const WINDOWS = platform() === "win32";
-const ETAPAS = ["m00", "m03", "m05"];
+const ETAPAS = ["m00", "m03", "m04"];
 
 const i = process.argv.indexOf("--etapa");
 const etapa = i !== -1 && process.argv[i + 1] ? process.argv[i + 1].toLowerCase() : "m00";
@@ -31,7 +31,7 @@ if (!ETAPAS.includes(etapa)) {
   process.exit(2);
 }
 const EXIGE_BACKEND = ETAPAS.indexOf(etapa) >= ETAPAS.indexOf("m03");
-const EXIGE_DOCKER = ETAPAS.indexOf(etapa) >= ETAPAS.indexOf("m05");
+const EXIGE_DOCKER = ETAPAS.indexOf(etapa) >= ETAPAS.indexOf("m04");
 
 let falhas = 0;
 
@@ -62,7 +62,7 @@ console.log("=".repeat(62));
 info(`Sistema: ${platform()} ${release()}`);
 info(`Etapa verificada: ${etapa.toUpperCase()}`);
 if (!EXIGE_BACKEND) {
-  info("Backend e Docker ainda nao sao exigidos — use --etapa m03 / m05 depois");
+  info("Backend e Docker ainda nao sao exigidos — use --etapa m03 / m04 depois");
 }
 if (WINDOWS) {
   info("Guia de setup do Windows: docs/ambiente-setup-windows.md");
@@ -155,7 +155,7 @@ if (EXIGE_BACKEND) {
   }
 }
 
-// --- Docker (a partir do M05) --------------------------------------------
+// --- Docker (a partir do M04) --------------------------------------------
 if (EXIGE_DOCKER) {
   if (rodar("docker --version")) {
     check(
@@ -229,7 +229,7 @@ console.log("-".repeat(62));
 if (falhas === 0) {
   console.log(`Ambiente da etapa ${etapa.toUpperCase()} pronto. Bom curso!`);
   if (etapa === "m00") console.log("Antes do M03, rode de novo com: --etapa m03");
-  else if (etapa === "m03") console.log("Antes do M05, rode de novo com: --etapa m05");
+  else if (etapa === "m03") console.log("Antes do M04, rode de novo com: --etapa m04");
   if (WINDOWS) {
     console.log("Leia as cinco armadilhas do Windows: recursos/comandos-windows.md (secao 2)");
   }

@@ -43,7 +43,7 @@ necessário**:
 |---|---|---|
 | **Semana 1** (M00) | Node 20, pnpm, Git, VS Code, monorepo, 1º commit | — |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | sim |
-| **Antes do M05** | Docker + PostgreSQL | **sim, com folga** — no Windows exige WSL2 e, às vezes, virtualização na BIOS |
+| **Antes do M04** | Docker + PostgreSQL | **sim, com folga** — no Windows exige WSL2 e, às vezes, virtualização na BIOS |
 
 A semana 1 instala **um runtime só**. Antes da mudança de stack, eram dois ecossistemas mais
 Docker — a maior parte sem uso por semanas, e cada um um ponto de falha na primeira aula.

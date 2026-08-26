@@ -377,7 +377,7 @@ node --version             # v20+
 pnpm --version             # 9+
 git --version
 curl.exe --version         # note o .exe
-docker info                # só a partir do M05
+docker info                # só a partir do M04
 
 node recursos\codigo\verifica-ambiente.mjs
 ```

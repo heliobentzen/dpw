@@ -8,7 +8,7 @@ Gere uma migração para cada mudança, **abra o arquivo** e responda sem aplica
 |---|---|---|---|
 | 1 | Adicionar `Obra.destaque` (boolean, default false) | | |
 | 2 | Adicionar `Obra.codigoInterno` (`unique`) | | |
-| 3 | Remover `Obra.subtitulo` | | |
+| 3 | Remover `Obra.isbn` | | |
 | 4 | Trocar `Exemplar.estado` de texto para enum | | |
 | 5 | Adicionar índice em `Obra.anoPublicacao` | | |
 
@@ -78,13 +78,24 @@ Provoque e resolva:
 
 ---
 
-## E05.6 — Trocar de banco (individual)
+## E05.6 — O que o ORM não abstrai (individual)
 
-Depois de migrar para PostgreSQL, responda:
+Abra a migração `Inicial` e cace, no SQL, tudo que é **específico do PostgreSQL**. Comece
+por estes e procure outros:
 
-1. Quantos arquivos de aplicação (entidade, service, controller) você alterou?
-2. As migrações geradas no SQLite rodaram no PostgreSQL? Por quê?
-3. `simple-enum` virou o quê?
+| Trecho no SQL | Por que é específico |
+|---|---|
+| `SERIAL` | |
+| `CREATE TYPE ... AS ENUM` | |
+| `character varying` | |
+| `"public"."..."` | |
+
+Agora responda:
+
+1. Onde ficou o `CREATE TYPE` do enum em relação ao `CREATE TABLE` que o usa? Por quê?
+2. Se a instituição decidisse migrar para MySQL amanhã, o que precisaria ser reescrito: as
+   **entidades**, as **migrações**, ou os dois?
+3. Você escreveu alguma dessas linhas de SQL? Quem escreveu?
 4. O que isso ensina sobre o que o ORM abstrai e o que ele não abstrai?
 
 ---
@@ -101,6 +112,9 @@ reversível no esquema (o `down` a recria) mas **não nos dados**: eles não vol
 código exige reverter a migração. (4) Como o passo 1 manteve as duas colunas, basta reverter
 o deploy do código — o banco não precisa mudar.
 
-**E05.6** — (1) Zero, fora a linha de conexão. É a promessa do ORM se cumprindo. (2)
-Provavelmente não: o SQL gerado é do dialeto do SQLite. (4) O ORM abstrai o **código de
-aplicação**, não o **SQL gerado**. Por isso migração se gera contra o banco de produção.
+**E05.6** — (1) Antes, e obrigatoriamente: no PostgreSQL o tipo enumerado é um objeto do
+banco, que precisa existir para a coluna poder referenciá-lo. (2) Só as migrações. As
+entidades não mudam uma linha — é a promessa do ORM se cumprindo. (3) Ninguém da turma: o
+`migration:generate` escreveu tudo. (4) O ORM abstrai o **código de aplicação**, não o **SQL
+gerado**. É por isso que migração se gera contra o mesmo banco que roda em produção, e que
+usar um banco diferente em desenvolvimento cria uma dívida que vence no deploy.

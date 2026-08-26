@@ -262,8 +262,16 @@ chegar a produção.
 
 ### Passo 1 — Backend: as três prioridades (50 min)
 
-Monte o cenário de teste (banco SQLite em memória e um utilitário `sessaoDe(papel)`) e
-escreva ao menos 15 testes:
+Monte o cenário de teste e escreva ao menos 15 testes.
+
+O banco de teste é um **segundo banco PostgreSQL**, não o de desenvolvimento e não SQLite
+em memória: um teste que passa num banco com tipagem e transações diferentes das de produção
+prova pouco. Acrescente um segundo serviço ao `docker-compose.yml`, na porta `5433`, e uma
+`DATABASE_URL` própria em `.env.test`. Recrie o esquema por suíte com
+`dataSource.synchronize(true)` — aqui o `synchronize` é adequado, porque o banco é
+descartável de verdade.
+
+Os 15 testes:
 
 - 6 de regra de negócio (prazo, limite, disponibilidade, atraso, devolução, restrição do banco)
 - 6 da matriz de acesso (com `it.each`, incluindo IDOR)
@@ -360,7 +368,8 @@ gerado pelo backend no mesmo commit e falha se os tipos estiverem defasados.
 
 | Erro | Correção |
 |---|---|
-| Testes compartilhando o mesmo banco | Use SQLite em memória, recriado por suíte |
+| Testes compartilhando o mesmo banco | Banco de teste próprio, recriado por suíte |
+| Teste verde na máquina, vermelho no CI | Suíte dependendo de dado deixado por outra. Limpe as tabelas entre elas |
 | Testar o framework | Teste **sua** regra |
 | Só `status_code` na asserção | Verifique também o efeito no banco |
 | `getByTestId` para tudo | `getByRole` — testa acessibilidade junto |

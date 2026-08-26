@@ -139,7 +139,8 @@ Problema N+1. Declare as relações em vez de buscar dentro de um laço.
 Parâmetro escrito no formato errado. No TypeORM é `:nome`, com objeto: `{ nome }`.
 
 **`ILIKE` não funciona**
-É do PostgreSQL. No SQLite use `LIKE`, que já ignora maiúsculas em ASCII.
+É do PostgreSQL, e é o banco do curso desde o M04. Em outro banco, a forma portável é
+`LOWER(coluna) LIKE LOWER(:termo)`.
 
 **`save()` criou um registro novo em vez de atualizar**
 O objeto não tinha `id`. `save` decide entre `INSERT` e `UPDATE` pela presença da chave.
@@ -169,9 +170,9 @@ Você devolveu a entidade em vez do DTO de saída. Ver M07.
 O PostgreSQL não está no ar: `docker compose up -d`. Se a porta estiver ocupada por uma
 instalação nativa, use `5433:5432` e ajuste a `DATABASE_URL`.
 
-**Funciona no SQLite e falha no PostgreSQL**
-Os dialetos divergem em tipos, `ILIKE` e migrações. Gere as migrações contra o mesmo banco
-que roda em produção.
+**Funciona nos testes e falha em produção**
+Bancos diferentes divergem em tipos, `ILIKE`, transações e restrições. Por isso o curso usa
+PostgreSQL em desenvolvimento, em teste e em produção — e gera as migrações contra ele.
 
 ---
 
@@ -256,7 +257,7 @@ O comando de start precisa incluí-la: `pnpm migration:run:prod && pnpm start:pr
 **Funciona local, falha no deploy**
 Ordem de suspeitas: variável de ambiente faltando → migração não aplicada → dependência em
 `devDependencies` que deveria estar em `dependencies` → caminho de arquivo com maiúscula
-diferente (Linux diferencia, Windows e macOS não) → diferença SQLite × PostgreSQL.
+diferente (Linux diferencia, Windows e macOS não) → versão do PostgreSQL diferente da local.
 
 **`bad interpreter: No such file or directory`**
 Um `.sh` foi commitado com CRLF. Configure o `.gitattributes` com `*.sh text eol=lf`.

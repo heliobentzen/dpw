@@ -67,7 +67,7 @@ Rode a aplicação com `logging: true` e responda **olhando o SQL**:
 2. `obra_categoria` tem chave primária? Composta de quê?
 3. `@CreateDateColumn` virou que tipo no seu banco?
 4. Quantos índices existem em `exemplar`? De onde vem cada um?
-5. `simple-enum` virou o quê no SQLite? E `enum` no PostgreSQL?
+5. Que dois comandos o `enum` gerou, e em que ordem?
 
 ---
 
@@ -121,8 +121,17 @@ específico deixaria a fila parada enquanto outro volume está livre. (3) `@Inde
 índice parcial.
 
 **E04.4** — (1) `autorId`: o TypeORM cria a coluna escalar a partir do nome da propriedade
-mais `Id`; a propriedade `autor` é o objeto, não a coluna. (2) Chave primária composta pelas
-duas FKs.
+mais `Id`; a propriedade `autor` é o objeto, não a coluna. (2) Sim, composta pelas duas FKs —
+e é a composição que impede a mesma obra receber a mesma categoria duas vezes. (3)
+`TIMESTAMP NOT NULL DEFAULT now()`. (5) `CREATE TYPE ... AS ENUM(...)` **antes** do
+`CREATE TABLE`: no PostgreSQL o enum é um objeto do banco, e a coluna só pode referenciá-lo
+depois que ele existe.
 
-**E04.5** — 2 falha se houver linhas. 3 **apaga a coluna e cria outra vazia**: o
-`synchronize` não enxerga renomeação, vê uma coluna que sumiu e outra que apareceu.
+**E04.5** — 2 falha na inicialização se houver linhas. 3 **preserva os dados**: o TypeORM
+deduz a renomeação e emite `RENAME COLUMN`. 4 **apaga tudo**: emite `DROP COLUMN` seguido de
+`ADD COLUMN`, a aplicação sobe normalmente e a coluna fica vazia.
+
+A comparação entre 3 e 4 é o exercício inteiro. Não é que a ferramenta seja burra — ela
+acertou o caso 3, que é o mais difícil dos dois. **É que você não tem como saber de antemão
+qual dos dois comportamentos vai receber**, e um deles não avisa. Migração resolve isso não
+por ser mais inteligente, e sim por mostrar o SQL antes de executá-lo.

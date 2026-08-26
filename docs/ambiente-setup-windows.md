@@ -25,7 +25,7 @@ aparece justo aqui, no setup.
 |---|---|---|
 | **Semana 1** (M00) | Terminal, Git, Node 20, pnpm, VS Code, monorepo, primeiro commit | 0 a 5, 8, 9 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
-| **Antes do M05** | Docker + PostgreSQL | 7 |
+| **Antes do M04** | Docker + PostgreSQL | 7 |
 | **A partir do M08** | Rodar os dois servidores juntos | 10 |
 
 **Tempo da semana 1:** 30–45 min.
@@ -43,7 +43,7 @@ aparece justo aqui, no setup.
 | [4](#passo-4--nodejs-e-pnpm) | Node 20 + pnpm | semana 1 |
 | [5](#passo-5--vs-code) | VS Code | semana 1 |
 | [6](#passo-6--dependências-do-backend) | Backend | **antes do M03** |
-| [7](#passo-7--docker-e-postgresql) | Docker + PostgreSQL | **antes do M05** |
+| [7](#passo-7--docker-e-postgresql) | Docker + PostgreSQL | **antes do M04** |
 | [8](#passo-8--verificação) | Verificação | semana 1 |
 | [9](#passo-9--gitignore-e-gitattributes) | `.gitignore` e `.gitattributes` | no 1º commit |
 | [10](#passo-10--rodar-o-sistema-completo) | Rodar os dois servidores | a partir do M08 |
@@ -334,7 +334,7 @@ code --install-extension esbenp.prettier-vscode
 
 | Extensão | Antes do | Para quê |
 |---|---|---|
-| **SQLite Viewer** | M04 | Ver as tabelas que as entidades geraram |
+| **PostgreSQL** (ms-ossdata.vscode-pgsql) | M04 | Ver as tabelas que as entidades geraram, sem sair do editor |
 | **Tailwind CSS IntelliSense** | M09 | Autocomplete de classes — praticamente obrigatória |
 | **GitLens** | quando quiser | Histórico e autoria linha a linha |
 
@@ -382,7 +382,8 @@ explicações estão lá.
 
 ## Passo 7 — Docker e PostgreSQL
 
-> ⏭️ **Só a partir do M05.** Até o M04 usamos SQLite, que não exige instalação.
+> ⏭️ **Só a partir do M04** — até lá não há entidade nem tabela. Mas o Docker no Windows
+> exige o WSL2, então não deixe para a véspera.
 
 ### 7.1 Pré-requisito: WSL2
 
@@ -509,8 +510,6 @@ dist/
 coverage/
 
 # Banco local
-*.sqlite
-*.sqlite-journal
 
 # Ambiente
 .env

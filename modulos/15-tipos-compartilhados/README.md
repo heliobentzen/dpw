@@ -93,7 +93,7 @@ export enum Papel { ASSOCIADO = "associado", BIBLIOTECARIO = "bibliotecario", CO
 
 // backend/src/contas/entidades/usuario.entity.ts
 import { Papel } from "@bibliocom/tipos";
-@Column({ type: "simple-enum", enum: Papel }) papel: Papel;
+@Column({ type: "enum", enum: Papel }) papel: Papel;
 
 // frontend/src/components/MenuAdmin.tsx
 import { Papel } from "@bibliocom/tipos";
