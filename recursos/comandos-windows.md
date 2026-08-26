@@ -146,7 +146,7 @@ puro: grava **UTF-16**, com dois bytes por caractere e um marcador BOM no iníci
 parece normal no editor, mas outras ferramentas leem lixo.
 
 ```powershell
-pnpm gerar:schema > openapi.json     # ❌ arquivo em UTF-16
+pnpm list --depth 0 --json > dependencias.json     # ❌ arquivo em UTF-16
 ```
 
 O erro aparece depois, na máquina de **outra pessoa**, quando ela clona o repositório:
@@ -158,8 +158,12 @@ SyntaxError: Unexpected token 'ÿ', "..." is not valid JSON
 Forma correta, que funciona no PowerShell 5.1 **e** no 7:
 
 ```powershell
-pnpm gerar:schema | Out-File -FilePath openapi.json -Encoding utf8
+pnpm list --depth 0 --json | Out-File -FilePath dependencias.json -Encoding utf8
 ```
+
+> Nem todo comando precisa disso: quando o próprio programa grava o arquivo — como o
+> `pnpm gerar:schema` do M03, que chama `writeFileSync` — quem escolhe a codificação é o
+> Node, e ele sempre usa UTF-8. O problema é só do `>` do PowerShell.
 
 | Trecho | O que faz |
 |---|---|

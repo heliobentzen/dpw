@@ -53,9 +53,9 @@ Endpoints: `GET /api/associados` e `GET /api/associados/:id`, com dados em memó
 
 ---
 
-## E03.4 — Quebrar de propósito (em duplas)
+## E03.4 — Quebrar de propósito (individual)
 
-Provoquem cada erro, anotem a **mensagem exata** e o que a causou:
+Provoque cada erro, anote a **mensagem exata** e o que a causou:
 
 | # | Provoque | Mensagem | O que ela indica |
 |---|---|---|---|
@@ -65,7 +65,7 @@ Provoquem cada erro, anotem a **mensagem exata** e o que a causou:
 | 4 | Retorne `undefined` de um handler | | |
 | 5 | Suba dois servidores na mesma porta | | |
 
-O caso 3 volta no M07 como erro comum de ordenação de rotas. Guardem a anotação.
+O caso 3 volta no M07 como erro comum de ordenação de rotas. Guarde a anotação.
 
 ---
 
@@ -93,6 +93,12 @@ Abra `/api/docs` e responda:
 ---
 
 ## Gabarito parcial
+
+**Experimento do `ParseIntPipe` (roteiro, passo 3d)** — sem o pipe, o TypeScript continua
+dizendo que `id` é `number`, mas em tempo de execução chega a **string** `"1"`. O
+`find((o) => o.id === id)` compara `1 === "1"`, que é `false`, e a obra existente vira
+**404**. Nenhum erro, nenhum aviso: o tipo declarado mentiu. É o caso clássico de por que
+validar a entrada na fronteira, e não confiar na anotação de tipo.
 
 **E03.1** — 1: Controller (`ParseIntPipe`). 2: Service. 3: Service lança, framework traduz.
 4: Service. 5: Controller. 6: Service (ou um provider próprio). 7: Controller. 8: Service.
