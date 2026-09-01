@@ -3,7 +3,7 @@
 ## E03.1 — Onde mora cada código (individual)
 
 Para cada trecho, diga se pertence ao **Controller**, ao **Service** ou a **nenhum dos dois**,
-e justifique com o critério da teoria (*"mudaria se rodasse por linha de comando?"*).
+e justifique com o critério da etapa 10a (*"mudaria se rodasse por linha de comando?"*).
 
 | # | Código | Camada | Justificativa |
 |---|---|---|---|
@@ -24,7 +24,7 @@ traduz para 404. Ninguém escreve o número.
 ## E03.2 — Injeção de dependência na marra (individual)
 
 Escreva `NotificacaoService` com um método `avisar(mensagem: string)` que só faz
-`console.log`. Injete-o no `AcervoService` e chame-o dentro de `criar()`.
+`console.log`. Injete-o no `AcervoService` e chame-o dentro de `listar()`.
 
 Depois responda por escrito:
 
@@ -94,7 +94,7 @@ Abra `/api/docs` e responda:
 
 ## Gabarito parcial
 
-**Experimento do `ParseIntPipe` (roteiro, passo 3d)** — sem o pipe, o TypeScript continua
+**Experimento do `ParseIntPipe` (roteiro, etapa 11d)** — sem o pipe, o TypeScript continua
 dizendo que `id` é `number`, mas em tempo de execução chega a **string** `"1"`. O
 `find((o) => o.id === id)` compara `1 === "1"`, que é `false`, e a obra existente vira
 **404**. Nenhum erro, nenhum aviso: o tipo declarado mentiu. É o caso clássico de por que
