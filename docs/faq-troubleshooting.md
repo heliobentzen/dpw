@@ -32,25 +32,26 @@ Três regras que resolvem a maioria:
 Faltou instalar, ou você está na pasta errada.
 
 ```bash
-pnpm install                     # na RAIZ do monorepo
-pnpm list X                      # confirma se está lá
+npm install                     # na RAIZ do monorepo
+npm ls X                         # confirma se está lá
 ```
 
 Se o módulo é `@bibliocom/tipos`, o workspace não foi resolvido: confira o
-`pnpm-workspace.yaml` e rode `pnpm install` na raiz de novo.
+campo `workspaces` do `package.json` da raiz e rode `npm install` lá de novo.
 
 **`ERR_PNPM_OUTDATED_LOCKFILE` no CI**
-Alguém mudou o `package.json` sem commitar o `pnpm-lock.yaml` atualizado. Rode `pnpm install`
+Alguém mudou o `package.json` sem commitar o `package-lock.json` atualizado. Rode `npm install`
 localmente e commite o lock.
 
-**`pnpm: command not found`**
-`corepack enable`. Se falhar no Windows com `EPERM`, `npm install -g pnpm`.
+**`npm: command not found`**
+O npm vem com o Node. Reinstale o Node e **feche e reabra o terminal** — o PATH só é lido
+na abertura.
 
 **Proxy do laboratório bloqueando o registro**
 
 ```bash
-pnpm config set proxy http://usuario:senha@proxy:porta
-pnpm config set https-proxy http://usuario:senha@proxy:porta
+npm config set proxy http://usuario:senha@proxy:porta
+npm config set https-proxy http://usuario:senha@proxy:porta
 ```
 
 Se for interceptação de TLS, peça o certificado à TI e use `NODE_EXTRA_CA_CERTS`.
@@ -73,12 +74,12 @@ Já há um servidor na porta.
 ```bash
 # Linux / macOS / WSL / Git Bash
 lsof -ti:3000 | xargs kill -9
-PORT=3001 pnpm start:dev
+PORT=3001 npm run start:dev
 ```
 ```powershell
 # Windows PowerShell
 Get-NetTCPConnection -LocalPort 3000 | Select-Object -ExpandProperty OwningProcess | Stop-Process -Force
-$env:PORT="3001"; pnpm start:dev
+$env:PORT="3001"; npm run start:dev
 ```
 
 **Alterei o `.env` e nada mudou**
@@ -103,7 +104,7 @@ A entidade não está no `TypeOrmModule.forFeature([...])` do módulo.
 Importação circular entre entidades. Use sempre `() => Entidade`, nunca a classe direta.
 
 **`QueryFailedError: relation "obra" does not exist`**
-As migrações não foram aplicadas: `pnpm migration:run`.
+As migrações não foram aplicadas: `npm run migration:run`.
 
 **`No changes in database schema were found`**
 As entidades já batem com o banco. Você salvou o arquivo? Está gerando contra o banco certo?
@@ -119,8 +120,8 @@ timestamp da migração mais nova para depois da que já foi mesclada.
 
 ```bash
 docker compose down -v && docker compose up -d    # apaga o volume
-pnpm migration:run
-pnpm dlx ts-node src/semear.ts
+npm run migration:run
+npx ts-node src/semear.ts
 ```
 
 ⚠️ `down -v` **apaga os dados**. Nunca em produção.
@@ -209,7 +210,7 @@ Não edite o conteúdo do conflito. Descarte sua migração local, refaça a par
 integrado:
 ```bash
 git checkout --theirs backend/src/migracoes/
-pnpm migration:generate src/migracoes/MinhaAlteracao
+npm run migration:generate src/migracoes/MinhaAlteracao
 ```
 
 **Comitei o `.env` ou o `node_modules/` por engano**
@@ -252,7 +253,7 @@ em desenvolvimento porque o Vite já faz o fallback.
 Variável `VITE_*` é embutida em **tempo de build**. É preciso refazer o build, não reiniciar.
 
 **Migração não foi aplicada em produção**
-O comando de start precisa incluí-la: `pnpm migration:run:prod && pnpm start:prod`.
+O comando de start precisa incluí-la: `npm run migration:run:prod && npm run start:prod`.
 
 **Funciona local, falha no deploy**
 Ordem de suspeitas: variável de ambiente faltando → migração não aplicada → dependência em

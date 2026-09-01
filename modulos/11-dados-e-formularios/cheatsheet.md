@@ -3,8 +3,8 @@
 ## Instalação
 
 ```bash
-pnpm add @tanstack/react-query react-hook-form zod @hookform/resolvers
-pnpm add -D @tanstack/react-query-devtools openapi-typescript
+npm install @tanstack/react-query react-hook-form zod @hookform/resolvers
+npm install -D @tanstack/react-query-devtools openapi-typescript
 ```
 
 ## TanStack Query — configuração
@@ -197,8 +197,8 @@ import { Controller } from "react-hook-form";
 ## Tipos do OpenAPI
 
 ```bash
-pnpm gerar:schema      # escreve backend/openapi.json
-pnpm dlx openapi-typescript schema.yml -o src/api/schema.d.ts
+npm run gerar:schema      # escreve backend/openapi.json
+npx openapi-typescript schema.yml -o src/api/schema.d.ts
 ```
 
 ```ts

@@ -36,7 +36,7 @@ Não há comando de "ativar": basta estar dentro da pasta. Outros ecossistemas p
 explícito. Em Python, por exemplo, você ativa um *ambiente virtual* em cada terminal novo, e
 esquecer disso rende uma tarde inteira de erro estranho. Aqui esse passo não existe.
 
-> **O que substitui a ativação é a pasta em que você está.** Rodar `pnpm test` dentro de
+> **O que substitui a ativação é a pasta em que você está.** Rodar `npm run test` dentro de
 > `backend/` e dentro de `frontend/` executa suítes diferentes. Quem decide é o
 > `package.json` mais próximo.
 
@@ -48,7 +48,7 @@ lugar:
 | Artefato | Função |
 |---|---|
 | `package.json` | Quais dependências, e em que faixa de versão |
-| **`pnpm-lock.yaml`** | A versão **exata** de cada uma, e das dependências delas |
+| **`package-lock.json`** | A versão **exata** de cada uma, e das dependências delas |
 | `.env.example` | Quais variáveis de ambiente são necessárias (sem os valores) |
 | `README.md` | Como subir o projeto em ≤ 5 comandos |
 | `docker-compose.yml` | Serviços externos (banco) idênticos para todos |
@@ -128,7 +128,7 @@ Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
 
 ```bash
 node --version      # v20 ou superior
-pnpm --version      # 9 ou superior
+npm --version      # 9 ou superior
 git --version
 code --version
 ```
@@ -163,7 +163,7 @@ Set-Location C:\dev\bibliocom
 #### O manifesto do projeto
 
 ```bash
-pnpm init
+npm init -y
 ```
 
 Isso cria um `package.json`. Abra-o e **edite** para:
@@ -172,9 +172,10 @@ Isso cria um `package.json`. Abra-o e **edite** para:
 {
   "name": "bibliocom",
   "private": true,
+  "workspaces": ["backend", "frontend", "pacotes/*"],
   "scripts": {
-    "dev:api": "pnpm --filter backend start:dev",
-    "dev:web": "pnpm --filter frontend dev"
+    "dev:api": "npm run -w backend start:dev",
+    "dev:web": "npm run -w frontend dev"
   }
 }
 ```
@@ -182,27 +183,20 @@ Isso cria um `package.json`. Abra-o e **edite** para:
 | Campo | O que faz |
 |---|---|
 | `"private": true` | Impede publicação acidental no npm. **Obrigatório** na raiz de um workspace |
-| `scripts` | Atalhos que rodam de qualquer pasta. `pnpm dev:api` sobe o backend sem você precisar entrar nele |
+| `"workspaces"` | Declara os projetos do monorepo. É esta linha que faz um único `npm install` na raiz resolver os três |
+| `scripts` | Atalhos que rodam de qualquer pasta. `npm run dev:api` sobe o backend sem você precisar entrar nele |
+| `-w backend` | "*workspace* backend": roda o script lá dentro, a partir da raiz |
 
-E `pnpm-workspace.yaml`, que declara os projetos do monorepo:
-
-```yaml
-packages:
-  - "backend"
-  - "frontend"
-  - "pacotes/*"
-```
-
-As pastas ainda não existem: nascem no M03 e no M08. Declará-las agora é o que faz um único
-`pnpm install` na raiz resolver as três quando chegarem.
+As pastas ainda não existem: nascem no M03 e no M08. Declará-las agora é o que faz o
+`npm install` já saber onde procurar quando elas chegarem.
 
 **Por que monorepo:** um único PR mostra a mudança completa, de entidade a tela. Com dois
 repositórios, a mesma mudança vira dois PRs, que alguém pode mesclar fora de ordem e quebrar
 produção na sexta-feira.
 
-**Deu certo se:** `pnpm install` roda sem erro e cria `node_modules/` e `pnpm-lock.yaml`.
+**Deu certo se:** `npm install` roda sem erro e cria `node_modules/` e `package-lock.json`.
 
-⚠️ **O `pnpm-lock.yaml` é versionado; o `node_modules/` não.** O primeiro é a receita, o
+⚠️ **O `package-lock.json` é versionado; o `node_modules/` não.** O primeiro é a receita, o
 segundo é o bolo. Confundir os dois é como versionar 30 mil arquivos que qualquer um
 reconstrói com um comando, e é assim que nasce repositório de 500 MB.
 
@@ -230,8 +224,7 @@ A estrutura agora:
 ```
 bibliocom/                 ← raiz do repositório
 ├── package.json           scripts e metadados   — PRECISA entrar no Git
-├── pnpm-lock.yaml         versões exatas        — PRECISA entrar no Git
-├── pnpm-workspace.yaml    quais são os projetos — PRECISA entrar no Git
+├── package-lock.json      versões exatas        — PRECISA entrar no Git
 └── node_modules/          dependências baixadas — NÃO pode entrar no Git
 ```
 
@@ -269,7 +262,7 @@ Thumbs.db
 
 | Padrão | Por que fica de fora |
 |---|---|
-| `node_modules/` | É **reconstruível** a partir do `package.json` + `pnpm-lock.yaml`. São dezenas de milhares de arquivos: versioná-los incha o repositório e gera conflito a cada instalação |
+| `node_modules/` | É **reconstruível** a partir do `package.json` + `package-lock.json`. São dezenas de milhares de arquivos: versioná-los incha o repositório e gera conflito a cada instalação |
 | `dist/`, `coverage/` | Saída de build e de teste. Geradas por comando, não escritas por pessoa |
 | `.env` | Contém segredo. **Segredo que entra no Git é segredo vazado** — mesmo removido depois, continua nos commits anteriores |
 | `!.env.example` | A `!` **desfaz** o ignore da linha acima. O `.env.example` entra sim: ele documenta *quais* variáveis existem, sem os valores |
@@ -319,9 +312,9 @@ Sistema de gestão para bibliotecas comunitárias. Estudo de caso da disciplina 
 ### Linux / macOS
 
 ```bash
-pnpm install          # instala backend, frontend e pacotes de uma vez
-pnpm dev:api          # http://localhost:3000
-pnpm dev:web          # http://localhost:5173
+npm install          # instala backend, frontend e pacotes de uma vez
+npm run dev:api          # http://localhost:3000
+npm run dev:web          # http://localhost:5173
 ```
 
 Os mesmos comandos valem no Windows, no macOS e no Linux.
@@ -346,7 +339,7 @@ git commit -m "chore: inicializa estrutura do projeto"
 | `git commit -m "..."` | Grava o snapshot com a mensagem |
 
 **Deu certo se:** o `git status` listou **seis itens**: `.gitignore`, `.gitattributes`,
-`README.md`, `package.json`, `pnpm-lock.yaml` e `pnpm-workspace.yaml`.
+`README.md`, `package.json` e `package-lock.json`.
 
 ⚠️ Se `node_modules/` ou `.env` aparecerem, pare e corrija o `.gitignore`
 antes de commitar. Depois de commitado, o arquivo fica no histórico mesmo que você o apague
@@ -416,26 +409,26 @@ vésperas da entrega.
 
 | Sintoma | Diagnóstico |
 |---|---|
-| `Cannot find module` depois de clonar | Faltou `pnpm install` na raiz |
+| `Cannot find module` depois de clonar | Faltou `npm install` na raiz |
 | `node_modules/` aparece no `git status` | Falta a linha no `.gitignore` |
-| Colega tem versão diferente da sua | O `pnpm-lock.yaml` não foi commitado, ou alguém o apagou |
+| Colega tem versão diferente da sua | O `package-lock.json` não foi commitado, ou alguém o apagou |
 | `.env` aparece em `git status` | Falta a linha no `.gitignore` |
 | Push rejeitado | Alguém enviou antes; `git pull --rebase origin main` |
 | Cinco commits `wip` seguidos | Commit é unidade coerente de mudança, não botão de salvar |
 
-🪟 **Erros de Windows** (política de execução bloqueando o `pnpm`, OneDrive travando o Git,
+🪟 **Erros de Windows** (política de execução bloqueando o `npm`, OneDrive travando o Git,
 `Filename too long` no `node_modules`) estão catalogados em
 [`docs/ambiente-setup-windows.md`, passo 11](../../docs/ambiente-setup-windows.md#passo-11--erros-e-diagnóstico).
 
 ## ✅ Checklist de saída
 
 - [ ] `node verifica-ambiente.mjs` termina com "Ambiente da etapa M00 pronto"
-- [ ] `pnpm install` roda sem erro na raiz
-- [ ] `package.json` com `"private": true` e `pnpm-workspace.yaml` declarando os três projetos
+- [ ] `npm install` roda sem erro na raiz
+- [ ] `package.json` com `"private": true` e `workspaces` declarando os três projetos
 - [ ] Repositório `bibliocom` no GitHub, com `.gitignore`, `.gitattributes` e `README.md`
 - [ ] 🪟 Windows: terminal escolhido, projeto em `C:\dev` (fora do OneDrive), `core.autocrlf input`
       e `core.longpaths` habilitado
-- [ ] `node_modules/` **não** versionado; `pnpm-lock.yaml` **sim**
+- [ ] `node_modules/` **não** versionado; `package-lock.json` **sim**
 - [ ] Ao menos 2 commits com mensagem no padrão Conventional Commits
 - [ ] Ao menos 1 Pull Request revisado e mesclado por outra pessoa
 - [ ] Chave SSH configurada (push sem digitar senha)
@@ -449,7 +442,7 @@ Ver [`exercicios.md`](exercicios.md).
 - [Pro Git (livro completo, em português)](https://git-scm.com/book/pt-br/v2)
 - [Learn Git Branching (visual e interativo)](https://learngitbranching.js.org/?locale=pt_BR)
 - [Conventional Commits](https://www.conventionalcommits.org/pt-br/)
-- [pnpm — workspaces](https://pnpm.io/workspaces)
+- [npm — workspaces](https://docs.npmjs.com/cli/using-npm/workspaces)
 - [Node.js — resolução de módulos](https://nodejs.org/api/modules.html#all-together)
 - 🪟 [`../../docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) — setup completo do Windows, passo a passo
 - 🪟 [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md) — tabela de equivalências, para consulta durante o curso

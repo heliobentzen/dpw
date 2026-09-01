@@ -1,8 +1,8 @@
 /**
  * M06 — Popula o banco com volume, para que os problemas de desempenho apareçam.
  *
- *     pnpm add -D @faker-js/faker
- *     pnpm exec ts-node -r tsconfig-paths/register src/semear.ts
+ *     npm install -D @faker-js/faker
+ *     npx ts-node -r tsconfig-paths/register src/semear.ts
  *
  * Com 20 registros tudo é rápido, inclusive o errado. Sem volume, o módulo de
  * consultas vira teoria: o N+1 não dói e o índice não faz diferença medível.

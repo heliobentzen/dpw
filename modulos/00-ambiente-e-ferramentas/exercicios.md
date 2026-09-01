@@ -34,7 +34,7 @@ dpw-exercicios/
 ├── .gitignore
 ├── .gitattributes
 ├── package.json
-├── pnpm-lock.yaml
+├── package-lock.json
 ├── .env.example
 └── evidencias/
     ├── e1-ambiente.md
@@ -76,8 +76,8 @@ professor abrir, vai encontrar outra coisa.
 ## Como rodar
 
 ```bash
-pnpm install
-pnpm verificar
+npm install
+npm run verificar
 ```
 ````
 
@@ -87,9 +87,9 @@ pnpm verificar
 
 Monte o repositório de forma que **outra pessoa consiga reproduzi-lo**.
 
-1. `pnpm init` e edite o `package.json`: `"private": true` e um script
-   `"verificar": "node --version && pnpm --version"`.
-2. Instale uma dependência qualquer para o lock existir: `pnpm add -D prettier`.
+1. `npm init -y` e edite o `package.json`: `"private": true` e um script
+   `"verificar": "node --version && npm --version"`.
+2. Instale uma dependência qualquer para o lock existir: `npm install -D prettier`.
 3. Crie o `.gitignore` (com `node_modules/`), o `.gitattributes` e o
    `.env.example` com as chaves `SESSION_SECRET=` e `DATABASE_URL=`, **sem valores**.
 4. Commit.
@@ -98,22 +98,22 @@ Monte o repositório de forma que **outra pessoa consiga reproduzi-lo**.
 
 ```bash
 rm -rf node_modules
-pnpm install --frozen-lockfile
+npm ci
 git status --short
 ```
 
 ```powershell
 Remove-Item -Recurse -Force node_modules
-pnpm install --frozen-lockfile
+npm ci
 git status --short
 ```
 
-`git status` precisa sair **vazio**: o `pnpm-lock.yaml` não pode ter mudado.
+`git status` precisa sair **vazio**: o `package-lock.json` não pode ter mudado.
 
 **Em `evidencias/e1-ambiente.md`:**
 - a saída completa dos três comandos, em bloco de código;
 - link permanente para o seu `.gitignore` no GitHub;
-- uma frase: por que o `pnpm-lock.yaml` é versionado e o `node_modules/` não?
+- uma frase: por que o `package-lock.json` é versionado e o `node_modules/` não?
 
 **Verificação:**
 - [ ] `git status` vazio depois de reinstalar

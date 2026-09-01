@@ -71,7 +71,7 @@ a escolha de autenticação por sessão **depende** desta topologia.
 > backend é JavaScript para o Node executar; o do frontend é o site para o navegador baixar.
 
 > ⚠️ A terceira linha é a que pega todo mundo. `VITE_API_URL` é substituída pelo valor
-> literal durante `pnpm build`. Mudar a variável na plataforma **não** muda o site: é
+> literal durante `npm run build`. Mudar a variável na plataforma **não** muda o site: é
 > preciso rodar o build de novo. E, pelo mesmo motivo, ela é pública (M13).
 
 ### 3. O *fallback* da SPA (20 min) ⭐
@@ -170,8 +170,8 @@ expandir → migrar → contrair do M05, aplicado ao contrato.
 
 ```bash
 cd ~/dev/bibliocom/backend
-pnpm add pg
-pnpm build            # nest build → dist/main.js
+npm install pg
+npm run build            # nest build → dist/main.js
 ```
 
 `backend/package.json` — os scripts que a plataforma vai chamar:
@@ -215,14 +215,14 @@ Valide localmente antes de subir — este passo economiza a maior parte do tempo
 remota. É o **mesmo comando nas três plataformas**:
 
 ```bash
-pnpm build
+npm run build
 NODE_ENV=production SESSION_SECRET=teste node dist/main.js
 ```
 
 ```powershell
 # Windows PowerShell — variáveis não são inline e FICAM na sessão
 $env:NODE_ENV="production"; $env:SESSION_SECRET="teste"
-pnpm build
+npm run build
 node dist/main.js
 
 # ao terminar, limpe — senão o próximo start:dev sobe em modo produção
@@ -240,8 +240,8 @@ de `dist/`, não do fonte.
 
 ```bash
 cd frontend
-pnpm build           # gera dist/
-pnpm preview         # serve dist/ localmente, como em produção
+npm run build           # gera dist/
+npm run preview         # serve dist/ localmente, como em produção
 ```
 
 Abra o `preview` e **teste o F5 numa rota interna** (`/obras/42`). Funciona? O `preview` do
@@ -267,8 +267,8 @@ Select-String -Recurse "VITE_" dist\* | Select-Object -First 10   # variaveis em
 
 1. Na PaaS: **New → PostgreSQL**. Copie a *Internal Database URL*.
 2. **New → Web Service**, apontando para `backend/`:
-   - Build: `pnpm install --frozen-lockfile && pnpm build`
-   - Start: `pnpm migration:run:prod && pnpm start:prod`
+   - Build: `npm ci && npm run build`
+   - Start: `npm run migration:run:prod && npm run start:prod`
 3. Variáveis:
 
 | Chave | Valor |
@@ -283,10 +283,10 @@ jeito comum de o serviço subir e nunca receber tráfego.
 
 4. Deploy. Acompanhe os logs até o fim — as migrações aparecem lá.
 5. Crie o primeiro usuário de coordenação. Como não há painel administrativo pronto, use um
-   script `pnpm seed:admin` que lê e-mail e senha do ambiente:
+   script `npm run seed:admin` que lê e-mail e senha do ambiente:
 
 ```bash
-ADMIN_EMAIL=voce@exemplo.org ADMIN_SENHA='...' pnpm seed:admin
+ADMIN_EMAIL=voce@exemplo.org ADMIN_SENHA='...' npm run seed:admin
 ```
 
 > Um script versionado é melhor que criar o usuário à mão: é reproduzível, roda igual em
@@ -301,7 +301,7 @@ Duas estratégias; escolha **uma** e documente a escolha.
 **A) Serviço estático + regra de proxy** (mais comum)
 
 - **New → Static Site**, apontando para `frontend/`
-  - Build: `pnpm install && pnpm build`
+  - Build: `npm install && npm run build`
   - Publish directory: `dist`
 - Variável de build: `VITE_API_URL=/api`
 - Regras de redirecionamento:
@@ -317,7 +317,7 @@ isso que preserva o *same-site* e evita CORS.
 **B) O NestJS serve a SPA** (artefato único, mais simples de operar)
 
 ```bash
-pnpm --filter backend add @nestjs/serve-static
+npm install -w backend @nestjs/serve-static
 ```
 
 ```ts
@@ -335,7 +335,7 @@ especialmente confuso.
 Comando de build na plataforma, a partir da raiz do monorepo:
 
 ```
-pnpm install --frozen-lockfile && pnpm --filter frontend build && pnpm --filter backend build
+npm ci && npm run -w frontend build && npm run -w backend build
 ```
 
 Um serviço, um deploy, zero CORS. Em troca, o build fica mais lento e as camadas ficam

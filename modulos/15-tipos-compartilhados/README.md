@@ -139,14 +139,14 @@ mkdir -p pacotes/tipos/src
 | `"private": true` | Impede publicação acidental |
 | `main`/`types` apontando para `.ts` | Sem passo de build: os consumidores compilam o fonte. Simples e suficiente para o monorepo |
 
-O `pnpm-workspace.yaml` do M03 já inclui `pacotes/*`. Ligue as camadas:
+O campo `workspaces` do `package.json` da raiz (M00) já inclui `pacotes/*`. Ligue as camadas:
 
 ```bash
-pnpm --filter backend  add @bibliocom/tipos --workspace
-pnpm --filter frontend add @bibliocom/tipos --workspace
+npm run -w backend  add @bibliocom/tipos --workspace
+npm run -w frontend add @bibliocom/tipos --workspace
 ```
 
-`--workspace` faz o pnpm resolver o pacote **localmente**, por link, em vez de procurar no
+`-w` faz o npm resolver o pacote **localmente**, por link, em vez de procurar no
 registro público.
 
 ### Passo 2 — Enums compartilhados (15 min)
@@ -177,7 +177,7 @@ export * from "./api";
 
 Agora **apague** as definições duplicadas do backend e do frontend, e importe daqui.
 
-**Deu certo se:** `pnpm --filter backend tsc --noEmit` continua limpo depois de você trocar
+**Deu certo se:** `npm run -w backend tsc --noEmit` continua limpo depois de você trocar
 o enum local pelo importado — e quebra se você digitar `Papel.COORDENACAOO`.
 
 ⚠️ Repare que `LIMITE_EMPRESTIMOS_ABERTOS` agora é **um só número** para as duas camadas. A
@@ -187,9 +187,9 @@ regra do M06 (recusar o quarto empréstimo) e a mensagem que o frontend mostra (
 ### Passo 3 — Gerar os tipos da API (20 min)
 
 ```bash
-pnpm --filter @bibliocom/tipos add -D openapi-typescript
-cd backend && pnpm gerar:schema        # escreve openapi.json (M07)
-cd .. && pnpm --filter @bibliocom/tipos gerar
+npm run -w @bibliocom/tipos add -D openapi-typescript
+cd backend && npm run gerar:schema        # escreve openapi.json (M07)
+cd .. && npm run -w @bibliocom/tipos gerar
 ```
 
 Abra `pacotes/tipos/src/api.d.ts`: cada rota, cada DTO, cada campo — derivados do backend.
@@ -214,8 +214,8 @@ export async function buscarObra(id: number): Promise<Obra> {
 Este é o passo que justifica o módulo. Faça o experimento:
 
 1. No backend, renomeie `anoPublicacao` para `ano` no `ObraResposta`.
-2. Rode `pnpm gerar:schema` e regenere os tipos.
-3. Rode `pnpm --filter frontend tsc --noEmit`.
+2. Rode `npm run gerar:schema` e regenere os tipos.
+3. Rode `npm run -w frontend tsc --noEmit`.
 
 **Deu certo se:** o TypeScript aponta o erro, com nome de arquivo e linha, em cada lugar do
 frontend que usava o campo antigo.
@@ -233,7 +233,7 @@ acrescente ao job do frontend no `ci.yml` (M14):
 ```yaml
       - name: Tipos sincronizados com a API
         run: |
-          pnpm --filter @bibliocom/tipos gerar
+          npm run -w @bibliocom/tipos gerar
           git diff --exit-code pacotes/tipos/src/api.d.ts
 ```
 
@@ -248,7 +248,7 @@ mudou a API e não regerou os tipos, o CI falha e o PR não passa.**
 
 | Sintoma | Diagnóstico |
 |---|---|
-| `Cannot find module '@bibliocom/tipos'` | Faltou `--workspace` no `add`, ou um `pnpm install` na raiz |
+| `Cannot find module '@bibliocom/tipos'` | Faltou `--workspace` no `add`, ou um `npm install` na raiz |
 | Mudanças no pacote não aparecem | O editor está com cache; reinicie o servidor de TypeScript do VS Code |
 | `api.d.ts` gerado vazio | O `openapi.json` está desatualizado ou os DTOs não têm `@ApiProperty` (M07) |
 | CI falha em `git diff` sem ninguém ter mexido | O `openapi.json` não foi commitado junto com a mudança do DTO |
@@ -271,7 +271,7 @@ Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [pnpm workspaces](https://pnpm.io/workspaces)
+- [npm workspaces](https://docs.npmjs.com/cli/using-npm/workspaces)
 - [openapi-typescript](https://openapi-ts.dev/)
 - [NestJS — OpenAPI](https://docs.nestjs.com/openapi/introduction)
 - [TypeScript — declaration files](https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html)

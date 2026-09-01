@@ -10,7 +10,7 @@
 
 ## Um runtime só
 
-A stack é **TypeScript ponta a ponta**. Você instala **Node e pnpm**, e nada além disso do
+A stack é **TypeScript ponta a ponta**. Você instala **o Node** (que já traz o npm), e nada além disso do
 lado de linguagem — não há Python, `venv`, `pip` nem um segundo ecossistema de pacotes para
 manter. O backend e o frontend compartilham runtime, gerenciador de pacotes e sintaxe.
 
@@ -18,7 +18,7 @@ manter. O backend e o frontend compartilham runtime, gerenciador de pacotes e si
 
 | Momento | O que entra | Seções |
 |---|---|---|
-| **Semana 1** (M00) | Git, Node 20, pnpm, VS Code, monorepo, primeiro commit | 1 a 5, 8, 9 |
+| **Semana 1** (M00) | Git, Node 20, VS Code, monorepo, primeiro commit | 1 a 5, 8, 9 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
 | **Antes do M04** | Docker + PostgreSQL | 7 |
 | **A partir do M08** | Rodar os dois servidores juntos | 10 |
@@ -33,12 +33,12 @@ manter. O backend e o frontend compartilham runtime, gerenciador de pacotes e si
 
 ```bash
 cd ~/dev/bibliocom
-pnpm dev:api      # backend  → http://localhost:3000
-pnpm dev:web      # frontend → http://localhost:5173
+npm run dev:api      # backend  → http://localhost:3000
+npm run dev:web      # frontend → http://localhost:5173
 ```
 
 Sem ativar ambiente virtual, sem `source` nenhum: as dependências vivem em `node_modules/`
-dentro do projeto, e o `pnpm` as encontra pela pasta em que você está.
+dentro do projeto, e o `npm` as encontra pela pasta em que você está.
 
 ---
 
@@ -47,7 +47,6 @@ dentro do projeto, e o `pnpm` as encontra pela pasta em que você está.
 | Ferramenta | Versão mínima | Camada | Para quê |
 |---|---|---|---|
 | Node.js | **20 LTS** | ambas | Runtime do backend **e** do frontend |
-| pnpm | 9 | ambas | Gerenciador de pacotes e de *workspaces* |
 | Git | 2.40 | ambas | Versionamento |
 | VS Code (ou WebStorm) | atual | ambas | Editor |
 | Docker | atual | 🔵 | PostgreSQL local (a partir do M04) |
@@ -60,9 +59,8 @@ dentro do projeto, e o `pnpm` as encontra pela pasta em que você está.
 ## 2. Estrutura do repositório
 
 ```
-bibliocom/                    monorepo (workspaces do pnpm)
+bibliocom/                    monorepo (workspaces do npm)
 ├── package.json              scripts da raiz
-├── pnpm-workspace.yaml
 ├── backend/                  NestJS + TypeORM
 │   ├── src/
 │   ├── openapi.json          contrato gerado (M07)
@@ -76,7 +74,7 @@ bibliocom/                    monorepo (workspaces do pnpm)
 └── README.md
 ```
 
-**Um repositório, três projetos.** Um `pnpm install` na raiz resolve os três, e um PR mostra
+**Um repositório, três projetos.** Um `npm install` na raiz resolve os três, e um PR mostra
 a mudança completa: entidade → DTO → tipo → tela.
 
 ---
@@ -102,7 +100,7 @@ cat ~/.ssh/id_ed25519.pub   # cole em github.com > Settings > SSH and GPG keys
 ssh -T git@github.com       # deve responder "Hi <usuario>!"
 ```
 
-## 4. Node.js e pnpm
+## 4. Node.js e npm
 
 ### Instalação recomendada: via `fnm` (gerencia versões)
 
@@ -119,18 +117,19 @@ gerenciador de pacotes da sua distribuição.
 node --version    # v20.x ou superior
 ```
 
-### pnpm
+### npm
+
+Não há nada a instalar: o npm vem junto com o Node.
 
 ```bash
-corepack enable
-corepack prepare pnpm@latest --activate
-pnpm --version
+npm --version    # 10.x ou superior
 ```
 
-> **Por que pnpm e não npm?** Instala mais rápido e usa muito menos disco (links para um
-> armazém compartilhado) — diferença sentida num laboratório com 40 máquinas, e maior ainda
-> num monorepo com duas árvores de dependências. Ele também é quem gerencia os *workspaces*
-> do M03. Tudo funciona com `npm`, mas os workspaces exigem configuração diferente.
+> **Por que npm?** Ele já está instalado — zero passo extra — e é o que aparece em todo
+> tutorial, resposta de fórum e documentação, sem precisar traduzir comando. Os *workspaces*
+> que o monorepo usa funcionam nele desde a versão 7. Alternativas como pnpm e yarn são
+> comuns no mercado e valem conhecer depois; numa turma iniciante elas cobram uma instalação
+> a mais e, no Windows, atrito com links simbólicos — custo sem retorno pedagógico.
 
 ## 5. VS Code
 
@@ -179,10 +178,10 @@ o editor pode acusar erros que o `tsc` não acusa — e vice-versa.
 O M03 conduz a criação do projeto NestJS e do monorepo:
 
 ```bash
-pnpm dlx @nestjs/cli new backend --package-manager pnpm --skip-git
+nest new backend --skip-git
 ```
 
-`pnpm dlx` executa a CLI sem instalá-la globalmente (é o `npx` do pnpm). O `--skip-git` é
+`npx` executa um pacote sem instalá-lo no projeto — vem junto com o npm. O `--skip-git` é
 importante: sem ele, a CLI cria um segundo repositório dentro do seu.
 
 Siga o roteiro do [M03](../modulos/03-nestjs-primeiros-passos/).
@@ -217,7 +216,7 @@ volumes:
 ```bash
 docker compose up -d
 docker compose ps          # deve estar "healthy"
-pnpm --filter backend add pg
+npm install -w backend pg
 ```
 
 ## 8. Verificação do ambiente
@@ -226,7 +225,7 @@ pnpm --filter backend add pg
 node recursos/codigo/verifica-ambiente.mjs
 ```
 
-Confere Node, pnpm, Git configurado e Docker. Aceita `--etapa m00|m03|m05` e cobra só o que
+Confere Node, npm, Git configurado e Docker. Aceita `--etapa m00|m03|m04` e cobra só o que
 já deveria existir naquele ponto do curso. Ele **diagnostica e não instala**: para cada
 falha, imprime o comando exato que corrige.
 
@@ -239,14 +238,14 @@ falha, imprime o comando exato que corrige.
 ```bash
 # terminal 1 — backend
 cd ~/dev/bibliocom/backend
-pnpm start:dev            # http://localhost:3000
+npm run start:dev            # http://localhost:3000
 
 # terminal 2 — frontend
 cd ~/dev/bibliocom/frontend
-pnpm dev                  # http://localhost:5173
+npm run dev                  # http://localhost:5173
 ```
 
-Ou, da raiz, usando os scripts do workspace: `pnpm dev:api` e `pnpm dev:web`.
+Ou, da raiz, usando os scripts do workspace: `npm run dev:api` e `npm run dev:web`.
 
 O Vite encaminha `/api` ao NestJS, então o navegador vê tudo na mesma origem — evita CORS em
 desenvolvimento e reproduz a topologia de produção.
@@ -313,13 +312,12 @@ Nunca coloque chave de API nele. Detalhado no M13.
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
-| `pnpm: command not found` | Corepack não habilitado | `corepack enable` |
-| `Cannot find module` após clonar | Faltou instalar | `pnpm install` **na raiz** |
-| `Cannot find module '@bibliocom/tipos'` | Workspace não resolvido | `pnpm install` na raiz; confira o `pnpm-workspace.yaml` |
-| `EACCES` ao instalar pacote global | Permissão | Use `fnm`/`corepack`, nunca `sudo npm -g` |
+| `Cannot find module` após clonar | Faltou instalar | `npm install` **na raiz** |
+| `Cannot find module '@bibliocom/tipos'` | Workspace não resolvido | `npm install` na raiz; confira o campo `workspaces` do `package.json` |
+| `EACCES` ao instalar pacote global | Permissão | Use `fnm` ou mude o prefixo do npm, nunca `sudo npm -g` |
 | `npm ERR! network` no laboratório | Proxy/firewall | Libere `registry.npmjs.org` |
-| `port 5173 already in use` | Outro Vite rodando | `pnpm dev --port 5174` |
-| `port 3000 already in use` | Outro Nest rodando | `PORT=3001 pnpm start:dev` |
+| `port 5173 already in use` | Outro Vite rodando | `npm run dev --port 5174` |
+| `port 3000 already in use` | Outro Nest rodando | `PORT=3001 npm run start:dev` |
 | `port 5432 already in use` | PostgreSQL local ativo | Pare o serviço ou use `5433:5432` |
 | Requisição do front dá **CORS error** | Chamou `localhost:3000` direto | Use o caminho `/api` (proxy do Vite) |
 | Editor acusa erro que o `tsc` não acusa | Versões diferentes de TypeScript | `"typescript.tsdk"` no `settings.json` |

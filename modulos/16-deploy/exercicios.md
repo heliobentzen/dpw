@@ -41,7 +41,7 @@ Provoque cada falha em produção, capture a evidência e corrija:
 | # | Falha | Como provocar | Sintoma | Correção |
 |---|---|---|---|---|
 | 1 | `ALLOWED_HOSTS` errado | Remover o domínio | | |
-| 2 | SPA não construída | Remover `pnpm --filter frontend build` do comando de build | | |
+| 2 | SPA não construída | Remover `npm run -w frontend build` do comando de build | | |
 | 3 | Migração não aplicada | Remover `migrate` do release | | |
 | 4 | Variável de ambiente faltando | Remover `SESSION_SECRET` | | |
 | 5 | Porta fixa no código | Trocar `process.env.PORT` por `3000` | | |
@@ -110,7 +110,7 @@ Requisitos: imagem final < 200 MB; não roda como root; usa cache de camadas
 eficientemente (dependências antes do código); `healthcheck` configurado; funciona com
 `docker compose up` sem passo manual.
 
-Responda: **por que copiar o `package.json` e o `pnpm-lock.yaml` antes do resto do código?**
+Responda: **por que copiar o `package.json` e o `package-lock.json` antes do resto do código?**
 
 ---
 
@@ -139,5 +139,5 @@ logs, mas toda requisição devolve "Application failed to respond" ou 502.
 
 **E14.7** — As camadas do Docker são cacheadas em ordem. Copiando os manifestos de dependência
 primeiro e instalando as dependências antes de copiar o código, uma alteração em
-`obras.service.ts` invalida apenas a última camada — o `pnpm install` é reaproveitado do cache.
+`obras.service.ts` invalida apenas a última camada — o `npm install` é reaproveitado do cache.
 Copiando tudo de uma vez, cada alteração de código reinstala todas as dependências.

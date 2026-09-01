@@ -10,7 +10,7 @@ as armadilhas em detalhe (seções 2 e 4).
 
 | Preciso de… | Vá para |
 |---|---|
-| Instalar Node, pnpm, Git, Docker | [`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md) |
+| Instalar Node, Git, Docker | [`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md) |
 | Traduzir um comando do roteiro | [seção 3](#3-tabela-de-equivalências) deste arquivo |
 | Entender por que algo quebrou | [seção 2](#2-as-cinco-armadilhas-que-não-são-tradução) deste arquivo |
 | Instalar o WSL2 | [seção 1.1](#instalar-o-wsl2-opcional-10-min) deste arquivo |
@@ -41,7 +41,7 @@ integra com a extensão *WSL*, e o Docker Desktop usa o WSL2 como backend.
 
 > ⚠️ **Se usar WSL2, mantenha o projeto no sistema de arquivos do Linux**
 > (`~/projetos/bibliocom`), **não** em `/mnt/c/...`. Acessar o disco do Windows a partir do
-> WSL é muito lento — `pnpm install` pode levar minutos em vez de segundos.
+> WSL é muito lento — `npm install` pode levar minutos em vez de segundos.
 
 ---
 
@@ -102,7 +102,7 @@ Remove-Item Env:\NODE_ENV
 
 > ⚠️ **A diferença que causa bug:** no Linux a variável vale só para aquele comando; no
 > PowerShell ela **fica na sessão**. Se você rodar `$env:NODE_ENV="production"` e depois
-> `pnpm start:dev`, o servidor sobe em modo produção — sem recarregar, com log diferente —
+> `npm run start:dev`, o servidor sobe em modo produção — sem recarregar, com log diferente —
 > e você vai perder tempo procurando a causa. **Feche o terminal ou limpe a variável**
 > depois de testar.
 
@@ -112,7 +112,7 @@ O Windows 10/11 vem com **PowerShell 5.1**. O operador `&&` só foi adicionado n
 **PowerShell 7**. Ou seja: metade dos comandos encadeados de qualquer tutorial falha.
 
 ```powershell
-cd backend && pnpm start:dev     # ❌ PowerShell 5.1: erro de sintaxe
+cd backend && npm run start:dev     # ❌ PowerShell 5.1: erro de sintaxe
 ```
 
 Três saídas:
@@ -120,10 +120,10 @@ Três saídas:
 ```powershell
 # 1. linhas separadas (o que este material usa)
 cd backend
-pnpm start:dev
+npm run start:dev
 
 # 2. ponto e vírgula — executa o segundo INDEPENDENTE de o primeiro falhar
-cd backend; pnpm start:dev
+cd backend; npm run start:dev
 
 # 3. instale o PowerShell 7, e aí o && funciona como no Linux
 winget install Microsoft.PowerShell
@@ -146,7 +146,7 @@ puro: grava **UTF-16**, com dois bytes por caractere e um marcador BOM no iníci
 parece normal no editor, mas outras ferramentas leem lixo.
 
 ```powershell
-pnpm list --depth 0 --json > dependencias.json     # ❌ arquivo em UTF-16
+npm ls --depth 0 --json > dependencias.json     # ❌ arquivo em UTF-16
 ```
 
 O erro aparece depois, na máquina de **outra pessoa**, quando ela clona o repositório:
@@ -158,11 +158,11 @@ SyntaxError: Unexpected token 'ÿ', "..." is not valid JSON
 Forma correta, que funciona no PowerShell 5.1 **e** no 7:
 
 ```powershell
-pnpm list --depth 0 --json | Out-File -FilePath dependencias.json -Encoding utf8
+npm ls --depth 0 --json | Out-File -FilePath dependencias.json -Encoding utf8
 ```
 
 > Nem todo comando precisa disso: quando o próprio programa grava o arquivo — como o
-> `pnpm gerar:schema` do M03, que chama `writeFileSync` — quem escolhe a codificação é o
+> `npm run gerar:schema` do M03, que chama `writeFileSync` — quem escolhe a codificação é o
 > Node, e ele sempre usa UTF-8. O problema é só do `>` do PowerShell.
 
 | Trecho | O que faz |
@@ -187,7 +187,7 @@ Para quebrar um comando longo em várias linhas, o Linux usa `\` e o PowerShell 
 (`` ` ``). A diferença perigosa é que a crase precisa ser **o último caractere da linha**:
 
 ```powershell
-pnpm add @nestjs/typeorm `
+npm install @nestjs/typeorm `
           typeorm
 ```
 
@@ -207,8 +207,8 @@ que fiquem. Se precisar quebrar, ative "renderizar espaços em branco" no editor
 
 | Linux/macOS | PowerShell | Git Bash |
 |---|---|---|
-| `pnpm install` | `pnpm install` | `pnpm install` |
-| `pnpm --filter backend dev` | idem | idem |
+| `npm install` | `npm install` | `npm install` |
+| `npm run -w backend dev` | idem | idem |
 | `deactivate` | `deactivate` | `deactivate` |
 | `which node` | `Get-Command node` | `which node` |
 
@@ -359,13 +359,13 @@ git config --global core.autocrlf input
 
 | Situação | No Windows |
 |---|---|
-| **Pasta do projeto** | ⚠️ Use `C:\dev`. Dentro do `Documents` o OneDrive sincroniza `node_modules`, travando `pnpm install` e produzindo mudanças fantasma no Git. Espaços e acentos no caminho também quebram ferramentas |
+| **Pasta do projeto** | ⚠️ Use `C:\dev`. Dentro do `Documents` o OneDrive sincroniza `node_modules`, travando `npm install` e produzindo mudanças fantasma no Git. Espaços e acentos no caminho também quebram ferramentas |
 | **Docker Desktop** | Exige WSL2 habilitado. Instale o WSL antes do Docker |
 | **PostgreSQL local** | Prefira o container Docker ao instalador nativo |
 | **Caminhos longos** | `node_modules` pode passar de 260 caracteres. Habilite: `git config --system core.longpaths true` e ative *Long Paths* no Windows |
-| **Antivírus** | Windows Defender pode deixar `pnpm install` e `runserver` lentos. Adicione a pasta do projeto às exclusões |
-| **Node e pnpm** | Funcionam nativamente, sem ressalva |
-| **`make`** | Não existe. Use scripts do `package.json` (`pnpm <script>`) |
+| **Antivírus** | Windows Defender pode deixar `npm install` e `runserver` lentos. Adicione a pasta do projeto às exclusões |
+| **Node e npm** | Funcionam nativamente, sem ressalva |
+| **`make`** | Não existe. Use scripts do `package.json` (`npm run <script>`) |
 | **Emoji/acentos no terminal** | Se aparecerem quebrados: `chcp 65001` ou use o Windows Terminal |
 
 ---
@@ -374,7 +374,7 @@ git config --global core.autocrlf input
 
 ```powershell
 node --version             # v20+
-pnpm --version             # 9+
+npm --version             # 9+
 git --version
 curl.exe --version         # note o .exe
 docker info                # só a partir do M04

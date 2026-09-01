@@ -78,16 +78,16 @@ check(
 );
 info(`Node v${versaoNode}`);
 
-// --- pnpm -----------------------------------------------------------------
-const versaoPnpm = rodar("pnpm --version");
+// --- npm ------------------------------------------------------------------
+const versaoNpm = rodar("npm --version");
 check(
-  "pnpm instalado",
-  versaoPnpm !== null,
-  "corepack enable && corepack prepare pnpm@latest --activate",
+  "npm instalado",
+  versaoNpm !== null,
+  "O npm vem com o Node. Reinstale o Node e reabra o terminal",
 );
-if (versaoPnpm) {
-  info(`pnpm ${versaoPnpm}`);
-  check("pnpm >= 9", maior(versaoPnpm) >= 9, "corepack prepare pnpm@latest --activate");
+if (versaoNpm) {
+  info(`npm ${versaoNpm}`);
+  check("npm >= 9", maior(versaoNpm) >= 9, "Atualize o Node para a versao 20 LTS ou superior");
 }
 
 // --- Git ------------------------------------------------------------------
@@ -135,12 +135,12 @@ if (EXIGE_BACKEND) {
       check(
         "NestJS instalado",
         "@nestjs/core" in deps,
-        "Rode 'pnpm install' na raiz do monorepo",
+        "Rode 'npm install' na raiz do monorepo",
       );
       check(
         "TypeORM instalado",
         "typeorm" in deps,
-        "pnpm --filter backend add @nestjs/typeorm typeorm",
+        "npm install -w backend @nestjs/typeorm typeorm",
       );
       achou = true;
       break;
@@ -195,7 +195,7 @@ if (WINDOWS) {
     "Projeto fora do OneDrive",
     !cwd.toLowerCase().includes("onedrive"),
     "Mova o projeto para C:\\dev — o OneDrive sincroniza node_modules, travando o " +
-      "pnpm install e produzindo mudancas fantasma no Git",
+      "npm install e produzindo mudancas fantasma no Git",
   );
   check(
     "Caminho sem espaco nem acento",

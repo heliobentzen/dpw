@@ -21,8 +21,8 @@ Log existe para responder perguntas depois que o problema aconteceu. Um log que 
 consegue pesquisar não é log — é ruído.
 
 ```bash
-pnpm --filter backend add nestjs-pino pino-http
-pnpm --filter backend add -D pino-pretty
+npm install -w backend nestjs-pino pino-http
+npm install -D -w backend pino-pretty
 ```
 
 ```ts
@@ -86,7 +86,7 @@ Quatro perguntas, quatro instrumentos:
 Healthcheck:
 
 ```bash
-pnpm --filter backend add @nestjs/terminus
+npm install -w backend @nestjs/terminus
 ```
 
 ```ts
@@ -111,7 +111,7 @@ Um healthcheck que só devolve `200 OK` sem tocar no banco não detecta a falha 
 Sentry em 5 linhas:
 
 ```bash
-pnpm --filter backend add @sentry/node
+npm install -w backend @sentry/node
 ```
 
 ```ts
@@ -237,7 +237,7 @@ traceback, URL e contexto — **sem** dados pessoais.
 
 1. Escreva 5 consultas que você faria nos logs para investigar "o empréstimo do usuário X
    sumiu". Seus logs respondem a todas?
-2. Implemente um script `pnpm relatorio:saude` que verifique: banco acessível,
+2. Implemente um script `npm run relatorio:saude` que verifique: banco acessível,
    migrações aplicadas, espaço em disco, tamanho do banco, e nº de erros nas últimas 24h.
 3. Calcule o custo mensal real de manter o sistema no ar por 3 anos (hospedagem, domínio,
    backup, horas de manutenção). Apresente à organização parceira.

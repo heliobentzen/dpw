@@ -5,8 +5,8 @@
 Este é o primeiro código do backend, e o primeiro TypeScript da disciplina. Ao final existe
 uma API que responde de verdade, e você entende cada linha dela.
 
-> **As horas teóricas não estão num bloco separado.** Elas são as etapas 4, 5, 6 e 10 — em
-> que a gente para de digitar e lê — mais as explicações dentro de cada etapa. Conceito
+> **As horas teóricas não estão num bloco separado.** Elas são as etapas 5, 6, 7, 11 e 20 —
+> em que a gente para de digitar e lê — mais as explicações dentro de cada etapa. Conceito
 > chega quando o código pede, e não antes.
 
 ## 🎯 Objetivos
@@ -15,8 +15,8 @@ Ao final você será capaz de:
 
 1. Ler um projeto NestJS e dizer o que cada arquivo faz.
 2. Explicar o que é um **decorator** e por que o framework depende deles.
-3. Distinguir **module**, **controller** e **provider**, e dizer o que cada um não deve fazer.
-4. Explicar o que **injeção de dependência** resolve — tendo visto o problema antes da solução.
+3. **Justificar** a separação em module, controller e service — não só descrevê-la.
+4. Explicar o que **injeção de dependência** resolve, tendo visto o problema antes da solução.
 5. Criar endpoints que respondem JSON, com rota, parâmetro e status HTTP corretos.
 6. Ler configuração de fora do código e **impedir a aplicação de subir** quando faltar.
 7. Publicar o contrato da API em OpenAPI, gerado a partir do código.
@@ -40,7 +40,8 @@ M06 (consultas) e o M07 (validação) vão preencher sem precisar mover nada de 
 
 ## 📋 Como este módulo funciona
 
-Dezessete etapas curtas, em ordem. Cada uma tem sempre as mesmas quatro partes:
+Vinte etapas curtas, em ordem. Nenhum comando tem mais que uma linha. Cada etapa tem sempre
+as mesmas quatro partes:
 
 | Parte | O que é |
 |---|---|
@@ -52,105 +53,203 @@ Dezessete etapas curtas, em ordem. Cada uma tem sempre as mesmas quatro partes:
 **Não pule para a frente.** Cada etapa assume que a anterior funcionou, e várias delas
 existem para você ver um erro de propósito — o erro é o conteúdo.
 
-| # | Etapa | Min | Recurso técnico que entra |
-|---|---|---|---|
-| 1 | [Conferir o terreno](#etapa-1--conferir-o-terreno-5-min) | 5 | — |
-| 2 | [Criar o projeto](#etapa-2--criar-o-projeto-15-min) | 15 | CLI do Nest |
-| 3 | [Subir o servidor](#etapa-3--subir-o-servidor-10-min) | 10 | scripts do `package.json`, recarga automática |
-| 4 | [Ler o `main.ts`](#etapa-4--ler-o-maints-10-min) | 10 | `import`/`export`, `async`/`await` |
-| 5 | [Ler o controller e o service](#etapa-5--ler-o-controller-e-o-service-20-min) | 20 | **decorators**, `@Controller`, `@Get`, `@Injectable` |
-| 6 | [Ler o módulo](#etapa-6--ler-o-módulo-10-min) | 10 | `@Module` e suas três listas |
-| 7 | [A primeira mudança sua](#etapa-7--a-primeira-mudança-sua-10-min) | 10 | ciclo editar → salvar → ver |
-| 8 | [Criar o seu módulo](#etapa-8--criar-o-seu-módulo-15-min) | 15 | `nest generate` |
-| 9 | [O primeiro endpoint seu](#etapa-9--o-primeiro-endpoint-seu-20-min) | 20 | rota própria, resposta JSON |
-| 10 | [Tirar o dado do controller](#etapa-10--tirar-o-dado-do-controller-25-min) | 25 | **injeção de dependência** |
-| 11 | [Receber um parâmetro na URL](#etapa-11--receber-um-parâmetro-na-url-20-min) | 20 | `@Param`, **pipes** |
-| 12 | [Responder 404](#etapa-12--responder-404-15-min) | 15 | exceções de domínio |
-| 13 | [Configuração fora do código](#etapa-13--configuração-fora-do-código-20-min) | 20 | `.env`, `ConfigModule` |
-| 14 | [Não subir quebrado](#etapa-14--não-subir-quebrado-15-min) | 15 | validação na inicialização |
-| 15 | [O prefixo `/api`](#etapa-15--o-prefixo-api-10-min) | 10 | `setGlobalPrefix` |
-| 16 | [Documentação automática](#etapa-16--documentação-automática-15-min) | 15 | Swagger / OpenAPI |
-| 17 | [O mapa que você percorreu](#etapa-17--o-mapa-que-você-percorreu-5-min) | 5 | — |
+### 🪟 Sobre o sistema operacional
 
-> 📦 **Antes desta aula**, instale o Node 20 e o pnpm.
-> 🐧 [`ambiente-setup.md`, seção 4](../../docs/ambiente-setup.md#4-nodejs-e-pnpm) ·
-> 🪟 [`ambiente-setup-windows.md`, passo 4](../../docs/ambiente-setup-windows.md#passo-4--nodejs-e-pnpm)
+Os comandos deste módulo são **os mesmos no Windows, no macOS e no Linux**, com uma exceção:
+
+| No PowerShell (Windows) | No macOS / Linux / Git Bash |
+|---|---|
+| `curl.exe` | `curl` |
+
+No PowerShell, `curl` é apelido de outro programa (`Invoke-WebRequest`) e não aceita os
+mesmos parâmetros. **Escrevendo `curl.exe` você chama o programa certo.** Daqui em diante o
+material escreve `curl.exe`; no macOS e no Linux, apague o `.exe`.
+
+> Esta é uma das cinco diferenças do Windows que valem a pena conhecer. As outras estão em
+> [`recursos/comandos-windows.md`](../../recursos/comandos-windows.md), para consultar quando
+> aparecerem.
+
+### As vinte etapas
+
+| # | Etapa | Min | O que entra |
+|---|---|---|---|
+| 1 | [Conferir as ferramentas](#etapa-1--conferir-as-ferramentas-5-min) | 5 | — |
+| 2 | [Instalar a CLI do Nest](#etapa-2--instalar-a-cli-do-nest-10-min) | 10 | o que é uma CLI |
+| 3 | [Criar o projeto](#etapa-3--criar-o-projeto-10-min) | 10 | `nest new` |
+| 4 | [Subir o servidor](#etapa-4--subir-o-servidor-10-min) | 10 | scripts, recarga automática |
+| 5 | [Ler o `main.ts`](#etapa-5--ler-o-maints-10-min) | 10 | `import`/`export`, `async`/`await` |
+| 6 | [Ler o controller e o service](#etapa-6--ler-o-controller-e-o-service-15-min) | 15 | **decorators** |
+| 7 | [Ler o módulo](#etapa-7--ler-o-módulo-10-min) | 10 | `@Module` e suas três listas |
+| 8 | [A primeira mudança sua](#etapa-8--a-primeira-mudança-sua-5-min) | 5 | editar → salvar → ver |
+| 9 | [Criar o seu módulo](#etapa-9--criar-o-seu-módulo-15-min) | 15 | `nest generate` |
+| 10 | [O primeiro endpoint seu](#etapa-10--o-primeiro-endpoint-seu-15-min) | 15 | rota própria, JSON |
+| 11 | [**Por que separar em camadas**](#etapa-11--por-que-separar-em-camadas-20-min) | 20 | **o porquê das camadas** |
+| 12 | [Mover os dados para o service](#etapa-12--mover-os-dados-para-o-service-15-min) | 15 | service |
+| 13 | [Como o controller recebe o service](#etapa-13--como-o-controller-recebe-o-service-20-min) | 20 | **injeção de dependência** |
+| 14 | [Parâmetro na URL](#etapa-14--parâmetro-na-url-20-min) | 20 | `@Param`, **pipes** |
+| 15 | [Responder 404](#etapa-15--responder-404-15-min) | 15 | exceções de domínio |
+| 16 | [Configuração fora do código](#etapa-16--configuração-fora-do-código-15-min) | 15 | `.env`, `ConfigModule` |
+| 17 | [Não subir quebrado](#etapa-17--não-subir-quebrado-10-min) | 10 | validação na inicialização |
+| 18 | [O prefixo `/api`](#etapa-18--o-prefixo-api-5-min) | 5 | `setGlobalPrefix` |
+| 19 | [Documentação automática](#etapa-19--documentação-automática-10-min) | 10 | Swagger / OpenAPI |
+| 20 | [O mapa que você percorreu](#etapa-20--o-mapa-que-você-percorreu-5-min) | 5 | — |
 
 ---
 
-## Etapa 1 — Conferir o terreno (5 min)
+## Etapa 1 — Conferir as ferramentas (5 min)
 
-O `package.json` e o `pnpm-workspace.yaml` foram criados no M00. Antes de criar coisa nova,
-confirme que a base está lá.
+Antes de criar qualquer coisa, confirme que o Node está instalado e que você está na pasta
+certa.
 
 **Faça:**
 
-```bash
-cd ~/dev/bibliocom          # 🪟 Windows: Set-Location C:\dev\bibliocom
-cat pnpm-workspace.yaml     # 🪟 Windows: Get-Content pnpm-workspace.yaml
+```powershell
+node --version
 ```
 
-**Deu certo se:** o arquivo lista `backend`, `frontend` e `pacotes/*`.
+```powershell
+npm --version
+```
 
-As pastas ainda não existem, e isso é normal: `backend/` nasce na etapa 2, `frontend/` no
-M08 e `pacotes/tipos/` no M15. O `pnpm-workspace.yaml` é uma **declaração de intenção** —
-ele diz ao pnpm onde procurar projetos quando eles existirem.
+**Deu certo se:** o primeiro responde `v20.` ou superior, e o segundo `10.` ou superior.
+
+**Linha a linha:**
+
+| Comando | O que é |
+|---|---|
+| `node` | O programa que **executa** JavaScript fora do navegador. É ele que vai rodar a sua API |
+| `npm` | O gerenciador de pacotes. Instala bibliotecas e roda os atalhos do projeto. **Vem junto com o Node** — você não instalou separado |
+
+> Se algum dos dois responder "não é reconhecido como um comando", o Node não está instalado
+> ou o terminal foi aberto antes da instalação. Feche e reabra o terminal primeiro; se
+> continuar, volte ao [guia de setup](../../docs/ambiente-setup-windows.md#passo-4--nodejs-e-npm).
+
+Agora vá para a pasta do projeto, criada no M00:
+
+```powershell
+cd C:\dev\bibliocom
+```
+
+*(No macOS ou Linux: `cd ~/dev/bibliocom`.)*
+
+**Deu certo se:** existe um `package.json` nessa pasta. Confira abrindo-o no VS Code — ele
+deve ter um campo `workspaces` listando `backend`, `frontend` e `pacotes/*`.
+
+Essas pastas ainda não existem, e é normal: `backend/` nasce daqui a duas etapas,
+`frontend/` no M08 e `pacotes/tipos/` no M15. O campo `workspaces` é uma **declaração de
+intenção** — ele diz ao npm onde procurar projetos quando eles existirem.
 
 ---
 
-## Etapa 2 — Criar o projeto (15 min)
+## Etapa 2 — Instalar a CLI do Nest (10 min)
 
 **Faça:**
 
-```bash
-pnpm dlx @nestjs/cli new backend --package-manager pnpm --skip-git
+```powershell
+npm install -g @nestjs/cli@11
 ```
 
 **Linha a linha:**
 
 | Trecho | O que faz |
 |---|---|
-| `pnpm dlx` | Baixa e executa um pacote **sem instalá-lo** no projeto. É o `npx` do pnpm. Você usa a CLI hoje e não fica com ela pendurada como dependência |
-| `@nestjs/cli` | A ferramenta de linha de comando do Nest. O `@nestjs/` é um *escopo*: um prefixo que agrupa os pacotes oficiais do projeto |
-| `new backend` | Cria um projeto novo na pasta `backend/` |
-| `--package-manager pnpm` | Responde de antemão a pergunta que a CLI faria (npm? yarn? pnpm?) |
-| `--skip-git` | **Importante.** Sem isto a CLI cria um repositório Git **dentro** do seu, e você passa meia hora sem entender por que o `git status` da raiz ignora tudo que está em `backend/` |
-
-A CLI lista os arquivos que criou e instala as dependências. Na primeira vez leva um ou dois
-minutos — ela está baixando o Nest inteiro.
+| `npm install` | Instala um pacote |
+| `-g` | *global*: instala **na sua máquina**, não dentro de um projeto. Assim o comando `nest` fica disponível em qualquer pasta |
+| `@nestjs/cli` | O pacote. O `@nestjs/` é um *escopo*: um prefixo que agrupa os pacotes oficiais do projeto Nest |
+| `@11` | **A versão.** Sem isto você receberia a mais recente, que hoje é a 12 |
 
 **Deu certo se:**
 
-```bash
-ls backend                  # 🪟 Windows: Get-ChildItem backend
-ls backend/.git             # deve dar "não encontrado"
+```powershell
+nest --version
 ```
 
-Existe `backend/` com `src/` dentro, e **não** existe `backend/.git`.
+responde `11.` seguido de outros números.
 
-> Se o `backend/.git` existir, apague essa pasta (`rm -rf backend/.git`) e siga. Nada mais
-> quebra por causa disso.
+### Por que uma CLI, e por que fixar a versão
+
+Uma **CLI** (*Command Line Interface*) é um programa que você usa pelo terminal. Esta faz
+duas coisas para você: cria a estrutura inicial do projeto e gera arquivos novos já
+registrados nos lugares certos. Nada que ela faz é obrigatório — dá para escrever todos os
+arquivos à mão, e o exercício E03.3 pede exatamente isso. Ela apenas evita a digitação
+repetitiva e, principalmente, evita esquecimentos de registro.
+
+O `@11` merece uma frase própria. **Uma turma inteira precisa produzir o mesmo projeto.** Sem
+fixar a versão, quem instalar hoje e quem instalar em novembro receberiam versões diferentes,
+com arquivos gerados diferentes — e o material deixaria de bater com a tela de metade da
+sala. Fixar versão em material didático é o mesmo cuidado que se toma em produção, e pelo
+mesmo motivo: previsibilidade vale mais que novidade.
+
+> 📌 **Nota para quem for atualizar este material.** A versão 12 do Nest gera um projeto
+> ESM: todo `import` de arquivo próprio precisa terminar em `.js` — mesmo o arquivo sendo
+> `.ts` —, os testes passam de Jest para Vitest, e a CLI do TypeORM muda de
+> `typeorm-ts-node-commonjs` para `typeorm-ts-node-esm`. É uma migração que atravessa o
+> curso inteiro, não só este módulo.
 
 ---
 
-## Etapa 3 — Subir o servidor (10 min)
+## Etapa 3 — Criar o projeto (10 min)
 
 **Faça:**
 
-```bash
-cd backend
-pnpm start:dev
+```powershell
+nest new backend --skip-git
 ```
 
 **Linha a linha:**
 
 | Trecho | O que faz |
 |---|---|
-| `pnpm start:dev` | Executa o *script* chamado `start:dev`, que está no `package.json`. Abra o arquivo e procure a seção `"scripts"`: você vai ver que `start:dev` é um apelido para `nest start --watch` |
-| `--watch` (dentro do script) | Fica observando os arquivos. A cada `Ctrl+S`, ele recompila e reinicia sozinho |
+| `nest new` | Cria um projeto novo, com a estrutura padrão |
+| `backend` | O nome da pasta que vai nascer |
+| `--skip-git` | **Importante.** Sem isto a CLI cria um repositório Git **dentro** do seu, e você passa meia hora sem entender por que o `git status` da raiz ignora tudo que está em `backend/` |
+
+A CLI vai **perguntar** qual gerenciador de pacotes usar:
+
+```
+? Which package manager would you ❤️ to use?
+> npm
+  yarn
+  pnpm
+```
+
+**`npm` já vem selecionado. Aperte Enter.**
+
+Ela então lista os arquivos criados e instala as dependências. Na primeira vez leva um ou
+dois minutos — está baixando o Nest inteiro.
+
+**Deu certo se:** apareceu `🚀 Successfully created project backend`, e agora existe uma
+pasta `backend` com uma pasta `src` dentro dela.
+
+⚠️ **Confira que não existe `backend\.git`.** No VS Code, com "mostrar arquivos ocultos"
+ligado, ela não deve aparecer. Se apareceu, apague essa pasta e siga — nada mais quebra por
+causa disso.
+
+---
+
+## Etapa 4 — Subir o servidor (10 min)
+
+**Faça:**
+
+```powershell
+cd backend
+```
+
+```powershell
+npm run start:dev
+```
+
+**Linha a linha:**
+
+| Trecho | O que faz |
+|---|---|
+| `npm run` | Executa um *script* declarado no `package.json` |
+| `start:dev` | O nome do script. Abra o `package.json` e procure `"scripts"`: você vai ver que `start:dev` é um apelido para `nest start --watch` |
+| `--watch` (dentro do script) | Fica observando os arquivos. A cada `Ctrl+S`, recompila e reinicia sozinho |
 
 Este comando **ocupa o terminal** e não devolve o cursor — ele fica rodando. Deixe-o numa
-janela e abra **outra** para os comandos das próximas etapas.
+janela e abra **outra** para os comandos das próximas etapas. No VS Code, o `+` no painel de
+terminal abre a segunda.
 
 **Rode:** abra <http://localhost:3000> no navegador.
 
@@ -169,15 +268,15 @@ são para entender de onde ele veio.
 
 ---
 
-## Etapa 4 — Ler o `main.ts` (10 min)
+## Etapa 5 — Ler o `main.ts` (10 min)
 
-Pare de digitar. As etapas 4, 5 e 6 são de leitura: são **quatro arquivos pequenos**, e o
+Pare de digitar. As etapas 5, 6 e 7 são de leitura: são **quatro arquivos pequenos**, e o
 `Hello World!` que você acabou de ver sai deles.
 
-> Em `src/` você vai contar cinco arquivos. O quinto é o `app.controller.spec.ts`, um teste
+> Em `src` você vai contar cinco arquivos. O quinto é o `app.controller.spec.ts`, um teste
 > que a CLI deixa de brinde. Ignore-o por enquanto — ele é assunto do M14.
 
-Abra `src/main.ts`:
+Abra `src\main.ts`:
 
 ```ts
 import { NestFactory } from "@nestjs/core";
@@ -195,26 +294,26 @@ bootstrap();
 | Trecho | O que faz |
 |---|---|
 | `import { X } from "y"` | Traz a coisa chamada `X` de dentro do módulo `y`. As chaves indicam **exportação nomeada** — `y` exporta várias coisas e você quer só essa |
-| `from "@nestjs/core"` | Sem `./` na frente: é um pacote de `node_modules` |
+| `from "@nestjs/core"` | Sem `./` na frente: é um pacote de `node_modules`, baixado pelo npm |
 | `from "./app.module"` | Com `./`: é um arquivo **seu**, na mesma pasta. Repare que não se escreve `.ts` no fim |
 | `async function` | Marca a função como assíncrona. Só dentro de uma função `async` é possível usar `await` |
 | `await` | "Espere esta operação terminar antes de seguir para a próxima linha." Sem ele, o código seguiria adiante com a aplicação ainda pela metade |
 | `NestFactory.create(AppModule)` | **A linha central do arquivo.** Monta a aplicação inteira a partir de **um único módulo** |
 | `app.listen(...)` | Começa a escutar requisições HTTP. Antes desta linha, a aplicação existe mas não atende ninguém |
-| `process.env.PORT` | Lê a variável de ambiente `PORT`. O `process` é global do Node |
-| `?? 3000` | Operador de coalescência nula: "se o valor da esquerda for `null` ou `undefined`, use 3000". Diferente de `\|\|`, que também trocaria `0` e `""` — e porta `0` é um valor legítimo |
+| `process.env.PORT` | Lê a variável de ambiente `PORT`. O `process` é um objeto global do Node |
+| `?? 3000` | "Se o valor da esquerda for `null` ou `undefined`, use 3000." Diferente de `\|\|`, que também trocaria `0` e `""` |
 | `bootstrap();` | Chama a função. Sem esta linha, a função existe e nunca roda |
 
-**O que reter desta etapa:** toda a aplicação sai de **um** módulo, o `AppModule`. Tudo o
-que você criar daqui em diante vai, direta ou indiretamente, pendurar nele.
+**O que reter:** toda a aplicação sai de **um** módulo, o `AppModule`. Tudo o que você criar
+daqui em diante vai, direta ou indiretamente, pendurar nele.
 
 ---
 
-## Etapa 5 — Ler o controller e o service (20 min)
+## Etapa 6 — Ler o controller e o service (15 min)
 
 Estes dois arquivos são de onde o texto `Hello World!` realmente vem.
 
-### 5a. `src/app.controller.ts`
+### 6a. `src\app.controller.ts`
 
 ```ts
 import { Controller, Get } from "@nestjs/common";
@@ -237,13 +336,13 @@ export class AppController {
 |---|---|
 | `@Controller()` | Marca a classe como controller e define o **prefixo de rota**. Vazio aqui, então as rotas começam na raiz |
 | `export class` | `class` é do JavaScript; `export` disponibiliza a classe para outros arquivos importarem |
-| `constructor(private readonly appService: AppService)` | Recebe um `AppService` já pronto. **Volte a esta linha na etapa 10** — ela é o assunto do módulo inteiro |
-| `private readonly` | Atalho do TypeScript: declara a propriedade `this.appService` **e** atribui o valor, numa linha só. Sem ele seriam três linhas |
-| `@Get()` | Marca o método como resposta a requisições `GET`. Sem caminho, atende o prefixo do `@Controller` |
-| `getHello(): string` | O `: string` depois dos parênteses é o **tipo de retorno**. Se você devolvesse um número aqui, o TypeScript acusaria antes de rodar |
+| `constructor(private readonly appService: AppService)` | Recebe um `AppService` já pronto. **Volte a esta linha na etapa 13** — ela é o assunto do módulo inteiro |
+| `private readonly` | Atalho do TypeScript: declara a propriedade `this.appService` **e** atribui o valor, numa linha só |
+| `@Get()` | Marca o método como resposta a requisições `GET` |
+| `getHello(): string` | O `: string` depois dos parênteses é o **tipo de retorno**. Devolver um número aqui seria erro apontado antes de rodar |
 | `return this.appService.getHello()` | O controller **não produz o texto**: pede a quem sabe |
 
-### 5b. `src/app.service.ts`
+### 6b. `src\app.service.ts`
 
 ```ts
 import { Injectable } from "@nestjs/common";
@@ -257,9 +356,9 @@ export class AppService {
 ```
 
 Uma classe comum, com um método que devolve um texto. O `@Injectable()` é o único elemento
-novo, e a etapa 10 explica o que ele faz.
+novo, e a etapa 13 explica o que ele faz.
 
-### 5c. O conceito: o que é um decorator
+### 6c. O conceito: o que é um decorator
 
 Você viu três coisas começando com `@`. Elas têm nome: **decorators**.
 
@@ -272,7 +371,7 @@ getHello(): string {}
 ```
 
 Quando a aplicação sobe, o Nest **lê esses registros** e monta a tabela de rotas a partir
-deles. É exatamente por isso que o terminal, ao iniciar, imprime linhas como:
+deles. É exatamente por isso que o terminal, ao iniciar, imprime:
 
 ```
 [RouterExplorer] Mapped {/, GET} route
@@ -283,17 +382,17 @@ Ele está lendo o que os decorators anexaram e anunciando o que encontrou.
 | Pergunta comum | Resposta |
 |---|---|
 | O `@` é do TypeScript ou do Nest? | Da linguagem. O Nest só define **quais** decorators existem e o que fazer com eles |
-| Por que os parênteses em `@Get()`? | Porque é uma chamada de função. `@Get()` chama `Get` sem argumento; `@Get(":id")` passa o caminho |
-| Onde mais vou ver isso? | Em `@Entity()` no M04 e em `@IsString()` no M07. **Um mecanismo, três usos** — quando chegar lá, você já sabe o que está acontecendo |
+| Por que os parênteses em `@Get()`? | Porque é uma chamada de função. `@Get()` chama sem argumento; `@Get(":id")` passa o caminho |
+| Onde mais vou ver isso? | Em `@Entity()` no M04 e em `@IsString()` no M07. **Um mecanismo, três usos** |
 
 **Não decore os decorators.** Cada um vai aparecer no momento em que resolve um problema
 seu, e é aí que ele gruda.
 
 ---
 
-## Etapa 6 — Ler o módulo (10 min)
+## Etapa 7 — Ler o módulo (10 min)
 
-Falta o arquivo que amarra os outros três. Abra `src/app.module.ts`:
+Falta o arquivo que amarra os outros três. Abra `src\app.module.ts`:
 
 ```ts
 import { Module } from "@nestjs/common";
@@ -322,10 +421,10 @@ decorator. O módulo não *faz* nada: ele **declara** o que existe.
 Agora dá para ler a aplicação inteira de trás para frente:
 
 ```
-main.ts  →  cria a app a partir do AppModule
-AppModule  →  declara AppController (rotas) e AppService (provider)
-AppController  →  @Get() na raiz, pede o texto ao AppService
-AppService  →  devolve "Hello World!"
+main.ts        cria a app a partir do AppModule
+AppModule      declara AppController (rotas) e AppService (provider)
+AppController  @Get() na raiz, pede o texto ao AppService
+AppService     devolve "Hello World!"
 ```
 
 **Esse é o projeto inteiro.** Quatro arquivos, cada um com uma responsabilidade. Tudo que
@@ -333,19 +432,23 @@ vem depois é mais do mesmo, em maior quantidade.
 
 ---
 
-## Etapa 7 — A primeira mudança sua (10 min)
+## Etapa 8 — A primeira mudança sua (5 min)
 
 Antes de acrescentar conceito, feche o ciclo básico: editar, salvar, ver o resultado.
 
-**Faça:** em `src/app.service.ts`, troque o texto:
+**Faça:** em `src\app.service.ts`, troque o texto:
 
 ```ts
 return "BiblioCom no ar";
 ```
 
-**Rode:** salve o arquivo e olhe o terminal do `start:dev`. Ele imprime algo como
-`File change detected. Starting incremental compilation...` e reinicia sozinho. Atualize o
-navegador.
+**Rode:** salve o arquivo e olhe o terminal do `start:dev`. Ele imprime
+
+```
+File change detected. Starting incremental compilation...
+```
+
+e reinicia sozinho. Atualize o navegador.
 
 **Deu certo se:** a página mostra `BiblioCom no ar`, sem você ter reiniciado nada à mão.
 
@@ -353,34 +456,37 @@ navegador.
 > é de ambiente, não de código. Confira se o `start:dev` ainda está rodando naquela outra
 > janela — é comum tê-lo fechado sem perceber.
 
-Parece pouca coisa. É o ciclo que você vai repetir algumas centenas de vezes até o M17, e
-vale ter certeza de que ele funciona antes de complicar.
-
 ---
 
-## Etapa 8 — Criar o seu módulo (15 min)
+## Etapa 9 — Criar o seu módulo (15 min)
 
 O `AppModule` é a raiz. Coisas de verdade ficam em módulos próprios, um por área do domínio.
 O nosso se chama **acervo**.
 
-**Faça:**
+**Faça** — três comandos curtos, um de cada vez:
 
-```bash
-pnpm dlx @nestjs/cli generate module acervo
-pnpm dlx @nestjs/cli generate controller acervo --no-spec
-pnpm dlx @nestjs/cli generate service acervo --no-spec
+```powershell
+nest generate module acervo
+```
+
+```powershell
+nest generate controller acervo --no-spec
+```
+
+```powershell
+nest generate service acervo --no-spec
 ```
 
 **Linha a linha:**
 
 | Trecho | O que faz |
 |---|---|
-| `generate module acervo` | Cria `src/acervo/acervo.module.ts` **e** o registra no `imports` do `app.module.ts` |
+| `generate module acervo` | Cria `src\acervo\acervo.module.ts` **e** o registra no `imports` do `app.module.ts` |
 | `generate controller acervo` | Cria o controller **e** o registra em `controllers` do `AcervoModule` |
 | `generate service acervo` | Cria o service **e** o registra em `providers` |
 | `--no-spec` | Pula o arquivo de teste. Eles entram no M14, com o conteúdo que os justifica |
 
-**Rode:** abra `src/acervo/acervo.module.ts`:
+**Rode:** abra `src\acervo\acervo.module.ts`:
 
 ```ts
 import { Module } from "@nestjs/common";
@@ -397,9 +503,10 @@ export class AcervoModule {}
 **Este arquivo é a peça que faz tudo funcionar.** Confira também o `app.module.ts`: o
 `AcervoModule` apareceu no `imports` sozinho.
 
-Esse registro automático é justamente o que se esquece de fazer quando se cria arquivo à
-mão — e o erro que aparece quando falta **não menciona registro nenhum**. Você vai provocar
-esse erro de propósito na etapa 10.
+Repare no que a CLI fez de mais valioso: **os registros**. Ela não só criou três arquivos —
+ela os anunciou nos lugares certos, em dois módulos diferentes. É justamente isso que se
+esquece ao criar arquivo à mão, e o erro que aparece quando falta **não menciona registro
+nenhum**. Você vai provocar esse erro de propósito na etapa 13.
 
 Os outros dois arquivos vieram quase vazios:
 
@@ -407,30 +514,32 @@ Os outros dois arquivos vieram quase vazios:
 // acervo.controller.ts
 @Controller("acervo")
 export class AcervoController {}
+```
 
+```ts
 // acervo.service.ts
 @Injectable()
 export class AcervoService {}
 ```
 
 ⚠️ **Um ajuste antes de seguir.** A CLI usou o nome que você passou (`acervo`) como prefixo
-de rota. Nós queremos `/obras` — o módulo se chama acervo, mas o recurso que ele expõe é
-obra. Troque:
+de rota. Nós queremos `/obras`. Troque:
 
 ```ts
 @Controller("obras")
 ```
 
 > Módulo e rota não precisam ter o mesmo nome, e frequentemente não têm. O módulo organiza o
-> **código**; a rota nomeia o **recurso** que o cliente enxerga. O M07 volta a isso.
+> **código**; a rota nomeia o **recurso** que o cliente enxerga. Aqui o módulo cuida do
+> acervo, e o recurso que ele publica é a obra.
 
 ---
 
-## Etapa 9 — O primeiro endpoint seu (20 min)
+## Etapa 10 — O primeiro endpoint seu (15 min)
 
 Agora você escreve. Comece pelo mais simples que existe: uma rota que devolve uma lista fixa.
 
-**Faça:** em `src/acervo/acervo.controller.ts`:
+**Faça:** em `src\acervo\acervo.controller.ts`:
 
 ```ts
 import { Controller, Get } from "@nestjs/common";
@@ -456,13 +565,9 @@ export class AcervoController {
 | `listar()` | O nome do método é **seu**. Ele não vira parte da URL — quem define a URL são os decorators |
 | `return [ … ]` | Devolve um array de objetos JavaScript comuns |
 
-**Rode:**
+**Rode:** abra <http://localhost:3000/obras> no navegador.
 
-```bash
-curl -i http://localhost:3000/obras       # 🪟 Windows: curl.exe -i http://localhost:3000/obras
-```
-
-**Deu certo se:** a primeira linha é `HTTP/1.1 200 OK`, e o corpo é o array em JSON.
+**Deu certo se:** aparece o array em JSON.
 
 **Repare no que você não escreveu:**
 
@@ -472,40 +577,120 @@ curl -i http://localhost:3000/obras       # 🪟 Windows: curl.exe -i http://loc
 | `Content-Type: application/json` | O Nest pôs o cabeçalho ao ver que você devolveu um objeto |
 | `status(200)` | 200 é o padrão para `GET` |
 
-Você devolveu um valor e o framework cuidou do HTTP. Essa é a diferença entre o Nest e o
-Express da conversa do M02.
-
-> ⚠️ **Este endpoint está errado de propósito.** Os dados estão dentro do controller, e a
-> próxima etapa existe para consertar isso. Deixe como está.
+Você devolveu um valor e o framework cuidou do HTTP. Essa é a diferença prática entre o Nest
+e o Express da conversa do M02.
 
 ---
 
-## Etapa 10 — Tirar o dado do controller (25 min)
+## Etapa 11 — Por que separar em camadas (20 min)
 
-Esta é a etapa mais importante do módulo. Ela tem três partes: o problema, a solução e a
-prova.
+Pare o teclado. Esta etapa é a mais importante do módulo, e ela é de raciocínio.
 
-### 10a. Por que os dados não podem ficar no controller
+O endpoint da etapa 10 **funciona**. Devolve o que deveria, com o status certo. Então por que
+todo material de NestJS insiste que os dados não podem ficar ali?
 
-Volte à tabela de responsabilidades — ela agora tem código concreto por trás:
+A resposta honesta não é "porque é a boa prática". É que existem quatro situações concretas
+em que essa escolha cobra a conta — e todas as quatro vão acontecer nesta disciplina.
+
+### Situação 1 — o mesmo dado é preciso em outro lugar
+
+No M12 vai existir um relatório de acervo para a coordenação. Ele precisa da lista de obras,
+mas **não é uma requisição HTTP** — é uma tela diferente, com outro formato de saída.
+
+Com a lista dentro do `listar()` do controller, só há duas saídas: chamar um método de
+controller a partir de outro controller (que arrasta consigo o `@Get`, a rota, o status) ou
+**copiar a lista**. Todo mundo copia. Aí existem duas cópias, alguém corrige uma, e a outra
+fica errada em silêncio.
+
+### Situação 2 — testar a regra exige subir um servidor
+
+No M14 você vai testar a regra "um associado não pode ter mais de três empréstimos em
+aberto". Se essa regra morar no controller, testá-la exige:
+
+```
+subir a aplicação → montar uma requisição HTTP → mandar → ler a resposta → interpretar o status
+```
+
+Cinco passos, um servidor de pé, e um teste lento que quebra por motivos que nada têm a ver
+com a regra: porta ocupada, JSON malformado, rota renomeada.
+
+Se a regra mora no service, o teste é:
+
+```ts
+expect(() => servico.emprestar(exemplar, associadoComTres)).toThrow();
+```
+
+Uma linha, sem rede, sem servidor. **A separação em camadas é, na prática, o que torna o
+teste barato** — e teste caro é teste que ninguém escreve.
+
+### Situação 3 — a fonte dos dados vai mudar
+
+No M04 a lista sai de um array e passa a vir do PostgreSQL. Essa é uma mudança **grande**:
+entra uma conexão, entram consultas, entra tratamento de erro de banco.
+
+Se o dado estiver no controller, tudo isso desemboca no arquivo que também cuida de rota,
+status e parâmetro de URL — que era de 10 linhas e vira de 60. Com o service no meio, a troca
+acontece **só dentro dele**, e o controller não muda **uma vírgula**.
+
+Isso não é promessa: no M06 você vai fazer exatamente essa troca e conferir que o controller
+continua igual. Guarde para comparar.
+
+### Situação 4 — duas pessoas mexendo na mesma semana
+
+Numa equipe de quatro, alguém está criando rotas e alguém está escrevendo regra de negócio.
+Em arquivos separados, os dois trabalham em paralelo e o Git mescla sem conflito. No mesmo
+arquivo, os dois editam as mesmas linhas — e o M00 já mostrou como termina.
+
+### A regra, e como decidir
+
+Dessas quatro situações sai a divisão que o Nest impõe:
 
 | Peça | Responsabilidade | O que **não** deve fazer |
 |---|---|---|
 | **Module** | Agrupar o que pertence a um domínio e declarar o que ele expõe | Conter lógica |
 | **Controller** | Traduzir HTTP ↔ chamada de método: ler rota, corpo e query; devolver dados | Falar com o banco, conter regra de negócio |
-| **Provider** (Service) | A regra de negócio e o acesso a dados | Saber que HTTP existe |
+| **Service** (provider) | A regra de negócio e o acesso a dados | Saber que HTTP existe |
 
-A pergunta que resolve 90% das dúvidas de "onde eu ponho este código?":
+E a pergunta que resolve 90% das dúvidas de "onde eu ponho este código?":
 
-> Se este código precisasse rodar a partir de um comando de terminal, em vez de uma
-> requisição HTTP, ele mudaria? **Se não muda, é Service. Se muda, é Controller.**
+> Se este código precisasse rodar a partir de um **comando de terminal**, em vez de uma
+> requisição HTTP, ele mudaria?
+>
+> **Se não muda, é Service. Se muda, é Controller.**
 
-A lista de obras não muda: ela é a mesma vindo de uma requisição HTTP, de um comando de
-terminal ou de um teste. Logo, é service.
+Aplique aos casos que você já viu:
 
-### 10b. Mover o dado
+| Código | Muda sem HTTP? | Camada |
+|---|---|---|
+| A lista de obras | Não. É a mesma lista de qualquer origem | **Service** |
+| Converter `:id` da URL em número | Sim. Sem URL não há `:id` | **Controller** |
+| Decidir que obra sem exemplar não empresta | Não. É regra da biblioteca | **Service** |
+| Escolher que a resposta do POST é 201 | Sim. Status é conceito de HTTP | **Controller** |
 
-**Faça:** em `src/acervo/acervo.service.ts`:
+### O que acontece quando não se separa
+
+Este é o ponto do M02 com nome e endereço. Um projeto Express típico começa assim:
+
+```ts
+app.get("/obras", (req, res) => { /* consulta o banco, valida, responde */ });
+```
+
+Funciona lindamente na semana 3. Na semana 12, com 40 rotas, isso é um arquivo de 800 linhas
+onde ninguém acha nada, nada é testável isoladamente e cada pessoa da equipe organizou do seu
+jeito.
+
+**O NestJS impõe a estrutura, e a imposição é o produto.** Não é que ele saiba organizar
+melhor que você; é que ele organiza **igual para todo mundo**, e é isso que permite quatro
+pessoas mexerem no mesmo backend sem colidir — e você voltar ao seu próprio código seis meses
+depois e ainda entendê-lo.
+
+As próximas duas etapas aplicam essa decisão ao endpoint que você acabou de escrever.
+
+---
+
+## Etapa 12 — Mover os dados para o service (15 min)
+
+**Faça:** em `src\acervo\acervo.service.ts`:
 
 ```ts
 import { Injectable } from "@nestjs/common";
@@ -531,12 +716,20 @@ export class AcervoService {
 | Trecho | O que faz |
 |---|---|
 | `export type Obra = { … }` | Declara um **tipo**: a forma que um objeto obra tem. Não gera código nenhum ao rodar — serve só para o TypeScript conferir |
-| `private obras: Obra[]` | Propriedade da classe. `Obra[]` é "array de Obra". `private` impede acesso de fora da classe |
+| `private obras: Obra[]` | Propriedade da classe. `Obra[]` é "array de Obra"; `private` impede acesso de fora |
 | `listar(): Obra[]` | Se você errar e devolver outra coisa, o TypeScript acusa antes de rodar |
+| o comentário | Vale a pena escrever: ele diz ao leitor que o array é **provisório**, e até quando |
 
-### 10c. Pedir o service, sem criá-lo
+**Deu certo se:** o arquivo salva sem erro. A rota ainda responde a lista antiga — o
+controller ainda não sabe que o service existe. É a próxima etapa.
 
-E agora o controller. **A forma ingênua seria esta:**
+---
+
+## Etapa 13 — Como o controller recebe o service (20 min)
+
+### 13a. A forma que não usamos
+
+O controller precisa do service. O jeito direto seria:
 
 ```ts
 export class AcervoController {
@@ -544,15 +737,19 @@ export class AcervoController {
 }
 ```
 
-Funciona, e é ruim por dois motivos concretos:
+Funciona. E é ruim por dois motivos concretos:
 
-1. **O controller ficou soldado a essa implementação.** Num teste (M14), não há como trocar
-   o service por um dublê — a linha `new` está dentro dele.
-2. **Se o service passar a precisar de coisas**, como a conexão de banco do M04, o controller
-   passa a ter de saber montá-las. E quem usa o controller, também. A ignorância se espalha
-   para cima.
+1. **O controller fica soldado a essa implementação.** Num teste (M14), não há como trocar o
+   service por um dublê — a linha `new` está dentro dele, e o teste não alcança.
+2. **Quando o service passar a precisar de coisas**, como a conexão de banco do M04, o
+   controller passa a ter de saber montá-las. E quem cria o controller, também. A ignorância
+   se espalha para cima.
 
-**A forma do Nest — a dependência chega pronta, pelo construtor. Faça:**
+### 13b. A forma do Nest
+
+A dependência **chega pronta**, pelo construtor.
+
+**Faça:** em `src\acervo\acervo.controller.ts`:
 
 ```ts
 import { Controller, Get } from "@nestjs/common";
@@ -574,27 +771,24 @@ export class AcervoController {
 | Trecho | O que faz |
 |---|---|
 | `constructor(...)` | Método chamado quando a classe é instanciada. **Quem a instancia é o Nest**, não você |
-| `private readonly acervo` | Atalho do TypeScript, o mesmo do `AppController`: declara e atribui `this.acervo` numa linha |
+| `private readonly acervo` | Atalho do TypeScript: declara e atribui `this.acervo` numa linha |
 | `: AcervoService` | **É por este tipo que o Nest identifica o que entregar.** Ele lê o tipo do parâmetro, procura quem está declarado em `providers` e entrega uma instância pronta |
 | `@Injectable()` no service | Sem ele, o Nest não guarda os metadados necessários e não consegue criar a classe |
 | ausência de `new` | Em nenhum lugar do seu código existe `new AcervoService()` |
 
 Isso é **injeção de dependência**: a classe declara *o que precisa*, não *como conseguir*.
 
-**Rode:**
-
-```bash
-curl -i http://localhost:3000/obras
-```
+**Rode:** atualize <http://localhost:3000/obras> no navegador.
 
 **Deu certo se:** responde as duas obras, exatamente como antes. O comportamento visível é o
-mesmo da etapa 9 — o que mudou foi **onde o dado mora**.
+mesmo da etapa 10 — o que mudou foi **onde o dado mora**, que é tudo o que a etapa 11
+argumentou.
 
-### 10d. A prova de que a injeção é real
+### 13c. A prova de que a injeção é real
 
 Até aqui, "o Nest entrega o service" é uma afirmação. Vamos verificá-la quebrando.
 
-**Faça:** em `src/acervo/acervo.module.ts`, comente o `AcervoService` da lista `providers`:
+**Faça:** em `src\acervo\acervo.module.ts`, comente o `AcervoService` da lista `providers`:
 
 ```ts
 @Module({
@@ -616,29 +810,30 @@ in the AcervoModule module.
 | Parte | Significado |
 |---|---|
 | `can't resolve dependencies of the AcervoController` | Ele tentou criar o controller e não conseguiu |
-| `(?)` | A posição do parâmetro que ele não resolveu. Com dois parâmetros e o segundo faltando, seria `(AcervoService, ?)` |
+| `(?)` | A posição do parâmetro que não resolveu. Com dois parâmetros e o segundo faltando, seria `(AcervoService, ?)` |
 | `at index [0]` | O primeiro parâmetro do construtor |
 | `is available in the AcervoModule module` | **Onde procurar:** a lista `providers` daquele módulo |
 
 Descomente e o servidor volta.
 
-Guarde este erro: é o mais comum do módulo e do M04, e a causa é quase sempre a mesma —
+Guarde este erro: é o mais comum deste módulo e do M04, e a causa é quase sempre a mesma —
 alguém criou uma classe e esqueceu de registrá-la em `providers`.
 
-**Três consequências práticas da injeção**, agora que você viu como funciona:
+**Três consequências práticas**, agora que você viu como funciona:
 
-1. **Testar fica trivial** — o teste passa um dublê no lugar do service (M14).
+1. **Testar fica barato** — o teste passa um dublê no lugar do service (M14). É a situação 2
+   da etapa 11, resolvida.
 2. **Uma instância só** (*singleton*), reaproveitada em toda a aplicação.
-3. **Trocar a implementação não toca quem usa** — útil quando o `EmailService` de
-   desenvolvimento vira o de produção.
+3. **Trocar a implementação não toca quem usa** — é a situação 3 da etapa 11, e você vai
+   comprová-la no M06.
 
 ---
 
-## Etapa 11 — Receber um parâmetro na URL (20 min)
+## Etapa 14 — Parâmetro na URL (20 min)
 
 Listar todas é fácil. Buscar uma exige ler um pedaço da URL.
 
-### 11a. O método no service
+### 14a. O método no service
 
 **Faça:**
 
@@ -651,7 +846,7 @@ buscarUm(id: number): Obra | undefined {
 `Obra | undefined` é um **tipo de união**: "ou uma Obra, ou nada". O `find` do JavaScript
 devolve `undefined` quando não encontra, e o tipo diz isso em voz alta.
 
-### 11b. A rota no controller
+### 14b. A rota no controller
 
 **Faça:**
 
@@ -672,24 +867,38 @@ Acrescente `Param` e `ParseIntPipe` ao `import` de `@nestjs/common`.
 | `@Param("id")` | Decorator **de parâmetro**: extrai da URL o pedaço chamado `id` e entrega ao seu método. O nome tem de bater com o do `@Get(":id")` |
 | `ParseIntPipe` | Converte o texto em número **antes** de o método ser chamado |
 
-### 11c. O conceito: o que é um pipe
+### 14c. O conceito: o que é um pipe
 
-Um **pipe** é uma peça que roda **entre a requisição e o seu método**. Ele recebe o valor
-que chegou e devolve o valor que o método vai receber — convertendo, validando, ou as duas
-coisas.
+Um **pipe** é uma peça que roda **entre a requisição e o seu método**. Ele recebe o valor que
+chegou e devolve o valor que o método vai receber — convertendo, validando, ou as duas coisas.
 
-O `ParseIntPipe` faz o seguinte: pega a string vinda da URL, tenta convertê-la em número; se
-conseguir, entrega o número; se não conseguir, **responde 400 sozinho** e o seu método nunca
-é chamado.
+O `ParseIntPipe` pega a string vinda da URL e tenta convertê-la em número. Se conseguir,
+entrega o número; se não conseguir, **responde 400 sozinho** e o seu método nunca é chamado.
 
-**Rode:**
+### 14d. Ver os dois casos
 
-```bash
-curl -i http://localhost:3000/obras/1
-curl -i http://localhost:3000/obras/abc
+Aqui o navegador não basta: precisamos ver o **código de status**, e o navegador mostra só o
+corpo. É a hora do `curl`.
+
+**Faça** — na segunda janela do terminal:
+
+```powershell
+curl.exe -i http://localhost:3000/obras/1
 ```
 
-**Deu certo se:** a primeira devolve o objeto; a segunda responde **400**, com
+```powershell
+curl.exe -i http://localhost:3000/obras/abc
+```
+
+*(No macOS ou Linux: `curl` sem o `.exe`.)*
+
+| Trecho | O que faz |
+|---|---|
+| `curl.exe` | Faz uma requisição HTTP pelo terminal e imprime a resposta |
+| `-i` | *include*: mostra também os **cabeçalhos**, e é na primeira linha deles que está o status |
+
+**Deu certo se:** a primeira devolve `HTTP/1.1 200 OK` e o objeto; a segunda devolve
+`HTTP/1.1 400 Bad Request` com
 
 ```json
 {"message":"Validation failed (numeric string is expected)","error":"Bad Request","statusCode":400}
@@ -697,7 +906,7 @@ curl -i http://localhost:3000/obras/abc
 
 Esse 400 veio do pipe. Você não escreveu nenhum `if`, nenhum `isNaN`, nenhum `try`.
 
-### 11d. Experimento: tire o pipe
+### 14e. Experimento: tire o pipe
 
 **Faça:** troque por `@Param("id") id: number`, deixando o tipo `number` no lugar. Salve e
 chame `/obras/1` de novo.
@@ -709,15 +918,17 @@ Anote o que acontece e por quê. (A resposta está no gabarito de
 > vira JavaScript. Ninguém está conferindo tipos em tempo de execução, exceto quem você
 > mandar conferir.
 
+Recoloque o `ParseIntPipe` antes de seguir.
+
 ---
 
-## Etapa 12 — Responder 404 (15 min)
+## Etapa 15 — Responder 404 (15 min)
 
 **Rode:** chame `/obras/999`.
 
-Hoje responde `200` com corpo vazio — que é pior do que um erro. O cliente não tem como
-saber se a obra não existe, se a API quebrou ou se ele digitou a URL errada. Um `200` é uma
-promessa de que deu certo.
+Hoje responde `200` com corpo vazio — que é pior do que um erro. O cliente não tem como saber
+se a obra não existe, se a API quebrou ou se ele digitou a URL errada. Um `200` é uma promessa
+de que deu certo.
 
 **Faça:** no service, troque o `buscarUm`:
 
@@ -743,11 +954,11 @@ buscarUm(id: number): Obra {
 
 **Rode:**
 
-```bash
-curl -i http://localhost:3000/obras/999
+```powershell
+curl.exe -i http://localhost:3000/obras/999
 ```
 
-**Deu certo se:** responde **404** com
+**Deu certo se:** responde `HTTP/1.1 404 Not Found` com
 
 ```json
 {"message":"Obra 999 não encontrada","error":"Not Found","statusCode":404}
@@ -762,57 +973,57 @@ curl -i http://localhost:3000/obras/999
 | montou o JSON de erro | o corpo veio padronizado |
 
 Você lançou uma exceção em **linguagem de domínio** ("não encontrada") e o framework a
-traduziu para HTTP. O service continua sem saber que HTTP existe — é o critério da etapa
-10a, funcionando.
+traduziu para HTTP. O service continua sem saber que HTTP existe — é o critério da etapa 11,
+funcionando na sua máquina.
 
 O Nest tem uma exceção para cada situação comum: `BadRequestException` (400),
 `ConflictException` (409), `ForbiddenException` (403). O M07 e o M12 usam as outras.
 
-**Repare também no que o controller não faz:** não valida, não guarda dados, não decide
-regra. Ele traduz HTTP e delega. É um arquivo de dez linhas, e vai continuar sendo pequeno
-até o M07.
-
 ---
 
-## Etapa 13 — Configuração fora do código (20 min)
+## Etapa 16 — Configuração fora do código (15 min)
 
 O nome da biblioteca não pode estar escrito no meio do código: ele muda por instalação, e
 alguém sem acesso ao repositório precisa poder trocá-lo.
 
-### 13a. Os dois arquivos
+### 16a. Os dois arquivos
 
-**Faça:** crie `backend/.env` — que **não** vai para o Git (o `.gitignore` do M00 já cuida):
+**Faça:** crie `backend\.env` — que **não** vai para o Git (o `.gitignore` do M00 já cuida):
 
 ```ini
 PORT=3000
-NODE_ENV=development
 NOME_BIBLIOTECA=Biblioteca Comunitária do Bairro
 ```
 
-E `backend/.env.example` — **este vai**, com as mesmas chaves e sem os valores:
+E `backend\.env.example` — **este vai**, com as mesmas chaves e sem os valores:
 
 ```ini
 PORT=
-NODE_ENV=
 NOME_BIBLIOTECA=
 ```
 
 > Por que dois arquivos: o `.env` tem os **seus** valores e é secreto; o `.env.example`
-> documenta **quais** variáveis existem e é público. É por ele que uma pessoa nova descobre
-> o que precisa configurar. Variável nova no `.env` sem entrada no `.env.example` é o bug de
+> documenta **quais** variáveis existem e é público. É por ele que uma pessoa nova descobre o
+> que precisa configurar. Variável nova no `.env` sem entrada no `.env.example` é o bug de
 > integração mais comum que existe, e só aparece quando alguém clona o projeto.
 
-### 13b. Ligar o ConfigModule
+### 16b. Ligar o ConfigModule
 
 Ler `.env` não vem de fábrica no Nest.
 
 **Faça:**
 
-```bash
-pnpm add @nestjs/config
+```powershell
+npm install @nestjs/config@4
 ```
 
-Em `src/app.module.ts`, acrescente ao `imports` (o `AcervoModule` já está lá):
+> **De novo uma versão fixada, e pelo mesmo motivo da etapa 2 — só que agora com um efeito
+> visível.** O ecossistema do Nest já está na versão 12. Se você escrever
+> `npm install @nestjs/config` sem o `@4`, o npm traz a versão 12 do pacote, ela exige o Nest
+> 12, e o seu projeto é o 11: o npm recusa a instalação com um erro chamado `ERESOLVE`.
+> **Companheiro do Nest 11 tem de ser pinado junto com ele.**
+
+Em `src\app.module.ts`, acrescente ao `imports` (o `AcervoModule` já está lá):
 
 ```ts
 import { ConfigModule } from "@nestjs/config";
@@ -828,19 +1039,17 @@ import { ConfigModule } from "@nestjs/config";
 export class AppModule {}
 ```
 
-**Linha a linha:**
-
 | Trecho | O que faz |
 |---|---|
 | `ConfigModule.forRoot(...)` | Lê o `.env` uma vez, na inicialização. O sufixo `forRoot` é convenção do Nest para "configure este módulo aqui, uma vez só" |
 | `isGlobal: true` | Deixa o `ConfigService` disponível em **toda** a aplicação. Sem isto, cada módulo precisaria importar o `ConfigModule` de novo |
 
-### 13c. Usar o valor
+### 16c. Usar o valor
 
 **Faça:** no `AcervoService` — que ainda não tinha construtor, este é o primeiro:
 
 ```ts
-import { ConfigService } from "@nestjs/config";   // ← novo import
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AcervoService {
@@ -856,13 +1065,13 @@ export class AcervoService {
 
 | Trecho | O que faz |
 |---|---|
-| `constructor(private readonly config: ConfigService)` | Mesma injeção da etapa 10, agora com uma classe do próprio framework |
+| `constructor(private readonly config: ConfigService)` | Mesma injeção da etapa 13, agora com uma classe do próprio framework |
 | `.get<string>("...")` | O `<string>` entre os sinais de menor/maior diz ao TypeScript o tipo esperado. Chama-se *genérico* |
-| `?? "sem nome"` | Se a variável não existir, usa esse valor. Na etapa 14 essa rede de proteção sai |
+| `?? "sem nome"` | Se a variável não existir, usa esse valor. Na etapa 17 essa rede de proteção sai |
 
 Repare que você **não** precisou importar o `ConfigModule` dentro do `AcervoModule`: é o
 `isGlobal: true` fazendo efeito. Sem ele, faltaria esse registro e você cairia no
-`can't resolve dependencies` da etapa 10d de novo.
+`can't resolve dependencies` da etapa 13c de novo.
 
 **Faça:** exponha num endpoint temporário. No `acervo.controller.ts`, **acima** do
 `@Get(":id")`:
@@ -879,65 +1088,35 @@ nome() {
 `ParseIntPipe` tenta converter `"nome"` em número. Resultado: **400 numa rota que existe**.
 Rota literal sempre vem antes de rota com parâmetro. O M07 volta a isso.
 
-**Rode:**
-
-```bash
-curl -i http://localhost:3000/obras/nome
-```
-
-**Deu certo se:** responde `{"nome":"Biblioteca Comunitária do Bairro"}`, ou o que estiver
-no seu `.env`.
+**Deu certo se:** <http://localhost:3000/obras/nome> responde
+`{"nome":"Biblioteca Comunitária do Bairro"}`.
 
 ---
 
-## Etapa 14 — Não subir quebrado (15 min)
+## Etapa 17 — Não subir quebrado (10 min)
 
 Hoje, se alguém apagar `NOME_BIBLIOTECA` do `.env`, a aplicação sobe normalmente e o erro só
 aparece quando alguém abre a tela que usa aquele valor — possivelmente em produção,
 possivelmente na frente de um usuário. Melhor não subir.
 
-### 14a. O esquema
-
 **Faça:**
 
-```bash
-pnpm add zod
+```powershell
+npm install zod
 ```
 
-Crie `src/config/esquema-env.ts`:
+Crie `src\config\esquema-env.ts`:
 
 ```ts
 import { z } from "zod";
 
 export const esquemaEnv = z.object({
   PORT: z.coerce.number().default(3000),
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   NOME_BIBLIOTECA: z
     .string("NOME_BIBLIOTECA é obrigatória")
     .min(1, "NOME_BIBLIOTECA não pode ficar vazia"),
 });
-```
 
-**Linha a linha:**
-
-| Trecho | O que faz |
-|---|---|
-| `z.object({...})` | Descreve o formato esperado de um objeto |
-| `z.coerce.number()` | Variável de ambiente é **sempre texto**. O `coerce` converte antes de validar |
-| `.default(3000)` | Se a chave não vier, usa este valor em vez de reclamar |
-| `z.enum([...])` | Só aceita os três valores listados. `NODE_ENV=prod` (errado) é recusado |
-| `z.string("...")` | A mensagem para quando a chave **não existe** |
-| `.min(1, "...")` | A mensagem para quando ela existe mas está **vazia** |
-
-> São duas mensagens porque são dois problemas diferentes: `NOME_BIBLIOTECA` ausente e
-> `NOME_BIBLIOTECA=` vazia falham por motivos distintos. Quem está com a mão no `.env` às
-> duas da manhã agradece a distinção.
-
-### 14b. A função de validação
-
-**Faça:** no mesmo arquivo, abaixo do esquema:
-
-```ts
 export function validarEnv(bruto: Record<string, unknown>) {
   const resultado = esquemaEnv.safeParse(bruto);
 
@@ -950,13 +1129,17 @@ export function validarEnv(bruto: Record<string, unknown>) {
 }
 ```
 
+**Linha a linha:**
+
 | Trecho | O que faz |
 |---|---|
-| `Record<string, unknown>` | "Um objeto com chaves de texto e valores de tipo desconhecido". É o que o Nest entrega aqui |
+| `z.object({...})` | Descreve o formato esperado de um objeto |
+| `z.coerce.number()` | Variável de ambiente é **sempre texto**. O `coerce` converte antes de validar |
+| `z.string("...")` | A mensagem para quando a chave **não existe** |
+| `.min(1, "...")` | A mensagem para quando ela existe mas está **vazia**. São dois problemas diferentes, e quem está mexendo no `.env` agradece a distinção |
 | `safeParse` | Devolve `{ success, data }` ou `{ success, error }` em vez de lançar. **Você** decide o que fazer com a falha |
 | `error.issues` | A lista com **todos** os problemas, não só o primeiro |
 | `throw new Error(...)` | Uma mensagem legível. Sem isto o terminal cospe o objeto de erro cru do Zod, que ninguém lê às pressas |
-| `return resultado.data` | O que sai daqui é o que o `ConfigService` passa a servir — já convertido, com `PORT` como número |
 
 **Faça:** ligue no `app.module.ts`:
 
@@ -969,9 +1152,7 @@ ConfigModule.forRoot({
 }),
 ```
 
-### 14c. Testar a falha, que é o ponto da etapa
-
-**Faça:** comente a linha `NOME_BIBLIOTECA` no `.env` e salve.
+**Rode:** comente a linha `NOME_BIBLIOTECA` no `.env` e salve.
 
 **Deu certo se:** a aplicação **não sobe**, e no meio do erro aparecem estas duas linhas:
 
@@ -980,26 +1161,22 @@ Error: Variáveis de ambiente inválidas:
   - NOME_BIBLIOTECA é obrigatória
 ```
 
-Descomente e ela volta. Depois experimente mais duas:
-
-| No `.env` | Mensagem esperada |
-|---|---|
-| `NOME_BIBLIOTECA=` (vazia) | `não pode ficar vazia` |
-| `NODE_ENV=prod` | o `z.enum` recusa e lista os valores aceitos |
+Descomente e ela volta. Depois experimente `NOME_BIBLIOTECA=` (vazia): a mensagem muda para
+`não pode ficar vazia`.
 
 > Você vai ver um *stack trace* embaixo da mensagem. É normal — o Nest imprime a pilha de
 > qualquer erro de inicialização. A linha que interessa é a primeira.
-
-> **Por que isto vale 15 minutos de aula:** um serviço que não sobe é um problema óbvio, que
-> alguém resolve em dois minutos lendo a mensagem. Um serviço que sobe pela metade é um
-> problema caro, que aparece na frente do usuário e leva horas para ser rastreado até uma
-> variável faltando.
+>
+> **Por que isto vale uma etapa:** um serviço que não sobe é um problema óbvio, que alguém
+> resolve em dois minutos lendo a mensagem. Um serviço que sobe pela metade é um problema
+> caro, que aparece na frente do usuário e leva horas para ser rastreado até uma variável
+> faltando.
 
 ---
 
-## Etapa 15 — O prefixo `/api` (10 min)
+## Etapa 18 — O prefixo `/api` (5 min)
 
-**Faça:** em `src/main.ts`, uma linha entre o `create` e o `listen`:
+**Faça:** em `src\main.ts`, uma linha entre o `create` e o `listen`:
 
 ```ts
 const app = await NestFactory.create(AppModule);
@@ -1011,15 +1188,8 @@ await app.listen(process.env.PORT ?? 3000);
 |---|---|
 | `setGlobalPrefix("api")` | Toda rota passa a começar em `/api`. As obras vão de `/obras` para `/api/obras` |
 
-**Rode:**
-
-```bash
-curl -i http://localhost:3000/api/obras
-curl -i http://localhost:3000/obras
-```
-
-**Deu certo se:** a primeira responde **200** e a segunda, que funcionava até agora,
-responde **404**.
+**Deu certo se:** <http://localhost:3000/api/obras> responde a lista, e
+<http://localhost:3000/obras> — que funcionava até agora — passa a dar erro 404.
 
 **Por que fazer isso hoje, e não depois:** no M16 o backend e o frontend vão para o mesmo
 domínio, com `/api/*` indo para a API e todo o resto para a aplicação React. Sem um prefixo
@@ -1028,20 +1198,17 @@ custaria reescrever todas as URLs que o frontend do M08 já tiver escrito.
 
 ---
 
-## Etapa 16 — Documentação automática (15 min)
+## Etapa 19 — Documentação automática (10 min)
 
 O M02 falou em **contrato de API**. Aqui ele deixa de ser conversa.
 
-### 16a. Instalar e isolar a configuração
-
 **Faça:**
 
-```bash
-pnpm add @nestjs/swagger
+```powershell
+npm install @nestjs/swagger@11
 ```
 
-A configuração vai ser usada em **dois lugares** — a página interativa e o arquivo do
-schema. Escreva uma vez só, em `src/swagger.ts`:
+Crie `src\swagger.ts`:
 
 ```ts
 import { INestApplication } from "@nestjs/common";
@@ -1061,39 +1228,29 @@ export function montarDocumento(app: INestApplication) {
 | Trecho | O que faz |
 |---|---|
 | `DocumentBuilder` | Monta os metadados: título, descrição, versão. Os pontos encadeados são *method chaining* — cada método devolve o próprio objeto |
-| `.build()` | Fecha a construção e devolve o objeto de configuração |
 | `createDocument(app, config)` | **Varre a aplicação inteira** e monta o schema OpenAPI a partir dos decorators dos controllers |
 
-### 16b. A página interativa
-
-**Faça:** em `src/main.ts`, entre o prefixo e o `listen`:
+**Faça:** em `src\main.ts`, entre o prefixo e o `listen`:
 
 ```ts
-import { SwaggerModule } from "@nestjs/swagger";
-import { montarDocumento } from "./swagger";
-
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix("api");
-
-  SwaggerModule.setup("api/docs", app, montarDocumento(app));   // ← nova
-
-  await app.listen(process.env.PORT ?? 3000);
-}
+SwaggerModule.setup("api/docs", app, montarDocumento(app));
 ```
+
+com os imports correspondentes no topo.
 
 **Deu certo se:** <http://localhost:3000/api/docs> lista `GET /api/obras` e
 `GET /api/obras/{id}`, com um botão *Try it out* que funciona de verdade.
 
-Ninguém escreveu essa documentação. Ela saiu dos `@Controller` e `@Get` que você escreveu
-nas etapas 9 e 11 — os mesmos decorators, lidos por outra ferramenta.
+Ninguém escreveu essa documentação. Ela saiu dos `@Controller` e `@Get` que você escreveu nas
+etapas 10 e 14 — os mesmos decorators, lidos por outra ferramenta. É o terceiro uso do mesmo
+mecanismo, e o M04 e o M07 trazem mais dois.
 
-### 16c. Gravar o schema em arquivo
+### Gravar o schema em arquivo
 
-A página serve para pessoas. O **M15** precisa do schema como arquivo, para gerar os tipos
-do frontend a partir dele.
+A página serve para pessoas. O **M15** precisa do schema como arquivo, para gerar os tipos do
+frontend a partir dele.
 
-**Faça:** crie `src/gerar-schema.ts`:
+**Faça:** crie `src\gerar-schema.ts`:
 
 ```ts
 import { writeFileSync } from "node:fs";
@@ -1117,36 +1274,23 @@ gerar();
 | Trecho | O que faz |
 |---|---|
 | `{ logger: false }` | Silencia os logs de inicialização. O script só deve imprimir uma linha |
-| `setGlobalPrefix("api")` | Precisa repetir aqui: este script monta a aplicação por conta própria, e sem esta linha as rotas sairiam sem `/api` no schema |
-| `JSON.stringify(x, null, 2)` | Converte para texto. O `2` é a indentação — sem ele, o arquivo sai numa linha só e o `git diff` fica inútil |
-| `app.close()` | Encerra a aplicação. **Sem isto o script não termina** e fica pendurado no terminal |
+| `setGlobalPrefix("api")` | Precisa repetir aqui: este script monta a aplicação por conta própria |
+| `JSON.stringify(x, null, 2)` | Converte para texto. O `2` é a indentação — sem ele o arquivo sai numa linha só e o `git diff` fica inútil |
+| `app.close()` | Encerra a aplicação. **Sem isto o script não termina** e fica pendurado |
 
-**Faça:** o atalho, em `backend/package.json`, ao lado dos scripts que já estão lá:
+**Faça:** o atalho, em `backend\package.json`, ao lado dos scripts que já estão lá:
 
 ```json
-"scripts": {
-  "gerar:schema": "nest build && node dist/gerar-schema.js"
-}
+"gerar:schema": "nest build && node dist/gerar-schema.js"
 ```
-
-| Trecho | O que faz |
-|---|---|
-| `nest build` | Compila o TypeScript para `dist/`. É o mesmo comando do `pnpm build` |
-| `&&` | Só roda o segundo se o primeiro der certo. Erro de compilação para aqui |
-| `node dist/gerar-schema.js` | Executa o arquivo **compilado** — repare no `.js` |
-
-> Por que compilar antes em vez de rodar o `.ts` direto: o Node não executa TypeScript. Dá
-> para contornar com o `ts-node`, que até já vem instalado no projeto, mas aí seriam duas
-> formas de rodar o mesmo código no repositório. O `nest build` já está aí desde a etapa 2, e
-> é o que o CI vai usar no M14.
 
 **Rode:**
 
-```bash
-pnpm gerar:schema
+```powershell
+npm run gerar:schema
 ```
 
-**Deu certo se:** aparece `openapi.json gerado`, e o arquivo `backend/openapi.json` contém
+**Deu certo se:** aparece `openapi.json gerado`, e o arquivo `backend\openapi.json` contém
 `"/api/obras"`.
 
 Repare que **nenhum servidor subiu**: o `NestFactory.create` monta a árvore de módulos em
@@ -1158,7 +1302,7 @@ saída; no M15, vira os tipos do frontend. Como nasce do código, não tem como 
 
 ---
 
-## Etapa 17 — O mapa que você percorreu (5 min)
+## Etapa 20 — O mapa que você percorreu (5 min)
 
 Agora o diagrama faz sentido, porque você construiu três das caixas:
 
@@ -1172,13 +1316,13 @@ GET /api/obras/42
 [ Guard ]           "pode entrar?" — autenticação/papel    ○ M12
     │
     ▼
-[ Pipe ]            ParseIntPipe                           ● etapa 11
+[ Pipe ]            ParseIntPipe                           ● etapa 14
     │
     ▼
-[ Controller ]      acervo.buscarUm(42)                    ● etapa 11
+[ Controller ]      acervo.buscarUm(42)                    ● etapa 14
     │
     ▼
-[ Service ]         regra de negócio, lança 404            ● etapa 12
+[ Service ]         regra de negócio, lança 404            ● etapa 15
     │
     ▼
 [ Repository ]      SELECT ... WHERE id = 42               ○ M06
@@ -1193,16 +1337,16 @@ JSON
 **● o que você já tem · ○ o que os próximos módulos acrescentam.**
 
 Nenhuma das caixas vazias exige mexer nas que você construiu — elas se **encaixam** em volta.
-É isso que a estrutura imposta pelo framework comprou: quatro pessoas podem preencher caixas
-diferentes na mesma semana sem colidir.
+É esse o retorno da separação que a etapa 11 justificou: quatro pessoas podem preencher
+caixas diferentes na mesma semana sem colidir.
 
 Guarde o diagrama. Cada módulo daqui em diante preenche uma caixa, e o M13 volta a ele para
 mostrar em que camada cada tipo de ataque é barrado.
 
 💼 **No mercado:** "explique injeção de dependência" e "onde você colocaria esta regra" são
-perguntas de entrevista para vaga júnior de Node. Quem responde com o critério da etapa 10a
-— *"se o código não mudaria vindo de um comando de terminal, é service"* — se destaca de
-quem responde "no service, porque sim".
+perguntas de entrevista para vaga júnior de Node. Quem responde com o critério da etapa 11 —
+*"se o código não mudaria vindo de um comando de terminal, é service"* — e consegue dar um
+exemplo concreto se destaca de quem responde "no service, porque sim".
 
 ---
 
@@ -1210,18 +1354,20 @@ quem responde "no service, porque sim".
 
 | Sintoma | Diagnóstico |
 |---|---|
-| `Nest can't resolve dependencies of the AcervoController (?)` | O `AcervoService` não está em `providers` do `AcervoModule`. O `?` marca a posição do parâmetro que ele não resolveu |
-| A rota responde em `/acervo` e não em `/obras` | A CLI usou o nome do módulo como prefixo. Troque no `@Controller(...)` — etapa 8 |
-| `/obras/nome` responde 400 | Rota literal declarada depois de `@Get(":id")`. O `ParseIntPipe` tentou converter `"nome"` |
+| `nest` não é reconhecido como comando | A CLI não foi instalada, ou o terminal foi aberto antes da instalação. Feche e reabra |
+| `curl : Não é possível localizar um parâmetro` | No PowerShell, `curl` é outro programa. Escreva `curl.exe` |
+| `Nest can't resolve dependencies of the AcervoController (?)` | O `AcervoService` não está em `providers` do `AcervoModule` |
+| A rota responde em `/acervo` e não em `/obras` | A CLI usou o nome do módulo como prefixo. Troque no `@Controller(...)` — etapa 9 |
+| `/obras/nome` responde 400 | Rota literal declarada depois de `@Get(":id")` |
 | `/obras/1` responde 404 numa obra que existe | Faltou o `ParseIntPipe`. O `id` chegou como `"1"`, e `"1" === 1` é `false` |
-| A rota responde 404 depois da etapa 15 | Faltou o prefixo `/api` na URL que você chamou |
+| A rota responde 404 depois da etapa 18 | Faltou o prefixo `/api` na URL que você chamou |
 | `Cannot find module './acervo.service'` | Import com caminho errado, ou o arquivo não foi salvo |
 | Alterou o `.env` e nada mudou | O `.env` é lido na **inicialização**. Reinicie o `start:dev` |
-| A aplicação sobe mesmo faltando variável no `.env` | O `validate` não foi ligado no `ConfigModule` — etapa 14b |
-| `pnpm gerar:schema` não termina | Faltou `await app.close()` no fim do script |
-| `openapi.json` sai com rotas sem `/api` | Faltou `setGlobalPrefix("api")` dentro do `gerar-schema.ts` |
-| Um segundo `.git` apareceu dentro de `backend/` | Faltou `--skip-git` no `nest new`. Apague `backend/.git` |
+| A aplicação sobe mesmo faltando variável no `.env` | O `validate` não foi ligado no `ConfigModule` — etapa 17 |
+| `npm run gerar:schema` não termina | Faltou `await app.close()` no fim do script |
+| Um segundo `.git` apareceu dentro de `backend` | Faltou `--skip-git` no `nest new`. Apague a pasta |
 | `EADDRINUSE: address already in use :::3000` | Já há um servidor na porta. Encerre-o ou use outra porta |
+| `npm error ERESOLVE unable to resolve dependency tree` | Você instalou um pacote `@nestjs/*` sem fixar a versão, e veio a 12 num projeto 11. Leia a linha `peer @nestjs/common@"^12.0.0" from…`: ela nomeia o culpado. Reinstale com `@11` (ou `@4`, no caso do `config`) |
 
 ## ✅ Checklist de saída
 
@@ -1233,10 +1379,10 @@ quem responde "no service, porque sim".
 - [ ] `.env` fora do Git; `.env.example` dentro, com as mesmas chaves
 - [ ] A aplicação **não sobe** se faltar variável obrigatória — você testou
 - [ ] `/api/docs` abre e lista os endpoints
-- [ ] `pnpm gerar:schema` grava o `openapi.json`
-- [ ] Você viu o erro `Nest can't resolve dependencies` de propósito (etapa 10d)
-- [ ] Você fez o experimento do `ParseIntPipe` (etapa 11d) e sabe explicar o resultado
-- [ ] Você sabe explicar, em uma frase, o que a injeção de dependência resolve
+- [ ] `npm run gerar:schema` grava o `openapi.json`
+- [ ] Você viu o erro `Nest can't resolve dependencies` de propósito (etapa 13c)
+- [ ] Você fez o experimento do `ParseIntPipe` (etapa 14e) e sabe explicar o resultado
+- [ ] Você sabe dar **um exemplo concreto** de problema que a separação em camadas evita
 
 ## 🧪 Exercícios
 
@@ -1247,4 +1393,4 @@ Ver [`exercicios.md`](exercicios.md).
 - [NestJS — documentação oficial](https://docs.nestjs.com/)
 - [NestJS — Providers e injeção de dependência](https://docs.nestjs.com/providers)
 - [TypeScript — decorators](https://www.typescriptlang.org/docs/handbook/decorators.html)
-- [pnpm workspaces](https://pnpm.io/workspaces)
+- [npm — workspaces](https://docs.npmjs.com/cli/using-npm/workspaces)

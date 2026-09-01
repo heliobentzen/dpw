@@ -46,7 +46,7 @@ vale o que está aqui.
 
 | Sem | Conteúdo | h | Entregas / marcos |
 |---:|---|---:|---|
-| 1 | M00 Ambiente — Node + monorepo (3h) · M01 Web e HTTP — parte 1 (2h) | 5 | Ambiente validado (`node` e `pnpm` ok) |
+| 1 | M00 Ambiente — Node + monorepo (3h) · M01 Web e HTTP — parte 1 (2h) | 5 | Ambiente validado (`node` e `npm` ok) |
 | 2 | M01 Web e HTTP — parte 2 (3h) · M02 Arquitetura desacoplada (2h) | 5 | **E0**: relatório de inspeção HTTP |
 | 3 | M03 NestJS (4h) · M04 Entidades (1h) | 5 | API respondendo JSON |
 | 4 | M04 Models (4h) · M05 Migrações (1h) | 5 | **E1**: modelo de dados do BiblioCom |

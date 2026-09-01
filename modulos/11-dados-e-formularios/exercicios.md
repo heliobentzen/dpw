@@ -88,7 +88,7 @@ Implemente o mapeamento completo dos erros do DRF e teste:
 1. Troque os tipos manuais por `schema.d.ts` gerado.
 2. No backend, renomeie `titulo` para `nome` no `ObraResposta`.
 3. Regenere o schema e os tipos.
-4. Rode `pnpm build`. Copie a mensagem de erro.
+4. Rode `npm run build`. Copie a mensagem de erro.
 5. Agora repita **sem** regenerar os tipos. O build passa? O que o usuário vê em produção?
 6. Reverta.
 

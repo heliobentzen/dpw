@@ -4,12 +4,12 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 
 ## Antes (local) — 🔵 backend
 
-- [ ] `pnpm test` verde nas duas camadas
+- [ ] `npm run test` verde nas duas camadas
 - [ ] `ruff check .` sem erros
-- [ ] `pnpm migration:generate` não gera nada novo (esquema em dia com as entidades)
-- [ ] `pnpm lint` e `pnpm tsc --noEmit` sem erros
+- [ ] `npm run migration:generate` não gera nada novo (esquema em dia com as entidades)
+- [ ] `npm run lint` e `npx tsc --noEmit` sem erros
 - [ ] `requirements.txt` atualizado, com versões fixadas
-- [ ] `pnpm build` conclui e `node dist/main.js` sobe localmente
+- [ ] `npm run build` conclui e `node dist/main.js` sobe localmente
       (mesmo comando nas três plataformas)
 - [ ] 🪟 `.gitattributes` com `*.sh text eol=lf` (senão o deploy falha com `bad interpreter`)
 - [ ] `collectstatic` roda sem erro
@@ -18,11 +18,11 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 
 ## Antes (local) — 🟣 frontend
 
-- [ ] `pnpm lint` e `pnpm tsc --noEmit` sem erros
-- [ ] `pnpm vitest run` verde
-- [ ] `pnpm build` conclui sem aviso
-- [ ] `pnpm preview` funciona, **e o F5 numa rota interna também**
-- [ ] Tipos regenerados do schema mais recente (`pnpm tipos` + `git diff` limpo)
+- [ ] `npm run lint` e `npx tsc --noEmit` sem erros
+- [ ] `npx vitest run` verde
+- [ ] `npm run build` conclui sem aviso
+- [ ] `npm run preview` funciona, **e o F5 numa rota interna também**
+- [ ] Tipos regenerados do schema mais recente (`npm run tipos` + `git diff` limpo)
 - [ ] `grep` no `dist/` não revela segredo
 - [ ] `VITE_API_URL` apontando para o caminho correto do ambiente alvo
 
@@ -35,7 +35,7 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 - [ ] `DATABASE_URL` configurada
 - [ ] `CSRF_TRUSTED_ORIGINS` com `https://<domínio>`
 - [ ] Comando de build/release do backend definido (inclui `migrate` e `collectstatic`)
-- [ ] Build do frontend definido (`pnpm install && pnpm build`, publicando `dist/`)
+- [ ] Build do frontend definido (`npm install && npm run build`, publicando `dist/`)
 - [ ] **Regra de fallback configurada** (`/* → /index.html`)
 - [ ] Roteamento `/api/*` para o backend, no mesmo site
 - [ ] `CSRF_TRUSTED_ORIGINS` com o domínio `https://`

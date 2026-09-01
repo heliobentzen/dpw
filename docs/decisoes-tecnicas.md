@@ -130,7 +130,7 @@ administrativo de usuários e papéis que antes ficava implícito no Admin.
 
 ---
 
-## ADR-13 — Monorepo com workspaces do pnpm
+## ADR-13 — Monorepo com workspaces
 
 - **Status:** aceito · **Data:** 2026-08-18
 
@@ -143,13 +143,12 @@ essa relação.
 ```
 bibliocom/
 ├── package.json          workspaces + scripts na raiz
-├── pnpm-workspace.yaml
 ├── backend/              NestJS + TypeORM
 ├── frontend/             React + Vite
 └── pacotes/tipos/        @bibliocom/tipos — DTOs e enums compartilhados
 ```
 
-**Consequências.** Um `pnpm install` na raiz resolve as três. Um PR mostra a mudança
+**Consequências.** Um `npm install` na raiz resolve as três. Um PR mostra a mudança
 completa (entidade → DTO → tipo → tela). Em contrapartida, a turma precisa entender
 *workspaces* — 20 minutos no M03, que se pagam no M15.
 
@@ -193,6 +192,54 @@ semana antes. É o custo real desta decisão, e os guias de setup passam a avis�
 antecedência correspondente. A demonstração "troque o `type` e nada mais muda" deixa de ser
 um exercício e vira um parágrafo na teoria do M04, mais o exercício E05.6, que persegue o
 mesmo aprendizado lendo o SQL gerado em vez de refazendo o trabalho.
+
+---
+
+## ADR-15 — npm como gerenciador de pacotes, no lugar do pnpm
+
+- **Status:** aceito · **Data:** 2026-09-01 · **Revisa a escolha de ferramenta da ADR-13**
+
+**Contexto.** A ADR-13 adotou pnpm pelos *workspaces* e pela economia de disco. Revendo a
+decisão contra o público real da disciplina — turma iniciante, laboratório e máquinas
+pessoais majoritariamente Windows —, o saldo se inverte.
+
+**Decisão.** npm, que já vem instalado com o Node. O monorepo passa a declarar os projetos
+no campo `workspaces` do `package.json` da raiz, e o `pnpm-workspace.yaml` deixa de existir.
+
+**Comparação, para o público desta disciplina.**
+
+| Critério | npm | pnpm |
+|---|---|---|
+| Instalação | nenhuma: vem com o Node | passo extra (Corepack ou instalador) |
+| Windows | sem ressalva | depende de links simbólicos: pede Modo de Desenvolvedor ou terminal como administrador. O próprio guia de setup já documentava o `EPERM` |
+| Workspaces | desde a v7; testado neste monorepo | sim |
+| Tutoriais, fóruns, respostas de IA | tudo, sem tradução | é preciso traduzir cada comando |
+| Disco entre projetos | duplica | compartilha um armazém |
+| Rigor de dependências | permite usar pacote não declarado | bloqueia |
+
+**Justificativa.** As duas vantagens reais do pnpm — disco e rigor — se pagam para quem
+mantém dezenas de repositórios. Nenhuma delas se paga em 100 horas com um repositório só.
+Os custos, ao contrário, incidem na primeira aula: uma instalação a mais para dar errado, um
+erro de link simbólico específico do Windows, e a fricção constante de traduzir para pnpm
+todo comando que a turma encontrar fora do material.
+
+**Alternativas consideradas.**
+
+| Alternativa | Por que não |
+|---|---|
+| Manter pnpm e documentar melhor o `EPERM` | Documentar um problema não é o mesmo que não tê-lo. O erro ocorre na semana 1, antes de a turma ter repertório para diagnosticá-lo |
+| Yarn | Mesmo custo de instalação do pnpm, sem vantagem que compense |
+| Deixar a escolha por conta do aluno | Lockfiles incompatíveis no mesmo repositório. Em trabalho de equipe, isso vira conflito de merge sem causa aparente |
+
+**Consequências.**
+
+*A favor:* a semana 1 perde um passo de instalação e um modo de falha; `npx`, `npm install`
+e `npm run` são o vocabulário que a turma vai reencontrar em qualquer lugar.
+
+*Contra:* perde-se o rigor do pnpm — em npm, importar um pacote que você não declarou
+funciona por acaso, e só quebra na máquina de outra pessoa. O M14 compensa parcialmente,
+rodando `npm ci` no CI a partir do `package-lock.json`, que falha quando o lock não bate com
+o `package.json`.
 
 ---
 

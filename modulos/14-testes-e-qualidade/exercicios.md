@@ -99,7 +99,7 @@ Responda: **por que um teste que usa `date.today()` real é uma bomba-relógio?*
 
 ## E12.6 — Cobertura honesta (individual)
 
-1. Rode `pnpm test --coverage` e abra `coverage/lcov-report/index.html`.
+1. Rode `npm run test --coverage` e abra `coverage/lcov-report/index.html`.
 2. Liste os 5 arquivos com menor cobertura.
 3. Para cada um, decida: *precisa de teste ou não?* Justifique.
 4. Escreva os testes que faltam nos que precisam.

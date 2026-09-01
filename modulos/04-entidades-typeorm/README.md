@@ -201,7 +201,7 @@ sem ele o banco ocupa a janela.
 
 ```bash
 cd backend
-pnpm add @nestjs/typeorm typeorm pg
+npm install @nestjs/typeorm typeorm pg
 ```
 
 | Pacote | Para quê |
@@ -267,7 +267,7 @@ export class AppModule {}
 | `logging: true` | **Imprime cada SQL no terminal.** É a única forma de saber o que o ORM está realmente fazendo |
 
 ```bash
-pnpm start:dev
+npm run start:dev
 ```
 
 **Deu certo se:** a aplicação sobe e o terminal mostra `query: SELECT version()`. Ainda não

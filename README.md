@@ -6,7 +6,7 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 > **Stack:** TypeScript ponta a ponta, em arquitetura desacoplada.
 > **Backend** — Node 20 · TypeScript · NestJS 11 · TypeORM · PostgreSQL 16
 > **Frontend** — React 19 · TypeScript · Vite · Tailwind CSS 4 · React Router · TanStack Query
-> **Comum** — monorepo pnpm · tipos compartilhados · Git/GitHub · Docker · CI · deploy em PaaS
+> **Comum** — monorepo npm · tipos compartilhados · Git/GitHub · Docker · CI · deploy em PaaS
 >
 > **Uma linguagem em toda a stack.** Na semana 8, quando a turma passa para o frontend, ela
 > troca de camada e não de idioma. É o que mais suaviza a virada do curso.
@@ -97,7 +97,7 @@ Todos os módulos evoluem **um mesmo sistema**, construído incrementalmente:
 > acervo, associados, empréstimos, devoluções, reservas e relatórios.
 
 ```
-bibliocom/                    monorepo (workspaces do pnpm)
+bibliocom/                    monorepo (workspaces do npm)
 ├── backend/       NestJS + TypeORM + PostgreSQL   (M03–M07)
 ├── frontend/      React + Vite + Tailwind         (M08–M11)
 └── pacotes/tipos/ @bibliocom/tipos — DTOs e enums (M15)
@@ -140,7 +140,7 @@ Todo bloco **executável** que difere entre plataformas aparece em pares:
 
 Nunca um comentário `# Windows: ...` **dentro** de um bloco Unix. Isso obriga a editar o
 comando antes de rodar, que é justo o contrário do que um roteiro deveria fazer. Blocos
-idênticos nas três plataformas (`git`, `pnpm`, `npx`) aparecem uma vez só; blocos que são
+idênticos nas três plataformas (`git`, `npm`, `npx`) aparecem uma vez só; blocos que são
 **conteúdo de arquivo** (`.env`, `.gitattributes`) usam ` ```ini `, não ` ```bash `.
 
 Achou um bloco sem alternativa? É falha do material, não sua. Abra uma issue.
@@ -157,11 +157,11 @@ cada peça chegando junto com o problema que ela resolve:
 
 | Momento | O que entra | Conferir com |
 |---|---|---|
-| **Semana 1** (M00) | Node 20, pnpm, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
+| **Semana 1** (M00) | Node 20, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
 | **Antes do M03** | NestJS CLI e as dependências do backend | `--etapa m03` |
 | **Antes do M04** | Docker + PostgreSQL | `--etapa m04` |
 
-**A stack tem um runtime só.** A semana 1 instala **Node e pnpm**, e acabou: não há segundo
+**A stack tem um runtime só.** A semana 1 instala **o Node**, e acabou: não há segundo
 ecossistema de pacotes para manter, nem ambiente virtual para lembrar de ativar.
 
 Guias: [`docs/ambiente-setup.md`](docs/ambiente-setup.md) (Linux/macOS) ou

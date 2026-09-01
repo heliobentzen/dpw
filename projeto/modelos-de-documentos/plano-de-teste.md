@@ -27,7 +27,7 @@
 | 2 | | | |
 
 **Cobertura:** `<X>%` geral · `<Y>%` nas regras de negócio
-**Comando:** `pnpm test --coverage`
+**Comando:** `npm run test --coverage`
 
 ## 3. Matriz de acesso
 

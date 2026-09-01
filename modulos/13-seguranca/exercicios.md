@@ -71,7 +71,7 @@ que o cookie `HttpOnly` reduz — mas não elimina — o impacto de um XSS?
 ## E13.4 — Segredo no bundle (individual)
 
 1. Adicione `VITE_CHAVE_SECRETA=nao-deveria-vazar-42` ao `.env` do frontend e use-a.
-2. `pnpm build`
+2. `npm run build`
 3. `grep -r "nao-deveria-vazar-42" dist/`
 4. Abra o arquivo encontrado e localize o valor.
 5. Agora repita com a variável **sem** o prefixo `VITE_`. Ela aparece? O componente
@@ -90,7 +90,7 @@ Aplique ao **projeto da equipe** e documente antes/depois:
 - [ ] CSP funcional, sem `unsafe-inline` em `script-src`
 - [ ] `connect-src` restrito
 - [ ] CORS com lista explícita, ou dispensado por *same-site*
-- [ ] `pip-audit` e `pnpm audit` sem alertas críticos ou altos
+- [ ] `pip-audit` e `npm audit` sem alertas críticos ou altos
 - [ ] `detect-secrets scan` limpo, inclusive no histórico
 - [ ] Nenhum segredo no bundle (`grep` no `dist/`)
 - [ ] Rate limit no login

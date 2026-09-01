@@ -116,7 +116,7 @@ Preencham para o projeto de vocês, com **nome e data**, não "a equipe":
 |---|---|---|---|
 | Semanal | Revisar erros novos no Sentry | | |
 | Semanal | Conferir que o backup rodou | | |
-| Mensal | `pnpm audit` e atualizar dependências críticas | | |
+| Mensal | `npm audit` e atualizar dependências críticas | | |
 | Trimestral | **Testar a restauração do backup** | | |
 | Semestral | Revisar acessos e remover contas inativas | | |
 

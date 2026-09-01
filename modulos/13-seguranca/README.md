@@ -215,11 +215,11 @@ Toda variável `VITE_*` é **substituída pelo valor literal em tempo de build**
 arquivo JavaScript que qualquer pessoa baixa. Prove:
 
 ```bash
-pnpm build
+npm run build
 grep -r "AKIA" dist/                          # Linux/macOS/WSL/Git Bash
 ```
 ```powershell
-pnpm build
+npm run build
 Select-String -Recurse "AKIA" dist/*          # Windows PowerShell
 ```
 
@@ -353,8 +353,8 @@ A verificação é montada por você, e o que ela audita fica explícito.
 
 ```bash
 cd ~/dev/bibliocom/backend
-pnpm audit --audit-level=high      # A06 — dependências vulneráveis
-pnpm add helmet
+npm audit --audit-level=high      # A06 — dependências vulneráveis
+npm install helmet
 ```
 
 Aplique o `helmet` da seção 7 e confira o resultado com a requisição abaixo. Depois, para
@@ -402,7 +402,7 @@ curl.exe -I http://localhost:8000/api/obras/ | Select-String "x-frame|x-content|
 
 1. Adicione `VITE_CHAVE_SECRETA=super-secreta-123` ao `frontend/.env`.
 2. Use em algum componente.
-3. `pnpm build && grep -r "super-secreta-123" dist/`
+3. `npm run build && grep -r "super-secreta-123" dist/`
 4. Capture a saída. Onde o segredo apareceu?
 5. Remova e escreva a regra em uma frase.
 
@@ -433,7 +433,7 @@ curl.exe -I http://localhost:8000/api/obras/ | Select-String "x-frame|x-content|
 - [ ] Sei explicar por que CORS não protege a API
 - [ ] Cabeçalhos de segurança e CSP configurados
 - [ ] Nenhum segredo no repositório, no histórico ou no bundle
-- [ ] `pip-audit` e `pnpm audit` sem alertas críticos
+- [ ] `pip-audit` e `npm audit` sem alertas críticos
 - [ ] Mapa de dados pessoais preenchido
 - [ ] Aviso de privacidade redigido
 - [ ] DTOs de saída minimizados (não devolvem o que a tela não usa)

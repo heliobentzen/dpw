@@ -138,7 +138,7 @@ export default new DataSource({
 
 ```bash
 cd backend
-pnpm add dotenv
+npm install dotenv
 ```
 
 #### 1b. Desligar na aplicação também
@@ -161,9 +161,9 @@ Em `backend/package.json`:
 {
   "scripts": {
     "typeorm": "typeorm-ts-node-commonjs -d src/data-source.ts",
-    "migration:generate": "pnpm typeorm migration:generate",
-    "migration:run": "pnpm typeorm migration:run",
-    "migration:revert": "pnpm typeorm migration:revert",
+    "migration:generate": "npm run typeorm migration:generate",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:revert": "npm run typeorm migration:revert",
     "migration:create": "typeorm-ts-node-commonjs migration:create"
   }
 }
@@ -188,7 +188,7 @@ O `-v` apaga o volume — o banco inteiro. Aqui isso é seguro porque não há n
 dentro; é a última vez no curso que essa frase será verdadeira.
 
 ```bash
-pnpm migration:generate src/migracoes/Inicial
+npm run migration:generate src/migracoes/Inicial
 ```
 
 | Comando | O que faz |
@@ -205,7 +205,7 @@ Repare nos nomes das constraints: `PK_51d3959df48c82010ae1c4907fb`, `FK_1fa7f93a
 consegue derrubar exatamente a constraint que o `up()` criou.
 
 ```bash
-pnpm migration:run
+npm run migration:run
 ```
 
 **Deu certo se:** o terminal mostra `Migration Inicial<timestamp> has been executed
@@ -231,7 +231,7 @@ destaque: boolean;
 ```
 
 ```bash
-pnpm migration:generate src/migracoes/AdicionaDestaque
+npm run migration:generate src/migracoes/AdicionaDestaque
 ```
 
 Confira o arquivo antes de aplicar. Ele deve ter uma linha só:
@@ -245,13 +245,13 @@ O `DEFAULT false` importa: sem ele, as linhas existentes ficariam nulas numa col
 `default: false` na entidade.
 
 ```bash
-pnpm migration:run
+npm run migration:run
 ```
 
 #### 3b. Reverter, que é a metade que ninguém testa
 
 ```bash
-pnpm migration:revert
+npm run migration:revert
 ```
 
 O log mostra `ALTER TABLE "obra" DROP COLUMN "destaque"` e a coluna some. Confirme:
@@ -260,7 +260,7 @@ O log mostra `ALTER TABLE "obra" DROP COLUMN "destaque"` e a coluna some. Confir
 docker compose exec db psql -U bibliocom -d bibliocom -c "\d obra"
 ```
 
-Rode `pnpm migration:run` de novo e ela volta.
+Rode `npm run migration:run` de novo e ela volta.
 
 **É este par que torna o deploy reversível.** Um `down()` que ninguém executou é uma
 suposição, não um plano de retorno — e a hora de descobrir que ele não funciona não é às
@@ -279,7 +279,7 @@ biografia: string;
 ```
 
 ```bash
-pnpm migration:generate src/migracoes/EncurtaBiografia
+npm run migration:generate src/migracoes/EncurtaBiografia
 ```
 
 **Não rode.** Abra o arquivo:
@@ -307,7 +307,7 @@ Regra nova: obras publicadas antes de 1900 entram em destaque. Isso não está e
 entidade — está na cabeça de quem pediu.
 
 ```bash
-pnpm migration:create src/migracoes/DestacaObrasAntigas
+npm run migration:create src/migracoes/DestacaObrasAntigas
 ```
 
 > `migration:create` (vazia) é diferente de `migration:generate` (derivada das entidades).
@@ -348,7 +348,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c \
 ```
 
 ```bash
-pnpm migration:run
+npm run migration:run
 docker compose exec db psql -U bibliocom -d bibliocom -c \
   "SELECT titulo, \"anoPublicacao\", destaque FROM obra;"
 ```
@@ -374,7 +374,7 @@ quebre**, nos quatro passos da teoria. Uma migração por passo:
 | 4 | `RemoveSinopse` | `DROP COLUMN "sinopse"` |
 
 Comece pondo texto na `sinopse` de alguma obra, para ter o que preservar. Ao final, rode
-`pnpm migration:revert` três vezes e confira que o banco voltou ao início **com os dados
+`npm run migration:revert` três vezes e confira que o banco voltou ao início **com os dados
 intactos**.
 
 ⚠️ Use `migration:create` nos quatro, e escreva o SQL você mesmo. Se você usar

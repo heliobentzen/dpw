@@ -123,7 +123,7 @@ evita mass assignment?" separam quem copiou tutorial de quem entendeu.
 
 ```bash
 cd ~/dev/bibliocom/backend      # 🪟 Windows: Set-Location C:\dev\bibliocom\backend
-pnpm add class-validator class-transformer
+npm install class-validator class-transformer
 ```
 
 Em `src/main.ts`, ao lado do `setGlobalPrefix` do M03:
@@ -214,7 +214,7 @@ criar(@Body() dto: CriarObraDto) {
 
 O TypeScript vai reclamar: `CriarObraDto` não é `Partial<Obra>`, porque `categoriaIds` não
 é um campo da entidade. **Deixe o erro aí por enquanto** — o passo 4 conserta o service. Se
-quiser rodar antes disso, use `pnpm start:dev`, que roda mesmo com erro de tipo.
+quiser rodar antes disso, use `npm run start:dev`, que roda mesmo com erro de tipo.
 
 #### 2c. Ver a validação agir
 
@@ -492,7 +492,7 @@ Toda obra tem capa. É o requisito mais comum de qualquer CRUD e um dos que mais
 feitos, porque envolve três decisões que ninguém toma no seu lugar.
 
 ```bash
-pnpm add -D @types/multer
+npm install -D @types/multer
 ```
 
 ```ts
@@ -585,7 +585,7 @@ O `gerar:schema` já existe desde o M03. Agora que há DTOs de entrada e saída,
 mais o que descrever:
 
 ```bash
-pnpm gerar:schema
+npm run gerar:schema
 ```
 
 Abra `/api/docs` e confira: cada rota, cada campo, cada status — **derivado do código**. O

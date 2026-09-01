@@ -48,7 +48,7 @@
 | Testes | 🔵 Jest, Supertest · 🟣 Vitest, Testing Library, MSW | Testes automatizados |
 | Depuração | 🔵 logging do TypeORM, Pino · 🟣 React DevTools, TanStack Query Devtools | Consultas, estado, cache |
 | Tipos | openapi-typescript | Contrato garantido pelo compilador |
-| Segurança | `pnpm audit`, detect-secrets, axe DevTools | Dependências, segredos, acessibilidade |
+| Segurança | `npm audit`, detect-secrets, axe DevTools | Dependências, segredos, acessibilidade |
 | Diagramas | Mermaid, dbdiagram.io, Excalidraw | ER, arquitetura, protótipo |
 | Gestão | GitHub Projects, GitHub Issues | Backlog e sprints |
 | Monitoramento | UptimeRobot, Sentry/GlitchTip | Disponibilidade e erros |

@@ -58,7 +58,7 @@ servidor são apenas as chamadas de **dados** (`/api/...`).
 ### 2. Definindo rotas (20 min)
 
 ```bash
-pnpm add react-router
+npm install react-router
 ```
 
 ```tsx

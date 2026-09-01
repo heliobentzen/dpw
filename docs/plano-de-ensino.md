@@ -119,7 +119,7 @@ só entra depois que existe uma API real** (semana 8, após o M07).
 
 ## 8. Recursos necessários
 
-- Laboratório com **Node.js 20+**, pnpm, Git, editor e acesso à internet.
+- Laboratório com **Node.js 20+** (o npm vem junto), Git, editor e acesso à internet.
 - ⚠️ Acesso liberado ao registro npm e ao PyPI. Proxy corporativo bloqueando `npm install`
   é a falha logística nº 1 desta disciplina.
 - Conta GitHub por estudante; organização GitHub para as equipes.

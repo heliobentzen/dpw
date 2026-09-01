@@ -50,7 +50,7 @@ Cada linha exigiria dezenas de linhas de código próprio. É isso que a bibliot
 ### 2. TanStack Query — leitura (30 min)
 
 ```bash
-pnpm add @tanstack/react-query
+npm install @tanstack/react-query
 ```
 
 ```tsx
@@ -178,7 +178,7 @@ Estados da mutação: `isPending`, `isError`, `isSuccess`, `error`, `reset()`.
 ### 4. Formulários com React Hook Form + Zod (35 min) ⭐
 
 ```bash
-pnpm add react-hook-form zod @hookform/resolvers
+npm install react-hook-form zod @hookform/resolvers
 ```
 
 **Zod** descreve o formato esperado e **valida**; o TypeScript infere o tipo do próprio
@@ -293,9 +293,9 @@ O `curl` do M01 continua ignorando seu React. Zod é conveniência; o DTO valida
 ```bash
 # funciona nas tres plataformas — uma linha por comando evita o && (PowerShell 5.1)
 cd backend
-pnpm gerar:schema      # escreve backend/openapi.json
+npm run gerar:schema      # escreve backend/openapi.json
 cd ../frontend
-pnpm dlx openapi-typescript schema.yml -o src/api/schema.d.ts
+npx openapi-typescript schema.yml -o src/api/schema.d.ts
 ```
 
 ```ts
@@ -311,7 +311,7 @@ Coloque num script:
 { "scripts": { "tipos": "openapi-typescript schema.yml -o src/api/schema.d.ts" } }
 ```
 
-Agora, se o backend renomear `titulo`, o `pnpm build` **falha** — em vez de a tela mostrar
+Agora, se o backend renomear `titulo`, o `npm run build` **falha** — em vez de a tela mostrar
 `undefined` em produção. É a defesa contra o contrato quebrado em silêncio (M02),
 finalmente completa. No M14 isso entra no CI.
 
@@ -378,7 +378,7 @@ Gere `schema.d.ts`, troque os tipos escritos à mão por ele e **prove a proteç
 
 1. No backend, renomeie `titulo` para `nome` no `ObraResposta`.
 2. Regenere o schema e os tipos.
-3. Rode `pnpm build`. O que acontece?
+3. Rode `npm run build`. O que acontece?
 4. Reverta.
 
 ---

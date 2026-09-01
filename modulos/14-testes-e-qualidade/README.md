@@ -50,7 +50,7 @@ só o utilitário de dados:
 
 ```bash
 cd ~/dev/bibliocom/backend
-pnpm add -D @faker-js/faker supertest @types/supertest
+npm install -D @faker-js/faker supertest @types/supertest
 ```
 
 | Pacote | Para quê |
@@ -147,13 +147,13 @@ configuração que o projeto já tem.
 
 ```bash
 # Linux / macOS / WSL / Git Bash
-pnpm add -D vitest @vitest/ui jsdom @testing-library/react \
+npm install -D vitest @vitest/ui jsdom @testing-library/react \
             @testing-library/user-event @testing-library/jest-dom msw
 ```
 
 ```powershell
 # Windows PowerShell — linha única de propósito (ver nota abaixo)
-pnpm add -D vitest @vitest/ui jsdom @testing-library/react @testing-library/user-event @testing-library/jest-dom msw
+npm install -D vitest @vitest/ui jsdom @testing-library/react @testing-library/user-event @testing-library/jest-dom msw
 ```
 
 > 🪟 A quebra de linha no PowerShell é a **crase** (`` ` ``), não a barra invertida — e ela
@@ -247,8 +247,8 @@ O teste que só existe nesta arquitetura — e o que evita o bug mais caro:
 ```bash
 # no CI, após rodar os testes das duas camadas.
 # O runner do GitHub Actions e Linux — aqui o && e sempre valido.
-cd backend && pnpm gerar:schema          # escreve openapi.json (M07)
-cd .. && pnpm --filter @bibliocom/tipos gerar
+cd backend && npm run gerar:schema          # escreve openapi.json (M07)
+cd .. && npm run -w @bibliocom/tipos gerar
 git diff --exit-code pacotes/tipos/src/api.d.ts
 ```
 
@@ -278,7 +278,7 @@ Os 15 testes:
 - 3 de validação de DTO (com `it.each`)
 
 ```bash
-pnpm test --coverage
+npm run test --coverage
 ```
 
 ### Passo 2 — Frontend: componente e formulário (40 min)
@@ -295,7 +295,7 @@ Configure Vitest, Testing Library e MSW, e escreva ao menos 6 testes:
 | Formulário exibe erro 400 do servidor no campo | **Integração do contrato** |
 
 ```bash
-pnpm vitest run
+npx vitest run
 ```
 
 ### Passo 3 — CI para os dois projetos (30 min)
@@ -322,15 +322,14 @@ jobs:
     defaults: { run: { working-directory: backend } }
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm tsc --noEmit
-      - run: pnpm test --coverage --coverageThreshold='{"global":{"lines":60}}'
-      - run: pnpm gerar:schema
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run test --coverage --coverageThreshold='{"global":{"lines":60}}'
+      - run: npm run gerar:schema
       - uses: actions/upload-artifact@v4
         with: { name: schema, path: backend/openapi.json }
 
@@ -340,21 +339,20 @@ jobs:
     defaults: { run: { working-directory: frontend } }
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: pnpm, cache-dependency-path: frontend/pnpm-lock.yaml }
-      - run: pnpm install --frozen-lockfile
+        with: { node-version: 20, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci
       - uses: actions/download-artifact@v4
         with: { name: schema, path: backend }
       - name: Tipos sincronizados com a API
         run: |
-          pnpm --filter @bibliocom/tipos gerar
+          npm run -w @bibliocom/tipos gerar
           git diff --exit-code ../pacotes/tipos/src/api.d.ts
-      - run: pnpm lint
-      - run: pnpm tsc --noEmit
-      - run: pnpm vitest run
-      - run: pnpm build
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npx vitest run
+      - run: npm run build
 ```
 
 Proteja a `main` exigindo os dois jobs verdes antes do merge.
@@ -387,8 +385,8 @@ gerado pelo backend no mesmo commit e falha se os tipos estiverem defasados.
 - [ ] ≥ 6 testes no frontend, incluindo o erro 400 no formulário
 - [ ] MSW simulando a API, sem depender do backend
 - [ ] Cobertura ≥ 60% no backend
-- [ ] `pnpm lint` sem erros nas duas camadas
-- [ ] `pnpm tsc --noEmit` sem erros nas duas camadas
+- [ ] `npm run lint` sem erros nas duas camadas
+- [ ] `npx tsc --noEmit` sem erros nas duas camadas
 - [ ] **Teste de contrato no CI** (tipos sincronizados)
 - [ ] CI verde nos dois jobs; `main` protegida
 - [ ] Ao menos 1 teste de regressão a partir de um bug real

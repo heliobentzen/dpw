@@ -316,16 +316,16 @@ export function RotaProtegida({ papeis }: { papeis?: string[] }) {
 
 ```bash
 cd ~/dev/bibliocom/backend
-pnpm add @nestjs/passport passport passport-local express-session argon2
-pnpm add -D @types/passport-local @types/express-session
+npm install @nestjs/passport passport passport-local express-session argon2
+npm install -D @types/passport-local @types/express-session
 ```
 
 Crie `src/contas/entidades/usuario.entity.ts` com a entidade da seção 3, gere a migração e
 aplique:
 
 ```bash
-pnpm migration:generate src/migracoes/CriaUsuario
-pnpm migration:run
+npm run migration:generate src/migracoes/CriaUsuario
+npm run migration:run
 ```
 
 `src/contas/contas.service.ts`:

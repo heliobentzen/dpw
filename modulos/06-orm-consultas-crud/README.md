@@ -246,7 +246,7 @@ Precisamos de volume para que os problemas de desempenho apareçam. Copie
 `backend/src/semear.ts` e rode:
 
 ```bash
-pnpm exec ts-node -r tsconfig-paths/register src/semear.ts
+npx ts-node -r tsconfig-paths/register src/semear.ts
 ```
 
 Gera 60 autores, 800 obras e 2.000 exemplares.

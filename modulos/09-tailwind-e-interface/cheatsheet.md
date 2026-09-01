@@ -3,7 +3,7 @@
 ## Instalação (Vite)
 
 ```bash
-pnpm add -D tailwindcss @tailwindcss/vite
+npm install -D tailwindcss @tailwindcss/vite
 ```
 
 ```ts
@@ -162,7 +162,7 @@ aria-[invalid=true]:border-red-600
 className={`rounded px-4 py-2 ${ativo ? "bg-marca-600 text-white" : "bg-white"}`}
 
 // com clsx + tailwind-merge (resolve conflitos de classe)
-// pnpm add clsx tailwind-merge
+// npm install clsx tailwind-merge
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

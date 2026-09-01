@@ -170,7 +170,7 @@ export function ListaAssociados() {
  *
  *  3. A02 Segredo exposto no bundle. Toda variável `VITE_*` é substituída
  *     em tempo de build e vai para o JavaScript público.
- *     Prove: `pnpm build && grep -r "$CHAVE" dist/`.
+ *     Prove: `npm run build && grep -r "$CHAVE" dist/`.
  *     Correção: a chamada com chave secreta é feita pelo BACKEND; o
  *     frontend chama o backend. Chave que precisa ser secreta nunca
  *     passa pelo frontend.

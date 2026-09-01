@@ -14,7 +14,7 @@ alterne entre ele e [`ambiente-setup.md`](ambiente-setup.md), que é Linux/macOS
 
 ## Um runtime só
 
-A stack é **TypeScript ponta a ponta**. Isso significa que você instala **Node e pnpm**, e
+A stack é **TypeScript ponta a ponta**. Isso significa que você instala **o Node** (que já traz o npm), e
 nada além disso do lado de linguagem — não há Python, `venv`, `pip` nem um segundo
 ecossistema de pacotes para manter. É o maior ganho colateral da escolha de stack, e ele
 aparece justo aqui, no setup.
@@ -23,7 +23,7 @@ aparece justo aqui, no setup.
 
 | Momento | O que entra | Passos |
 |---|---|---|
-| **Semana 1** (M00) | Terminal, Git, Node 20, pnpm, VS Code, monorepo, primeiro commit | 0 a 5, 8, 9 |
+| **Semana 1** (M00) | Terminal, Git, Node 20, VS Code, monorepo, primeiro commit | 0 a 5, 8, 9 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
 | **Antes do M04** | Docker + PostgreSQL | 7 |
 | **A partir do M08** | Rodar os dois servidores juntos | 10 |
@@ -40,7 +40,7 @@ aparece justo aqui, no setup.
 | [1](#passo-1--powershell-e-política-de-scripts) | PowerShell e política de scripts | semana 1 |
 | [2](#passo-2--pasta-de-trabalho) | Pasta de trabalho | semana 1 |
 | [3](#passo-3--git) | Git + SSH | semana 1 |
-| [4](#passo-4--nodejs-e-pnpm) | Node 20 + pnpm | semana 1 |
+| [4](#passo-4--nodejs-e-npm) | Node 20 (o npm vem junto) | semana 1 |
 | [5](#passo-5--vs-code) | VS Code | semana 1 |
 | [6](#passo-6--dependências-do-backend) | Backend | **antes do M03** |
 | [7](#passo-7--docker-e-postgresql) | Docker + PostgreSQL | **antes do M04** |
@@ -72,7 +72,7 @@ Esta é a origem da maior parte dos problemas inexplicáveis no Windows, e **nen
 
 | ❌ Evite | Por quê |
 |---|---|
-| `C:\Users\João Silva\Documents\projetos` | O `Documents` costuma ser **sincronizado pelo OneDrive**. Ele vai tentar subir as dezenas de milhares de arquivos de `node_modules` para a nuvem: o `pnpm install` trava, o Git acusa mudanças fantasma e arquivos ficam bloqueados em uso |
+| `C:\Users\João Silva\Documents\projetos` | O `Documents` costuma ser **sincronizado pelo OneDrive**. Ele vai tentar subir as dezenas de milhares de arquivos de `node_modules` para a nuvem: o `npm install` trava, o Git acusa mudanças fantasma e arquivos ficam bloqueados em uso |
 | `C:\Users\João Silva\dev` | O **espaço** quebra ferramentas que não põem aspas nos caminhos |
 | `C:\Users\João Silva\dev` | O **acento** quebra ferramentas que assumem ASCII |
 
@@ -112,7 +112,7 @@ Este guia funciona nos dois. Onde houver diferença, ela está sinalizada com �
 ### 1.2 Liberar a execução de scripts ⚠️
 
 Faça isto **agora**, não quando der erro. Por padrão o Windows bloqueia scripts `.ps1` — e o
-`pnpm` é distribuído como um deles.
+`npm` é distribuído como um deles.
 
 ```powershell
 Get-ExecutionPolicy -Scope CurrentUser
@@ -232,7 +232,7 @@ does not provide shell access.` — a segunda metade **não é erro**, é o espe
 
 ---
 
-## Passo 4 — Node.js e pnpm
+## Passo 4 — Node.js e npm
 
 ### 4.1 Instalar o Node 20 LTS
 
@@ -258,37 +258,28 @@ npm --version
 > usa `fnm`, rode `fnm env --use-on-cd | Out-String | Invoke-Expression` e ponha essa linha
 > no arquivo em `$PROFILE`.
 
-### 4.2 Habilitar o pnpm
+### 4.2 O npm já veio junto
+
+Não há nada a instalar: o **npm vem dentro do instalador do Node**. O `npm --version` que
+você acabou de rodar já provou isso.
 
 ```powershell
-corepack enable
-corepack prepare pnpm@latest --activate
-pnpm --version
+npm --version
 ```
 
-| Linha | O que faz |
-|---|---|
-| `corepack enable` | O Corepack vem com o Node 20 e cria os atalhos de `pnpm` sem instalar nada |
-| `corepack prepare pnpm@latest --activate` | Baixa a última versão e a marca como ativa |
+**Deu certo se:** responde `10.x` ou superior.
 
-**Se falhar com `EPERM` ou erro de link simbólico:** o Windows exige privilégio para criar
-links simbólicos fora do Modo de Desenvolvedor. Saída mais simples:
-
-```powershell
-npm install -g pnpm
-```
-
-**Deu certo se:** `pnpm --version` responde `9.x` ou superior.
-
-> **Por que pnpm e não npm?** Instala mais rápido e usa muito menos disco, porque guarda os
-> pacotes num único armazém e liga cada projeto a ele — diferença sentida num laboratório
-> com 40 máquinas, e ainda maior num monorepo com duas árvores de dependências. Ele também
-> é quem gerencia os *workspaces* do M03. Tudo funciona com `npm`, mas os workspaces exigem
-> configuração diferente.
+> **E o pnpm ou o yarn?** São gerenciadores alternativos, comuns no mercado, e você vai
+> encontrá-los em projetos por aí. Esta disciplina usa **npm** por três motivos concretos:
+> ele já está instalado, o Windows não cria atrito com ele (o pnpm depende de links
+> simbólicos, que exigem o Modo de Desenvolvedor ligado ou o terminal como administrador), e
+> todo tutorial, resposta de fórum e documentação que você encontrar vai estar em npm — sem
+> precisar traduzir comando. Os *workspaces* que o monorepo do M00 usa funcionam em npm
+> desde a versão 7.
 
 ### 4.3 Excluir a pasta do antivírus ⚠️
 
-O Windows Defender inspeciona cada um dos milhares de arquivos que o `pnpm install` cria. O
+O Windows Defender inspeciona cada um dos milhares de arquivos que o `npm install` cria. O
 resultado é uma instalação de minutos em vez de segundos.
 
 **Win** → *Segurança do Windows* → *Proteção contra vírus e ameaças* → *Gerenciar
@@ -308,7 +299,7 @@ git config --system core.longpaths true
 ```
 
 Ative também *Long Paths* no Windows (Editor de Política de Grupo ou registro). O sintoma
-sem isto é `Filename too long` no meio de um `pnpm install`, sem indicar o motivo real.
+sem isto é `Filename too long` no meio de um `npm install`, sem indicar o motivo real.
 
 ---
 
@@ -367,12 +358,12 @@ Crie `C:\dev\bibliocom\.vscode\settings.json`:
 O M03 conduz a criação do projeto NestJS e do monorepo. O comando central é:
 
 ```powershell
-pnpm dlx @nestjs/cli new backend --package-manager pnpm --skip-git
+nest new backend --skip-git
 ```
 
 | Trecho | O que faz |
 |---|---|
-| `pnpm dlx` | Executa a CLI **sem instalá-la** globalmente. É o `npx` do pnpm |
+| `npx` | Executa um pacote **sem instalá-lo** no projeto. Vem junto com o npm |
 | `--skip-git` | **Importante:** sem isto, a CLI cria um segundo repositório dentro do seu |
 
 Siga o roteiro do [M03](../modulos/03-nestjs-primeiros-passos/) — os passos e as
@@ -463,7 +454,7 @@ node C:\dev\dpw\recursos\codigo\verifica-ambiente.mjs
 
 > Ajuste o caminho para onde você clonou o repositório do material.
 
-O script confere Node, pnpm, Git configurado, Docker — e, no Windows, também `curl.exe`,
+O script confere Node, npm, Git configurado, Docker — e, no Windows, também `curl.exe`,
 `.gitattributes`, `core.autocrlf`, OneDrive e acentos no caminho. Ele aceita
 `--etapa m00|m03|m05` e cobra só o que já deveria existir.
 
@@ -473,7 +464,7 @@ O script confere Node, pnpm, Git configurado, Docker — e, no Windows, também 
 
 ```powershell
 node --version
-pnpm --version
+npm --version
 git --version
 curl.exe --version
 ```
@@ -565,14 +556,14 @@ Dois servidores, cada um na sua janela. No Windows Terminal, `Ctrl+Shift+T` abre
 
 ```powershell
 Set-Location C:\dev\bibliocom\backend
-pnpm start:dev
+npm run start:dev
 ```
 
 **Terminal 2 — frontend (porta 5173):**
 
 ```powershell
 Set-Location C:\dev\bibliocom\frontend
-pnpm dev
+npm run dev
 ```
 
 Abra <http://localhost:5173>. O Vite encaminha `/api` ao NestJS (configurado no M03), então
@@ -593,9 +584,8 @@ Get-NetTCPConnection -LocalPort 3000 | Select-Object -ExpandProperty OwningProce
 
 | Mensagem | Causa | Solução |
 |---|---|---|
-| `pnpm : não pode ser carregado porque a execução de scripts foi desabilitada` | Política de execução | [Passo 1.2](#12-liberar-a-execução-de-scripts-) |
+| `npm : não pode ser carregado porque a execução de scripts foi desabilitada` | Política de execução | [Passo 1.2](#12-liberar-a-execução-de-scripts-) |
 | `node : O termo 'node' não é reconhecido` | Terminal aberto antes da instalação | Feche e reabra |
-| `corepack : EPERM` / erro de link simbólico | Privilégio para links simbólicos | `npm install -g pnpm` |
 | `winget : não é reconhecido` | Windows desatualizado | Use os instaladores gráficos |
 | `Filename too long` | Limite de 260 caracteres | `git config --system core.longpaths true` ([4.4](#44-caminhos-longos-)) |
 
@@ -605,7 +595,7 @@ Get-NetTCPConnection -LocalPort 3000 | Select-Object -ExpandProperty OwningProce
 |---|---|---|
 | `curl -i http://...` | `curl.exe -i http://...` | `curl` é apelido de `Invoke-WebRequest` |
 | `NODE_ENV=production node dist/main.js` | `$env:NODE_ENV="production"` <br> `node dist/main.js` | Não existe variável inline. ⚠️ Ela **fica na sessão** — limpe com `Remove-Item Env:\NODE_ENV` |
-| `cd backend && pnpm start:dev` | duas linhas separadas | `&&` não existe no PowerShell 5.1. `;` **não** é equivalente: executa o segundo mesmo se o primeiro falhar |
+| `cd backend && npm run start:dev` | duas linhas separadas | `&&` não existe no PowerShell 5.1. `;` **não** é equivalente: executa o segundo mesmo se o primeiro falhar |
 | `grep -r "texto" src/` | `Select-String -Path src\* -Pattern "texto"` | Comandos diferentes |
 | `comando > arquivo.json` | `comando \| Out-File -FilePath arquivo.json -Encoding utf8` | O `>` grava UTF-16 no PowerShell 5.1 |
 | `comando \` <br> `  --opcao` | `comando` `` ` `` <br> `  --opcao` | Continuação é crase — e **sem espaço depois dela** |
@@ -616,7 +606,7 @@ Get-NetTCPConnection -LocalPort 3000 | Select-Object -ExpandProperty OwningProce
 
 | Sintoma | Causa | Solução |
 |---|---|---|
-| `pnpm install` leva minutos | Antivírus varrendo `node_modules` | Exclua `C:\dev` ([4.3](#43-excluir-a-pasta-do-antivírus-)) |
+| `npm install` leva minutos | Antivírus varrendo `node_modules` | Exclua `C:\dev` ([4.3](#43-excluir-a-pasta-do-antivírus-)) |
 | Git acusa mudanças que você não fez | Projeto dentro do OneDrive | Mova para `C:\dev` ([0.2](#02-escolha-a-pasta--fora-do-onedrive-sem-espaço-e-sem-acento-)) |
 | Arquivo "em uso" e não pode ser apagado | OneDrive ou antivírus | Mesma solução |
 | Docker não responde | Docker Desktop fechado | Abra pelo menu Iniciar |

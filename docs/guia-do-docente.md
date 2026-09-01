@@ -9,14 +9,14 @@ Como conduzir a disciplina com este material.
 | −6 semanas | Mapear organizações parceiras candidatas para a extensão (ver [`../projeto/extensao/README.md`](../projeto/extensao/README.md)) |
 | −4 semanas | Formalizar parceria com 2–4 organizações (carta de anuência) |
 | −3 semanas | Criar a organização GitHub da turma e o repositório-modelo |
-| −2 semanas | Validar o laboratório: **Node 20**, pnpm, Git, Docker, portas 3000/5432/5173 |
-| −2 semanas | ⚠️ **Confirmar acesso a `registry.npmjs.org`** — proxy bloqueando `pnpm install` é a falha logística nº 1 |
+| −2 semanas | Validar o laboratório: **Node 20**, Git, Docker, portas 3000/5432/5173 |
+| −2 semanas | ⚠️ **Confirmar acesso a `registry.npmjs.org`** — proxy bloqueando `npm install` é a falha logística nº 1 |
 | −2 semanas | 🪟 Se o laboratório é Windows: instalar Git (traz o Git Bash), habilitar WSL2 e excluir a pasta de projetos do Windows Defender |
 | −2 semanas | Criar contas de PaaS ou solicitar GitHub Student Pack |
 | −1 semana | Enviar [`ambiente-setup.md`](ambiente-setup.md) aos estudantes com o script de verificação |
 
 > **A falha nº 1 desta disciplina é logística, não técnica**: proxy do laboratório
-> bloqueando o registro do npm, antivírus tornando o `pnpm install` lentíssimo, ou parceria extensionista
+> bloqueando o registro do npm, antivírus tornando o `npm install` lentíssimo, ou parceria extensionista
 > fechada tarde demais. Resolva isso antes da aula 1.
 
 ### 🪟 Turma no Windows
@@ -41,7 +41,7 @@ necessário**:
 
 | Momento | O que entra | Avise na aula anterior |
 |---|---|---|
-| **Semana 1** (M00) | Node 20, pnpm, Git, VS Code, monorepo, 1º commit | — |
+| **Semana 1** (M00) | Node 20, Git, VS Code, monorepo, 1º commit | — |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | sim |
 | **Antes do M04** | Docker + PostgreSQL | **sim, com folga** — no Windows exige WSL2 e, às vezes, virtualização na BIOS |
 
@@ -67,11 +67,11 @@ causa.
 
 1. **A pasta do projeto está fora do OneDrive?** O `Documents` é sincronizado por padrão em
    máquina nova e em conta institucional. Com `node_modules` dentro dele, o Git
-   acusa mudanças fantasma, arquivos ficam bloqueados e o `pnpm install` trava. Peça
+   acusa mudanças fantasma, arquivos ficam bloqueados e o `npm install` trava. Peça
    `C:\dev` — sem espaço e sem acento no caminho.
 2. **`git config --get core.longpaths` responde `true`?** Um monorepo tem duas árvores de
    `node_modules`, e o limite de 260 caracteres do Windows é atingido com facilidade — o
-   sintoma é `Filename too long` no meio de um `pnpm install`.
+   sintoma é `Filename too long` no meio de um `npm install`.
 
 ### Diagnóstico de JavaScript — semana 1
 
@@ -191,7 +191,8 @@ a extensão: são eliminatórias.
 - Estudantes sem máquina própria: garanta laboratório com horário estendido ou use
   GitHub Codespaces / Gitpod (o material roda sem alterações).
 - Internet instável: os módulos M00–M15 funcionam offline após a primeira instalação;
-  use `pnpm fetch` num espelho local, ou distribua o `pnpm-store` já populado.
+  use um espelho local (`npm config set registry`), ou distribua um `node_modules` já
+  populado por pen drive.
 - Requisitos de acessibilidade das interfaces (WCAG básico) são cobrados no M09 e na
   rubrica da Etapa 3.
 

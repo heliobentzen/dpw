@@ -92,8 +92,8 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 ## Dependências e operação
 
 - [ ] `pip-audit` sem vulnerabilidades críticas ou altas
-- [ ] `pnpm audit` sem vulnerabilidades críticas ou altas
-- [ ] Dependências fixadas nos dois projetos (`pnpm-lock.yaml` das duas camadas)
+- [ ] `npm audit` sem vulnerabilidades críticas ou altas
+- [ ] Dependências fixadas nos dois projetos (`package-lock.json` das duas camadas)
 - [ ] `detect-secrets scan` limpo, inclusive no histórico do Git
 - [ ] Backup automatizado do banco **e restauração testada**
 - [ ] Logs de segurança (login, falha, acesso negado, erro 5xx) sendo gravados
@@ -105,12 +105,12 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 ```bash
 # ---- Linux / macOS / WSL / Git Bash ----
 cd backend
-pnpm audit --audit-level=high
+npm audit --audit-level=high
 pip-audit
 
 cd ../frontend
-pnpm audit
-pnpm build && grep -rEi "secret|password|api[_-]?key|AKIA" dist/ || echo "nenhum segredo no bundle"
+npm audit
+npm run build && grep -rEi "secret|password|api[_-]?key|AKIA" dist/ || echo "nenhum segredo no bundle"
 
 detect-secrets scan
 curl -I https://seu-dominio/ | grep -iE "strict-transport|x-frame|x-content|referrer|content-security"
@@ -119,12 +119,12 @@ curl -I https://seu-dominio/ | grep -iE "strict-transport|x-frame|x-content|refe
 ```powershell
 # ---- Windows PowerShell ----
 cd backend
-pnpm audit --audit-level=high
+npm audit --audit-level=high
 pip-audit
 
 cd ..\frontend
-pnpm audit
-pnpm build
+npm audit
+npm run build
 Select-String -Recurse -Pattern "secret|password|api[_-]?key|AKIA" dist/*
 
 detect-secrets scan
