@@ -11,7 +11,7 @@
 | Carga horária extensionista | 10 horas (creditadas dentro da CH total) |
 | Modalidade sugerida | Presencial ou híbrida, com laboratório de informática |
 | Pré-requisitos | Lógica de programação; POO; banco de dados relacional; **JavaScript moderno** (atendido — ver §11) |
-| Stack — backend | Node 20, TypeScript, NestJS 11, TypeORM, PostgreSQL 16 |
+| Stack — backend | Node 20, TypeScript, NestJS 12, TypeORM, PostgreSQL 16 |
 | Stack — frontend | React 19, TypeScript, Vite, Tailwind CSS 4, React Router, TanStack Query |
 | Stack — comum | Git/GitHub, Docker, GitHub Actions, deploy em PaaS |
 

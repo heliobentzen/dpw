@@ -148,8 +148,8 @@ da biblioteca. Os dois saem de cena agora.
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Obra } from "./entidades/obra.entity";
-import { Autor } from "./entidades/autor.entity";
+import { Obra } from "./entidades/obra.entity.js";
+import { Autor } from "./entidades/autor.entity.js";
 
 @Injectable()
 export class AcervoService {

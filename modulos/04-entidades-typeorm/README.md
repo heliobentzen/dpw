@@ -234,6 +234,13 @@ DATABASE_URL: z
 
 > Esta linha existe pelo motivo do M03: melhor a aplicação não subir do que subir e falhar
 > na primeira consulta, com um erro que não menciona o `.env`.
+>
+> ⚠️ **E ela é obrigatória, não opcional.** O `validate` do `ConfigModule` não apenas confere
+> as variáveis: ele **substitui** o conjunto delas pelo que o esquema devolveu. Variável que
+> não está no esquema simplesmente **deixa de existir** para a aplicação. Se você esquecer
+> esta linha, o `DATABASE_URL` do seu `.env` some, o TypeORM recebe `undefined` e o erro que
+> aparece é `no PostgreSQL user name specified in startup packet` — que não menciona nem o
+> `.env`, nem o esquema, nem o `validate`. Guarde este sintoma.
 
 #### 1d. Ligar o TypeOrmModule
 
@@ -313,7 +320,7 @@ Registre no `src/acervo/acervo.module.ts`:
 
 ```ts
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Autor } from "./entidades/autor.entity";
+import { Autor } from "./entidades/autor.entity.js";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Autor])],
@@ -424,7 +431,7 @@ Agora a relação. Na `Obra`:
 
 ```ts
 import { ManyToOne } from "typeorm";
-import { Autor } from "./autor.entity";
+import { Autor } from "./autor.entity.js";
 
   @ManyToOne(() => Autor, (autor) => autor.obras, {
     nullable: false,
@@ -440,7 +447,7 @@ E o outro lado, na `Autor`:
 
 ```ts
 import { OneToMany } from "typeorm";
-import { Obra } from "./obra.entity";
+import { Obra } from "./obra.entity.js";
 
   @OneToMany(() => Obra, (obra) => obra.autor)
   obras: Obra[];
@@ -478,7 +485,7 @@ Responda, olhando o schema:
 
 ```ts
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Obra } from "./obra.entity";
+import { Obra } from "./obra.entity.js";
 
 @Entity()
 export class Categoria {
@@ -527,7 +534,7 @@ A diferença entre **obra** e **exemplar** é o coração do domínio: a bibliot
 
 ```ts
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Obra } from "./obra.entity";
+import { Obra } from "./obra.entity.js";
 
 export enum EstadoExemplar {
   NOVO = "novo",
@@ -687,6 +694,7 @@ Depois, justifique por escrito, em uma linha cada: todo `nullable`, todo `unique
 | Sintoma | Diagnóstico |
 |---|---|
 | `ECONNREFUSED ::1:5432` | O contêiner do banco não está de pé. `docker compose ps` |
+| `no PostgreSQL user name specified in startup packet` | `DATABASE_URL` chegou vazia. Quase sempre: falta a chave no esquema do `validate` — ver passo 1c |
 | `password authentication failed` | `DATABASE_URL` não bate com o `docker-compose.yml` |
 | `Entity metadata for Obra#autor was not found` | A entidade não está no `forFeature` do módulo |
 | `Cannot read properties of undefined (reading 'name')` na inicialização | Importação circular: use `() => Entidade`, nunca a classe direta |

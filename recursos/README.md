@@ -44,7 +44,7 @@
 | Categoria | Ferramenta | Para quê |
 |---|---|---|
 | Editor | VS Code / WebStorm | Desenvolvimento |
-| Lint e formatação | ESLint + Prettier, nas duas camadas | Padrão de código |
+| Lint e formatação | oxlint no backend, ESLint no frontend; Prettier nos dois | Padrão de código |
 | Testes | 🔵 Jest, Supertest · 🟣 Vitest, Testing Library, MSW | Testes automatizados |
 | Depuração | 🔵 logging do TypeORM, Pino · 🟣 React DevTools, TanStack Query Devtools | Consultas, estado, cache |
 | Tipos | openapi-typescript | Contrato garantido pelo compilador |

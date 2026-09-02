@@ -4,7 +4,7 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 
 
 > **Stack:** TypeScript ponta a ponta, em arquitetura desacoplada.
-> **Backend** — Node 20 · TypeScript · NestJS 11 · TypeORM · PostgreSQL 16
+> **Backend** — Node 20 · TypeScript · NestJS 12 · TypeORM · PostgreSQL 16
 > **Frontend** — React 19 · TypeScript · Vite · Tailwind CSS 4 · React Router · TanStack Query
 > **Comum** — monorepo npm · tipos compartilhados · Git/GitHub · Docker · CI · deploy em PaaS
 >

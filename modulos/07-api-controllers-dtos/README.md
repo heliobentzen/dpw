@@ -275,7 +275,7 @@ O terceiro caso é o `forbidNonWhitelisted` em ação: o campo que passou no M06
 
 ```ts
 import { PartialType } from "@nestjs/swagger";
-import { CriarObraDto } from "./criar-obra.dto";
+import { CriarObraDto } from "./criar-obra.dto.js";
 
 export class AtualizarObraDto extends PartialType(CriarObraDto) {}
 ```
@@ -370,7 +370,7 @@ Falta o lado da resposta. Hoje o controller devolve a entidade inteira.
 
 ```ts
 import { ApiProperty } from "@nestjs/swagger";
-import { Obra } from "../entidades/obra.entity";
+import { Obra } from "../entidades/obra.entity.js";
 
 export class ObraResposta {
   @ApiProperty() id: number;

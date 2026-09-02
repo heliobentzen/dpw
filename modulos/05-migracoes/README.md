@@ -139,7 +139,11 @@ export default new DataSource({
 ```bash
 cd backend
 npm install dotenv
+npm install -D ts-node
 ```
+
+O `ts-node` faz a CLI conseguir ler os seus arquivos `.ts` direto, sem compilar antes. Ele
+não vem no projeto do Nest 12 — a aplicação em si não precisa dele, só a CLI do TypeORM.
 
 #### 1b. Desligar na aplicação também
 
@@ -160,18 +164,18 @@ Em `backend/package.json`:
 ```json
 {
   "scripts": {
-    "typeorm": "typeorm-ts-node-commonjs -d src/data-source.ts",
+    "typeorm": "typeorm-ts-node-esm -d src/data-source.ts",
     "migration:generate": "npm run typeorm migration:generate",
     "migration:run": "npm run typeorm migration:run",
     "migration:revert": "npm run typeorm migration:revert",
-    "migration:create": "typeorm-ts-node-commonjs migration:create"
+    "migration:create": "typeorm-ts-node-esm migration:create"
   }
 }
 ```
 
 | Script | Detalhe |
 |---|---|
-| `typeorm-ts-node-commonjs` | Executa a CLI através do `ts-node`, para ela ler os `.ts` direto. Já vem instalado com o projeto do Nest |
+| `typeorm-ts-node-esm` | Executa a CLI através do `ts-node`, para ela ler os `.ts` direto. O sufixo `-esm` casa com o projeto ESM que o `nest new` criou — a variante `-commonjs` é para projetos antigos |
 | `-d src/data-source.ts` | Diz à CLI onde está a configuração |
 | `migration:create` **sem o `-d`** | ⚠️ Este comando só escreve um arquivo vazio: não conecta no banco e **recusa** o `-d`. Passá-lo dá `Unknown argument: d` |
 

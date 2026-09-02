@@ -37,7 +37,7 @@ duas premissas que foram reexaminadas:
 ```
 ┌──────────────────────────────┐        ┌──────────────────────────────┐
 │  FRONTEND (SPA)              │  HTTP  │  BACKEND (API REST)          │
-│  React 19 + TypeScript       │ ◀────▶ │  NestJS 11 + TypeScript      │
+│  React 19 + TypeScript       │ ◀────▶ │  NestJS 12 + TypeScript      │
 │  Vite · Tailwind 4           │  JSON  │  TypeORM · PostgreSQL        │
 │  React Router · TanStack     │        │  class-validator · Swagger   │
 │  React Hook Form + Zod       │        │  Passport · Argon2           │
@@ -192,6 +192,57 @@ semana antes. É o custo real desta decisão, e os guias de setup passam a avis�
 antecedência correspondente. A demonstração "troque o `type` e nada mais muda" deixa de ser
 um exercício e vira um parágrafo na teoria do M04, mais o exercício E05.6, que persegue o
 mesmo aprendizado lendo o SQL gerado em vez de refazendo o trabalho.
+
+---
+
+## ADR-16 — NestJS 12 e módulos ESM
+
+- **Status:** aceito · **Data:** 2026-09-02 · **Atualiza a stack da [ADR-10](#adr-10--typescript-ponta-a-ponta-nestjs--typeorm--react)**
+
+**Contexto.** O material foi escrito para o NestJS 11. O 12 já é a versão corrente, e o
+`nest new` de hoje produz um projeto diferente do descrito: módulos **ESM** (`"type":
+"module"` no `package.json`), imports de arquivo próprio terminando em `.js`, `await` de
+topo no `main.ts`, **Vitest** no lugar do Jest e **oxlint** no lugar do ESLint.
+
+A pergunta era se adotar o 12 tornaria o curso mais difícil para uma turma iniciante.
+
+**Decisão.** Adotar o NestJS 12. A CLI é fixada em `@12` na etapa 2 do M03, por
+reprodutibilidade da turma; os pacotes `@nestjs/*` deixam de precisar de versão fixada.
+
+**O que pesou, medido em vez de suposto.**
+
+| | Ficar no 11 | Ir para o 12 |
+|---|---|---|
+| Instalar um pacote `@nestjs/*` | Precisa fixar versão, e **as versões são inconsistentes**: `@nestjs/config@4`, `@nestjs/swagger@11`, `@nestjs/typeorm@11`. Errar dá `ERESOLVE` com um muro de texto sobre *peer dependencies* | `npm install @nestjs/swagger` e pronto |
+| Import de arquivo próprio | `from "./acervo.service"` | `from "./acervo.service.js"` — mesmo o arquivo sendo `.ts` |
+| Executor de testes | **Dois**: Jest no backend, Vitest no frontend. O M14 precisava de um parágrafo explicando que a API é parecida | **Um só**, nas duas camadas |
+| Sistema de módulos | Backend CommonJS, frontend ESM — duas convenções no mesmo repositório | ESM nos dois lados |
+| CLI do TypeORM | `typeorm-ts-node-commonjs` | `typeorm-ts-node-esm`, e o `ts-node` precisa ser instalado explicitamente |
+
+**Justificativa.** O critério foi qual atrito é pior para quem está começando, não qual é
+mais frequente.
+
+O `.js` no import é frequente — aparece em todo arquivo — mas é **uma regra só, com uma razão
+verificável** (o TypeScript não reescreve caminhos; o que roda é o `.js` compilado) e **um
+único sintoma de erro**, que nomeia o arquivo faltante. Além disso, a CLI escreve os imports
+corretos sozinha em tudo que ela gera.
+
+O `ERESOLVE` é raro, mas é opaco: o texto fala de *peer dependencies*, não diz o que fazer, e
+a correção **muda de pacote para pacote**. É um atrito que não vira regra — só vira consulta
+ao professor.
+
+Os dois ganhos colaterais decidiram o empate: **um executor de testes em vez de dois** (o
+M14 encolhe) e **um sistema de módulos em vez de dois** no mesmo repositório.
+
+**Consequências.**
+
+*A favor:* instalar pacote do Nest volta a ser trivial; M14 ensina uma ferramenta em vez de
+duas; backend e frontend passam a compartilhar a convenção de módulos; o material deixa de
+nascer uma versão principal atrasado.
+
+*Contra:* o `.js` em import de arquivo `.ts` é estranho na primeira semana e exige uma
+explicação própria — que está na etapa 5a do M03. O `ts-node` passa a ser instalação
+explícita no M05. E, quando o Nest 13 sair, a checagem a fazer está anotada na etapa 2 do M03.
 
 ---
 

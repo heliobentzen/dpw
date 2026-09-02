@@ -9,11 +9,11 @@
  */
 
 import { faker } from "@faker-js/faker/locale/pt_BR";
-import dataSource from "./data-source";
-import { Autor } from "./acervo/entidades/autor.entity";
-import { Categoria } from "./acervo/entidades/categoria.entity";
-import { Exemplar, EstadoExemplar } from "./acervo/entidades/exemplar.entity";
-import { Obra } from "./acervo/entidades/obra.entity";
+import dataSource from "./data-source.js";
+import { Autor } from "./acervo/entidades/autor.entity.js";
+import { Categoria } from "./acervo/entidades/categoria.entity.js";
+import { Exemplar, EstadoExemplar } from "./acervo/entidades/exemplar.entity.js";
+import { Obra } from "./acervo/entidades/obra.entity.js";
 
 const QUANTIDADE = { autores: 60, obras: 800, exemplaresPorObra: [1, 4] as const };
 

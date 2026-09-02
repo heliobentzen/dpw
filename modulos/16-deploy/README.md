@@ -181,7 +181,7 @@ npm run build            # nest build → dist/main.js
   "scripts": {
     "build": "nest build",
     "start:prod": "node dist/main.js",
-    "migration:run:prod": "typeorm-ts-node-commonjs -d dist/data-source.js migration:run"
+    "migration:run:prod": "typeorm -d dist/data-source.js migration:run"
   }
 }
 ```
@@ -191,6 +191,7 @@ npm run build            # nest build → dist/main.js
 | `build` | No deploy | Compila TypeScript para `dist/` |
 | `start:prod` | A cada boot | Sobe a aplicação. **Sem `--watch`**, sem recompilar |
 | `migration:run:prod` | Antes de subir | Aplica as migrações pendentes (M05) |
+| `typeorm` puro, sem `ts-node` | — | Em produção os arquivos **já estão compilados** em `dist/`. Usar a variante `ts-node` aqui arrastaria uma dependência de desenvolvimento para o servidor |
 
 > `node dist/main.js` é o mesmo comando em Windows, macOS, Linux e na PaaS. Não há
 > servidor de produção separado nem instrução por plataforma.

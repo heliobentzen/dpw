@@ -11,7 +11,7 @@ projeto quando falha**, e trata o resto como leitura. Ver
 ## 🎯 Objetivos
 
 1. Priorizar o que testar quando o tempo é escasso.
-2. Testar regra de negócio, DTOs, permissões e API com Jest e Supertest.
+2. Testar regra de negócio, DTOs, permissões e API com Vitest e Supertest.
 3. Testar componentes e formulários com Vitest + Testing Library.
 4. Garantir o **contrato** entre as camadas no CI.
 5. Configurar lint, formatação e integração contínua para os dois projetos.
@@ -43,24 +43,35 @@ Prioridade, nesta ordem:
 > Numa arquitetura desacoplada, o item 4 é o que mais dá prejuízo e o que menos gente
 > testa: os dois lados passam nos próprios testes e o sistema não funciona.
 
-### 2. Backend com Jest (20 min)
+### 2. Backend com Vitest (20 min)
 
-O NestJS já vem com Jest configurado — o `nest new` do M03 criou `jest` e os scripts. Falta
-só o utilitário de dados:
+O NestJS já vem com **Vitest** configurado — o `nest new` do M03 criou `vitest.config.ts`,
+`vitest.config.e2e.ts` e os scripts `test`, `test:watch`, `test:cov` e `test:e2e`. Confirme
+antes de escrever qualquer teste:
 
 ```bash
 cd ~/dev/bibliocom/backend
-npm install -D @faker-js/faker supertest @types/supertest
+npm test
+```
+
+Deve passar um teste — o `app.controller.spec.ts` que a CLI deixou lá no M03.
+
+Falta só o utilitário de dados e o cliente HTTP:
+
+```bash
+npm install -D @faker-js/faker supertest @types/supertest @vitest/coverage-v8
 ```
 
 | Pacote | Para quê |
 |---|---|
-| `jest` | Já instalado pelo `nest new`. Executor e biblioteca de asserção |
+| `vitest` | Já instalado pelo `nest new`. Executor e biblioteca de asserção |
 | `supertest` | Faz requisições HTTP contra a aplicação **sem subir servidor** |
 | `@faker-js/faker` | Gera dados plausíveis, evitando `"teste1"`, `"teste2"` |
+| `@vitest/coverage-v8` | Mede cobertura. Sem ele, `--coverage` não roda |
 
-> Jest e Vitest têm API praticamente idêntica (`describe`, `it`, `expect`). O que você
-> aprender aqui vale na seção 3, sobre o frontend.
+> **Um executor só, nas duas camadas.** O Vitest que roda aqui é o mesmo da seção 3, sobre o
+> frontend: mesma API (`describe`, `it`, `expect`), mesmo comando, mesma forma de configurar.
+> Você aprende uma ferramenta e usa nos dois lados do sistema.
 
 **Regra de negócio (prioridade 1):**
 
@@ -142,7 +153,7 @@ permite cobrir muitas combinações.
 
 ### 3. Frontend com Vitest e Testing Library (25 min)
 
-Mesma API do Jest, executor diferente — o Vitest roda sobre o Vite e reaproveita a
+O mesmo executor da seção 2 — o Vitest roda sobre o Vite e reaproveita a
 configuração que o projeto já tem.
 
 ```bash
@@ -278,7 +289,7 @@ Os 15 testes:
 - 3 de validação de DTO (com `it.each`)
 
 ```bash
-npm run test --coverage
+npm run test:cov
 ```
 
 ### Passo 2 — Frontend: componente e formulário (40 min)
@@ -322,13 +333,12 @@ jobs:
     defaults: { run: { working-directory: backend } }
     steps:
       - uses: actions/checkout@v4
-        with: { version: 9 }
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
-      - run: npm run test --coverage --coverageThreshold='{"global":{"lines":60}}'
+      - run: npx vitest run --coverage.enabled --coverage.thresholds.lines=60
       - run: npm run gerar:schema
       - uses: actions/upload-artifact@v4
         with: { name: schema, path: backend/openapi.json }
@@ -339,7 +349,6 @@ jobs:
     defaults: { run: { working-directory: frontend } }
     steps:
       - uses: actions/checkout@v4
-        with: { version: 9 }
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm, cache-dependency-path: frontend/package-lock.json }
       - run: npm ci
@@ -403,7 +412,6 @@ Ver [`exercicios.md`](exercicios.md).
 ## 📚 Para aprofundar
 
 - [NestJS — Testing](https://docs.nestjs.com/fundamentals/testing)
-- [Jest](https://jestjs.io/pt-BR/)
 - [Supertest](https://github.com/ladjs/supertest)
 - [Vitest](https://vitest.dev/)
 - [Testing Library — princípios](https://testing-library.com/docs/guiding-principles)

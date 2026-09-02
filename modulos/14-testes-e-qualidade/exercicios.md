@@ -71,21 +71,21 @@ Este é o fluxo que impede que o mesmo bug volte na semana seguinte. Faça três
 Escreva testes para código que depende de tempo, sem depender do relógio real:
 
 ```ts
-// Jest e Vitest têm relógio falso embutido — nenhuma dependência extra
-beforeEach(() => jest.useFakeTimers());
-afterEach(() => jest.useRealTimers());
+// O Vitest tem relógio falso embutido — nenhuma dependência extra
+beforeEach(() => vi.useFakeTimers());
+afterEach(() => vi.useRealTimers());
 
 it("empréstimo de 15/03 vence em 29/03", async () => {
-  jest.setSystemTime(new Date("2026-03-15"));
+  vi.setSystemTime(new Date("2026-03-15"));
   const e = await service.emprestar(exemplar.id, associado.id);
   expect(e.previsaoDevolucao).toEqual(new Date("2026-03-29"));
 });
 
 it("empréstimo de 15/03 está atrasado em 01/04", async () => {
-  jest.setSystemTime(new Date("2026-03-15"));
+  vi.setSystemTime(new Date("2026-03-15"));
   const e = await service.emprestar(exemplar.id, associado.id);
 
-  jest.setSystemTime(new Date("2026-04-01"));
+  vi.setSystemTime(new Date("2026-04-01"));
   expect(service.estaAtrasado(e)).toBe(true);
 });
 ```
@@ -116,7 +116,7 @@ prova sobre a métrica?
 Configure o pipeline do projeto da equipe com **todos** os estágios:
 
 ```
-lint (eslint) → tsc --noEmit → migrações sem pendências → testes → cobertura →
+lint → tsc --noEmit → migrações sem pendências → testes → cobertura →
 contrato (tipos sincronizados) → build
 ```
 

@@ -74,10 +74,10 @@ material escreve `curl.exe`; no macOS e no Linux, apague o `.exe`.
 | # | Etapa | Min | O que entra |
 |---|---|---|---|
 | 1 | [Conferir as ferramentas](#etapa-1--conferir-as-ferramentas-5-min) | 5 | — |
-| 2 | [Instalar a CLI do Nest](#etapa-2--instalar-a-cli-do-nest-10-min) | 10 | o que é uma CLI |
+| 2 | [Instalar a CLI do Nest](#etapa-2--instalar-a-cli-do-nest-5-min) | 5 | o que é uma CLI |
 | 3 | [Criar o projeto](#etapa-3--criar-o-projeto-10-min) | 10 | `nest new` |
 | 4 | [Subir o servidor](#etapa-4--subir-o-servidor-10-min) | 10 | scripts, recarga automática |
-| 5 | [Ler o `main.ts`](#etapa-5--ler-o-maints-10-min) | 10 | `import`/`export`, `async`/`await` |
+| 5 | [Ler o `main.ts`](#etapa-5--ler-o-maints-15-min) | 15 | `import`/`export`, `await`, **a regra do `.js`** |
 | 6 | [Ler o controller e o service](#etapa-6--ler-o-controller-e-o-service-15-min) | 15 | **decorators** |
 | 7 | [Ler o módulo](#etapa-7--ler-o-módulo-10-min) | 10 | `@Module` e suas três listas |
 | 8 | [A primeira mudança sua](#etapa-8--a-primeira-mudança-sua-5-min) | 5 | editar → salvar → ver |
@@ -141,12 +141,12 @@ intenção** — ele diz ao npm onde procurar projetos quando eles existirem.
 
 ---
 
-## Etapa 2 — Instalar a CLI do Nest (10 min)
+## Etapa 2 — Instalar a CLI do Nest (5 min)
 
 **Faça:**
 
 ```powershell
-npm install -g @nestjs/cli@11
+npm install -g @nestjs/cli@12
 ```
 
 **Linha a linha:**
@@ -156,7 +156,7 @@ npm install -g @nestjs/cli@11
 | `npm install` | Instala um pacote |
 | `-g` | *global*: instala **na sua máquina**, não dentro de um projeto. Assim o comando `nest` fica disponível em qualquer pasta |
 | `@nestjs/cli` | O pacote. O `@nestjs/` é um *escopo*: um prefixo que agrupa os pacotes oficiais do projeto Nest |
-| `@11` | **A versão.** Sem isto você receberia a mais recente, que hoje é a 12 |
+| `@12` | **A versão.** Sem isto você receberia a mais recente, que hoje é a 12 mesmo — mas amanhã pode ser a 13 |
 
 **Deu certo se:**
 
@@ -164,7 +164,7 @@ npm install -g @nestjs/cli@11
 nest --version
 ```
 
-responde `11.` seguido de outros números.
+responde `12.` seguido de outros números.
 
 ### Por que uma CLI, e por que fixar a versão
 
@@ -180,11 +180,10 @@ com arquivos gerados diferentes — e o material deixaria de bater com a tela de
 sala. Fixar versão em material didático é o mesmo cuidado que se toma em produção, e pelo
 mesmo motivo: previsibilidade vale mais que novidade.
 
-> 📌 **Nota para quem for atualizar este material.** A versão 12 do Nest gera um projeto
-> ESM: todo `import` de arquivo próprio precisa terminar em `.js` — mesmo o arquivo sendo
-> `.ts` —, os testes passam de Jest para Vitest, e a CLI do TypeORM muda de
-> `typeorm-ts-node-commonjs` para `typeorm-ts-node-esm`. É uma migração que atravessa o
-> curso inteiro, não só este módulo.
+> 📌 **Nota para quem for atualizar este material.** Quando o Nest 13 sair, troque o `@12`
+> aqui e confira três pontos: se a CLI continua gerando os `import` com `.js` (etapa 5), se
+> os pacotes `@nestjs/*` acompanham a mesma versão principal, e se o executor de testes do
+> M14 continua sendo o Vitest.
 
 ---
 
@@ -268,7 +267,7 @@ são para entender de onde ele veio.
 
 ---
 
-## Etapa 5 — Ler o `main.ts` (10 min)
+## Etapa 5 — Ler o `main.ts` (15 min)
 
 Pare de digitar. As etapas 5, 6 e 7 são de leitura: são **quatro arquivos pequenos**, e o
 `Hello World!` que você acabou de ver sai deles.
@@ -280,13 +279,13 @@ Abra `src\main.ts`:
 
 ```ts
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
+import { AppModule } from "./app.module.js";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+await bootstrap();
 ```
 
 **Linha a linha:**
@@ -294,18 +293,59 @@ bootstrap();
 | Trecho | O que faz |
 |---|---|
 | `import { X } from "y"` | Traz a coisa chamada `X` de dentro do módulo `y`. As chaves indicam **exportação nomeada** — `y` exporta várias coisas e você quer só essa |
-| `from "@nestjs/core"` | Sem `./` na frente: é um pacote de `node_modules`, baixado pelo npm |
-| `from "./app.module"` | Com `./`: é um arquivo **seu**, na mesma pasta. Repare que não se escreve `.ts` no fim |
-| `async function` | Marca a função como assíncrona. Só dentro de uma função `async` é possível usar `await` |
-| `await` | "Espere esta operação terminar antes de seguir para a próxima linha." Sem ele, o código seguiria adiante com a aplicação ainda pela metade |
+| `from "@nestjs/core"` | Sem `./` na frente: é um **pacote** de `node_modules`, baixado pelo npm |
+| `from "./app.module.js"` | Com `./`: é um arquivo **seu**. E termina em `.js` — leia o quadro abaixo, é a pergunta que todo mundo faz |
+| `async function` | Marca a função como assíncrona. Só dentro de uma função `async` é possível usar `await`… |
+| `await bootstrap()` | …**ou no topo do arquivo**, como aqui. Um módulo ESM pode usar `await` fora de qualquer função |
 | `NestFactory.create(AppModule)` | **A linha central do arquivo.** Monta a aplicação inteira a partir de **um único módulo** |
 | `app.listen(...)` | Começa a escutar requisições HTTP. Antes desta linha, a aplicação existe mas não atende ninguém |
 | `process.env.PORT` | Lê a variável de ambiente `PORT`. O `process` é um objeto global do Node |
 | `?? 3000` | "Se o valor da esquerda for `null` ou `undefined`, use 3000." Diferente de `\|\|`, que também trocaria `0` e `""` |
-| `bootstrap();` | Chama a função. Sem esta linha, a função existe e nunca roda |
 
-**O que reter:** toda a aplicação sai de **um** módulo, o `AppModule`. Tudo o que você criar
-daqui em diante vai, direta ou indiretamente, pendurar nele.
+### 5a. Por que o import termina em `.js` se o arquivo é `.ts`
+
+Esta é a pergunta que o arquivo provoca, e ela tem uma resposta curta e uma regra.
+
+**A resposta curta:** o TypeScript **não reescreve caminhos de import**. Ele só apaga os
+tipos e entrega o arquivo ao Node. Quando você roda `npm run build`, o `src/app.module.ts`
+vira `dist/app.module.js` — e é esse nome que vai existir na hora em que o programa rodar.
+O import precisa apontar para o arquivo que **vai existir**, não para o que você está
+editando.
+
+```
+você escreve      src/app.module.ts
+compila para      dist/app.module.js      ← é este que o Node carrega
+logo, o import    "./app.module.js"
+```
+
+**A regra, que vale para o curso inteiro:**
+
+| Importando… | Como escrever | Exemplo |
+|---|---|---|
+| um arquivo **seu** | com `.js` no fim | `from "./acervo.service.js"` |
+| um **pacote** instalado | sem extensão | `from "@nestjs/common"` |
+
+Duas coisas que ajudam a não sofrer com isso:
+
+1. **A CLI escreve sozinha.** Todo arquivo gerado por `nest generate` já vem com os imports
+   certos. Você só escreve à mão quando acrescenta um import novo.
+2. **O erro é sempre o mesmo, e ele te dá a resposta.** Se esquecer, o TypeScript avisa:
+
+   ```
+   error TS2835: Relative import paths need explicit file extensions in ECMAScript
+   imports when '--moduleResolution' is 'node16' or 'nodenext'.
+   Did you mean './acervo.service.js'?
+   ```
+
+   A última linha é literalmente o que você deve escrever. É um dos erros mais gentis que
+   você vai encontrar no curso — aproveite, porque nem todos são assim.
+
+> Isso se chama **ESM** (*ECMAScript Modules*), o sistema de módulos oficial do JavaScript.
+> O frontend que você vai escrever a partir do M08 já usa ESM também — então backend e
+> frontend passam a falar a mesma língua, em vez de duas.
+
+**O que reter da etapa:** toda a aplicação sai de **um** módulo, o `AppModule`. Tudo o que
+você criar daqui em diante vai, direta ou indiretamente, pendurar nele.
 
 ---
 
@@ -317,7 +357,7 @@ Estes dois arquivos são de onde o texto `Hello World!` realmente vem.
 
 ```ts
 import { Controller, Get } from "@nestjs/common";
-import { AppService } from "./app.service";
+import { AppService } from "./app.service.js";
 
 @Controller()
 export class AppController {
@@ -396,8 +436,8 @@ Falta o arquivo que amarra os outros três. Abra `src\app.module.ts`:
 
 ```ts
 import { Module } from "@nestjs/common";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
+import { AppController } from "./app.controller.js";
+import { AppService } from "./app.service.js";
 
 @Module({
   imports: [],
@@ -490,8 +530,8 @@ nest generate service acervo --no-spec
 
 ```ts
 import { Module } from "@nestjs/common";
-import { AcervoController } from "./acervo.controller";
-import { AcervoService } from "./acervo.service";
+import { AcervoController } from "./acervo.controller.js";
+import { AcervoService } from "./acervo.service.js";
 
 @Module({
   controllers: [AcervoController],
@@ -753,7 +793,7 @@ A dependência **chega pronta**, pelo construtor.
 
 ```ts
 import { Controller, Get } from "@nestjs/common";
-import { AcervoService } from "./acervo.service";
+import { AcervoService } from "./acervo.service.js";
 
 @Controller("obras")
 export class AcervoController {
@@ -1014,14 +1054,13 @@ Ler `.env` não vem de fábrica no Nest.
 **Faça:**
 
 ```powershell
-npm install @nestjs/config@4
+npm install @nestjs/config
 ```
 
-> **De novo uma versão fixada, e pelo mesmo motivo da etapa 2 — só que agora com um efeito
-> visível.** O ecossistema do Nest já está na versão 12. Se você escrever
-> `npm install @nestjs/config` sem o `@4`, o npm traz a versão 12 do pacote, ela exige o Nest
-> 12, e o seu projeto é o 11: o npm recusa a instalação com um erro chamado `ERESOLVE`.
-> **Companheiro do Nest 11 tem de ser pinado junto com ele.**
+> Repare que aqui **não** vai versão. Os pacotes `@nestjs/*` acompanham a versão principal do
+> framework, e o seu projeto é o 12 — então o npm já traz o `@nestjs/config` 12, que combina.
+> A única versão que este curso fixa é a da CLI, na etapa 2, e por um motivo diferente:
+> reprodutibilidade da turma.
 
 Em `src\app.module.ts`, acrescente ao `imports` (o `AcervoModule` já está lá):
 
@@ -1144,7 +1183,7 @@ export function validarEnv(bruto: Record<string, unknown>) {
 **Faça:** ligue no `app.module.ts`:
 
 ```ts
-import { validarEnv } from "./config/esquema-env";
+import { validarEnv } from "./config/esquema-env.js";
 
 ConfigModule.forRoot({
   isGlobal: true,
@@ -1205,7 +1244,7 @@ O M02 falou em **contrato de API**. Aqui ele deixa de ser conversa.
 **Faça:**
 
 ```powershell
-npm install @nestjs/swagger@11
+npm install @nestjs/swagger
 ```
 
 Crie `src\swagger.ts`:
@@ -1255,8 +1294,8 @@ frontend a partir dele.
 ```ts
 import { writeFileSync } from "node:fs";
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
-import { montarDocumento } from "./swagger";
+import { AppModule } from "./app.module.js";
+import { montarDocumento } from "./swagger.js";
 
 async function gerar() {
   const app = await NestFactory.create(AppModule, { logger: false });
@@ -1367,7 +1406,8 @@ exemplo concreto se destaca de quem responde "no service, porque sim".
 | `npm run gerar:schema` não termina | Faltou `await app.close()` no fim do script |
 | Um segundo `.git` apareceu dentro de `backend` | Faltou `--skip-git` no `nest new`. Apague a pasta |
 | `EADDRINUSE: address already in use :::3000` | Já há um servidor na porta. Encerre-o ou use outra porta |
-| `npm error ERESOLVE unable to resolve dependency tree` | Você instalou um pacote `@nestjs/*` sem fixar a versão, e veio a 12 num projeto 11. Leia a linha `peer @nestjs/common@"^12.0.0" from…`: ela nomeia o culpado. Reinstale com `@11` (ou `@4`, no caso do `config`) |
+| `npm error ERESOLVE unable to resolve dependency tree` | Um pacote `@nestjs/*` veio de uma versão principal diferente da do projeto. Leia a linha `peer @nestjs/common@…`: ela diz qual versão ele queria. Reinstale fixando a mesma do seu projeto |
+| `error TS2835: Relative import paths need explicit file extensions…` | Faltou o `.js` no fim de um import de arquivo seu. A própria mensagem termina com `Did you mean './x.js'?` — é essa a correção. Ver etapa 5a |
 
 ## ✅ Checklist de saída
 
