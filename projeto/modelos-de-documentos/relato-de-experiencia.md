@@ -1,6 +1,6 @@
 # Relato de Experiência — dimensão extensionista
 
-> Etapa 4 / Extensão (X3) · 2 a 3 páginas · Compõe a seção 11 do relatório técnico.
+> Etapa 3 / Extensão (X3) · 2 a 3 páginas · Compõe a seção 11 do relatório técnico.
 
 O relato de experiência **não** é resumo do que o sistema faz. É a reflexão sobre a
 interação com a comunidade: o que se esperava, o que se encontrou, o que mudou nos dois
@@ -54,7 +54,7 @@ normalmente indica que não houve interação real.
 ### 5. Impacto (1–2 parágrafos + tabela)
 
 | Indicador | Antes | Depois | Como medimos |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Tempo de registro de um empréstimo | | | |
 | Itens sem rastreio | | | |
 | Pessoas capacitadas | — | | |
@@ -82,7 +82,7 @@ humanamente. Não são depoimentos protocolares; são reflexões.
 ## Critérios de qualidade
 
 | ✅ Bom relato | ❌ Relato fraco |
-|---|---|
+| --- | --- |
 | Cenas concretas com data e lugar | Generalidades sobre a importância da extensão |
 | Falas literais da organização | Paráfrases genéricas |
 | Decisões que mudaram por causa do diálogo | "Seguimos o que foi pedido" |

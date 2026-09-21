@@ -4,20 +4,20 @@ Modelos prontos para as entregas do projeto. Cada um reflete exatamente o que a 
 correspondente avalia — use-os como lista de verificação, não só como formatação.
 
 | Documento | Quando | Entrega |
-|---|---|---|
+| --- | --- | --- |
 | [Canvas do projeto](canvas-do-projeto.md) | Etapa 1 | P1 |
 | [Termo de abertura](termo-de-abertura.md) | Etapa 1 | P1 |
 | [Carta de anuência](carta-de-anuencia.md) | Etapa 1 | P1 |
-| [Ata de reunião](ata-de-reuniao.md) | Todas | P1–P4, X1–X3 |
-| [Contrato de equipe](contrato-de-equipe.md) | Etapa 2 | P2 |
-| [Backlog e histórias](backlog-e-historias.md) | Etapa 2 | P2 |
-| [Matriz de riscos](matriz-de-riscos.md) | Etapa 2 | P2 |
-| [ADR](adr.md) | Etapas 2–3 | P2, P3 |
-| [Plano de teste](plano-de-teste.md) | Etapa 3 | P3 |
-| [Relatório técnico](relatorio-tecnico.md) | Etapa 4 | P4 |
-| [Relato de experiência](relato-de-experiencia.md) | Etapa 4 / Extensão | P4, X3 |
-| [Avaliação por pares](avaliacao-por-pares.md) | Etapa 4 | P4 |
-| [Termo de transferência](termo-de-transferencia.md) | Etapa 4 | P4 |
+| [Ata de reunião](ata-de-reuniao.md) | Todas | P1–P3, X1–X3 |
+| [Contrato de equipe](contrato-de-equipe.md) | Etapa 1 | P1 |
+| [Backlog e histórias](backlog-e-historias.md) | Etapa 1 | P1 |
+| [Matriz de riscos](matriz-de-riscos.md) | Etapa 1 | P1 |
+| [ADR](adr.md) | Etapas 1–2 | P1, P2 |
+| [Plano de teste](plano-de-teste.md) | Etapa 2 | P2 |
+| [Relatório técnico](relatorio-tecnico.md) | Etapa 3 | P3 |
+| [Relato de experiência](relato-de-experiencia.md) | Etapa 3 / Extensão | P3, X3 |
+| [Avaliação por pares](avaliacao-por-pares.md) | Etapa 3 | P3 |
+| [Termo de transferência](termo-de-transferencia.md) | Etapa 3 | P3 |
 
 ## Onde guardar
 

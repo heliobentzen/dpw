@@ -2,26 +2,23 @@
 
 Material didático completo da disciplina **Desenvolvimento de Projeto Web** — 100 horas
 
-
-> **Stack:** TypeScript ponta a ponta, em arquitetura desacoplada.
+> **Escopo atual do repositório:** backend-first.
 > **Backend** — Node 20 · TypeScript · NestJS 12 · TypeORM · PostgreSQL 16
-> **Frontend** — React 19 · TypeScript · Vite · Tailwind CSS 4 · React Router · TanStack Query
-> **Comum** — monorepo npm · tipos compartilhados · Git/GitHub · Docker · CI · deploy em PaaS
+> **Comum** — monorepo npm · Git/GitHub · Docker · CI · deploy em PaaS
 >
-> **Uma linguagem em toda a stack.** Na semana 8, quando a turma passa para o frontend, ela
-> troca de camada e não de idioma. É o que mais suaviza a virada do curso.
+> Este repositório foi reduzido para priorizar a API, a regra de negócio e a operação do
+> sistema. O frontend foi removido do escopo principal e não é requisito do projeto.
 >
 > A ementa fala em "framework escolhido". Ver
 > [`docs/decisoes-tecnicas.md`](docs/decisoes-tecnicas.md) para a justificativa completa,
-> incluindo **por que TypeORM e não Prisma** (a ementa pede *classes* que geram o banco) e
-> a **ressalva sobre o item "Templates"**.
+> incluindo **por que TypeORM e não Prisma** (a ementa pede *classes* que geram o banco).
 
 ---
 
 ## Como navegar
 
 | Pasta | O que contém |
-|---|---|
+| --- | --- |
 | [`docs/`](docs/) | Plano de ensino, cronograma, setup, decisões técnicas, glossário, troubleshooting |
 | [`modulos/`](modulos/) | 18 módulos de conteúdo (69h), cada um com teoria, roteiro prático, exercícios e checklist |
 | [`projeto/`](projeto/) | Projeto integrador em 4 etapas (20h) + trilha extensionista (10h) |
@@ -39,32 +36,27 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 ## Trilha de módulos (69h)
 
 ### Fundamentos — 10h
+
 | # | Módulo | CH | T | P |
-|---|---|---:|---:|---:|
+| --- | --- | ---: | ---: | ---: |
 | 00 | [Ambiente e ferramentas](modulos/00-ambiente-e-ferramentas/) | 3 | 1 | 2 |
 | 01 | [Fundamentos da web e HTTP](modulos/01-fundamentos-web-http/) | 5 | 3 | 2 |
 | 02 | [Arquitetura desacoplada e contrato de API](modulos/02-arquitetura-desacoplada/) | 2 | 2 | 0 |
 
 ### Backend — 24h
+
 | # | Módulo | CH | T | P |
-|---|---|---:|---:|---:|
+| --- | --- | ---: | ---: | ---: |
 | 03 | [NestJS: módulos, controllers e providers](modulos/03-nestjs-primeiros-passos/) | 4 | 2 | 2 |
 | 04 | [Entidades: classes que geram o banco](modulos/04-entidades-typeorm/) | 6 | 3 | 3 |
 | 05 | [Migrações](modulos/05-migracoes/) | 3 | 1 | 2 |
 | 06 | [Repository e QueryBuilder: consultas e CRUD](modulos/06-orm-consultas-crud/) | 5 | 2 | 3 |
 | 07 | [API: rotas, controllers e DTOs](modulos/07-api-controllers-dtos/) | 6 | 3 | 3 |
 
-### Frontend — 14h
-| # | Módulo | CH | T | P |
-|---|---|---:|---:|---:|
-| 08 | [React: fundamentos](modulos/08-react-fundamentos/) | 4 | 1 | 3 |
-| 09 | [Tailwind e construção de interfaces](modulos/09-tailwind-e-interface/) | 4 | 1 | 3 |
-| 10 | [Rotas e navegação](modulos/10-rotas-e-navegacao/) | 2 | 1 | 1 |
-| 11 | [Dados e formulários no cliente](modulos/11-dados-e-formularios/) | 4 | 2 | 2 |
-
 ### Transversais e produção — 21h
+
 | # | Módulo | CH | T | P |
-|---|---|---:|---:|---:|
+| --- | --- | ---: | ---: | ---: |
 | 12 | [Autenticação e gestão de usuários](modulos/12-autenticacao-usuarios/) | 5 | 2 | 3 |
 | 13 | [Segurança](modulos/13-seguranca/) | 5 | 3 | 2 |
 | 14 | [Testes e qualidade](modulos/14-testes-e-qualidade/) | 3 | 1 | 2 |
@@ -77,12 +69,11 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 ## Projeto integrador (20h) + Extensão (10h)
 
 | Etapa | CH | T | P |
-|---|---:|---:|---:|
-| [1. Definição do tema](projeto/etapa-1-definicao-do-tema/) | 4 | 2 | 2 |
-| [2. Planejamento](projeto/etapa-2-planejamento/) | 4 | 1 | 3 |
-| [3. Desenvolvimento do sistema](projeto/etapa-3-desenvolvimento/) | 8 | 0 | 8 |
-| [4. Relatório técnico e encerramento](projeto/etapa-4-relatorio-e-encerramento/) | 4 | 2 | 2 |
+| --- | ---: | ---: | ---: |
 | [Atividades extensionistas](projeto/extensao/) | 10 | 2 | 8 |
+| [1. Definição e planejamento](projeto/etapa-1-definicao-do-tema/) | 8 | 3 | 5 |
+| [2. Desenvolvimento](projeto/etapa-3-desenvolvimento/) | 8 | 0 | 8 |
+| [3. Relatório e encerramento](projeto/etapa-4-relatorio-e-encerramento/) | 4 | 2 | 2 |
 | **Subtotal** | **30** | **7** | **23** |
 
 **Total geral: 100h — 40h teóricas + 60h práticas.**
@@ -97,15 +88,14 @@ Todos os módulos evoluem **um mesmo sistema**, construído incrementalmente:
 > acervo, associados, empréstimos, devoluções, reservas e relatórios.
 
 ```
-bibliocom/                    monorepo (workspaces do npm)
+bibliocom/                    monorepo (workspace do npm)
 ├── backend/       NestJS + TypeORM + PostgreSQL   (M03–M07)
-├── frontend/      React + Vite + Tailwind         (M08–M11)
-└── pacotes/tipos/ @bibliocom/tipos — DTOs e enums (M15)
+├── pacotes/tipos/ @bibliocom/tipos — DTOs e enums (M15)
+└── README.md      documentação do escopo backend-first
 ```
 
-O domínio **e a linguagem** são os mesmos nas duas camadas: o TypeScript do M04 é o mesmo do
-M11. A continuidade é proposital, e é o que evita que a semana 8 pareça o começo de outro
-curso.
+O foco do repositório agora está no backend. O frontend foi removido do escopo principal
+do curso e não faz parte da entrega obrigatória do projeto.
 
 O projeto da equipe é **outro sistema**, de tema livre, definido na Etapa 1. O BiblioCom é
 referência de código, não o entregável.
@@ -156,7 +146,7 @@ Em compensação, **nada é instalado antes da hora**. A montagem acontece em tr
 cada peça chegando junto com o problema que ela resolve:
 
 | Momento | O que entra | Conferir com |
-|---|---|---|
+| --- | --- | --- |
 | **Semana 1** (M00) | Node 20, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
 | **Antes do M03** | NestJS CLI e as dependências do backend | `--etapa m03` |
 | **Antes do M04** | Docker + PostgreSQL | `--etapa m04` |
@@ -183,18 +173,6 @@ equivalências e as **seis armadilhas** que não se resolvem trocando o comando:
 alias de `Invoke-WebRequest`; variáveis de ambiente inline não existem; `&&` não existe no
 PowerShell 5.1; `>` grava arquivos em UTF-16; e um espaço
 depois da crase de continuação corta o comando em silêncio.
-
-## Pré-requisito de JavaScript
-
-Os módulos 08–11 assumem **JavaScript moderno** (`const/let`, arrow functions,
-destructuring, *spread*, `map`/`filter`, módulos ES, Promises e `async/await`) — pré-requisito
-atendido pela turma a que este material se destina.
-
-Para apoio individual de quem chegar com lacunas, e para outras turmas que venham a usar
-este material, há uma referência de JavaScript moderno em
-[`recursos/js-para-react.md`](recursos/js-para-react.md), com um diagnóstico de 20 minutos
-e a compensação de carga prevista em
-[`docs/cronograma.md`](docs/cronograma.md#6-variações-de-calendário).
 
 ## Licença
 

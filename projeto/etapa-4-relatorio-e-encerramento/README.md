@@ -1,6 +1,6 @@
-# Etapa 4 — Relatório técnico e encerramento
+# Etapa 3 — Relatório técnico e encerramento
 
-> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 20** · **Entrega P4** · **Peso:** 10%
+> **CH:** 4h (2h teóricas · 2h práticas) · **Semanas 19 e 20** · **Entrega P3** · **Peso:** 10%
 
 ## Atividades previstas
 
@@ -19,7 +19,7 @@ responsável** do sistema para a organização parceira.
 Documento de 12 a 20 páginas. Estrutura obrigatória:
 
 | Seção | Conteúdo | Páginas |
-|---|---|---|
+| --- | --- | --- |
 | Capa e identificação | Instituição, disciplina, equipe, organização parceira, data | 1 |
 | Resumo | 200 palavras: problema, solução, resultado | 0,5 |
 | 1. Introdução | Contexto, problema, objetivos, justificativa | 1–2 |
@@ -44,7 +44,7 @@ Modelo em [`../modelos-de-documentos/relatorio-tecnico.md`](../modelos-de-docume
 Retome a tabela de critérios de sucesso da Etapa 1 e preencha honestamente:
 
 | Objetivo | Meta | Alcançado | Evidência |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Reduzir tempo de registro | < 1 min | 45 s (média de 5 registros) | Cronometragem, 12/11 |
 | 100% dos empréstimos registrados | 100% | 87% nas 2 primeiras semanas | Relatório do sistema |
 | Uso efetivo | ≥ 20 registros | 34 registros | Painel |
@@ -94,7 +94,7 @@ Modelo em [`../modelos-de-documentos/relato-de-experiencia.md`](../modelos-de-do
 ### Roteiro sugerido
 
 | Tempo | Conteúdo |
-|---|---|
+| --- | --- |
 | 2 min | O problema — conte a história de uma pessoa real |
 | 2 min | A organização parceira e o diagnóstico |
 | 2 min | A solução: o que faz e o que não faz |
@@ -175,12 +175,12 @@ As respostas são confidenciais e compõem o fator de participação individual 
 
 ---
 
-## 📦 Entrega P4
+## 📦 Entrega P3
 
 **Prazo:** semana 20
 
 | Item | Formato |
-|---|---|
+| --- | --- |
 | Relatório técnico completo | PDF |
 | Relato de experiência (seção 11) | Dentro do relatório |
 | Slides | PDF |
@@ -196,7 +196,7 @@ Rubrica em [`../../avaliacao/rubrica-etapa-4.md`](../../avaliacao/rubrica-etapa-
 ## ⚠️ Erros comuns
 
 | Erro | Correção |
-|---|---|
+| --- | --- |
 | Relatório que descreve tecnologia e não o problema | Comece pela pessoa, termine na tecnologia |
 | Relato de experiência genérico sobre extensão | Nomes, cenas e decisões concretas |
 | Omitir metas não alcançadas | Analise-as; isso vale nota |

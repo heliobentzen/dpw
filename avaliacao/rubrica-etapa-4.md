@@ -1,6 +1,6 @@
-# Rubrica — Etapa 4: Relatório técnico e encerramento
+# Rubrica — Etapa 3: Relatório técnico e encerramento
 
-> **Peso:** 10% · **Entrega:** semana 20 · **Eliminatória**
+> **Peso:** 10% · **Entrega:** semanas 19–20 · **Eliminatória**
 > Escala: 4 Excelente · 3 Adequado · 2 Em desenvolvimento · 0–1 Insuficiente
 
 **Equipe:** `<...>` · **Data:** `<...>`
@@ -8,7 +8,7 @@
 ## Bloco A — Relatório técnico (peso 4)
 
 | # | Critério | 4 | 3 | 2 | 0–1 | Nota |
-|---|---|---|---|---|---|:---:|
+| --- | --- | --- | --- | --- | --- | :---: |
 | A1 | **Estrutura** | Todas as seções, bem articuladas, dentro do limite de páginas | Todas as seções presentes | Faltam seções | Estrutura incompleta | |
 | A2 | **Diagnóstico** | Processo "antes" documentado com evidências e números; gargalos identificados | Diagnóstico claro do processo anterior | Descrição superficial | Ausente | |
 | A3 | **Fundamentação técnica** | Decisões justificadas com alternativas analisadas; nada copiado de documentação | Decisões justificadas | Descreve tecnologias em vez de justificar escolhas | Sem justificativa | |
@@ -21,7 +21,7 @@
 ## Bloco B — Relato de experiência (peso 3)
 
 | # | Critério | 4 | 3 | 2 | 0–1 | Nota |
-|---|---|---|---|---|---|:---:|
+| --- | --- | --- | --- | --- | --- | :---: |
 | B1 | **Cenas concretas** | Situações datadas, com falas literais da organização | Descrição concreta da interação | Descrição genérica | Texto abstrato sobre extensão | |
 | B2 | **Reciprocidade** | Explicita o que a comunidade ensinou à equipe, com exemplos | Reconhece o saber da comunidade | Menção protocolar | Postura de "levar conhecimento" | |
 | B3 | **Impacto no projeto** | Decisões concretas que mudaram por causa do diálogo | Cita mudanças decorrentes da interação | Menciona vagamente | Nenhuma mudança; requisitos coletados e ponto | |
@@ -31,7 +31,7 @@
 ## Bloco C — Apresentação (peso 3)
 
 | # | Critério | 4 | 3 | 2 | 0–1 | Nota |
-|---|---|---|---|---|---|:---:|
+| --- | --- | --- | --- | --- | --- | :---: |
 | C1 | **Narrativa** | Começa pela pessoa e pelo problema; prende a atenção | Estrutura clara e lógica | Apresentação técnica desconectada do problema | Desorganizada | |
 | C2 | **Demonstração ao vivo** | Fluida, no sistema em produção, cobrindo o cenário principal | Demonstração funciona em produção | Demonstração local ou com falhas | Não demonstrou | |
 | C3 | **Domínio técnico** | Todos explicam decisões com profundidade | Equipe responde bem às perguntas | Respostas superficiais | Não sabem explicar o próprio sistema | |
@@ -42,7 +42,7 @@
 ## Bloco D — Encerramento responsável (peso 3)
 
 | # | Critério | 4 | 3 | 2 | 0–1 | Nota |
-|---|---|---|---|---|---|:---:|
+| --- | --- | --- | --- | --- | --- | :---: |
 | D1 | **Manual do usuário** | Escrito para leigos, com prints, testado com um usuário real | Manual claro e completo | Manual técnico demais ou incompleto | Ausente | |
 | D2 | **Capacitação** | Realizada em formato mão na massa, com registro e ajustes decorrentes | Realizada, com lista de presença | Demonstração rápida | Não realizada | |
 | D3 | **Termo de transferência** | Completo e assinado; acessos transferidos, senhas trocadas, 2 admins na organização | Assinado, com acessos e custos | Incompleto | Ausente | |
@@ -52,7 +52,7 @@
 ## Bloco E — Avaliação por pares (peso 1)
 
 | # | Critério | 4 | 3 | 2 | 0–1 | Nota |
-|---|---|---|---|---|---|:---:|
+| --- | --- | --- | --- | --- | --- | :---: |
 | E1 | **Entrega do formulário** | Todos entregaram, com justificativas substantivas | Todos entregaram | Faltaram alguns | Não entregue | |
 | E2 | **Honestidade da autoavaliação** | Coerente com as demais fontes; reconhece limites | Coerente | Inflada | Incompatível com as evidências | |
 
@@ -61,7 +61,7 @@
 ## Cálculo
 
 | Bloco | Peso | Média (0–4) | Ponderado |
-|---|---:|---:|---:|
+| --- | ---: | ---: | ---: |
 | A. Relatório | 4 | | |
 | B. Relato de experiência | 3 | | |
 | C. Apresentação | 3 | | |

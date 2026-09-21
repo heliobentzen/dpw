@@ -1,34 +1,34 @@
 # Rubrica — Portfólio de atividades práticas (E0–E8)
 
 > **Peso:** 20% da nota final · **Individual** · Entrega contínua, semanas 2 a 16
-> 🔵 backend · 🟣 frontend · ⚪ transversal
+> 🔵 backend · 🟣 opcional / frontend · ⚪ transversal
 
 ## O que compõe o portfólio
 
 | Código | Entrega | Módulo | Camada | Semana |
-|---|---|---|:---:|---:|
+| --- | --- | --- | :---: | ---: |
 | **E0** | Relatório de inspeção HTTP | M01 | ⚪ | 2 |
 | **E1** | Modelo de dados do BiblioCom | M04 | 🔵 | 4 |
 | **E2** | Caderno de 20 consultas ORM + otimização N+1 | M06 | 🔵 | 6 |
-| **E3** | API documentada (CRUD, validação, filtros, OpenAPI) | M07 | 🔵 | 7 |
-| **E4** | SPA consumindo a API (listagem, detalhe, formulários) | M11 | 🟣 | 11 |
+| **E3** | API documentada com Swagger (CRUD, validação, filtros e OpenAPI) | M07 | 🔵 | 7 |
+| **E4** | Interface opcional consumindo a API | M11 | 🟣 | 11 |
 | **E5** | Autenticação ponta a ponta com matriz de acesso | M12 | ⚪ | 12 |
 | **E6** | Relatório de segurança (18 casos + hardening) | M13 | ⚪ | 13 |
-| **E7** | Suíte de testes verde nas duas camadas | M14 | ⚪ | 14 |
-| **E8** | BiblioCom implantado: API e SPA no ar | M16 | ⚪ | 16 |
+| **E7** | Suíte de testes verdes no backend | M14 | ⚪ | 14 |
+| **E8** | API do BiblioCom implantada em produção | M16 | ⚪ | 16 |
 
 Todas as entregas são **individuais**, no repositório pessoal do BiblioCom criado no M00.
 Isso garante que cada estudante percorra o caminho técnico completo — **das duas camadas**
 —, independentemente da divisão de tarefas na equipe.
 
-> Esse ponto ficou mais importante com a arquitetura desacoplada: sem o portfólio
-> individual, é comum a equipe se dividir em "quem faz backend" e "quem faz frontend", e
-> metade da turma sair sem ter escrito um DTO ou um componente.
+> Esse ponto continua importante porque o projeto foi reduzido ao backend, sem perder o
+> foco em quem escreve regra de negócio e contratos de API. O frontend, quando houver,
+> permanece complementar e opcional.
 
 ## Como cada entrega é avaliada
 
 | Nível | Pontos | Critério |
-|---|---:|---|
+| --- | ---: | --- |
 | **Excelente** | 4 | Completa, correta, com os itens opcionais e reflexão própria |
 | **Adequado** | 3 | Completa e correta, cumprindo todos os requisitos |
 | **Em desenvolvimento** | 2 | Parcial: falta parte dos requisitos ou há erros conceituais |
@@ -50,6 +50,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 ## Checklist por entrega
 
 ### E0 — Inspeção HTTP ⚪
+
 - [ ] Tabela do DevTools preenchida, com prints
 - [ ] 5+ comandos `curl` com saída comentada
 - [ ] 6 experimentos do servidor mínimo respondidos
@@ -57,6 +58,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 - [ ] Parágrafo sobre a característica do HTTP que mais influencia o design de aplicações
 
 ### E1 — Modelo de dados 🔵
+
 - [ ] Diagrama ER
 - [ ] `models.py` migrado, com 7 models
 - [ ] Tabela justificando cada `on_delete`
@@ -64,11 +66,13 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 - [ ] Fixture com 5 obras, 10 exemplares e 5 associados
 
 ### E2 — Consultas ORM 🔵
+
 - [ ] 20 consultas com código, SQL gerado e nº de resultados
 - [ ] Comentário de negócio em cada uma
 - [ ] Tabela de otimização N+1 (antes → depois, com medição)
 
 ### E3 — API documentada 🔵
+
 - [ ] CRUD completo em 2+ recursos, via ViewSet
 - [ ] DTOs separados para entrada e saída, com os campos declarados explicitamente
 - [ ] Validação de servidor testada com `curl` (3+ `validate_<campo>`, 1 `validate()`)
@@ -78,6 +82,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 - [ ] Contrato do M02 confrontado com a implementação, divergências resolvidas
 
 ### E4 — SPA consumindo a API 🟣
+
 - [ ] Listagem com busca e paginação, estado **na URL**
 - [ ] Detalhe com parâmetro de rota
 - [ ] Formulários de criação e edição com Zod + React Hook Form
@@ -88,6 +93,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 - [ ] 6+ componentes base próprios, acessíveis
 
 ### E5 — Autenticação ponta a ponta ⚪
+
 - [ ] Entidade `Usuario` própria, criada por migração
 - [ ] Login, logout e `eu` funcionando, testados com `curl`
 - [ ] CSRF funcionando na SPA
@@ -97,6 +103,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 - [ ] **Evidência de que a API recusa o que a interface esconde**
 
 ### E6 — Segurança ⚪
+
 - [ ] 18 casos do laboratório (10 backend + 8 frontend) explorados e corrigidos
 - [ ] `check --deploy` antes e depois
 - [ ] Cabeçalhos e CSP configurados e justificados
@@ -106,6 +113,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 - [ ] Aviso de privacidade
 
 ### E7 — Testes ⚪
+
 - [ ] 15+ testes no backend (regra, acesso, validação)
 - [ ] 6+ testes no frontend, incluindo erro do servidor no formulário
 - [ ] Matriz de acesso automatizada
@@ -114,6 +122,7 @@ Isso garante que cada estudante percorra o caminho técnico completo — **das d
 - [ ] CI verde nos dois jobs, com badge no README
 
 ### E8 — Deploy ⚪
+
 - [ ] API e SPA no ar, sob o mesmo site, com HTTPS
 - [ ] **F5 numa rota interna funciona**
 - [ ] Nota A em securityheaders.com

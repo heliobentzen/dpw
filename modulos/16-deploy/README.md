@@ -1,14 +1,14 @@
-# M16 — Implantação: dois artefatos em produção
+# M16 — Implantação da API em produção
 
-> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 16** · **Pré-requisitos:** M13, M14
+> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 16** · **Pré-requisitos:** M14, M15
 > **Ementa:** *Tópicos relevantes: Implantação (deploy) do sistema.*
 
 O módulo em que o projeto deixa de ser exercício e vira sistema. Regra: ao final desta semana
 **todo mundo tem uma URL pública funcionando**, com o BiblioCom e não com o projeto da
 equipe. O projeto vem depois, quando o caminho já não tem surpresa.
 
-Numa arquitetura desacoplada, "fazer deploy" significa publicar **dois** artefatos e
-garantir que eles se encontrem.
+No escopo atual, "fazer deploy" significa publicar a API, conectar o banco gerenciado,
+aplicar migrações e tornar o processo reproduzível.
 
 ## 🎯 Objetivos
 

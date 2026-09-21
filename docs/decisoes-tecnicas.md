@@ -8,20 +8,21 @@ reproduzir na Etapa 2 do projeto.
 >
 > 1. Django com renderização no servidor (templates DTL);
 > 2. Django/DRF como API + SPA em React (ADR-01, superado);
-> 3. **TypeScript ponta a ponta**: NestJS + TypeORM no backend, React no frontend
->    (**ADR-10**, vigente).
+> 3. **Backend em TypeScript**: NestJS + TypeORM + PostgreSQL, com suporte opcional a
+>    React para prototipagem e interfaces de demonstração (**ADR-10**, vigente).
 >
-> Os ADRs superados foram mantidos: entender por que uma decisão foi revista é parte do
-> que a Etapa 2 do projeto cobra.
+> Os ADRs superados foram mantidos apenas como contexto histórico. O escopo atual do curso
+> é backend-first, e o frontend foi reduzido a material complementar opcional.
 
 ---
 
-## ADR-10 — TypeScript ponta a ponta: NestJS + TypeORM + React
+## ADR-10 — Backend em TypeScript com frontend opcional: NestJS + TypeORM
 
 - **Status:** aceito · **Data:** 2026-08-18 · **Substitui:** ADR-01
 
 **Contexto.** A escolha anterior (Django/DRF + React) resolvia bem a ementa, mas carregava
-duas premissas que foram reexaminadas:
+duas premissas que foram reexaminadas. Com o escopo reduzido para backend, a camada de
+interface deixou de ser obrigatória e passou a ser complementar:
 
 1. **Mercado.** Nas pesquisas de uso mais recentes, Django aparece por volta da 4ª a 6ª
    posição entre frameworks de backend, atrás de Node/Express, ASP.NET Core e Spring Boot.
@@ -32,33 +33,33 @@ duas premissas que foram reexaminadas:
    pré-requisito de JavaScript está atendido por esta turma, metade dessa carga era
    redundante: a turma já traz o modelo mental da linguagem que o frontend usa.
 
-**Decisão.** Uma linguagem em toda a stack.
+**Decisão.** Uma linguagem principal no backend, com frontend opcional em React.
 
 ```
 ┌──────────────────────────────┐        ┌──────────────────────────────┐
-│  FRONTEND (SPA)              │  HTTP  │  BACKEND (API REST)          │
+│  FRONTEND (OPCIONAL)         │  HTTP  │  BACKEND (PRINCIPAL)         │
 │  React 19 + TypeScript       │ ◀────▶ │  NestJS 12 + TypeScript      │
 │  Vite · Tailwind 4           │  JSON  │  TypeORM · PostgreSQL        │
 │  React Router · TanStack     │        │  class-validator · Swagger   │
 │  React Hook Form + Zod       │        │  Passport · Argon2           │
 └──────────────────────────────┘        └──────────────────────────────┘
               └──────────── @bibliocom/tipos ────────────┘
-                     tipos compartilhados (M15)
+                     tipos compartilhados (quando o frontend existir)
 ```
 
 **Justificativa — o mapa da ementa.**
 
 | Item da ementa | Onde é atendido |
-|---|---|
+| --- | --- |
 | Classes geram o banco | Classes `@Entity()` do TypeORM + `synchronize` em dev (M04) |
 | Atualizar o banco pelas classes | `migration:generate` compara entidades × banco (M05) |
 | Consultas e CRUD via API do framework | `Repository` e `QueryBuilder` (M06) |
 | Mapeamento de URLs | `@Controller('obras')` + `@Get(':id')` (M07) **e** React Router (M10) |
 | Classes / métodos / funções para requisições | Controllers são **classes**, *handlers* são **métodos**, Providers são serviços injetados (M07) |
-| **Templates: criação de interfaces** | Componentes React + Tailwind (M08, M09) — ver ADR-11 |
+| **Templates: criação de interfaces** | Componentes React + Tailwind (opcional, M08–M11) — ver ADR-11 |
 | Gestão de usuários | Passport + Guards + entidade `Usuario` (M12) |
-| Segurança | M13 (OWASP aplicado a API + SPA) |
-| Implantação | M16 (dois artefatos) |
+| Segurança | M13 (OWASP aplicado a API e ao frontend opcional) |
+| Implantação | M16 (API em produção) |
 
 **Por que TypeORM e não Prisma.** Prisma é excelente e cresce rápido, mas seu schema é uma
 **DSL própria** (`schema.prisma`), não classes. A ementa pede literalmente *"classes para
@@ -74,11 +75,11 @@ E é o framework TypeScript de backend com maior adoção corporativa.
 **Consequências.**
 
 | Ganho | Custo |
-|---|---|
-| Uma linguagem só: a transição backend→frontend na semana 8 deixa de ser troca de idioma | NestJS exige entender **injeção de dependência e decorators** já no M03 — conceitos que o Django não cobrava tão cedo |
-| Tipos compartilhados entre as camadas (M15), impossível na stack anterior | Perdemos o **Django Admin**: não há back-office pronto (ver ADR-12) |
-| `class-validator` no backend e Zod no frontend têm o mesmo modelo mental | `contrib.auth` some: autenticação vira Passport + hash explícito (mais horas em M12) |
-| Alinhamento com vagas de Node/TypeScript, o segmento que mais contrata júnior | Segurança deixa de ser "o framework já protege" e passa a ser configuração explícita (M13 muda de tom) |
+| --- | --- |
+| O backend fica mais focado e a curva de aprendizagem da disciplina se reduz | O frontend deixou de ser obrigatório e vira material complementar |
+| O código do backend fica mais homogêneo e alinhado a vagas de Node/TypeScript | Fica mais difícil demonstrar fluxo completo de interface por ausência do SPA |
+| `class-validator` no backend continua alinhado ao modelo mental de validação da turma | O ecossistema frontend deixa de ser revisado em profundidade |
+| O material torna a entrega principal mais consistente com o escopo pedagógico | Segurança deixa de ser "o framework já protege" e passa a ser configuração explícita (M13 muda de tom) |
 
 ---
 
@@ -113,7 +114,7 @@ material dedicava 2h (M15) a customizá-lo. NestJS não tem equivalente.
 **Alternativas consideradas.**
 
 | Opção | Por que não |
-|---|---|
+| --- | --- |
 | AdminJS (painel automático para Node) | Adiciona uma dependência pesada e opinativa para ensinar a customizá-la — conhecimento que não transfere |
 | Construir um CRUD administrativo em React | Duplica exatamente o que M07–M11 já ensinam. Repetição sem conceito novo |
 
@@ -176,7 +177,7 @@ M05" e entra na "antes do M04". SQLite deixa de aparecer no material.
 **Alternativas consideradas.**
 
 | Alternativa | Por que não |
-|---|---|
+| --- | --- |
 | Manter SQLite e adiar a troca para o M16 | Piora: a divergência só apareceria no deploy, com o projeto inteiro em cima |
 | SQLite no curso, PostgreSQL só em produção | As migrações nunca seriam testadas contra o banco real. É a origem do "funciona local, falha no deploy" |
 | PostgreSQL nativo, sem Docker | Instalação diferente em cada sistema operacional, e o M16 usa contêiner de qualquer forma |
@@ -212,7 +213,7 @@ reprodutibilidade da turma; os pacotes `@nestjs/*` deixam de precisar de versão
 **O que pesou, medido em vez de suposto.**
 
 | | Ficar no 11 | Ir para o 12 |
-|---|---|---|
+| --- | --- | --- |
 | Instalar um pacote `@nestjs/*` | Precisa fixar versão, e **as versões são inconsistentes**: `@nestjs/config@4`, `@nestjs/swagger@11`, `@nestjs/typeorm@11`. Errar dá `ERESOLVE` com um muro de texto sobre *peer dependencies* | `npm install @nestjs/swagger` e pronto |
 | Import de arquivo próprio | `from "./acervo.service"` | `from "./acervo.service.js"` — mesmo o arquivo sendo `.ts` |
 | Executor de testes | **Dois**: Jest no backend, Vitest no frontend. O M14 precisava de um parágrafo explicando que a API é parecida | **Um só**, nas duas camadas |
@@ -260,7 +261,7 @@ no campo `workspaces` do `package.json` da raiz, e o `pnpm-workspace.yaml` deixa
 **Comparação, para o público desta disciplina.**
 
 | Critério | npm | pnpm |
-|---|---|---|
+| --- | --- | --- |
 | Instalação | nenhuma: vem com o Node | passo extra (Corepack ou instalador) |
 | Windows | sem ressalva | depende de links simbólicos: pede Modo de Desenvolvedor ou terminal como administrador. O próprio guia de setup já documentava o `EPERM` |
 | Workspaces | desde a v7; testado neste monorepo | sim |
@@ -277,7 +278,7 @@ todo comando que a turma encontrar fora do material.
 **Alternativas consideradas.**
 
 | Alternativa | Por que não |
-|---|---|
+| --- | --- |
 | Manter pnpm e documentar melhor o `EPERM` | Documentar um problema não é o mesmo que não tê-lo. O erro ocorre na semana 1, antes de a turma ter repertório para diagnosticá-lo |
 | Yarn | Mesmo custo de instalação do pnpm, sem vantagem que compense |
 | Deixar a escolha por conta do aluno | Lockfiles incompatíveis no mesmo repositório. Em trabalho de equipe, isso vira conflito de merge sem causa aparente |
@@ -316,7 +317,7 @@ não rodavam no PostgreSQL, e o próprio material mandava apagá-las e regerar. 
 **A distinção que mais gera bug:**
 
 | | Backend (`.env` do NestJS) | Frontend (`VITE_*`) |
-|---|---|---|
+| --- | --- | --- |
 | Quando é lida | **Execução** | **Build** |
 | Quem enxerga | Só o servidor | **Qualquer pessoa**, no bundle |
 | Pode conter segredo | Sim | **Nunca** |
@@ -387,7 +388,7 @@ utilitários consegue usar qualquer biblioteca depois; o contrário não vale.
 **O que a mudança para TypeScript ponta a ponta liberou e consumiu:**
 
 | Movimento | Horas |
-|---|---|
+| --- | --- |
 | M08 (React) cai de 5h para 4h — TypeScript já é conhecido desde o M03 | **−1h** |
 | M03 sobe de 3h para 4h — injeção de dependência e decorators exigem mais | **+1h** |
 | M15 troca Django Admin por tipos compartilhados | 2h → 2h |

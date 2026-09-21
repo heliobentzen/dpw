@@ -6,7 +6,7 @@ Fecha o backend. Aqui a ementa é atendida em dois itens: *"mapeamento de URLs"*
 de classes, métodos e funções para processamento das requisições"*.
 
 O M06 terminou com um CRUD que funciona e **aceita qualquer coisa**. Este módulo conserta o
-"qualquer coisa" — e ao final a API está pronta para o frontend do M08.
+"qualquer coisa" — e ao final a API está pronta para consumo externo e integração segura.
 
 > **As horas teóricas não estão num bloco separado.** Elas são as etapas 2, 5, 10, 12, 13,
 > 15 e 17 — em que a gente para de digitar e pensa — mais as explicações dentro de cada
@@ -20,7 +20,7 @@ Ao final você será capaz de:
 2. Validar entrada com DTOs, sem escrever `if` de validação.
 3. Explicar por que a entidade **não** deve ser exposta na resposta.
 4. Receber upload de arquivo com validação de tipo, tamanho e nome.
-5. Publicar um contrato OpenAPI que o frontend consome sem adivinhar.
+5. Publicar e revisar a documentação Swagger em `/api/docs`, com contrato OpenAPI, exemplos e erros.
 
 ---
 
@@ -38,7 +38,7 @@ POST /api/obras/1/capa                                → upload validado
 GET  /api/docs                                        → contrato completo, com formatos
 ```
 
-E um `openapi.json` que o M15 vai transformar nos tipos do frontend.
+E um `openapi.json` versionado, usado por clientes externos e pelo CI para verificar o contrato.
 
 ## 📋 Como este módulo funciona
 
@@ -46,7 +46,7 @@ Dezoito etapas. As três primeiras partem de um problema seu — o `POST` que pa
 não deveria — e o resto constrói a solução por partes.
 
 | Parte | O que é |
-|---|---|
+| --- | --- |
 | **Faça** | O comando ou o código, para digitar |
 | **Linha a linha** | Uma tabela explicando **cada elemento** |
 | **Rode** | Como verificar |
@@ -59,7 +59,7 @@ não deveria — e o resto constrói a solução por partes.
 ### As dezoito etapas
 
 | # | Etapa | Min | O que entra |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | [Ligar a validação global](#etapa-1--ligar-a-validação-global-15-min) | 15 | `ValidationPipe` |
 | 2 | [**Por que nada mudou**](#etapa-2--por-que-nada-mudou-15-min) | 15 | **o pipe precisa de um DTO** |
 | 3 | [O primeiro DTO de entrada](#etapa-3--o-primeiro-dto-de-entrada-25-min) | 25 | `class-validator` |
@@ -94,7 +94,7 @@ npm install class-validator class-transformer
 ```
 
 | Pacote | Para quê |
-|---|---|
+| --- | --- |
 | `class-validator` | Os decorators de regra: `@IsString`, `@Min`, `@IsOptional`… |
 | `class-transformer` | Converte o JSON cru numa **instância** da sua classe. Sem isto, os decorators não teriam onde agir |
 
@@ -115,7 +115,7 @@ app.useGlobalPipes(
 **Linha a linha:**
 
 | Opção | O que faz | Por que importa |
-|---|---|---|
+| --- | --- | --- |
 | `useGlobalPipes` | Aplica o pipe a **todas** as rotas. Um `ParseIntPipe` vale para um parâmetro; este vale para a aplicação inteira |
 | `whitelist: true` | **Remove** propriedades não declaradas no DTO | É a proteção contra *mass assignment* — etapa 5 |
 | `forbidNonWhitelisted: true` | Em vez de remover em silêncio, responde **400** | Erro de integração aparece cedo, não em produção |
@@ -165,7 +165,7 @@ o que ele faz           nada
 ### O que precisa existir
 
 | Precisa | Por quê |
-|---|---|
+| --- | --- |
 | Uma **classe**, não um tipo | Classe sobrevive à compilação; tipo não |
 | Com **decorators** de validação | São eles que o pipe lê, como o `@Get` é lido pelo roteador |
 
@@ -216,7 +216,7 @@ export class CriarObraDto {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@IsString()`, `@IsInt()` | Conferem o tipo **em tempo de execução** — que é onde o TypeScript não alcança |
 | `@Length(1, 200)` | Mínimo 1 impede título vazio; 200 casa com o `@Column({ length: 200 })` da entidade |
 | `@Min(1400) @Max(2100)` | Ano de publicação plausível. Uma regra de negócio, escrita onde ela pode ser aplicada |
@@ -290,7 +290,7 @@ e o terceiro responde 400 com:
 **Preencha:**
 
 | Requisição | Status | O corpo explica o erro? |
-|---|---|---|
+| --- | --- | --- |
 | Válida | | |
 | Título vazio, ano 3000 | | |
 | Campo `destaque` não declarado | | |
@@ -330,7 +330,7 @@ O nome vem daí: uma **atribuição em massa** de tudo que veio no corpo. O atac
 de nada sofisticado — basta descobrir um campo que você não esperava.
 
 | Campo | O que ele consegue |
-|---|---|
+| --- | --- |
 | `destaque` | Pôr a própria obra na vitrine |
 | `criadoEm` | Forjar a data de cadastro |
 | `papel` (numa entidade `Usuario`) | **Virar administrador** |
@@ -356,7 +356,7 @@ depois, e ele **aparece na resposta sozinho**, sem ninguém decidir isso.
 
 ### Problema 3 — acoplamento (contrato)
 
-Se a resposta **é** a entidade, então renomear uma coluna quebra o frontend. A decisão de
+Se a resposta **é** a entidade, então renomear uma coluna quebra clientes externos. A decisão de
 banco vaza para o contrato público da API.
 
 Com DTO de saída existe uma camada onde a mudança é **absorvida de propósito**: renomeia-se a
@@ -394,7 +394,7 @@ export class AtualizarObraDto extends PartialType(CriarObraDto) {}
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `PartialType(...)` | Uma função que **devolve uma classe nova**, com todos os campos do original marcados como opcionais |
 | `extends` | A classe resultante é a base da sua |
 | as validações | **São preservadas.** `titulo` continua limitado a 200 caracteres — só deixa de ser obrigatório |
@@ -443,7 +443,7 @@ export class ListarObrasDto {
 **Linha a linha:**
 
 | Trecho | Por quê |
-|---|---|
+| --- | --- |
 | `@Type(() => Number)` | *Query string* chega **sempre** como texto. Sem esta conversão, `@IsInt` reprovaria `"2"` |
 | `= 1` e `= 20` | Valor padrão na própria classe. **Some o `Number(pagina) \|\| 1` feio do M06** |
 | `@Min(1)` na página | Página 0 ou negativa geraria `OFFSET` inválido |
@@ -517,7 +517,7 @@ async atualizar(id: number, dto: AtualizarObraDto): Promise<Obra> {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `const { categoriaIds, ...campos }` | Desestruturação com *rest*: separa `categoriaIds` e junta **todo o resto** em `campos`. É a tradução DTO → entidade, e ela mora no service |
 | `({ id }) as Categoria` | Para ligar uma relação basta o id. O TypeORM grava as linhas em `obra_categoria` a partir disso, sem carregar as categorias inteiras |
 | `if (categoriaIds)` | **No `PATCH`, `undefined` significa "não mexa nas categorias" e `[]` significa "tire todas".** São coisas diferentes, e sem o `if` você apagaria as categorias em toda atualização que não as mencionasse |
@@ -576,7 +576,7 @@ async buscarUm(@Param("id", ParseIntPipe) id: number) {
 ### O que sumiu, e o que apareceu
 
 | Sumiu | Por quê |
-|---|---|
+| --- | --- |
 | `criadoEm`, `atualizadoEm` | Auditoria interna. O cliente não usa |
 | `autorId` cru | Redundante: a autora já vem como objeto |
 | A biografia inteira da autora | A tela mostra o nome. Trazer o resto é banda desperdiçada |
@@ -585,16 +585,16 @@ async buscarUm(@Param("id", ParseIntPipe) id: number) {
 
 | Apareceu | Por quê |
 |---|---|
-| `exemplaresDisponiveis` | Um número **calculado** que a entidade não tem. Sem ele, o frontend faria a contagem — ou três requisições |
+| `exemplaresDisponiveis` | Um número **calculado** que a entidade não tem. Sem ele, cada cliente faria a contagem — ou três requisições |
 
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `static de(obra)` | Um método de classe, chamado sem instanciar: `ObraResposta.de(x)`. A tradução mora **no DTO**, não espalhada pelos controllers |
 | `?? []` nas duas relações | Se alguém chamar o `de()` com uma obra buscada **sem** `relations`, o `map` receberia `undefined` e quebraria. O `?? []` devolve zero em vez de derrubar |
-| `autor: { id, nome }` | Só os dois campos que a tela usa |
-| `@ApiProperty({ nullable: true })` | Documenta que o campo pode vir nulo. O M15 gera o tipo do frontend a partir disso |
+| `autor: { id, nome }` | Só os dois campos necessários ao consumidor |
+| `@ApiProperty({ nullable: true })` | Documenta que o campo pode vir nulo no contrato OpenAPI |
 
 > **Esse é o argumento do DTO de saída.** Não é cerimônia: é **desenhar a resposta para quem
 > vai consumi-la**, em vez de despejar a tabela e desejar boa sorte.
@@ -625,7 +625,7 @@ novo para cada operação.
 ### O mapa completo
 
 | Método | Rota | Faz | Status de sucesso |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `GET` | `/obras` | Lista | 200 |
 | `GET` | `/obras/42` | Detalha | 200 · **404** se não existe |
 | `POST` | `/obras` | Cria | **201** |
@@ -640,7 +640,7 @@ souber o padrão consegue adivinhar a API inteira.
 ### `PATCH` ou `PUT`?
 
 | | `PUT` | `PATCH` |
-|---|---|---|
+| --- | --- | --- |
 | Semântica | Substitui o recurso **inteiro** | Altera **só o que veio** |
 | Campo omitido | É **apagado** | Fica como estava |
 | Serve para | Substituição completa | Formulário de edição |
@@ -712,7 +712,7 @@ export class AcervoController {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@ApiTags("obras")` | Agrupa as rotas numa seção do Swagger. Sem ele, tudo cai em "default" |
 | `@HttpCode(201)` | O padrão do Nest **já é** 201 no `POST`; explicitar deixa o contrato legível para quem lê o código |
 | `@HttpCode(204)` | Este **é** necessário: o padrão do `DELETE` seria 200 |
@@ -741,7 +741,7 @@ Você usou cinco status. Vale saber escolher, porque é decisão de projeto e ca
 ### A família dos 2xx — deu certo
 
 | Status | Quando |
-|---|---|
+| --- | --- |
 | **200** OK | Sucesso com corpo. O caso comum |
 | **201** Created | Criou um recurso novo. Idealmente com o recurso no corpo |
 | **204** No Content | Sucesso **sem** corpo. Típico do `DELETE` |
@@ -749,7 +749,7 @@ Você usou cinco status. Vale saber escolher, porque é decisão de projeto e ca
 ### A família dos 4xx — o cliente errou
 
 | Status | Quando | No seu código |
-|---|---|---|
+| --- | --- | --- |
 | **400** Bad Request | A entrada não faz sentido | O `ValidationPipe` (etapa 4) |
 | **401** Unauthorized | Não sabemos quem você é | M12 |
 | **403** Forbidden | Sabemos quem você é, e você não pode | M12 |
@@ -775,7 +775,7 @@ caminho de arquivo. O Nest já protege por padrão em produção; o M13 confere 
 **Exercite:** que status para cada situação?
 
 | Situação | Status |
-|---|---|
+| --- | --- |
 | `POST /obras` com sucesso | |
 | `POST /exemplares` com tombo repetido | |
 | `GET /obras/9999` inexistente | |
@@ -801,7 +801,7 @@ throw new BadRequestException("Envie um arquivo em 'arquivo'");
 Cada uma vira o status certo, com corpo JSON padronizado, sem você escrever número nenhum.
 
 | O service faz | O framework faz |
-|---|---|
+| --- | --- |
 | Lança linguagem de **domínio** ("não encontrada") | Traduz para HTTP (404) |
 | Descreve o problema em português | Monta `{message, error, statusCode}` |
 | Não importa `Response` | Escreve a resposta |
@@ -852,7 +852,7 @@ async enviarCapa(
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `POST :id/capa` | Uma **sub-rota** do recurso. A capa pertence à obra, e a URL diz isso |
 | `FileInterceptor("arquivo")` | Lê o campo `arquivo` de um corpo `multipart/form-data` |
 | `multipart/form-data` | O formato do M01 para enviar binário. **JSON não transporta binário** — teria de virar base64, crescendo 33% |
@@ -903,7 +903,7 @@ function pareceImagem(buffer: Buffer, mimetype: string): boolean {
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `0xff, 0xd8, 0xff` | Todo JPEG começa com esses três bytes. É parte do formato, não convenção |
 | `0x89, 0x50, 0x4e, 0x47` | O PNG começa com `\x89PNG` |
 | `every((b, i) => buffer[i] === b)` | Compara byte a byte, na posição |
@@ -918,7 +918,7 @@ const nome = `${randomUUID()}${extname(arquivo.originalname)}`;   // ✅
 O nome original é **entrada do usuário como qualquer outra**, e serve para três ataques:
 
 | Nome enviado | O que consegue |
-|---|---|
+| --- | --- |
 | `../../etc/cron.d/tarefa` | *Path traversal*: escrever fora da pasta de uploads |
 | `capa.jpg` (o mesmo de outra pessoa) | Sobrescrever o arquivo de outro usuário |
 | `orçamento-final-v3.jpg` | Vazar informação pelo próprio nome |
@@ -932,7 +932,7 @@ Na PaaS do M16, o disco é recriado a cada deploy: **os uploads somem**. Não é
 contêiner funciona.
 
 | Ambiente | Onde gravar |
-|---|---|
+| --- | --- |
 | Desenvolvimento | `backend/uploads/` — e ponha no `.gitignore` |
 | Produção | Armazenamento de objetos: S3, R2, Blob |
 
@@ -970,7 +970,7 @@ npm run gerar:schema
 caminho.
 
 | O que aparece | Veio de |
-|---|---|
+| --- | --- |
 | `titulo` com `maxLength: 200` | `@Length(1, 200)` no DTO |
 | `anoPublicacao` como opcional | `@ApiPropertyOptional` |
 | A resposta 404 no `GET /obras/{id}` | `@ApiNotFoundResponse` |
@@ -987,8 +987,8 @@ contrato.
 
 **Faça:** commite o arquivo.
 
-No M15 ele vira os tipos do frontend, e o CI passa a **falhar** quando o arquivo commitado
-não bate com o gerado. É assim que o contrato deixa de ser promessa e vira verificação.
+O CI passa a **falhar** quando o arquivo commitado não bate com o schema gerado. É assim que
+o contrato deixa de ser promessa e vira verificação.
 
 > **Repare no que não aconteceu:** ninguém escreveu documentação. Ela saiu dos mesmos
 > decorators que já estavam lá fazendo outra coisa — validar entrada e mapear rota. Quarto
@@ -1001,7 +1001,7 @@ não bate com o gerado. É assim que o contrato deixa de ser promessa e vira ver
 O backend está pronto. Vale ver o conjunto, porque agora todas as peças existem.
 
 | Camada | Responsabilidade | Onde você a construiu |
-|---|---|---|
+| --- | --- | --- |
 | **DTO** | O formato aceito e devolvido | Etapas 3, 6, 7, 9 |
 | **Controller** | Rota, status, extração de parâmetros | Etapa 11 |
 | **Service** | Regra de negócio | M06, etapa 8 |
@@ -1016,7 +1016,7 @@ possíveis em vez de duas:
 E o critério original do M03 continua valendo, agora afiado:
 
 | Este código… | Camada |
-|---|---|
+| --- | --- |
 | muda se a origem não for HTTP | **Controller** |
 | descreve o que o cliente pode mandar | **DTO** |
 | não muda vindo de um comando de terminal | **Service** |
@@ -1052,21 +1052,21 @@ construiu. **Elas se encaixam em volta**, que era exatamente a promessa da etapa
 
 ---
 
-## Etapa 18 — O que vai para o M08 (5 min)
+## Etapa 18 — O que vai para o projeto (5 min)
 
-O backend acabou. O que o frontend recebe dele:
+O backend está pronto para integração. O que a equipe entrega aos consumidores da API:
 
 | Entrega | Onde |
-|---|---|
+| --- | --- |
 | Cinco rotas REST, com métodos e status corretos | `/api/obras` |
 | Entrada validada, com mensagens em lista | `ValidationPipe` + DTOs |
 | Respostas desenhadas para a tela, sem campo interno | `ObraResposta` |
 | Erros padronizados, distinguíveis pelo status | 400, 404, 409 |
 | **Um contrato legível por máquina** | `openapi.json` |
 
-A última linha é a que muda o M08. O frontend não vai adivinhar nomes de campo nem descobrir
-formatos por tentativa: ele lê o contrato. E no M15, o contrato vira **tipo TypeScript**, de
-modo que mudar um campo na entidade quebra a compilação do frontend **antes** do deploy.
+A última linha é a que protege a integração: nenhum consumidor precisa adivinhar nomes de campo
+ou descobrir formatos por tentativa. O CI compara o schema gerado com o arquivo versionado,
+de modo que uma mudança de contrato seja percebida **antes** do deploy.
 
 💼 **No mercado:** desenhar rota, escolher status e validar entrada é o trabalho diário de
 quem faz backend. Em entrevista, *"quando você usaria PATCH em vez de PUT?"* e *"como você
@@ -1078,7 +1078,7 @@ implementar as duas respostas.
 ## ⚠️ Erros comuns
 
 | Sintoma | Diagnóstico |
-|---|---|
+| --- | --- |
 | DTO não valida nada | Faltou `useGlobalPipes`, ou o `@Body()` ainda está tipado como `Partial<Obra>` — etapa 2 |
 | `anoPublicacao` da query reprova sendo número | Faltou `@Type(() => Number)` e `transform: true` |
 | `Type 'CriarObraDto' is not assignable to 'Partial<Obra>'` | O service ainda espera a entidade. É a etapa 8 |

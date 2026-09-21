@@ -19,7 +19,7 @@ Ao final você será capaz de:
 4. Explicar o que **injeção de dependência** resolve, tendo visto o problema antes da solução.
 5. Criar endpoints que respondem JSON, com rota, parâmetro e status HTTP corretos.
 6. Ler configuração de fora do código e **impedir a aplicação de subir** quando faltar.
-7. Publicar o contrato da API em OpenAPI, gerado a partir do código.
+7. Publicar a documentação interativa da API com Swagger em `/api/docs` e gerar o schema OpenAPI a partir do código.
 
 ---
 
@@ -32,7 +32,7 @@ GET /api/obras          → 200  [{"id":1,"titulo":"Dom Casmurro","ano":1899}, �
 GET /api/obras/1        → 200  {"id":1,"titulo":"Dom Casmurro","ano":1899}
 GET /api/obras/abc      → 400  {"message":"Validation failed (numeric string is expected)"…}
 GET /api/obras/999      → 404  {"message":"Obra 999 não encontrada"…}
-GET /api/docs           → a documentação, gerada sozinha
+GET /api/docs           → Swagger UI, gerado a partir do código
 ```
 
 Três rotas parecem pouco. O que importa não são elas: é a **estrutura** que o M04 (banco), o
@@ -44,7 +44,7 @@ Vinte etapas curtas, em ordem. Nenhum comando tem mais que uma linha. Cada etapa
 as mesmas quatro partes:
 
 | Parte | O que é |
-|---|---|
+| --- | --- |
 | **Faça** | O comando ou o código, para digitar |
 | **Linha a linha** | Uma tabela explicando **cada elemento** do que você acabou de escrever |
 | **Rode** | Como verificar |
@@ -72,7 +72,7 @@ material escreve `curl.exe`; no macOS e no Linux, apague o `.exe`.
 ### As vinte etapas
 
 | # | Etapa | Min | O que entra |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | [Conferir as ferramentas](#etapa-1--conferir-as-ferramentas-5-min) | 5 | — |
 | 2 | [Instalar a CLI do Nest](#etapa-2--instalar-a-cli-do-nest-5-min) | 5 | o que é uma CLI |
 | 3 | [Criar o projeto](#etapa-3--criar-o-projeto-10-min) | 10 | `nest new` |
@@ -116,7 +116,7 @@ npm --version
 **Linha a linha:**
 
 | Comando | O que é |
-|---|---|
+| --- | --- |
 | `node` | O programa que **executa** JavaScript fora do navegador. É ele que vai rodar a sua API |
 | `npm` | O gerenciador de pacotes. Instala bibliotecas e roda os atalhos do projeto. **Vem junto com o Node** — você não instalou separado |
 
@@ -152,7 +152,7 @@ npm install -g @nestjs/cli@12
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `npm install` | Instala um pacote |
 | `-g` | *global*: instala **na sua máquina**, não dentro de um projeto. Assim o comando `nest` fica disponível em qualquer pasta |
 | `@nestjs/cli` | O pacote. O `@nestjs/` é um *escopo*: um prefixo que agrupa os pacotes oficiais do projeto Nest |
@@ -198,7 +198,7 @@ nest new backend --skip-git
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `nest new` | Cria um projeto novo, com a estrutura padrão |
 | `backend` | O nome da pasta que vai nascer |
 | `--skip-git` | **Importante.** Sem isto a CLI cria um repositório Git **dentro** do seu, e você passa meia hora sem entender por que o `git status` da raiz ignora tudo que está em `backend/` |
@@ -241,7 +241,7 @@ npm run start:dev
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `npm run` | Executa um *script* declarado no `package.json` |
 | `start:dev` | O nome do script. Abra o `package.json` e procure `"scripts"`: você vai ver que `start:dev` é um apelido para `nest start --watch` |
 | `--watch` (dentro do script) | Fica observando os arquivos. A cada `Ctrl+S`, recompila e reinicia sozinho |
@@ -291,7 +291,7 @@ await bootstrap();
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `import { X } from "y"` | Traz a coisa chamada `X` de dentro do módulo `y`. As chaves indicam **exportação nomeada** — `y` exporta várias coisas e você quer só essa |
 | `from "@nestjs/core"` | Sem `./` na frente: é um **pacote** de `node_modules`, baixado pelo npm |
 | `from "./app.module.js"` | Com `./`: é um arquivo **seu**. E termina em `.js` — leia o quadro abaixo, é a pergunta que todo mundo faz |
@@ -321,7 +321,7 @@ logo, o import    "./app.module.js"
 **A regra, que vale para o curso inteiro:**
 
 | Importando… | Como escrever | Exemplo |
-|---|---|---|
+| --- | --- | --- |
 | um arquivo **seu** | com `.js` no fim | `from "./acervo.service.js"` |
 | um **pacote** instalado | sem extensão | `from "@nestjs/common"` |
 
@@ -373,7 +373,7 @@ export class AppController {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@Controller()` | Marca a classe como controller e define o **prefixo de rota**. Vazio aqui, então as rotas começam na raiz |
 | `export class` | `class` é do JavaScript; `export` disponibiliza a classe para outros arquivos importarem |
 | `constructor(private readonly appService: AppService)` | Recebe um `AppService` já pronto. **Volte a esta linha na etapa 13** — ela é o assunto do módulo inteiro |
@@ -420,7 +420,7 @@ deles. É exatamente por isso que o terminal, ao iniciar, imprime:
 Ele está lendo o que os decorators anexaram e anunciando o que encontrou.
 
 | Pergunta comum | Resposta |
-|---|---|
+| --- | --- |
 | O `@` é do TypeScript ou do Nest? | Da linguagem. O Nest só define **quais** decorators existem e o que fazer com eles |
 | Por que os parênteses em `@Get()`? | Porque é uma chamada de função. `@Get()` chama sem argumento; `@Get(":id")` passa o caminho |
 | Onde mais vou ver isso? | Em `@Entity()` no M04 e em `@IsString()` no M07. **Um mecanismo, três usos** |
@@ -453,7 +453,7 @@ decorator. O módulo não *faz* nada: ele **declara** o que existe.
 **As três listas, que é tudo o que um módulo é:**
 
 | Lista | O que vai nela | Pergunta que ela responde |
-|---|---|---|
+| --- | --- | --- |
 | `imports` | Outros módulos | "De que outros pedaços do sistema eu preciso?" |
 | `controllers` | Quem responde a requisições HTTP | "Quais rotas nascem aqui?" |
 | `providers` | Quem pode ser **injetado** — os services | "Quem o Nest tem permissão de criar e entregar?" |
@@ -520,7 +520,7 @@ nest generate service acervo --no-spec
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `generate module acervo` | Cria `src\acervo\acervo.module.ts` **e** o registra no `imports` do `app.module.ts` |
 | `generate controller acervo` | Cria o controller **e** o registra em `controllers` do `AcervoModule` |
 | `generate service acervo` | Cria o service **e** o registra em `providers` |
@@ -599,7 +599,7 @@ export class AcervoController {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@Controller("obras")` | Todas as rotas desta classe começam em `/obras` |
 | `@Get()` | Sem caminho: atende exatamente `/obras` |
 | `listar()` | O nome do método é **seu**. Ele não vira parte da URL — quem define a URL são os decorators |
@@ -612,7 +612,7 @@ export class AcervoController {
 **Repare no que você não escreveu:**
 
 | Você não escreveu | Quem fez |
-|---|---|
+| --- | --- |
 | `res.json(...)` | O Nest converteu o array em JSON sozinho |
 | `Content-Type: application/json` | O Nest pôs o cabeçalho ao ver que você devolveu um objeto |
 | `status(200)` | 200 é o padrão para `GET` |
@@ -686,7 +686,7 @@ arquivo, os dois editam as mesmas linhas — e o M00 já mostrou como termina.
 Dessas quatro situações sai a divisão que o Nest impõe:
 
 | Peça | Responsabilidade | O que **não** deve fazer |
-|---|---|---|
+| --- | --- | --- |
 | **Module** | Agrupar o que pertence a um domínio e declarar o que ele expõe | Conter lógica |
 | **Controller** | Traduzir HTTP ↔ chamada de método: ler rota, corpo e query; devolver dados | Falar com o banco, conter regra de negócio |
 | **Service** (provider) | A regra de negócio e o acesso a dados | Saber que HTTP existe |
@@ -701,7 +701,7 @@ E a pergunta que resolve 90% das dúvidas de "onde eu ponho este código?":
 Aplique aos casos que você já viu:
 
 | Código | Muda sem HTTP? | Camada |
-|---|---|---|
+| --- | --- | --- |
 | A lista de obras | Não. É a mesma lista de qualquer origem | **Service** |
 | Converter `:id` da URL em número | Sim. Sem URL não há `:id` | **Controller** |
 | Decidir que obra sem exemplar não empresta | Não. É regra da biblioteca | **Service** |
@@ -754,7 +754,7 @@ export class AcervoService {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `export type Obra = { … }` | Declara um **tipo**: a forma que um objeto obra tem. Não gera código nenhum ao rodar — serve só para o TypeScript conferir |
 | `private obras: Obra[]` | Propriedade da classe. `Obra[]` é "array de Obra"; `private` impede acesso de fora |
 | `listar(): Obra[]` | Se você errar e devolver outra coisa, o TypeScript acusa antes de rodar |
@@ -809,7 +809,7 @@ export class AcervoController {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `constructor(...)` | Método chamado quando a classe é instanciada. **Quem a instancia é o Nest**, não você |
 | `private readonly acervo` | Atalho do TypeScript: declara e atribui `this.acervo` numa linha |
 | `: AcervoService` | **É por este tipo que o Nest identifica o que entregar.** Ele lê o tipo do parâmetro, procura quem está declarado em `providers` e entrega uma instância pronta |
@@ -848,7 +848,7 @@ in the AcervoModule module.
 **Leia a mensagem inteira:**
 
 | Parte | Significado |
-|---|---|
+| --- | --- |
 | `can't resolve dependencies of the AcervoController` | Ele tentou criar o controller e não conseguiu |
 | `(?)` | A posição do parâmetro que não resolveu. Com dois parâmetros e o segundo faltando, seria `(AcervoService, ?)` |
 | `at index [0]` | O primeiro parâmetro do construtor |
@@ -902,7 +902,7 @@ Acrescente `Param` e `ParseIntPipe` ao `import` de `@nestjs/common`.
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@Get(":id")` | Os dois-pontos marcam um **trecho variável**. Casa com `/obras/1`, `/obras/42`, `/obras/qualquercoisa` |
 | `@Param("id")` | Decorator **de parâmetro**: extrai da URL o pedaço chamado `id` e entrega ao seu método. O nome tem de bater com o do `@Get(":id")` |
 | `ParseIntPipe` | Converte o texto em número **antes** de o método ser chamado |
@@ -933,7 +933,7 @@ curl.exe -i http://localhost:3000/obras/abc
 *(No macOS ou Linux: `curl` sem o `.exe`.)*
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `curl.exe` | Faz uma requisição HTTP pelo terminal e imprime a resposta |
 | `-i` | *include*: mostra também os **cabeçalhos**, e é na primeira linha deles que está o status |
 
@@ -987,7 +987,7 @@ buscarUm(id: number): Obra {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `throw new NotFoundException(...)` | Lança uma exceção que o Nest reconhece e traduz para HTTP 404 |
 | `` `Obra ${id} não encontrada` `` | *Template string*: as crases permitem interpolar variáveis com `${...}` |
 | `: Obra` (sem `\| undefined`) | O tipo de retorno mudou: agora ou devolve uma obra, ou lança. Nunca devolve nada |
@@ -1007,7 +1007,7 @@ curl.exe -i http://localhost:3000/obras/999
 **O ponto da etapa está no que o service não fez:**
 
 | O service não… | E ainda assim… |
-|---|---|
+| --- | --- |
 | importou `Response` | a resposta saiu certa |
 | escreveu o número `404` | o status é 404 |
 | montou o JSON de erro | o corpo veio padronizado |
@@ -1079,7 +1079,7 @@ export class AppModule {}
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `ConfigModule.forRoot(...)` | Lê o `.env` uma vez, na inicialização. O sufixo `forRoot` é convenção do Nest para "configure este módulo aqui, uma vez só" |
 | `isGlobal: true` | Deixa o `ConfigService` disponível em **toda** a aplicação. Sem isto, cada módulo precisaria importar o `ConfigModule` de novo |
 
@@ -1103,7 +1103,7 @@ export class AcervoService {
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `constructor(private readonly config: ConfigService)` | Mesma injeção da etapa 13, agora com uma classe do próprio framework |
 | `.get<string>("...")` | O `<string>` entre os sinais de menor/maior diz ao TypeScript o tipo esperado. Chama-se *genérico* |
 | `?? "sem nome"` | Se a variável não existir, usa esse valor. Na etapa 17 essa rede de proteção sai |
@@ -1171,7 +1171,7 @@ export function validarEnv(bruto: Record<string, unknown>) {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `z.object({...})` | Descreve o formato esperado de um objeto |
 | `z.coerce.number()` | Variável de ambiente é **sempre texto**. O `coerce` converte antes de validar |
 | `z.string("...")` | A mensagem para quando a chave **não existe** |
@@ -1265,7 +1265,7 @@ export function montarDocumento(app: INestApplication) {
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `DocumentBuilder` | Monta os metadados: título, descrição, versão. Os pontos encadeados são *method chaining* — cada método devolve o próprio objeto |
 | `createDocument(app, config)` | **Varre a aplicação inteira** e monta o schema OpenAPI a partir dos decorators dos controllers |
 
@@ -1286,8 +1286,8 @@ mecanismo, e o M04 e o M07 trazem mais dois.
 
 ### Gravar o schema em arquivo
 
-A página serve para pessoas. O **M15** precisa do schema como arquivo, para gerar os tipos do
-frontend a partir dele.
+A página serve para pessoas. O projeto também versiona o schema como arquivo para que clientes
+externos e o CI possam consultá-lo e verificar a compatibilidade do contrato.
 
 **Faça:** crie `src\gerar-schema.ts`:
 
@@ -1311,7 +1311,7 @@ gerar();
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `{ logger: false }` | Silencia os logs de inicialização. O script só deve imprimir uma linha |
 | `setGlobalPrefix("api")` | Precisa repetir aqui: este script monta a aplicação por conta própria |
 | `JSON.stringify(x, null, 2)` | Converte para texto. O `2` é a indentação — sem ele o arquivo sai numa linha só e o `git diff` fica inútil |
@@ -1337,7 +1337,8 @@ memória, o Swagger a percorre, e pronto. É por isso que o comando roda em segu
 para rodar no CI a cada *pull request*.
 
 Esse arquivo é o **contrato** de que o M02 falou. No M07 ele ganha os formatos de entrada e
-saída; no M15, vira os tipos do frontend. Como nasce do código, não tem como divergir dele.
+saída, exemplos e caminhos de erro. Como nasce do código, o CI consegue detectar divergências
+antes do deploy.
 
 ---
 
@@ -1392,7 +1393,7 @@ exemplo concreto se destaca de quem responde "no service, porque sim".
 ## ⚠️ Erros comuns
 
 | Sintoma | Diagnóstico |
-|---|---|
+| --- | --- |
 | `nest` não é reconhecido como comando | A CLI não foi instalada, ou o terminal foi aberto antes da instalação. Feche e reabra |
 | `curl : Não é possível localizar um parâmetro` | No PowerShell, `curl` é outro programa. Escreva `curl.exe` |
 | `Nest can't resolve dependencies of the AcervoController (?)` | O `AcervoService` não está em `providers` do `AcervoModule` |

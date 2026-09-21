@@ -1,17 +1,20 @@
-# Etapa 1 — Definição do tema do projeto
+# Etapa 1 — Definição e planejamento do projeto
 
-> **CH:** 4h (2h teóricas · 2h práticas) · **Semanas 6 e 8** · **Entrega P1** (semana 8) · **Peso:** 7,5%
+> **CH:** 8h (3h teóricas · 5h práticas) · **Semanas 6 a 10** · **Entrega P1** (semana 10) · **Peso:** 15%
 
 ## Atividades previstas
 
 - Levantamento de problemas relevantes para a equipe
 - Seleção do problema a ser abordado
 - Proposta de solução a ser desenvolvida
+- Organização do trabalho da equipe e definição dos papéis
+- Criação do backlog, modelo de dados, arquitetura e matriz de riscos
+- Validação do plano com a organização parceira
 
 ## 🎯 O que esta etapa produz
 
-Um documento curto que responde, com evidências: **qual problema, de quem, por que vale a
-pena, e o que exatamente vamos construir**.
+Um documento que responde, com evidências: **qual problema, de quem, por que vale a pena,
+o que exatamente vamos construir e como a equipe vai desenvolver e validar a solução**.
 
 ---
 
@@ -64,7 +67,7 @@ Agrupe problemas semelhantes. Quase sempre 12 problemas viram 4 ou 5 temas.
 Pontue cada problema candidato de 1 a 5 em cada critério. Multiplique pelo peso.
 
 | Critério | Peso | O que significa |
-|---|---:|---|
+| --- | ---: | --- |
 | **Existe organização parceira acessível** | 3 | Há uma pessoa real, com nome e contato, disposta a conversar |
 | **Impacto social** | 3 | Resolver isso melhora concretamente a vida de alguém |
 | **Viabilidade em 20 semanas** | 3 | Cabe no MVP, com a stack da disciplina |
@@ -148,16 +151,47 @@ organização parceira — e a discussão desagradável na entrega.
 Métricas verificáveis, não intenções:
 
 | Objetivo | Como mediremos | Meta |
-|---|---|---|
+| --- | --- | --- |
 | Reduzir tempo de registro de empréstimo | Cronômetro, 5 registros | de ~3 min para < 1 min |
 | Eliminar ferramentas sem rastreio | Relatório do sistema | 100% dos empréstimos registrados |
 | A organização usa de fato | Registros no sistema após 2 semanas | ≥ 20 registros reais |
 
 ---
 
-## 📦 Entrega P1 — Documento de definição do tema
+## 4. Planejamento da execução
 
-**Prazo:** semana 8 · **Formato:** PDF (máx. 6 páginas) + arquivos no repositório
+Depois de definir o problema e o MVP, a equipe deve preparar a execução do desenvolvimento.
+Use os modelos de [contrato de equipe](../modelos-de-documentos/contrato-de-equipe.md),
+[backlog](../modelos-de-documentos/backlog-e-historias.md),
+[matriz de riscos](../modelos-de-documentos/matriz-de-riscos.md) e [ADR](../modelos-de-documentos/adr.md).
+
+### 4.1 Acordo de trabalho
+
+Registre canal e prazo de comunicação, reuniões, disponibilidade real, decisões, padrão de
+branches e PRs, Definition of Done, tratamento de conflitos e plano para ausências. Defina
+os papéis de Product Owner, Tech Lead, Scribe e Ops, com rotação durante o desenvolvimento.
+
+### 4.2 Backlog e capacidade
+
+Escreva as histórias no formato "Como, quero, para" e priorize com MoSCoW. O MVP deve conter
+apenas histórias *Must*, com critérios de aceite e estimativas. Distribua o trabalho até a
+semana 18, reservando folga para integração, testes e deploy.
+
+### 4.3 Projeto técnico
+
+Entregue o modelo de dados com entidades, cardinalidades, restrições e política de exclusão;
+o desenho da arquitetura; pelo menos três ADRs; e uma matriz de riscos com exposição,
+mitigação, plano B e responsável. Valide o fluxo principal e as decisões com a organização.
+
+### 4.4 Cronograma de desenvolvimento
+
+O cronograma deve detalhar as semanas 11 a 18, com histórias, responsáveis, marcos de
+integração, testes, segurança, implantação e critérios de pronto. Mantenha o quadro do
+projeto atualizado durante toda a execução.
+
+## 📦 Entrega P1 — Documento de definição e planejamento
+
+**Prazo:** semana 10 · **Formato:** PDF + arquivos no repositório
 
 Conteúdo obrigatório:
 
@@ -172,13 +206,19 @@ Conteúdo obrigatório:
 9. **Escopo** — as três colunas
 10. **Critérios de sucesso** — tabela com metas verificáveis
 11. **Carta de anuência** — assinada pela organização
+12. **Contrato de equipe**, papéis e Definition of Done
+13. **Backlog priorizado**, critérios de aceite e estimativas
+14. **Modelo de dados, arquitetura, pelo menos 3 ADRs e estratégia de documentação Swagger/OpenAPI**
+15. **Matriz de riscos** com mitigação, plano B e responsáveis
+16. **Cronograma das semanas 11 a 18** e link do quadro de projeto
+17. **Evidência de validação** do plano com a organização parceira
 
 Rubrica em [`../../avaliacao/rubrica-etapa-1.md`](../../avaliacao/rubrica-etapa-1.md).
 
 ## ⚠️ Erros que reprovam esta etapa
 
 | Erro | Consequência |
-|---|---|
+| --- | --- |
 | Não conversar com a organização | O projeto inteiro é construído sobre suposição |
 | Escolher a solução antes do problema | Solução em busca de problema; ninguém usa |
 | Escopo de 15 funcionalidades | A Etapa 3 não fecha |

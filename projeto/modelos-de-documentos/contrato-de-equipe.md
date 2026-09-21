@@ -1,6 +1,6 @@
 # Contrato de Equipe
 
-> Etapa 2 · Acordo interno, assinado por todos. Revisar ao fim de cada sprint.
+> Etapa 1 · Acordo interno, assinado por todos. Revisar ao fim de cada sprint.
 > **Regra:** nada de frases genéricas. Cada resposta precisa ser verificável.
 
 **Equipe:** `<nome>` · **Data:** `<AAAA-MM-DD>` · **Revisão nº:** `<1>`
@@ -12,7 +12,7 @@
 Seja honesto. Um número inflado aqui vira crise na semana 18.
 
 | Nome | Horas/semana | Melhores horários | Compromissos que competem |
-|---|---:|---|---|
+| --- | ---: | --- | --- |
 | | | | |
 | | | | |
 | | | | |
@@ -22,7 +22,7 @@ Seja honesto. Um número inflado aqui vira crise na semana 18.
 ## 2. Comunicação
 
 | Item | Acordo |
-|---|---|
+| --- | --- |
 | Canal principal | |
 | Canal para urgência | |
 | Prazo máximo de resposta | |
@@ -32,7 +32,7 @@ Seja honesto. Um número inflado aqui vira crise na semana 18.
 ## 3. Reuniões
 
 | Reunião | Quando | Duração | Formato | Quem conduz |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Acompanhamento | | 10 min | | Rotativo |
 | Planejamento de sprint | | 30 min | | PO |
 | Revisão de sprint | | 30 min | | PO |
@@ -43,7 +43,7 @@ Seja honesto. Um número inflado aqui vira crise na semana 18.
 ## 4. Papéis e rotação
 
 | Etapa | Product Owner | Tech Lead | Scribe | Ops |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | 1 | | | | |
 | 2 | | | | |
 | 3 | | | | |
@@ -52,7 +52,7 @@ Seja honesto. Um número inflado aqui vira crise na semana 18.
 ## 5. Fluxo de trabalho técnico
 
 | Item | Acordo |
-|---|---|
+| --- | --- |
 | Padrão de nome de branch | `feat/`, `fix/`, `docs/` + descrição curta |
 | Padrão de commit | Conventional Commits |
 | Aprovações necessárias no PR | `<1 ou 2>` |
@@ -77,7 +77,7 @@ Uma tarefa só está pronta quando:
 ## 7. Decisões
 
 | Situação | Como decidimos |
-|---|---|
+| --- | --- |
 | Decisão técnica com divergência | |
 | Empate | |
 | Mudança de escopo | |
@@ -88,7 +88,7 @@ Decisões técnicas relevantes viram **ADR** no repositório.
 ## 8. Conflitos e não entregas
 
 | Situação | O que fazemos |
-|---|---|
+| --- | --- |
 | Alguém não entregou o combinado, sem avisar | 1º: conversa direta. 2º: `<...>`. 3º: `<...>` |
 | Discordância técnica que trava o trabalho | |
 | Alguém está sobrecarregado | |
@@ -111,7 +111,7 @@ Assinamos declarando que lemos, concordamos e nos comprometemos com este contrat
 ele pode ser revisado ao fim de cada sprint por consenso.
 
 | Nome | Assinatura | Data |
-|---|---|---|
+| --- | --- | --- |
 | | | |
 | | | |
 | | | |

@@ -1,6 +1,6 @@
 # Matriz de Riscos
 
-> Etapa 2 · Revisar em toda retrospectiva de sprint.
+> Etapa 1 · Revisar em toda retrospectiva de sprint.
 
 ## Como usar
 
@@ -8,7 +8,7 @@
 **Impacto:** B (atrasa uma tarefa) · M (atrasa uma sprint) · A (compromete a entrega)
 
 | | Impacto B | Impacto M | Impacto A |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Prob. A** | Média | Alta | **Crítica** |
 | **Prob. M** | Baixa | Média | Alta |
 | **Prob. B** | Baixa | Baixa | Média |
@@ -16,7 +16,7 @@
 **Resposta por exposição:**
 
 | Exposição | O que fazer |
-|---|---|
+| --- | --- |
 | Crítica | Ação preventiva **agora**, com responsável e prazo; plano B pronto |
 | Alta | Mitigação planejada nesta sprint |
 | Média | Monitorar; revisar a cada retrospectiva |
@@ -27,7 +27,7 @@
 ## Matriz do projeto
 
 | # | Risco | Prob. | Imp. | Expos. | Mitigação (reduz a probabilidade) | Plano B (reduz o impacto) | Responsável | Situação |
-|---|---|:---:|:---:|:---:|---|---|---|---|
+| --- | --- | :---: | :---: | :---: | --- | --- | --- | --- |
 | R01 | | | | | | | | Ativo |
 | R02 | | | | | | | | Ativo |
 | R03 | | | | | | | | |
@@ -41,7 +41,7 @@
 Use como ponto de partida — adapte ao seu contexto, não copie.
 
 | Risco | Prob. típica | Imp. | Mitigação | Plano B |
-|---|:---:|:---:|---|---|
+| --- | :---: | :---: | --- | --- |
 | Organização parceira fica indisponível | M | A | Reuniões agendadas com antecedência; 2ª pessoa de contato | Validar com usuários finais; docente aciona parceiro reserva |
 | Integrante com sobrecarga (trabalho, saúde) | A | M | Disponibilidade real declarada; tarefas pequenas | Redistribuir na retrospectiva; renegociar escopo |
 | Escopo cresce durante o projeto | A | A | Escopo declarado por escrito; troca 1 por 1 | Cortar Should e Could |

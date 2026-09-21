@@ -65,7 +65,7 @@ Percorra **na véspera**, não na hora. Cada item aqui já derrubou nota de algu
 - [ ] Todos os integrantes com commits significativos
 - [ ] Quadro do projeto refletindo o estado real
 
-## Etapa 4 — Relatório e encerramento (semana 20)
+## Etapa 3 — Relatório e encerramento (semanas 19–20)
 
 - [ ] Relatório com todas as 12 seções
 - [ ] Resultados confrontados com os critérios da Etapa 1

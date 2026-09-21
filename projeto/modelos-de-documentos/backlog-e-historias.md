@@ -1,12 +1,12 @@
 # Backlog e Histórias de Usuário
 
-> Etapa 2 · Mantenha o backlog no GitHub Projects (issues) e este arquivo como espelho
+> Etapa 1 · Mantenha o backlog no GitHub Projects (issues) e este arquivo como espelho
 > versionado. Se divergirem, vale o quadro.
 
 ## Visão geral
 
 | ID | História | Prioridade | Estimativa | Sprint | Situação |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | H01 | | Must | | S1 | |
 | H02 | | Must | | S1 | |
 | H03 | | Must | | S2 | |
@@ -70,6 +70,7 @@ e ninguém lembra quem pegou". Este é o fluxo mais usado do sistema — precisa
 rápido.
 
 **Critérios de aceite**
+
 - [ ] Apenas ferramentas disponíveis aparecem na lista de seleção
 - [ ] Apenas moradores ativos e sem pendências podem receber empréstimo
 - [ ] O sistema calcula e exibe a data prevista de devolução (7 dias corridos)
@@ -80,11 +81,13 @@ rápido.
 - [ ] O fluxo completo é executável em menos de 1 minuto, em celular de 360px
 
 **Regras de negócio**
+
 - Prazo padrão: 7 dias corridos
 - Limite: 2 ferramentas simultâneas por morador
 - Morador com devolução atrasada fica bloqueado até regularizar
 
 **Fora desta história**
+
 - Renovação de empréstimo (H12)
 - Notificação por WhatsApp (Won't nesta versão)
 
@@ -97,7 +100,7 @@ H05 (cadastro de moradores)
 ## Capacidade da equipe
 
 | Sprint | Semanas | Capacidade (pontos) | Comprometido | Entregue |
-|---|---|---:|---:|---:|
+| --- | --- | ---: | ---: | ---: |
 | S1 | 12–13 | | | |
 | S2 | 14–15 | | | |
 | S3 | 16–17 | | | |

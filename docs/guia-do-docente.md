@@ -5,11 +5,11 @@ Como conduzir a disciplina com este material.
 ## 1. Antes do semestre começar
 
 | Prazo | Ação |
-|---|---|
+| --- | --- |
 | −6 semanas | Mapear organizações parceiras candidatas para a extensão (ver [`../projeto/extensao/README.md`](../projeto/extensao/README.md)) |
 | −4 semanas | Formalizar parceria com 2–4 organizações (carta de anuência) |
 | −3 semanas | Criar a organização GitHub da turma e o repositório-modelo |
-| −2 semanas | Validar o laboratório: **Node 20**, Git, Docker, portas 3000/5432/5173 |
+| −2 semanas | Validar o laboratório: **Node 20**, Git, Docker, portas 3000/5432 |
 | −2 semanas | ⚠️ **Confirmar acesso a `registry.npmjs.org`** — proxy bloqueando `npm install` é a falha logística nº 1 |
 | −2 semanas | 🪟 Se o laboratório é Windows: instalar Git (traz o Git Bash), habilitar WSL2 e excluir a pasta de projetos do Windows Defender |
 | −2 semanas | Criar contas de PaaS ou solicitar GitHub Student Pack |
@@ -26,7 +26,7 @@ Os roteiros usam comandos Linux/macOS, com equivalências em
 combine com a turma **um** caminho e mantenha-o:
 
 | Caminho | Recomende quando |
-|---|---|
+| --- | --- |
 | PowerShell nativo | Turma acostumada ao Windows; use as equivalências |
 | **Git Bash** | ⭐ Menor atrito: os comandos do material funcionam colados |
 | WSL2 | Turma mais madura; obrigatório se quiser paridade com produção |
@@ -40,13 +40,13 @@ O que reduz o atrito da semana 1 não é automatizar — é **não pedir o que a
 necessário**:
 
 | Momento | O que entra | Avise na aula anterior |
-|---|---|---|
+| --- | --- | --- |
 | **Semana 1** (M00) | Node 20, Git, VS Code, monorepo, 1º commit | — |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | sim |
 | **Antes do M04** | Docker + PostgreSQL | **sim, com folga** — no Windows exige WSL2 e, às vezes, virtualização na BIOS |
 
-A semana 1 instala **um runtime só**. Antes da mudança de stack, eram dois ecossistemas mais
-Docker — a maior parte sem uso por semanas, e cada um um ponto de falha na primeira aula.
+A semana 1 instala **um runtime só**. O foco do curso é o backend; a camada visual, quando
+for usada, entra como material opcional e não deve criar uma segunda fricção de ambiente.
 
 Para conferir, `verifica-ambiente.mjs` aceita `--etapa m00|m03|m05` e cobra só o que já
 deveria existir. Ele **diagnostica e não instala**: para cada falha, imprime o comando exato
@@ -81,7 +81,7 @@ Ainda assim, aplique o exercício de 20 minutos de
 objetivo mudou:
 
 | Antes servia para | Agora serve para |
-|---|---|
+| --- | --- |
 | Decidir o cronograma | **Identificar quem individualmente chega com lacuna** |
 | Escolher entre nivelamento e modo híbrido | Direcionar monitoria antes da semana 8 |
 
@@ -94,7 +94,7 @@ imutabilidade do estado, array de dependências do `useEffect` e chaves de lista
 ali, não em sintaxe.
 
 | Resultado do diagnóstico | Ação |
-|---|---|
+| --- | --- |
 | Turma confortável (esperado) | Cronograma padrão; monitoria pontual para casos isolados |
 | 20%+ com dificuldade | Monitoria dirigida nas semanas 6–7, sem mexer no cronograma |
 | Maioria com dificuldade | Reavalie: 4h de nivelamento (retire de M06 e M15) ou modo híbrido |
@@ -102,7 +102,7 @@ ali, não em sintaxe.
 ## 2. Ritmo sugerido de uma aula de 5h
 
 | Tempo | Atividade |
-|---|---|
+| --- | --- |
 | 0:00–0:15 | Retomada: 3 perguntas sobre a aula anterior (sem nota, oral) |
 | 0:15–1:15 | Bloco teórico: conceito + demonstração ao vivo |
 | 1:15–1:30 | Intervalo |
@@ -162,7 +162,7 @@ a extensão: são eliminatórias.
 ## 6. Erros de condução mais comuns
 
 | Erro | Efeito | Correção |
-|---|---|---|
+| --- | --- | --- |
 | Ensinar ORM antes de HTTP | Estudante decora comandos, não entende requisição | Mantenha M01 antes de tudo |
 | Deixar o deploy para a última semana | Metade da turma não implanta | M16 na semana 16, com o BiblioCom (não com o projeto) |
 | Aceitar tema de projeto grande demais | Etapa 3 não fecha | Aplicar o filtro de escopo da Etapa 1 com rigor |
@@ -171,7 +171,7 @@ a extensão: são eliminatórias.
 | Turma inteira com o mesmo tema | Cópia entre equipes | Um tema por equipe, aprovado na Etapa 1 |
 | Começar o frontend antes da API existir | Trabalha-se contra dados falsos e retrabalha-se | M08 só depois do M07 (semana 8) |
 | Deixar a equipe se dividir em "front" e "back" | Metade sai sem saber a outra camada | Portfólio individual cobre as duas; papéis rotativos |
-| Pular o contrato de API (M02) | Integração retrabalhada na Etapa 3 | Contrato escrito é entrega da Etapa 2 |
+| Pular o contrato de API (M02) | Integração retrabalhada na Etapa 2 | Contrato escrito é entrega da Etapa 1 |
 | Gastar as horas de React ensinando JavaScript | Perde-se o modelo mental, que é o difícil | Pré-requisito atendido; monitoria para casos isolados |
 | Achar que "a turma sabe JS" dispensa o M08 | React não é JavaScript; o modelo declarativo é novo | As 5h vão para estado, efeitos e imutabilidade |
 

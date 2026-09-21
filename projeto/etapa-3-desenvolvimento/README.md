@@ -1,15 +1,16 @@
-# Etapa 3 — Desenvolvimento do sistema web
+# Etapa 3 — Desenvolvimento do sistema backend
 
 > **CH:** 8h (0h teóricas · 8h práticas) · **Semanas 17 e 18** · **Entrega P3** (semana 18) · **Peso:** 30%
 
 ## Atividades previstas
 
 - Criação dos módulos definidos no projeto
-- Realização dos testes
+- Implementação da API e da regra de negócio
+- Realização dos testes e deploy do backend
 
 ## 🎯 O que esta etapa produz
 
-O sistema funcionando, testado e **no ar** — a maior entrega da disciplina.
+O backend funcionando, testado e **no ar** — a maior entrega da disciplina.
 
 > As 8h em aula são de integração, revisão e resolução de bloqueios. O desenvolvimento
 > acontece continuamente desde a semana 12, aproveitando as atividades práticas de cada
@@ -22,20 +23,20 @@ O sistema funcionando, testado e **no ar** — a maior entrega da disciplina.
 ### Sprints de 2 semanas
 
 | Sprint | Semanas | Foco sugerido |
-|---|---|---|
+| --- | --- | --- |
 | S1 | 12–13 | 🔵 Models, migrações, admin, dados de exemplo, **contrato de API** |
-| S2 | 14–15 | 🔵 API completa (DTOs, validação, filtros) · 🟣 telas de leitura |
-| S3 | 16–17 | ⚪ Autenticação ponta a ponta, formulários, testes, **deploy** |
-| S4 | 18 | Ajustes com a organização parceira, acessibilidade, documentação |
+| S2 | 14–15 | 🔵 API completa (DTOs, validação, filtros, autenticação) |
+| S3 | 16–17 | ⚪ Segurança, autorização, testes e **deploy** do backend |
+| S4 | 18 | Ajustes com a organização parceira, documentação e validação final |
 
 > **A ordem não é negociável:** o contrato de API na S1 e a API funcionando na S2 são o que
-> permite o frontend avançar. Equipe que começa as duas camadas em paralelo, sem contrato,
-> retrabalha a integração inteira.
+> permitem que o backend suporte a integração real com o cliente/usuário. Equipe que começa
+> sem contrato retrabalha a integração inteira.
 
 ### Rituais (curtos e obrigatórios)
 
 | Ritual | Quando | Duração | Pergunta |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Planejamento | Início da sprint | 30 min | O que entra nesta sprint? |
 | Acompanhamento | 2×/semana | 10 min | O que fiz, o que farei, o que me trava |
 | Revisão | Fim da sprint | 30 min | Demonstrar o que ficou pronto |
@@ -93,10 +94,7 @@ Layout do celular precisa de ajuste — issue #23.
 - [ ] Regra de negócio está no model/service, não espalhada na view?
 - [ ] Alguma consulta N+1? (`select_related`/`prefetch_related`)
 - [ ] Controle de acesso: o service filtra a consulta pelo usuário da sessão?
-- [ ] Alguma URL literal, `fields = "__all__"` ou `dangerouslySetInnerHTML`?
-- [ ] 🟣 `queryKey` inclui todos os filtros? A mutação invalida o cache certo?
-- [ ] 🟣 Os quatro estados estão tratados nesta tela?
-- [ ] 🟣 Componente acessível: label, foco, papel semântico correto?
+- [ ] Alguma URL literal, `fields = "__all__"` ou payload inseguro?
 - [ ] Nomes claros? Dá para entender daqui a seis meses?
 - [ ] Alguma credencial ou dado real de pessoa no diff?
 
@@ -108,12 +106,14 @@ Revisão é sobre o código, nunca sobre a pessoa. Comentário útil sugere alte
 ## 3. Requisitos técnicos mínimos (verificados na rubrica)
 
 ### 🔵 Backend — modelagem
+
 - [ ] 5+ models com relações 1-N **e** N-N
 - [ ] `on_delete` justificado em cada FK
 - [ ] 2+ restrições de integridade (`CheckConstraint`/`UniqueConstraint`)
 - [ ] Migrações versionadas, sem conflitos pendentes
 
 ### 🔵 Backend — API
+
 - [ ] CRUD completo em 2+ recursos, via ViewSet
 - [ ] DTOs separados para entrada e saída, com os campos declarados explicitamente
 - [ ] Validação de servidor: 3+ `validate_<campo>` e 1 `validate()`
@@ -121,27 +121,18 @@ Revisão é sobre o código, nunca sobre a pessoa. Comentário útil sugere alte
 - [ ] 2+ ações customizadas (`@action`)
 - [ ] 1+ relatório com agregação
 - [ ] Nenhuma consulta N+1 (medido)
-- [ ] Documentação OpenAPI em `/api/docs/`
+- [ ] Swagger disponível em `/api/docs/`, com OpenAPI versionado e exemplos dos endpoints e erros principais
 
-### 🟣 Frontend — interface
-- [ ] 5+ rotas, com layout compartilhado e página 404
-- [ ] Estado da busca (termo, filtros, ordenação, página) **na URL**
-- [ ] Design system próprio: 6+ componentes base em `components/ui/`
-- [ ] Responsiva: funciona em 360px sem rolagem horizontal
-- [ ] Acessibilidade: labels associados, foco visível, contraste ≥ 4.5:1,
-      navegação por teclado, nenhuma informação só por cor
-- [ ] **Os quatro estados** (carregando, vazio, conteúdo, erro) em todas as telas
-- [ ] Erros diferenciados: rede, 401, 403, 404, 500
+### ⚪ Integração e contrato
 
-### 🟣 Frontend — dados
-- [ ] TanStack Query para todo dado do servidor (nenhum `useEffect` buscando dados)
-- [ ] `queryKey` incluindo todos os filtros
-- [ ] Mutações com `invalidateQueries`
-- [ ] Formulários com React Hook Form + Zod
-- [ ] Erros 400 do DRF mapeados campo a campo
-- [ ] Tipos gerados do OpenAPI (`schema.d.ts`)
+- [ ] Cliente externo consegue consumir a API sem adivinhar o formato
+- [ ] Status codes claros e consistentes: 200/201/204, 400, 401, 403, 404, 409, 422
+- [ ] Documentação do contrato disponível e revisada
+- [ ] Erros do backend são informativos e padronizados
+- [ ] Payloads e respostas seguem uma estrutura estável e previsível
 
 ### ⚪ Segurança e acesso
+
 - [ ] Autenticação com 2+ papéis, ponta a ponta
 - [ ] Autorização por permissão **e** por objeto (sem IDOR)
 - [ ] **Evidência de que a API recusa o que a interface esconde** (saída de `curl`)
@@ -151,19 +142,19 @@ Revisão é sobre o código, nunca sobre a pessoa. Comentário útil sugere alte
 - [ ] Mapa de dados pessoais preenchido
 
 ### ⚪ Qualidade
+
 - [ ] 15+ testes no backend (regra, acesso, validação)
-- [ ] 6+ testes no frontend, incluindo erro do servidor no formulário
 - [ ] Matriz de acesso automatizada
 - [ ] Cobertura ≥ 60% no backend
-- [ ] Teste de contrato no CI (tipos sincronizados)
-- [ ] CI verde nos dois jobs; `main` protegida
+- [ ] Teste de contrato no CI (schema e resposta esperada)
+- [ ] CI verde; `main` protegida
 
 ### ⚪ Operação
-- [ ] API e SPA no ar, mesmo site, HTTPS
-- [ ] **F5 numa rota interna funciona** (fallback configurado)
+
+- [ ] API no ar com HTTPS
 - [ ] PostgreSQL gerenciado, com backup
 - [ ] Healthcheck e logs funcionando
-- [ ] `README.md` que sobe os dois projetos em ≤ 8 comandos
+- [ ] `README.md` que sobe o backend em ≤ 8 comandos
 - [ ] `docs/deploy.md` reproduzível
 
 ## 4. Plano de teste
@@ -197,12 +188,12 @@ nenhuma página passa de 2 segundos e que não há N+1 (Debug Toolbar).
 **Prazo:** semana 18
 
 | Item | Onde |
-|---|---|
+| --- | --- |
 | Código-fonte completo | Repositório GitHub |
 | Sistema no ar | URL pública, HTTPS |
 | Suíte de testes verde | CI com badge no README |
 | Plano de teste executado | `docs/plano-de-teste.md` |
-| Registro do teste com usuário real | `docs/teste-usuario.md` + evidências |
+| Evidências de uso real | `docs/teste-usuario.md` + registros |
 | Histórico de trabalho | Commits, PRs e quadro do projeto |
 | README funcional | Raiz do repositório |
 | Documentação de deploy | `docs/deploy.md` |
@@ -212,11 +203,11 @@ Rubrica em [`../../avaliacao/rubrica-etapa-3.md`](../../avaliacao/rubrica-etapa-
 ## ⚠️ Erros que derrubam esta etapa
 
 | Erro | Sintoma | Prevenção |
-|---|---|---|
+| --- | --- | --- |
 | Começar tarde | Semana 17 com models incompletos | Sprints desde a semana 12 |
 | Ninguém integra até o fim | Três branches enormes que não se juntam | PR pequeno, merge frequente |
 | Uma pessoa faz tudo | Histórico com 90% de commits de um autor | Pareamento; tarefas distribuídas |
-| Deploy deixado para o final | Descobre na véspera que não sobe | Deploy na semana 16, com o BiblioCom pronto |
+| Deploy deixado para o final | Descobre na véspera que não sobe | Deploy na semana 16, com o backend pronto |
 | Testar só no fim | Bug estrutural descoberto tarde | Teste junto com a funcionalidade |
 | Escopo crescendo | Nada fecha | Escopo declarado; troca 1 por 1 |
 | Nunca mostrar ao parceiro | Sistema não resolve o problema real | Demonstração a cada sprint |

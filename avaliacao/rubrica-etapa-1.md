@@ -1,12 +1,12 @@
-# Rubrica — Etapa 1: Definição do tema
+# Rubrica — Etapa 1: Definição e planejamento
 
-> **Peso:** 7,5% · **Entrega:** semana 8
+> **Peso:** 15% · **Entrega:** semana 10
 > Escala: 4 Excelente · 3 Adequado · 2 Em desenvolvimento · 0–1 Insuficiente
 
 **Equipe:** `<...>` · **Data:** `<...>`
 
 | # | Critério | 4 | 3 | 2 | 0–1 | Nota |
-|---|---|---|---|---|---|:---:|
+| --- | --- | --- | --- | --- | --- | :---: |
 | 1 | **Levantamento de problemas** | 9+ problemas reais, de contextos variados, com evidências | 6+ problemas reais, bem formulados | Poucos problemas ou mal formulados | Sem levantamento; tema imposto por um integrante | |
 | 2 | **Matriz de decisão** | Preenchida, com critérios ponderados e a escolha claramente decorrente dela | Preenchida e coerente | Preenchida superficialmente | Ausente ou decorativa | |
 | 3 | **Problema escolhido** | Formulação precisa: quem, o quê, como é hoje, qual consequência — com dados | Formulação completa na estrutura pedida | Formulação vaga | Descreve uma solução, não um problema | |
@@ -21,7 +21,19 @@
 | 12 | **Carta de anuência** | Assinada, com a demanda escrita pela organização | Assinada | Não assinada / pendente | Ausente | |
 | 13 | **Qualidade do documento** | Bem escrito, objetivo, dentro do limite de páginas | Claro e organizado | Desorganizado | Ilegível ou incompleto | |
 
-**Nota** = (soma ÷ 52) × 10
+## Bloco B — Planejamento da execução
+
+| # | Critério | 4 | 3 | 2 | 0–1 | Nota |
+| --- | --- | --- | --- | --- | --- | :---: |
+| 14 | **Contrato de equipe** | Específico, assinado, com papéis, rotação e Definition of Done | Completo e assinado | Genérico ou incompleto | Ausente | |
+| 15 | **Backlog e priorização** | Histórias com critérios, estimativas, MoSCoW e MVP só de *Must* | Backlog priorizado e utilizável | Histórias vagas ou sem estimativa | Lista de tarefas sem valor | |
+| 16 | **Modelo de dados** | Entidades, relações, restrições e exclusões justificadas | Diagrama completo e coerente | Incompleto | Ausente | |
+| 17 | **Arquitetura e ADRs** | Arquitetura clara e 3+ ADRs com alternativas e consequências | Arquitetura e 3 ADRs | Superficial | Ausentes | |
+| 18 | **Riscos e capacidade** | Riscos específicos, mitigação ativa, plano B e capacidade com folga | Riscos e capacidade considerados | Parcial | Ausentes | |
+| 19 | **Cronograma de desenvolvimento** | Semanas 11–18 detalhadas, com responsáveis e marcos de qualidade | Cronograma com marcos | Sem detalhe suficiente | Ausente | |
+| 20 | **Validação do plano** | Plano e fluxo validados com a organização, com mudanças registradas | Validação registrada | Mencionada sem evidência | Não validado | |
+
+**Nota** = (soma ÷ 80) × 10
 
 ---
 

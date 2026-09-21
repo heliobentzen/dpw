@@ -10,22 +10,17 @@
 
 ## Um runtime só
 
-A stack é **TypeScript ponta a ponta**. Você instala **o Node** (que já traz o npm), e nada além disso do
-lado de linguagem — não há Python, `venv`, `pip` nem um segundo ecossistema de pacotes para
-manter. O backend e o frontend compartilham runtime, gerenciador de pacotes e sintaxe.
+A stack principal do curso é **backend em TypeScript**. Você instala **o Node** (que já traz o npm),
+e nada além disso do lado de linguagem — não há Python, `venv`, `pip` nem um segundo ecossistema de
+pacotes para manter. O frontend, quando usado, é opcional e não define o núcleo da disciplina.
 
 ## O que entra em cada momento
 
 | Momento | O que entra | Seções |
-|---|---|---|
+| --- | --- | --- |
 | **Semana 1** (M00) | Git, Node 20, VS Code, monorepo, primeiro commit | 1 a 5, 8, 9 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
 | **Antes do M04** | Docker + PostgreSQL | 7 |
-| **A partir do M08** | Rodar os dois servidores juntos | 10 |
-
-> **Você digita tudo.** Não há script que monte o ambiente por você — configurar projeto,
-> instalar dependência e versionar código *são* conteúdo da disciplina, não preparação para
-> ela. O que existe é um script que **confere** o resultado (seção 8): ele diagnostica, não faz.
 
 **Tempo da semana 1:** 20–30 min.
 
@@ -33,9 +28,11 @@ manter. O backend e o frontend compartilham runtime, gerenciador de pacotes e si
 
 ```bash
 cd ~/dev/bibliocom
-npm run dev:api      # backend  → http://localhost:3000
-npm run dev:web      # frontend → http://localhost:5173
+npm run dev:api      # backend → http://localhost:3000
 ```
+
+> O comando de frontend é opcional e só faz sentido quando você quiser explorar a camada
+> visual complementar do material.
 
 Sem ativar ambiente virtual, sem `source` nenhum: as dependências vivem em `node_modules/`
 dentro do projeto, e o `npm` as encontra pela pasta em que você está.
@@ -45,8 +42,8 @@ dentro do projeto, e o `npm` as encontra pela pasta em que você está.
 ## 1. O que será instalado
 
 | Ferramenta | Versão mínima | Camada | Para quê |
-|---|---|---|---|
-| Node.js | **20 LTS** | ambas | Runtime do backend **e** do frontend |
+| --- | --- | --- | --- |
+| Node.js | **20 LTS** | principal | Runtime do backend |
 | Git | 2.40 | ambas | Versionamento |
 | VS Code (ou WebStorm) | atual | ambas | Editor |
 | Docker | atual | 🔵 | PostgreSQL local (a partir do M04) |
@@ -65,17 +62,14 @@ bibliocom/                    monorepo (workspaces do npm)
 │   ├── src/
 │   ├── openapi.json          contrato gerado (M07)
 │   └── .env
-├── frontend/                 React + Vite
-│   ├── src/
-│   └── .env
 ├── pacotes/tipos/            @bibliocom/tipos — DTOs e enums (M15)
 ├── docker-compose.yml
 ├── .gitignore
 └── README.md
 ```
 
-**Um repositório, três projetos.** Um `npm install` na raiz resolve os três, e um PR mostra
-a mudança completa: entidade → DTO → tipo → tela.
+**O repositório principal é backend-first.** O frontend, quando existir, continua como
+material complementar e opcional.
 
 ---
 
@@ -141,16 +135,15 @@ code --install-extension esbenp.prettier-vscode
 ```
 
 | Extensão | Para quê |
-|---|---|
+| --- | --- |
 | **ESLint** | Lint de TypeScript nas duas camadas |
 | **Prettier** | Formatação |
 
 **Depois, quando o módulo pedir:**
 
 | Extensão | Antes do | Para quê |
-|---|---|---|
+| --- | --- | --- |
 | **PostgreSQL** (ms-ossdata.vscode-pgsql) | M04 | Ver as tabelas que as entidades geraram, sem sair do editor |
-| **Tailwind CSS IntelliSense** | M09 | Autocomplete de classes — praticamente obrigatória |
 | **GitLens** | quando quiser | Histórico e autoria linha a linha |
 
 `.vscode/settings.json` sugerido:
@@ -161,7 +154,6 @@ code --install-extension esbenp.prettier-vscode
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
   "typescript.tsdk": "node_modules/typescript/lib",
-  "tailwindCSS.experimental.classRegex": [["cn\\(([^)]*)\\)", "'([^']*)'"]],
   "files.exclude": { "**/node_modules": true, "**/dist": true }
 }
 ```
@@ -311,7 +303,7 @@ Nunca coloque chave de API nele. Detalhado no M13.
 ## 11. Problemas frequentes
 
 | Sintoma | Causa provável | Solução |
-|---|---|---|
+| --- | --- | --- |
 | `Cannot find module` após clonar | Faltou instalar | `npm install` **na raiz** |
 | `Cannot find module '@bibliocom/tipos'` | Workspace não resolvido | `npm install` na raiz; confira o campo `workspaces` do `package.json` |
 | `EACCES` ao instalar pacote global | Permissão | Use `fnm` ou mude o prefixo do npm, nunca `sudo npm -g` |

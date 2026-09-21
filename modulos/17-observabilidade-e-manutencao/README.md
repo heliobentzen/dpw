@@ -6,7 +6,7 @@
 
 ## 🎯 Objetivos
 
-1. Configurar logs úteis e estruturados.
+1. Configurar logs úteis e estruturados para a API.
 2. Monitorar disponibilidade, erros e desempenho.
 3. Garantir backup **e restauração testada**.
 4. Escrever o plano de manutenção e transferência do sistema.
