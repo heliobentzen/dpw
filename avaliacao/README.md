@@ -54,7 +54,7 @@ decisão. O fator nunca é aplicado sem que o estudante saiba o motivo.
 | Avaliação teórica | [`avaliacao-teorica.md`](avaliacao-teorica.md) |
 | Etapa 1 — definição e planejamento | [`rubrica-etapa-1.md`](rubrica-etapa-1.md) |
 | Etapa 2 — desenvolvimento | [`rubrica-etapa-2.md`](rubrica-etapa-2.md) |
-| Etapa 3 — relatório e encerramento | [`rubrica-etapa-4.md`](rubrica-etapa-4.md) |
+| Etapa 3 — relatório e encerramento | [`rubrica-etapa-3.md`](rubrica-etapa-3.md) |
 | Extensão | [`rubrica-extensao.md`](rubrica-extensao.md) |
 
 **Todas as rubricas são divulgadas no início da etapa correspondente.** Avaliação
