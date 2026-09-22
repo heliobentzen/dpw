@@ -19,27 +19,6 @@ Ao final você será capaz de:
 4. Justificar cada `nullable`, cada `unique` e cada índice que você criar.
 5. Reconhecer o limite do `synchronize` — o que motiva o M05.
 
-## 🧭 Por que este módulo vem agora
-
-No M03, a aplicação respondia; os dados ainda eram provisórios. O M04 introduz a primeira
-decisão que dá permanência ao sistema: como representar o domínio do BiblioCom no banco.
-
-O aluno não começa pelo CRUD porque ainda precisa aprender a perguntar:
-
-- que coisas existem no domínio;
-- quais dados são obrigatórios ou únicos;
-- como as coisas se relacionam;
-- o que deve acontecer quando uma delas for removida.
-
-Essa ordem é didaticamente importante. Antes de consultar e alterar dados no M06, o estudante
-precisa saber de onde vieram as tabelas e quais regras elas já expressam. O M05, colocado logo
-depois, transforma essa modelagem em histórico reproduzível.
-
-> O resultado esperado não é apenas “o banco subiu”. É o aluno conseguir defender o modelo como
-uma tradução do domínio, e não como uma coleção de decorators copiados.
-
----
-
 ## 🧭 O que você vai construir
 
 Seis tabelas, nenhuma linha de SQL escrita por você:
