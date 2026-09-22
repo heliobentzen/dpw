@@ -49,8 +49,6 @@ decisão. O fator nunca é aplicado sem que o estudante saiba o motivo.
 
 | Instrumento | Rubrica |
 | --- | --- |
-| Portfólio (E0–E8) | [`rubrica-portfolio.md`](rubrica-portfolio.md) |
-| Avaliação teórica | [`avaliacao-teorica.md`](avaliacao-teorica.md) |
 | Etapa 1 — definição e planejamento | [`rubrica-etapa-1.md`](rubrica-etapa-1.md) |
 | Etapa 2 — sistema preliminar | [`rubrica-etapa-2.md`](rubrica-etapa-2.md) |
 | Etapa 3 — sistema final | [`rubrica-etapa-3.md`](rubrica-etapa-3.md) |
@@ -91,19 +89,7 @@ Entregas de equipe atrasadas afetam a equipe inteira — é parte do aprendizado
 coletivo. Situações de saúde ou força maior são tratadas individualmente, com o docente,
 **antes** do prazo sempre que possível.
 
-## 7. Recuperação
-
-Conforme o regimento da instituição. Sugestão de política:
-
-- **Portfólio:** entregas com nota ≤ 2 podem ser refeitas até a semana 19, valendo no máximo 3.
-- **Avaliação teórica:** prova substitutiva na semana 19 para quem obteve < 6,0.
-- **Etapa 1:** correção mediante devolutiva, até 1 semana após o feedback.
-- **Etapa 2 (sistema preliminar):** correção mediante devolutiva, até 1 semana após o feedback.
-- **Etapas 3 e 4 e extensão:** não há recuperação — dependem do processo, não do produto.
-  Por isso o acompanhamento é semanal, com marcos E0–E8: a entrega da Etapa 2, na semana 12,
-  é o ponto em que uma equipe em risco é identificada — não na semana 18.
-
-## 8. Integridade acadêmica
+## 7. Integridade acadêmica
 
 **Permitido e incentivado:** consultar documentação, fóruns, colegas e assistentes de IA;
 usar bibliotecas e código aberto com atribuição.
@@ -121,13 +107,3 @@ de terceiro.
 
 A arguição individual é o instrumento que verifica isso. Ela não pune quem usou ferramentas
 — pune quem não entende o que entregou.
-
-## 9. Devolutiva
-
-O docente devolve as correções em **até 7 dias** de cada entrega, com:
-
-- a rubrica preenchida;
-- ao menos um ponto forte identificado;
-- ao menos uma orientação acionável para a próxima etapa.
-
-Feedback que chega depois da próxima entrega não é feedback — é justificativa de nota.
