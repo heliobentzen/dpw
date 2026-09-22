@@ -52,15 +52,9 @@ decisão. O fator nunca é aplicado sem que o estudante saiba o motivo.
 | Portfólio (E0–E8) | [`rubrica-portfolio.md`](rubrica-portfolio.md) |
 | Avaliação teórica | [`avaliacao-teorica.md`](avaliacao-teorica.md) |
 | Etapa 1 — definição e planejamento | [`rubrica-etapa-1.md`](rubrica-etapa-1.md) |
-<<<<<<< HEAD
 | Etapa 2 — sistema preliminar | [`rubrica-etapa-2.md`](rubrica-etapa-2.md) |
 | Etapa 3 — sistema final | [`rubrica-etapa-3.md`](rubrica-etapa-3.md) |
 | Etapa 4 — relatório e encerramento | [`rubrica-etapa-4.md`](rubrica-etapa-4.md) |
-=======
-| Etapa 2 — desenvolvimento | [`rubrica-etapa-2.md`](rubrica-etapa-2.md) |
-| Etapa 3 — relatório e encerramento | [`rubrica-etapa-3.md`](rubrica-etapa-3.md) |
-
->>>>>>> 75e270dde949f4fae67aef373c1487f52579a610
 | Extensão | [`rubrica-extensao.md`](rubrica-extensao.md) |
 
 **Todas as rubricas são divulgadas no início da etapa correspondente.** Avaliação
