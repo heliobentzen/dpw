@@ -63,7 +63,6 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 | 15 | [Tipos compartilhados entre as camadas](modulos/15-tipos-compartilhados/) | 2 | 1 | 1 |
 | 16 | [Deploy dos dois artefatos](modulos/16-deploy/) | 4 | 2 | 2 |
 | 17 | [Observabilidade e manutenção](modulos/17-observabilidade-e-manutencao/) | 2 | 1 | 1 |
-| — | Avaliação teórica integrada (semana 10) | 1 | 1 | 0 |
 | | **Subtotal** | **70** | **33** | **37** |
 
 ## Projeto integrador (20h) + Extensão (10h)
