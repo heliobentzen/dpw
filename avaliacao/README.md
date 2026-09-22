@@ -4,8 +4,8 @@
 
 | Instrumento | Peso | Tipo |
 | --- | ---: | --- |
-| Projeto — Etapa 1 (definição e planejamento) | 50% | Equipe |
-| Projeto — Etapa 2 (sistema preliminar) | 10% | Equipe × fator individual |
+| Projeto — Etapa 1 (definição e planejamento) | 30% | Equipe |
+| Projeto — Etapa 2 (sistema preliminar) | 20% | Equipe × fator individual |
 | Projeto — Etapa 3 (sistema final) | 20% | Equipe × fator individual |
 | Projeto — Etapa 4 (relatório e apresentação) | 10% | Equipe × fator individual |
 | Atividades extensionistas | 10% | Equipe |
@@ -59,6 +59,7 @@ decisão. O fator nunca é aplicado sem que o estudante saiba o motivo.
 =======
 | Etapa 2 — desenvolvimento | [`rubrica-etapa-2.md`](rubrica-etapa-2.md) |
 | Etapa 3 — relatório e encerramento | [`rubrica-etapa-3.md`](rubrica-etapa-3.md) |
+
 >>>>>>> 75e270dde949f4fae67aef373c1487f52579a610
 | Extensão | [`rubrica-extensao.md`](rubrica-extensao.md) |
 
