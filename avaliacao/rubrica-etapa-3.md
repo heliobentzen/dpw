@@ -1,6 +1,8 @@
-# Rubrica — Etapa 2: Desenvolvimento do sistema
+# Rubrica — Etapa 3: Sistema final
 
-> **Peso:** 30% da nota final · **Entrega:** semana 18 · **Eliminatória**
+> **Peso:** 20% da nota final · **Entrega:** semana 18 · **Eliminatória**
+> Consolida e aprofunda o que foi verificado na Etapa 2 (sistema preliminar): modelagem e API
+> são reavaliadas aqui no estado final, junto com segurança, frontend, qualidade e implantação.
 > 🔵 backend · 🟣 frontend · ⚪ transversal
 > Escala: 4 Excelente · 3 Adequado · 2 Em desenvolvimento · 0–1 Insuficiente
 
@@ -110,6 +112,6 @@ A etapa é considerada **não entregue** se qualquer uma ocorrer:
 
 **Pontos fortes:**
 
-**Prioridade de melhoria para a Etapa 3:**
+**Prioridade de melhoria para a Etapa 4:**
 
 **Observações sobre participação individual:**

@@ -1,4 +1,4 @@
-# Rubrica — Etapa 3: Relatório técnico e encerramento
+# Rubrica — Etapa 4: Relatório técnico e encerramento
 
 > **Peso:** 10% · **Entrega:** semanas 19–20 · **Eliminatória**
 > Escala por critério: 4 Excelente · 3 Adequado · 2 Em desenvolvimento · 0–1 Insuficiente
