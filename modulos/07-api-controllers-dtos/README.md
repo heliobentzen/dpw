@@ -22,6 +22,26 @@ Ao final você será capaz de:
 4. Receber upload de arquivo com validação de tipo, tamanho e nome.
 5. Publicar e revisar a documentação Swagger em `/api/docs`, com contrato OpenAPI, exemplos e erros.
 
+## 🧭 Por que este módulo fecha a construção do backend
+
+Até o M06, o backend já consultava o banco, mas ainda aceitava entradas sem uma fronteira clara
+e podia expor mais dados do que o consumidor precisava. O M07 transforma esse protótipo funcional
+em uma API com contrato: rotas coerentes, validação, respostas estáveis e documentação.
+
+O estudante consolida quatro perguntas que vão acompanhar o restante da disciplina:
+
+1. O que o cliente pode enviar?
+2. O que o servidor aceita como válido?
+3. O que o servidor devolve, e em qual formato?
+4. Como outra pessoa pode conhecer esse acordo sem ler a implementação?
+
+Essa é a passagem da construção interna para a integração externa. Depois do M07, a API está
+pronta para receber identidade e permissões no M08, ser auditada no M09 e ser protegida por uma
+suíte de testes no M10.
+
+> O critério de saída não é apenas ter endpoints funcionando: é conseguir explicar e verificar
+o contrato de cada endpoint.
+
 ---
 
 ## 🧭 O que você vai construir
@@ -718,7 +738,7 @@ export class AcervoController {
 | `@HttpCode(204)` | Este **é** necessário: o padrão do `DELETE` seria 200 |
 | retorno vazio no `DELETE` | 204 significa "sem conteúdo". Devolver corpo aqui contradiz o status |
 | `@ApiNotFoundResponse` | Documenta o **caminho de erro**. Contrato que só descreve o sucesso é contrato pela metade |
-| `@ApiOkResponse({ type: [ObraResposta] })` | Os colchetes dizem "array de". É o que faz o M15 gerar o tipo certo |
+| `@ApiOkResponse({ type: [ObraResposta] })` | Os colchetes dizem "array de". É o que faz o M11 gerar o tipo certo |
 
 **Rode:**
 
@@ -751,8 +771,8 @@ Você usou cinco status. Vale saber escolher, porque é decisão de projeto e ca
 | Status | Quando | No seu código |
 | --- | --- | --- |
 | **400** Bad Request | A entrada não faz sentido | O `ValidationPipe` (etapa 4) |
-| **401** Unauthorized | Não sabemos quem você é | M12 |
-| **403** Forbidden | Sabemos quem você é, e você não pode | M12 |
+| **401** Unauthorized | Não sabemos quem você é | M08 |
+| **403** Forbidden | Sabemos quem você é, e você não pode | M08 |
 | **404** Not Found | O recurso não existe | `NotFoundException` (M03) |
 | **409** Conflict | Conflito com o estado atual | Tombo duplicado, por exemplo |
 | **422** Unprocessable | Sintaxe certa, semântica errada | Ver abaixo |
@@ -770,7 +790,7 @@ este material fica com isso — o importante é a equipe escolher **uma** conven
 
 ⚠️ **500 nunca deve vazar detalhe.** Se a resposta traz o *stack trace* ou a mensagem do banco,
 você está dando ao atacante o mapa da aplicação — nome de tabela, versão da biblioteca,
-caminho de arquivo. O Nest já protege por padrão em produção; o M13 confere isso.
+caminho de arquivo. O Nest já protege por padrão em produção; o M09 confere isso.
 
 **Exercite:** que status para cada situação?
 
@@ -871,7 +891,7 @@ curl.exe -s -o NUL -w "%{http_code}`n" -X POST http://localhost:3000/api/obras/1
 **Deu certo se:** responde 201 com um `.jpg` e 400 com um `.pdf`.
 
 > 🔒 **Este endpoint está aberto, e não deveria.** Upload é escrita: qualquer pessoa na
-> internet pode encher o seu disco. O M12 traz autenticação e volta aqui para pôr um
+> internet pode encher o seu disco. O M08 traz autenticação e volta aqui para pôr um
 > `@UseGuards` nesta rota. **Anote a dívida no código**, com um comentário
 > `// TODO(M12): exigir autenticação`, para ela não sumir de vista.
 
@@ -928,7 +948,7 @@ deriva do que **validou**, não do que veio.
 
 ### 3. Disco de contêiner é efêmero
 
-Na PaaS do M16, o disco é recriado a cada deploy: **os uploads somem**. Não é falha, é como
+Na PaaS do M12, o disco é recriado a cada deploy: **os uploads somem**. Não é falha, é como
 contêiner funciona.
 
 | Ambiente | Onde gravar |
@@ -1092,7 +1112,7 @@ implementar as duas respostas.
 | Upload responde 400 sempre | O nome do campo no `FileInterceptor` não bate com o do formulário |
 | Arquivo grande derruba o servidor | Faltou `limits.fileSize` |
 | PDF renomeado para `.jpg` passa | Falta a checagem de *magic bytes* — etapa 15 |
-| Upload some depois do deploy | Disco efêmero — use armazenamento de objetos (M16) |
+| Upload some depois do deploy | Disco efêmero — use armazenamento de objetos (M12) |
 
 ## ✅ Checklist de saída
 

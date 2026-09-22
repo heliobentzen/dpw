@@ -22,7 +22,7 @@ aparece justo aqui, no setup.
 ## O que entra em cada momento
 
 | Momento | O que entra | Passos |
-|---|---|---|
+| --- | --- | --- |
 | **Semana 1** (M00) | Terminal, Git, Node 20, VS Code, monorepo, primeiro commit | 0 a 5, 8, 9 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
 | **Antes do M04** | Docker + PostgreSQL | 7 |
@@ -35,7 +35,7 @@ aparece justo aqui, no setup.
 ## Índice
 
 | Passo | Assunto | Quando |
-|---|---|---|
+| --- | --- | --- |
 | [0](#passo-0--decisões-antes-de-digitar-qualquer-coisa) | Decisões antes de digitar | semana 1 |
 | [1](#passo-1--powershell-e-política-de-scripts) | PowerShell e política de scripts | semana 1 |
 | [2](#passo-2--pasta-de-trabalho) | Pasta de trabalho | semana 1 |
@@ -59,7 +59,7 @@ comando: é sobre **onde** e **em que shell** você vai trabalhar.
 ### 0.1 Escolha o terminal — e fique com ele
 
 | Caminho | O que é | Recomendação |
-|---|---|---|
+| --- | --- | --- |
 | **PowerShell** | O terminal nativo do Windows | ✅ **É o que este guia usa** |
 | **Git Bash** | Um shell Unix que vem junto com o Git | Alternativa: os comandos do guia Linux funcionam como estão |
 | **WSL2 (Ubuntu)** | Um Linux completo dentro do Windows | Instale antes do **M05** (Docker), não agora |
@@ -71,7 +71,7 @@ Se você não tem preferência: **PowerShell**.
 Esta é a origem da maior parte dos problemas inexplicáveis no Windows, e **nenhum tutorial avisa**.
 
 | ❌ Evite | Por quê |
-|---|---|
+| --- | --- |
 | `C:\Users\João Silva\Documents\projetos` | O `Documents` costuma ser **sincronizado pelo OneDrive**. Ele vai tentar subir as dezenas de milhares de arquivos de `node_modules` para a nuvem: o `npm install` trava, o Git acusa mudanças fantasma e arquivos ficam bloqueados em uso |
 | `C:\Users\João Silva\dev` | O **espaço** quebra ferramentas que não põem aspas nos caminhos |
 | `C:\Users\João Silva\dev` | O **acento** quebra ferramentas que assumem ASCII |
@@ -100,7 +100,7 @@ $PSVersionTable.PSVersion
 **Anote o número em `Major`.** Ele muda o que funciona:
 
 | `Major` | Significa | Consequência prática |
-|---|---|---|
+| --- | --- | --- |
 | **5** | PowerShell 5.1, o que vem com o Windows | O operador `&&` **não existe**; `>` grava em UTF-16 |
 | **7** ou mais | PowerShell 7, instalado à parte | `&&` funciona; `>` grava em UTF-8 |
 
@@ -120,7 +120,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
 | Linha | O que faz |
-|---|---|
+| --- | --- |
 | `Get-ExecutionPolicy -Scope CurrentUser` | Mostra a política atual. `Undefined` ou `Restricted` = scripts bloqueados |
 | `-Scope CurrentUser` | Aplica **só ao seu usuário**. Sem isto o comando exige terminal de administrador e altera a máquina toda — desnecessário e mais invasivo |
 | `-ExecutionPolicy RemoteSigned` | Permite scripts **locais**; os baixados da internet continuam exigindo assinatura. É o meio-termo seguro |
@@ -139,7 +139,7 @@ Set-Location C:\dev
 ```
 
 | Linha | O que faz |
-|---|---|
+| --- | --- |
 | `New-Item -ItemType Directory` | Cria uma pasta |
 | `-Force` | Não reclama se já existir. Sem isto, rodar duas vezes dá erro |
 | `Set-Location C:\dev` | Entra na pasta. É o `cd` do PowerShell — na verdade `cd` **é** apelido dele |
@@ -173,7 +173,7 @@ git config --global core.autocrlf input
 ```
 
 | Linha | O que faz | Por que importa |
-|---|---|---|
+| --- | --- | --- |
 | `user.name` | Nome que aparece em cada commit | Sem isto o Git recusa criar commits |
 | `user.email` | E-mail do commit | **Use o mesmo do GitHub**, senão os commits não são atribuídos a você |
 | `init.defaultBranch main` | Novos repositórios nascem em `main` | O GitHub usa `main` |
@@ -182,7 +182,7 @@ git config --global core.autocrlf input
 
 ### 3.3 Por que `core.autocrlf input` ⚠️
 
-Windows termina linha com `\r\n`; Linux, com `\n`. O servidor do M16 é Linux.
+Windows termina linha com `\r\n`; Linux, com `\n`. O servidor do M12 é Linux.
 
 Um `.sh` que vá para o Git com CRLF faz o servidor ler `#!/usr/bin/env bash\r`, procurar um
 interpretador chamado `bash\r`, não achar, e o deploy morre com:
@@ -203,7 +203,7 @@ ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `ssh-keygen` | Gera um par de chaves: a privada fica na sua máquina, a pública você entrega ao GitHub |
 | `-t ed25519` | Algoritmo recomendado hoje — mais curto e mais seguro que RSA |
 | `-C "..."` | Comentário gravado na chave, para você a identificar depois na lista do GitHub |
@@ -215,7 +215,7 @@ Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub | Set-Clipboard
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `$env:USERPROFILE` | Caminho da sua pasta de usuário — evita digitar seu nome |
 | `.pub` | A chave **pública**, que pode ser divulgada. **Nunca** copie o arquivo sem `.pub` |
 | `\| Set-Clipboard` | Manda para a área de transferência |
@@ -317,14 +317,14 @@ code --install-extension esbenp.prettier-vscode
 ```
 
 | Extensão | Para quê |
-|---|---|
+| --- | --- |
 | **ESLint** | Lint de TypeScript nas duas camadas |
 | **Prettier** | Formatação |
 
 **Depois, quando o módulo pedir** — não instale hoje o que só vai usar em semanas:
 
 | Extensão | Antes do | Para quê |
-|---|---|---|
+| --- | --- | --- |
 | **PostgreSQL** (ms-ossdata.vscode-pgsql) | M04 | Ver as tabelas que as entidades geraram, sem sair do editor |
 | **Tailwind CSS IntelliSense** | M09 | Autocomplete de classes — praticamente obrigatória |
 | **GitLens** | quando quiser | Histórico e autoria linha a linha |
@@ -344,7 +344,7 @@ Crie `C:\dev\bibliocom\.vscode\settings.json`:
 ```
 
 | Chave | O que faz |
-|---|---|
+| --- | --- |
 | `files.eol` | Salva arquivos novos com LF, evitando gerar CRLF que o `.gitattributes` teria de corrigir |
 | `typescript.tsdk` | Usa o TypeScript **do projeto**, não o embutido no editor. Sem isto, o editor pode acusar erros que o `tsc` não acusa — e vice-versa |
 | `editor.formatOnSave` | Elimina discussão de estilo no code review |
@@ -362,7 +362,7 @@ nest new backend --skip-git
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `npx` | Executa um pacote **sem instalá-lo** no projeto. Vem junto com o npm |
 | `--skip-git` | **Importante:** sem isto, a CLI cria um segundo repositório dentro do seu |
 
@@ -583,7 +583,7 @@ Get-NetTCPConnection -LocalPort 3000 | Select-Object -ExpandProperty OwningProce
 ### 11.1 Instalação
 
 | Mensagem | Causa | Solução |
-|---|---|---|
+| --- | --- | --- |
 | `npm : não pode ser carregado porque a execução de scripts foi desabilitada` | Política de execução | [Passo 1.2](#12-liberar-a-execução-de-scripts-) |
 | `node : O termo 'node' não é reconhecido` | Terminal aberto antes da instalação | Feche e reabra |
 | `winget : não é reconhecido` | Windows desatualizado | Use os instaladores gráficos |
@@ -592,20 +592,20 @@ Get-NetTCPConnection -LocalPort 3000 | Select-Object -ExpandProperty OwningProce
 ### 11.2 Comandos do material que não funcionam como estão
 
 | No material | No PowerShell | Por quê |
-|---|---|---|
+| --- | --- | --- |
 | `curl -i http://...` | `curl.exe -i http://...` | `curl` é apelido de `Invoke-WebRequest` |
 | `NODE_ENV=production node dist/main.js` | `$env:NODE_ENV="production"` <br> `node dist/main.js` | Não existe variável inline. ⚠️ Ela **fica na sessão** — limpe com `Remove-Item Env:\NODE_ENV` |
 | `cd backend && npm run start:dev` | duas linhas separadas | `&&` não existe no PowerShell 5.1. `;` **não** é equivalente: executa o segundo mesmo se o primeiro falhar |
 | `grep -r "texto" src/` | `Select-String -Path src\* -Pattern "texto"` | Comandos diferentes |
 | `comando > arquivo.json` | `comando \| Out-File -FilePath arquivo.json -Encoding utf8` | O `>` grava UTF-16 no PowerShell 5.1 |
-| `comando \` <br> `  --opcao` | `comando` `` ` `` <br> `  --opcao` | Continuação é crase — e **sem espaço depois dela** |
+| `comando \` <br> `--opcao` | `comando` `` ` `` <br> `--opcao` | Continuação é crase — e **sem espaço depois dela** |
 
 📖 Tabela completa: [`../recursos/comandos-windows.md`](../recursos/comandos-windows.md).
 
 ### 11.3 Lentidão e travamentos
 
 | Sintoma | Causa | Solução |
-|---|---|---|
+| --- | --- | --- |
 | `npm install` leva minutos | Antivírus varrendo `node_modules` | Exclua `C:\dev` ([4.3](#43-excluir-a-pasta-do-antivírus-)) |
 | Git acusa mudanças que você não fez | Projeto dentro do OneDrive | Mova para `C:\dev` ([0.2](#02-escolha-a-pasta--fora-do-onedrive-sem-espaço-e-sem-acento-)) |
 | Arquivo "em uso" e não pode ser apagado | OneDrive ou antivírus | Mesma solução |

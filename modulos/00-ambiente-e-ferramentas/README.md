@@ -14,6 +14,39 @@ Ao final você será capaz de:
 3. Usar o fluxo Git básico em equipe (branch → commit → push → PR).
 4. Diagnosticar sozinho os erros mais comuns de instalação.
 
+## 🧭 Como este módulo se encaixa na trilha
+
+Este módulo não ensina a aplicação em si; ele ensina a condição que torna a aplicação
+ensinável. Sem ambiente consistente, sem Git funcionando e sem reprodutibilidade, o aluno
+passa a maior parte da energia tentando descobrir se o problema é do código, da máquina ou
+do terminal.
+
+Em termos de pedagogia, a ordem é intencional:
+
+- primeiro o aluno aprende a controlar o ambiente;
+- depois passa a focar no comportamento do software;
+- em seguida entra em camada de domínio, API, segurança e operação.
+
+> O objetivo aqui não é instalar software por hábito; é reduzir a fricção cognitiva para que a aprendizagem real comece sem ruído.
+
+Em outras palavras, o M00 é a "janela de operação" da disciplina. Ele não é o módulo mais
+bonito do curso, mas é o mais importante para que tudo que vem depois pareça um sistema e
+não um conjunto de erros aleatórios.
+
+## 🧭 Por que este módulo abre a sequência
+
+Este módulo não é "instalação por fora": ele define a base de confiabilidade da disciplina.
+Sem ambiente reprodutível, sem Git consistente e sem a linguagem compartilhada de terminal,
+os módulos seguintes perdem tempo com erro de ferramenta em vez de aprender conceito.
+
+A lógica didática é simples:
+
+- primeiro o aluno consegue rodar a máquina;
+- depois entende que o projeto precisa ser reproduzível;
+- então entra no backend com menos ruído cognitivo.
+
+> Em termos de aprendizagem evolutiva, este módulo reduz fricção. Ele não ensina o domínio da aplicação ainda; ensina a base para que o domínio possa existir.
+
 ---
 
 ## 📖 Teoria (1h)
@@ -46,7 +79,7 @@ Se o projeto só roda na sua máquina, ele não existe. O que garante que roda e
 lugar:
 
 | Artefato | Função |
-|---|---|
+| --- | --- |
 | `package.json` | Quais dependências, e em que faixa de versão |
 | **`package-lock.json`** | A versão **exata** de cada uma, e das dependências delas |
 | `.env.example` | Quais variáveis de ambiente são necessárias (sem os valores) |
@@ -116,7 +149,7 @@ passam a servir para alguma coisa. Instalar tudo agora só antecipa problemas.
 Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
 
 | Seu sistema | Guia | O que fazer hoje |
-|---|---|---|
+| --- | --- | --- |
 | 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) | Passos 0 a 5 |
 | 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) | Seções 3 a 5 |
 | 🪟→🐧 **WSL2** | instale o WSL2 pelo passo 7.1 do guia Windows, depois siga o guia **Linux** dentro do Ubuntu | — |
@@ -156,7 +189,7 @@ Set-Location C:\dev\bibliocom
 ```
 
 | Linha | O que faz |
-|---|---|
+| --- | --- |
 | criar a pasta | O projeto fica em `dev/bibliocom`. 🪟 **Fora do OneDrive, sem espaço nem acento no caminho.** O OneDrive tenta sincronizar as 30 mil dependências e trava o Git |
 | entrar na pasta | Todo o resto acontece daqui |
 
@@ -181,7 +214,7 @@ Isso cria um `package.json`. Abra-o e **edite** para:
 ```
 
 | Campo | O que faz |
-|---|---|
+| --- | --- |
 | `"private": true` | Impede publicação acidental no npm. **Obrigatório** na raiz de um workspace |
 | `"workspaces"` | Declara os projetos do monorepo. É esta linha que faz um único `npm install` na raiz resolver os três |
 | `scripts` | Atalhos que rodam de qualquer pasta. `npm run dev:api` sobe o backend sem você precisar entrar nele |
@@ -214,10 +247,10 @@ git config core.autocrlf input
 ```
 
 | Linha | O que faz |
-|---|---|
+| --- | --- |
 | `cd ~/dev/bibliocom` | Sobe um nível: a raiz do repositório é `bibliocom`, não `backend`. O repositório abraça as duas camadas |
 | `git init` | Cria o repositório. Passa a existir a pasta oculta `.git`, onde mora todo o histórico |
-| `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Relevante sobretudo no Windows: sem isto, o deploy do M16 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
+| `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Relevante sobretudo no Windows: sem isto, o deploy do M12 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
 
 A estrutura agora:
 
@@ -261,7 +294,7 @@ Thumbs.db
 ```
 
 | Padrão | Por que fica de fora |
-|---|---|
+| --- | --- |
 | `node_modules/` | É **reconstruível** a partir do `package.json` + `package-lock.json`. São dezenas de milhares de arquivos: versioná-los incha o repositório e gera conflito a cada instalação |
 | `dist/`, `coverage/` | Saída de build e de teste. Geradas por comando, não escritas por pessoa |
 | `.env` | Contém segredo. **Segredo que entra no Git é segredo vazado** — mesmo removido depois, continua nos commits anteriores |
@@ -296,7 +329,7 @@ O `core.autocrlf` do passo 3a protege **você**; o `.gitattributes` protege **qu
 inclusive quem não configurou nada. Por isso um é versionado e o outro não.
 
 Ele precisa estar no **primeiro commit**. Arquivo já commitado com CRLF continua com CRLF,
-e ninguém vai lembrar disso quando o deploy quebrar no M16.
+e ninguém vai lembrar disso quando o deploy quebrar no M12.
 
 #### 3d. README: como rodar o projeto
 
@@ -333,7 +366,7 @@ git commit -m "chore: inicializa estrutura do projeto"
 ```
 
 | Linha | O que faz |
-|---|---|
+| --- | --- |
 | `git status` | Mostra o que entraria no commit. **Leia antes de commitar** |
 | `git add .` | Move para a *staging area* tudo que mudou e não está no `.gitignore` |
 | `git commit -m "..."` | Grava o snapshot com a mensagem |
@@ -359,7 +392,6 @@ corrige. Rode-o sempre que algo parar de funcionar.
 
 **Só avance com os itens da semana 1 em OK.** As dependências do backend e o Docker aparecem
 como pendentes até os módulos em que entram, e isso é esperado.
-
 
 ### Passo 4 — Publicar no GitHub (20 min)
 
@@ -408,7 +440,7 @@ vésperas da entrega.
 ## ⚠️ Erros comuns
 
 | Sintoma | Diagnóstico |
-|---|---|
+| --- | --- |
 | `Cannot find module` depois de clonar | Faltou `npm install` na raiz |
 | `node_modules/` aparece no `git status` | Falta a linha no `.gitignore` |
 | Colega tem versão diferente da sua | O `package-lock.json` não foi commitado, ou alguém o apagou |

@@ -1,5 +1,5 @@
 /**
- * M13 — Laboratório de vulnerabilidades (backend).
+ * M09 — Laboratório de vulnerabilidades (backend).
  *
  * ⚠️ CÓDIGO DELIBERADAMENTE INSEGURO. Existe para ser atacado e corrigido em
  *    sala. Nunca use nada daqui em produção.
@@ -14,9 +14,9 @@
  * O gabarito está no fim do arquivo. Não leia antes de tentar.
  */
 
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res } from "@nestjs/common";
 import { exec } from "node:child_process";
 import { join } from "node:path";
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res } from "@nestjs/common";
 
 @Controller("inseguro")
 export class InseguroController {
@@ -24,7 +24,7 @@ export class InseguroController {
     private readonly obras: Repository<Obra>,
     private readonly usuarios: Repository<Usuario>,
     private readonly emprestimos: Repository<Emprestimo>,
-  ) {}
+  ) { }
 
   // ---------------------------------------------------------------- (1)
   @Get("buscar")

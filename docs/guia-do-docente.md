@@ -97,7 +97,7 @@ ali, não em sintaxe.
 | --- | --- |
 | Turma confortável (esperado) | Cronograma padrão; monitoria pontual para casos isolados |
 | 20%+ com dificuldade | Monitoria dirigida nas semanas 6–7, sem mexer no cronograma |
-| Maioria com dificuldade | Reavalie: 4h de nivelamento (retire de M06 e M15) ou modo híbrido |
+| Maioria com dificuldade | Reavalie: 4h de nivelamento (retire de M06 e M11) ou modo híbrido |
 
 ## 2. Ritmo sugerido de uma aula de 5h
 
@@ -145,17 +145,17 @@ A nota do projeto é individualizável por fator de participação (0,7–1,1).
 
 Se precisar reduzir a carga sem ferir a ementa, corte nesta ordem:
 
-1. M17 Observabilidade (2h) — complementar
-2. M15 Tipos compartilhados (2h) — pode virar leitura assíncrona
-3. M14 Testes: 3h → 2h (mantenha regra de negócio e matriz de acesso)
+1. M13 Observabilidade (2h) — complementar
+2. M11 Tipos compartilhados (2h) — pode virar leitura assíncrona
+3. M10 Testes: 3h → 2h (mantenha regra de negócio e matriz de acesso)
 4. M00 Ambiente: transforme em pré-atividade assíncrona
-5. M10 Rotas (2h) — pode ser absorvido pelo M11, com perda
+5. M08 Componentes (2h) — pode ser absorvido pelo M09, com perda
 
 **Antes de cortar, considere o modo híbrido** ([ADR-04](decisoes-tecnicas.md#adr-11--o-item-templates-da-ementa)):
 ele libera ~8h de uma vez. Com o pré-requisito de JS atendido, porém, a única razão que
 resta para adotá-lo é a **leitura estrita da ementa** — não a capacidade da turma.
 
-**Nunca corte:** M01, M02, M04, M05, M06, M07, M08, M09, M12, M13, M16 — são itens
+**Nunca corte:** M01, M02, M04, M05, M06, M07, M08, M09, M12, M13 — são itens
 explícitos da ementa (ou pré-requisito direto deles). E não corte as etapas do projeto nem
 a extensão: são eliminatórias.
 
@@ -164,7 +164,7 @@ a extensão: são eliminatórias.
 | Erro | Efeito | Correção |
 | --- | --- | --- |
 | Ensinar ORM antes de HTTP | Estudante decora comandos, não entende requisição | Mantenha M01 antes de tudo |
-| Deixar o deploy para a última semana | Metade da turma não implanta | M16 na semana 16, com o BiblioCom (não com o projeto) |
+| Deixar o deploy para a última semana | Metade da turma não implanta | M12 na semana 12, com o BiblioCom (não com o projeto) |
 | Aceitar tema de projeto grande demais | Etapa 3 não fecha | Aplicar o filtro de escopo da Etapa 1 com rigor |
 | Extensão virar "apresentar slides na escola" | Não é extensão, é divulgação | Exigir demanda + entrega + devolutiva registrada |
 | Corrigir só o resultado final | Não se detecta equipe travada | Usar os marcos E0–E8 semanalmente |
@@ -182,7 +182,7 @@ a extensão: são eliminatórias.
 - Peça sempre **link + commit hash**, não arquivo `.zip`.
 - Para o portfólio (E0–E8): correção binária (entregue/não entregue) + amostragem de 30%
   com feedback escrito. Corrigir 100% com detalhe é insustentável e não muda o resultado.
-- Automatize o que der: o CI (M14) já reprova PR sem testes passando.
+- Automatize o que der: o CI (M10) já reprova PR sem testes passando.
 
 ## 8. Acessibilidade e inclusão
 
@@ -190,7 +190,7 @@ a extensão: são eliminatórias.
   divergem.
 - Estudantes sem máquina própria: garanta laboratório com horário estendido ou use
   GitHub Codespaces / Gitpod (o material roda sem alterações).
-- Internet instável: os módulos M00–M15 funcionam offline após a primeira instalação;
+- Internet instável: os módulos M00–M11 funcionam offline após a primeira instalação;
   use um espelho local (`npm config set registry`), ou distribua um `node_modules` já
   populado por pen drive.
 - Requisitos de acessibilidade das interfaces (WCAG básico) são cobrados no M09 e na

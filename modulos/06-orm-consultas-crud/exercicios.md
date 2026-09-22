@@ -8,7 +8,7 @@
 Escreva cada consulta com a API do `Repository` e cole o SQL gerado:
 
 | # | Consulta |
-|---|---|
+| --- | --- |
 | 1 | Obras publicadas antes de 1900, por título |
 | 2 | Obras cujo título contém "sertão", sem diferenciar maiúsculas |
 | 3 | Obras de um autor específico, com o autor carregado |
@@ -32,7 +32,7 @@ Pegadinhas: **5** — vazio (`""`) e `NULL` são coisas diferentes; qual é o se
 5. Meça de novo.
 
 | Versão | Consultas | Tempo | Linhas de código |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Ruim | | | |
 | Boa | | | |
 
@@ -44,7 +44,7 @@ sobre encontrar N+1 em revisão de código?
 ## E06.3 — Relatórios com QueryBuilder (em duplas) ⭐
 
 | # | Relatório |
-|---|---|
+| --- | --- |
 | 1 | Quantas obras por autor, só quem tem mais de 3, do maior para o menor |
 | 2 | Quantos exemplares por estado |
 | 3 | Autores **sem** nenhuma obra cadastrada |
@@ -63,6 +63,7 @@ O item 3 é o mais instrutivo: exige `LEFT JOIN` com `IS NULL`, e a versão ing�
 todos opcionais e combináveis.
 
 **Verificação:**
+
 - [ ] Sem nenhum filtro, devolve a primeira página de tudo
 - [ ] Cada filtro isolado funciona
 - [ ] Combinados funcionam (`?q=casa&de=1900`)
@@ -87,7 +88,7 @@ Chame com `?q=' OR 1=1 --` e observe. Depois com `?q=' UNION SELECT ...`.
 3. Corrija com parâmetro nomeado e mostre o SQL agora.
 4. Onde exatamente o valor viaja, na versão correta?
 
-Apague a versão vulnerável ao terminar. O M13 retoma o assunto.
+Apague a versão vulnerável ao terminar. O M09 retoma o assunto.
 
 ---
 
@@ -122,7 +123,7 @@ Obra retirada do acervo não deve sumir do histórico de empréstimos.
 4. Meça e rode `EXPLAIN` de novo.
 
 | | Tempo | Plano de execução |
-|---|---|---|
+| --- | --- | --- |
 | Sem índice | | |
 | Com índice | | |
 

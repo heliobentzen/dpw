@@ -10,7 +10,7 @@ vale o que está aqui.
 
 | Bloco | CH | Teórica | Prática |
 | --- | ---: | ---: | ---: |
-| Módulos de conteúdo (M00–M17) | 69 | 32 | 37 |
+| Módulos de conteúdo (M00–M13) | 69 | 32 | 37 |
 | Avaliação teórica integrada | 1 | 1 | 0 |
 | Projeto integrador (Etapas 1–3) | 20 | 5 | 15 |
 | Atividades extensionistas | 10 | 2 | 8 |
@@ -28,12 +28,12 @@ vale o que está aqui.
 | M05 Migrações | back | 3 | 1 | 2 | 4–5 |
 | M06 ORM: consultas e CRUD | back | 5 | 2 | 3 | 5–6 |
 | M07 API: rotas, controllers e DTOs | back | 6 | 3 | 3 | 6–7 |
-| M12 Autenticação e gestão de usuários | backend | 5 | 2 | 3 | 12 |
-| M13 Segurança | backend | 5 | 3 | 2 | 13 |
-| M14 Testes e qualidade | backend | 3 | 1 | 2 | 14 |
-| M15 Tipos compartilhados entre as camadas | opcional | 2 | 1 | 1 | 15 |
-| M16 Deploy da API | backend | 4 | 2 | 2 | 16 |
-| M17 Observabilidade e manutenção | backend | 2 | 1 | 1 | 17 |
+| M08 Autenticação e gestão de usuários | backend | 5 | 2 | 3 | 8 |
+| M09 Segurança | backend | 5 | 3 | 2 | 9 |
+| M10 Testes e qualidade | backend | 3 | 1 | 2 | 10 |
+| M11 Tipos compartilhados entre as camadas | opcional | 2 | 1 | 1 | 11 |
+| M12 Deploy da API | backend | 4 | 2 | 2 | 12 |
+| M13 Observabilidade e manutenção | backend | 2 | 1 | 1 | 13 |
 | **Total** | | **69** | **32** | **37** | |
 
 **Distribuição por camada:** backend principal 45h · transversal 9h.
@@ -49,16 +49,16 @@ vale o que está aqui.
 | 5 | M05 Migrações (2h) · M06 ORM (3h) | 5 | Migrações versionadas · PostgreSQL |
 | 6 | M06 ORM (2h) · M07 API (2h) · **Projeto Etapa 1** (1h) | 5 | **E2**: caderno de consultas ORM |
 | 7 | M07 API — DTOs, validação, filtros (4h) · **Etapa 1** (1h) | 5 | **E3**: API CRUD documentada (OpenAPI) |
-| 8 | M12 Autenticação (3h) · **Etapa 1** (2h) | 5 | Definição do tema, parceiro e MVP |
-| 9 | M13 Segurança (3h) · **Etapa 1** (2h) | 5 | Backlog, riscos e arquitetura |
-| 10 | M14 Testes (3h) · **Etapa 1** (2h) | 5 | **P1**: definição e planejamento aprovados · **A1**: avaliação teórica |
-| 11 | M15 Tipos compartilhados (2h) · **Etapa 2** — início do desenvolvimento (3h) | 5 | Sprint 1 iniciada |
-| 12 | M12 Autenticação ponta a ponta (2h) · **Etapa 2** — desenvolvimento (3h) | 5 | **E5**: login, papéis e rotas protegidas |
-| 13 | M13 Segurança (2h) · **Etapa 2** — desenvolvimento (3h) | 5 | **E6**: checklist OWASP aplicado |
-| 14 | M14 Testes (3h) · **Etapa 2** — desenvolvimento (2h) | 5 | **E7**: suíte verde (Jest + Supertest) |
-| 15 | M15 Tipos compartilhados (2h) · **Extensão** — diagnóstico e plano (3h) | 5 | **X1**: plano de ação extensionista |
-| 16 | M16 Deploy da API (4h) · **Etapa 2** (1h) | 5 | **E8**: API implantada |
-| 17 | M17 Observabilidade (2h) · **Etapa 2** (3h) | 5 | Integração e correções finais |
+| 8 | M08 Autenticação (3h) · **Etapa 1** (2h) | 5 | Definição do tema, parceiro e MVP |
+| 9 | M09 Segurança (3h) · **Etapa 1** (2h) | 5 | Backlog, riscos e arquitetura |
+| 10 | M10 Testes (3h) · **Etapa 1** (2h) | 5 | **P1**: definição e planejamento aprovados · **A1**: avaliação teórica |
+| 11 | M11 Tipos compartilhados (2h) · **Etapa 2** — início do desenvolvimento (3h) | 5 | Sprint 1 iniciada |
+| 12 | M08 Autenticação ponta a ponta (2h) · **Etapa 2** — desenvolvimento (3h) | 5 | **E5**: login, papéis e rotas protegidas |
+| 13 | M09 Segurança (2h) · **Etapa 2** — desenvolvimento (3h) | 5 | **E6**: checklist OWASP aplicado |
+| 14 | M10 Testes (3h) · **Etapa 2** — desenvolvimento (2h) | 5 | **E7**: suíte verde (Jest + Supertest) |
+| 15 | M11 Tipos compartilhados (2h) · **Extensão** — diagnóstico e plano (3h) | 5 | **X1**: plano de ação extensionista |
+| 16 | M12 Deploy da API (4h) · **Etapa 2** (1h) | 5 | **E8**: API implantada |
+| 17 | M13 Observabilidade (2h) · **Etapa 2** (3h) | 5 | Integração e correções finais |
 | 18 | **Etapa 2** — desenvolvimento, testes e entrega (5h) | 5 | **P2**: sistema entregue e implantado |
 | 19 | **Etapa 3** — relatório e encerramento (4h) · **Extensão** (1h) | 5 | Rascunho do relatório · **X2**: evidências |
 | 20 | **Etapa 3** — relatório e apresentação (4h) · **Extensão** — devolutiva (1h) | 5 | **P3**: relatório + apresentação · **X3**: relato |
@@ -83,9 +83,9 @@ de desenvolvimento apoiado pelas aulas · Etapa 3 = 4+4 = 8h · Extensão = 3+1+
 comprima as semanas 11–20 (desenvolvimento, relatório e extensão).
 
 **Formato intensivo (5 semanas × 20h):** semana 1 = M00–M06; semana 2 = M07 + Etapa 1;
-semanas 3 e 4 = Etapa 2 + M12–M17; semana 5 = Etapa 3 + extensão. Inicie o contato
+semanas 3 e 4 = Etapa 2 + M08–M13; semana 5 = Etapa 3 + extensão. Inicie o contato
 com a organização parceira **antes** do primeiro dia de aula.
 
 **EaD / híbrido:** as 40h teóricas migram bem para assíncrono. As práticas exigem síncrono
 ou monitoria, especialmente M05 (migrações), M13
-(segurança) e M16 (deploy) — onde o erro é silencioso e o feedback precisa ser rápido.
+(segurança) e M12 (deploy) — onde o erro é silencioso e o feedback precisa ser rápido.

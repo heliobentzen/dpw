@@ -1,6 +1,6 @@
-# M13 — Segurança de APIs
+# M09 — Segurança de APIs
 
-> **CH:** 5h (3h teóricas · 2h práticas) · **Semana 13** · **Pré-requisitos:** M07, M12
+> **CH:** 5h (3h teóricas · 2h práticas) · **Semana 9** · **Pré-requisitos:** M07, M08
 > **Ementa:** tópicos relevantes de segurança
 
 Segurança não é uma etapa decorativa depois do CRUD. Neste módulo, as ameaças são ligadas
@@ -13,6 +13,27 @@ diretamente às entradas, respostas, autorização e operação da API.
 3. Evitar IDOR, exposição excessiva de dados e upload inseguro.
 4. Proteger segredos, cabeçalhos, CORS e mensagens de erro.
 5. Registrar riscos e evidências de correção no projeto.
+
+## 🧭 Por que este módulo vem depois da autenticação
+
+O M08 ensinou a reconhecer usuários e permissões. O M09 amplia a pergunta: mesmo sabendo quem
+fez a requisição, a API continua segura contra entradas maliciosas, abuso de recursos e exposição
+indevida?
+
+Essa posição na trilha evita dois equívocos comuns:
+
+- tratar segurança como uma lista de configurações copiadas no fim;
+- confundir autenticação com proteção completa do sistema.
+
+Agora o aluno revisita decisões dos módulos anteriores com uma lente de risco: DTOs, consultas,
+uploads, mensagens de erro, logs, CORS e dependências. A aprendizagem deixa de ser apenas
+“implementar uma funcionalidade” e passa a incluir “antecipar como ela pode ser abusada”.
+
+O M10 virá em seguida para transformar parte dessas garantias em testes repetíveis. Assim, a
+segurança não fica dependente da memória de quem escreveu a API.
+
+> A evidência de aprendizagem é uma correção demonstrada: ameaça identificada, teste executado,
+falha reproduzida e proteção verificada.
 
 ## Sequência prática
 

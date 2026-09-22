@@ -38,13 +38,13 @@
 | Views: mapeamento de URLs | M07 (`@Controller`, `@Get`, `@Post`) | 🔵 |
 | Views: classes/métodos/funções de processamento de requisições | M07 (FBV, `APIView`, `ViewSet`) | 🔵 |
 | **Interface com o usuário** | API documentada e consumida por clientes externos | 🔵 |
-| Segurança | M13 (transversal em M07, M12, M16) | 🔵🟣 |
-| Gestão de usuários | M12 | 🔵🟣 |
-| Implantação (deploy) | M16 (+ M17 pós-deploy) | 🔵🟣 |
+| Segurança | M09 (transversal em M07, M08, M12) | 🔵🟣 |
+| Gestão de usuários | M08 | 🔵🟣 |
+| Implantação (deploy) | M12 (+ M13 pós-deploy) | 🔵🟣 |
 | Atividades extensionistas | `projeto/extensao/` | — |
 
 Conteúdos **complementares** (não exigidos pela ementa, incluídos por demanda de mercado):
-M00 (ambiente), M03 (bootstrap), M14 (testes), M15 (Admin), M17 (observabilidade). Podem
+M00 (ambiente), M03 (bootstrap), M10 (testes), M13 (observabilidade). Podem
 ser comprimidos — ver [`guia-do-docente.md`](guia-do-docente.md#5-compressão-do-conteúdo).
 
 ## 4. Objetivo geral

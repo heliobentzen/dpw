@@ -63,6 +63,7 @@ Se for interceptação de TLS, peça o certificado à TI e use `NODE_EXTRA_CA_CE
 
 **`Nest can't resolve dependencies of the XController (?)`**
 O `?` marca o parâmetro que ele não conseguiu resolver. Duas causas, nesta ordem:
+
 1. O provider não está em `providers` do módulo;
 2. Falta `@Injectable()` na classe do provider.
 
@@ -76,6 +77,7 @@ Já há um servidor na porta.
 lsof -ti:3000 | xargs kill -9
 PORT=3001 npm run start:dev
 ```
+
 ```powershell
 # Windows PowerShell
 Get-NetTCPConnection -LocalPort 3000 | Select-Object -ExpandProperty OwningProcess | Stop-Process -Force
@@ -188,7 +190,7 @@ conexão é HTTP e recusa enviar o cookie `secure`.
 
 **A sessão some a cada reinício do servidor**
 O armazenamento padrão do `express-session` é em memória. Para produção, use um store
-externo (Redis) — está previsto no M16.
+externo (Redis) — está previsto no M12.
 
 **Esqueci a senha do usuário de coordenação**
 Rode o script de seed com um e-mail novo, ou atualize o hash direto pelo banco em
@@ -199,6 +201,7 @@ desenvolvimento.
 ## Git em equipe
 
 **`error: failed to push some refs`**
+
 ```bash
 git pull --rebase origin main
 # resolva conflitos, então:
@@ -208,17 +211,20 @@ git push -u origin minha-branch
 **Conflito em arquivo de migração**
 Não edite o conteúdo do conflito. Descarte sua migração local, refaça a partir do estado
 integrado:
+
 ```bash
 git checkout --theirs backend/src/migracoes/
 npm run migration:generate src/migracoes/MinhaAlteracao
 ```
 
 **Comitei o `.env` ou o `node_modules/` por engano**
+
 ```bash
 git rm -r --cached .env node_modules
 printf '.env\nnode_modules/\n' >> .gitignore
 git commit -m "chore: remove arquivos que nao devem ser versionados"
 ```
+
 Se **já foi para o remoto**, considere o `SESSION_SECRET` comprometido: gere um novo e troque
 todas as credenciais que estavam no arquivo. Remover do histórico exige reescrita
 (`git filter-repo`) e coordenação com toda a equipe.

@@ -1,6 +1,6 @@
-# M12 — Autenticação e autorização na API
+# M08 — Autenticação e autorização na API
 
-> **CH:** 5h (2h teóricas · 3h práticas) · **Semana 12** · **Pré-requisito:** M07
+> **CH:** 5h (2h teóricas · 3h práticas) · **Semana 8** · **Pré-requisito:** M07
 > **Ementa:** gestão de usuários
 
 A API agora precisa distinguir quem está fazendo uma requisição e o que essa pessoa pode
@@ -13,6 +13,24 @@ fazer. O módulo implementa o fluxo no backend, sem confiar em qualquer cliente.
 3. Implementar login e emissão de sessão ou token com expiração.
 4. Proteger rotas com guards e autorizar operações por papel.
 5. Testar acesso permitido, negado e recurso inexistente.
+
+## 🧭 Por que este módulo chega agora
+
+O M08 não é uma aula de "login no final do curso". Ele aparece neste ponto porque o sistema
+já tem estrutura, dados e endpoints suficientes para precisar de identidade real.
+
+Até aqui, a turma construiu a API e modelou o domínio. Agora o problema deixa de ser apenas
+"como a aplicação funciona" e passa a ser "quem pode fazer o quê". A partir desse momento,
+o backend precisa distinguir usuário, ação e permissão — e não pode mais confiar em uma ideia
+genérica de "quem acessou o site".
+
+Esse módulo também funciona como ponte entre a construção técnica e a responsabilidade ética do
+software: a API precisa decidir com rigor o que pode ser executado por cada identidade, e não
+apenas por convenção de interface.
+
+> Quando o aluno chega ao M08, ele já tem uma aplicação funcional. O que muda agora é o nível
+> de maturidade: a aplicação deixa de ser acessível a qualquer ator e passa a ser governada por
+> regra de acesso e auditoria.
 
 ## Sequência prática
 

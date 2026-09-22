@@ -18,8 +18,8 @@
 
 import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { platform, release } from "node:os";
+import { join } from "node:path";
 
 const WINDOWS = platform() === "win32";
 const ETAPAS = ["m00", "m03", "m04"];
@@ -101,7 +101,7 @@ if (versaoGit) {
     "Git configurado (user.name e user.email)",
     Boolean(nome && email),
     'git config --global user.name "Seu Nome" e ' +
-      'git config --global user.email "voce@exemplo.com"',
+    'git config --global user.email "voce@exemplo.com"',
   );
 }
 
@@ -118,8 +118,8 @@ if (raiz) {
   check(
     ".gitattributes presente",
     existsSync(join(raiz, ".gitattributes")),
-    "Crie o .gitattributes com '*.sh text eol=lf' — sem ele o deploy do M16 falha " +
-      "com 'bad interpreter' (ver ambiente-setup.md, secao 10)",
+    "Crie o .gitattributes com '*.sh text eol=lf' — sem ele o deploy do M12 falha " +
+    "com 'bad interpreter' (ver ambiente-setup.md, secao 10)",
   );
 } else {
   info("Fora de um repositorio Git — verificacoes do repositorio puladas");
@@ -195,13 +195,13 @@ if (WINDOWS) {
     "Projeto fora do OneDrive",
     !cwd.toLowerCase().includes("onedrive"),
     "Mova o projeto para C:\\dev — o OneDrive sincroniza node_modules, travando o " +
-      "npm install e produzindo mudancas fantasma no Git",
+    "npm install e produzindo mudancas fantasma no Git",
   );
   check(
     "Caminho sem espaco nem acento",
     !cwd.includes(" ") && /^[\x20-\x7E]*$/.test(cwd.replace(/ /g, "")),
     `Caminho atual: ${cwd} — mova para C:\\dev. Espacos e acentos quebram ` +
-      "ferramentas que nao poem aspas nos caminhos",
+    "ferramentas que nao poem aspas nos caminhos",
   );
 
   // 3. Finais de linha

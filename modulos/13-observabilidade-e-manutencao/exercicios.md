@@ -1,4 +1,4 @@
-# M17 — Exercícios
+# M13 — Exercícios
 
 ## E17.1 — O log que responde perguntas (individual)
 
@@ -10,7 +10,7 @@ Um associado liga dizendo que "o sistema não deixou eu pegar o livro, ontem à 
 4. Reproduza o cenário e confirme que agora responde.
 
 | Pergunta | Consegui? | O que faltava |
-|---|---|---|
+| --- | --- | --- |
 | Quem era o usuário? | | |
 | Que exemplar era? | | |
 | Qual regra recusou? | | |
@@ -45,7 +45,7 @@ acesso ao banco?
 5. Troque pelo healthcheck com `pingCheck` e repita 2 a 4.
 
 | | Banco no ar | Banco fora |
-|---|---|---|
+| --- | --- | --- |
 | Healthcheck ingênuo | | |
 | Healthcheck com `pingCheck` | | |
 
@@ -59,7 +59,7 @@ ingênuo provoca?
 Classifique cada evento no nível certo e justifique:
 
 | Evento | `debug` / `log` / `warn` / `error` | Justificativa |
-|---|---|---|
+| --- | --- | --- |
 | Empréstimo registrado com sucesso | | |
 | Tentativa de login com senha errada | | |
 | 10 tentativas de login falhas do mesmo IP em 1 min | | |
@@ -113,7 +113,7 @@ resolver, qual a causa raiz, e **o que impediria a repetição**.
 Preencham para o projeto de vocês, com **nome e data**, não "a equipe":
 
 | Frequência | Tarefa | Responsável | Como verificar que foi feito |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Semanal | Revisar erros novos no Sentry | | |
 | Semanal | Conferir que o backup rodou | | |
 | Mensal | `npm audit` e atualizar dependências críticas | | |

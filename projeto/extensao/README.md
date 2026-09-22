@@ -10,7 +10,7 @@ pesquisa em articulação com a sociedade, por meio de **interação dialógica*
 troca de saberes e transformação social — nos dois sentidos.
 
 | ✅ É extensão | ❌ Não é extensão |
-|---|---|
+| --- | --- |
 | A comunidade traz a demanda | A equipe decide o que a comunidade precisa |
 | Interação continuada, dialógica | Uma visita para coletar requisitos |
 | Entrega algo que fica e é usado | Apresentação de slides e ida embora |
@@ -29,7 +29,7 @@ empresa, nem projeto interno da própria instituição sem demanda externa.
 ## Cronograma (10h)
 
 | Semana | Atividade | h | Entrega |
-|---:|---|---:|---|
+| ---: | --- | ---: | --- |
 | 14 | Diagnóstico participativo com a organização | 1 | Ata + diagnóstico |
 | 15 | Planejamento da ação e pactuação com a organização | 3 | **X1** — Plano de ação |
 | 19 | Execução: capacitação, implantação assistida, acompanhamento | 5 | **X2** — Evidências |
@@ -62,7 +62,7 @@ internet permite adaptar; descobrir na semana 20, não.
 ## Semana 15 — Plano de ação (3h) — Entrega X1
 
 | Campo | Conteúdo |
-|---|---|
+| --- | --- |
 | **Organização parceira** | Nome, natureza jurídica, endereço, pessoa de contato |
 | **Público atingido** | Quem, quantas pessoas, perfil |
 | **Demanda identificada** | Nas palavras da organização |
@@ -77,7 +77,7 @@ internet permite adaptar; descobrir na semana 20, não.
 ### Indicadores de impacto: quantitativos e qualitativos
 
 | Tipo | Exemplos |
-|---|---|
+| --- | --- |
 | Quantitativo | Nº de pessoas capacitadas; nº de registros no sistema após 30 dias; tempo médio de uma operação antes × depois; % do processo que migrou do papel |
 | Qualitativo | Depoimentos da equipe da organização; observação de uso autônomo; problemas relatados que deixaram de ocorrer |
 
@@ -95,6 +95,7 @@ Colocar o sistema em uso real, no ambiente da organização, com dados reais. N�
 demonstração — é operação acompanhada.
 
 Checklist:
+
 - [ ] Sistema no ar e acessível do local
 - [ ] Contas criadas para as pessoas que vão usar
 - [ ] Dados iniciais carregados (cadastros existentes migrados, se houver)
@@ -128,7 +129,7 @@ Corrija o que aparecer. **Este retorno é o que separa entrega de abandono.**
 ### Evidências a coletar
 
 | Evidência | Formato |
-|---|---|
+| --- | --- |
 | Lista de presença da capacitação | Assinada |
 | Registro fotográfico | Com autorização de imagem |
 | Prints do sistema em uso real | Dados anonimizados |
@@ -138,7 +139,7 @@ Corrija o que aparecer. **Este retorno é o que separa entrega de abandono.**
 
 > **Cuidado com dados pessoais nas evidências.** Prints com nome, telefone ou endereço de
 > terceiros precisam ser anonimizados. Autorização de imagem por escrito para toda foto
-> com pessoas identificáveis. É aplicação direta do M13.
+> com pessoas identificáveis. É aplicação direta do M09.
 
 ---
 
@@ -170,7 +171,7 @@ Modelo em
 Se a equipe não tem contato, procure — nesta ordem de facilidade:
 
 | Tipo | Onde procurar | Demanda típica |
-|---|---|---|
+| --- | --- | --- |
 | Associação de moradores | Prefeitura, subprefeitura, redes de bairro | Cadastro de associados, reserva de espaço, empréstimo de equipamentos |
 | Biblioteca ou sala de leitura comunitária | Secretaria de Cultura, coletivos | Acervo, empréstimo |
 | Cursinho popular / reforço escolar | Coletivos estudantis, igrejas | Matrícula, frequência, notas |
@@ -195,7 +196,7 @@ cabe no semestre.
 ## 📦 Entregas
 
 | Código | Entrega | Semana |
-|---|---|---:|
+| --- | --- | ---: |
 | **X1** | Plano de ação extensionista | 15 |
 | **X2** | Pasta de evidências da execução | 19 |
 | **X3** | Relato de experiência (na seção 11 do relatório) | 20 |
@@ -205,7 +206,7 @@ Rubrica em [`../../avaliacao/rubrica-extensao.md`](../../avaliacao/rubrica-exten
 ## ⚠️ Erros comuns
 
 | Erro | Por que é problema |
-|---|---|
+| --- | --- |
 | Deixar para procurar parceiro na semana 14 | Não dá tempo de construir relação |
 | Tratar a organização como cliente que "passa requisito" | Extensão é diálogo, não encomenda |
 | Entregar o sistema sem capacitar | Ninguém usa |

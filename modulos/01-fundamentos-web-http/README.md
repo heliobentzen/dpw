@@ -20,6 +20,25 @@ este módulo decora o framework; quem entende este módulo aprende a web.
 4. Interpretar códigos de status e usar o DevTools/`curl` para diagnosticar problemas.
 5. Explicar como cookies e sessões contornam a ausência de estado do HTTP.
 
+## 🧭 Por que este módulo é a base da disciplina
+
+O M01 é o primeiro momento em que o aluno deixa de ver a web como "um navegador que mostra
+uma página" e passa a ver a web como um conjunto de mensagens, regras e estados. É aqui que a
+disciplina muda de ferramenta para arquitetura.
+
+Antes de construir a API, o estudante precisa perceber que:
+
+- o navegador não é o sistema, é apenas um cliente;
+- cada click gera uma nova mensagem, e essa mensagem pode ser observada;
+- o estado da aplicação não existe por milagres, e sim por protocolo;
+- a falha mais comum do backend não é de sintaxe, e sim de entender mal o HTTP.
+
+> Se o aluno entende este módulo, ele não apenas usa o framework: ele compreende o que o
+> framework está escondendo por conveniência.
+
+O M01 prepara a mente para o resto da trilha. Os módulos seguintes vão abstrair o protocolo,
+mas sem esse entendimento a abstração vira caixa-preta.
+
 ---
 
 ## 📖 Teoria (3h)
@@ -55,7 +74,7 @@ Sequência completa:
 #### Onde roda o quê
 
 | Camada | Executa | Exemplos |
-|---|---|---|
+| --- | --- | --- |
 | Cliente | Navegador | HTML, CSS, JavaScript, validação de UX |
 | Rede | Infraestrutura | DNS, TLS, CDN, proxy reverso |
 | Servidor | Sua aplicação | Roteamento, regras de negócio, acesso a dados, **validação de verdade** |
@@ -102,7 +121,7 @@ Estrutura: `VERSÃO STATUS RAZÃO` → cabeçalhos → **linha em branco** → c
 **Cabeçalhos que você usará com frequência:**
 
 | Cabeçalho | Direção | Para quê |
-|---|---|---|
+| --- | --- | --- |
 | `Host` | → | Qual site, quando um IP hospeda vários |
 | `Content-Type` | ↔ | Formato do corpo (`text/html`, `application/json`, `multipart/form-data`) |
 | `Accept` | → | Formatos que o cliente entende |
@@ -124,7 +143,7 @@ vulnerabilidades.
 - **Idempotente** — repetir N vezes tem o mesmo efeito de fazer 1 vez.
 
 | Método | Seguro | Idempotente | Corpo | Uso |
-|---|:---:|:---:|:---:|---|
+| --- | :---: | :---: | :---: | --- |
 | `GET` | ✅ | ✅ | não | Obter representação de um recurso |
 | `HEAD` | ✅ | ✅ | não | Só os cabeçalhos (checar existência/tamanho) |
 | `POST` | ❌ | ❌ | sim | Criar recurso / processar dados |
@@ -143,7 +162,7 @@ Host: biblioteca.exemplo.org.br
 Características e consequências:
 
 | Característica | Consequência prática |
-|---|---|
+| --- | --- |
 | Dados vão na URL | Aparecem no histórico, nos logs do servidor, no `Referer` e em prints |
 | Pode ser marcado como favorito | Bom para busca, filtro, paginação — o link reproduz o estado |
 | É cacheável | Navegador e CDN podem servir sem tocar no servidor |
@@ -166,17 +185,17 @@ titulo=Dom+Casmurro&autor=1&ano=1899&csrfmiddlewaretoken=Ab3xY...
 ```
 
 | Característica | Consequência prática |
-|---|---|
+| --- | --- |
 | Dados no corpo | Não vão para o histórico nem para a URL (mas **não** são criptografados por isso — só o HTTPS criptografa) |
 | Não idempotente | F5 depois de um POST reenvia o formulário → duplicação. Solução: **PRG** |
 | Não cacheável por padrão | Sempre chega ao servidor |
 | Sem limite prático de tamanho | Serve para upload e textos longos |
-| Requer proteção CSRF | Ver M13 |
+| Requer proteção CSRF | Ver M09 |
 
 **Formatos de corpo em POST:**
 
 | `Content-Type` | Quando |
-|---|---|
+| --- | --- |
 | `application/x-www-form-urlencoded` | Formulário HTML comum |
 | `multipart/form-data` | Formulário com upload de arquivo (`enctype`) |
 | `application/json` | Chamadas de API / JavaScript |
@@ -215,7 +234,7 @@ Em formulário HTML puro só existem GET e POST:
 ### 4. Códigos de status (20 min)
 
 | Faixa | Significado | Principais |
-|---|---|---|
+| --- | --- | --- |
 | **1xx** | Informativo | `101 Switching Protocols` (WebSocket) |
 | **2xx** | Sucesso | `200 OK`, `201 Created`, `204 No Content` |
 | **3xx** | Redirecionamento | `301 Moved Permanently`, `302 Found`, `304 Not Modified` |
@@ -259,7 +278,7 @@ quem está logado. Solução em duas partes:
 **Atributos de cookie que importam para segurança:**
 
 | Atributo | Efeito |
-|---|---|
+| --- | --- |
 | `HttpOnly` | JavaScript não lê o cookie → mitiga roubo de sessão por XSS |
 | `Secure` | Só trafega em HTTPS |
 | `SameSite=Lax/Strict` | Não é enviado (ou só em navegação de topo) em requisições de outros sites → mitiga CSRF |
@@ -272,7 +291,7 @@ mobile. Comparação em M07.
 ### 6. HTTP/1.1, HTTP/2, HTTP/3 (10 min)
 
 | Versão | Mudança principal | Impacto no seu código |
-|---|---|---|
+| --- | --- | --- |
 | HTTP/1.1 | Texto, uma requisição por vez na conexão | Truques como *sprite* e concatenação de CSS |
 | HTTP/2 | Binário, multiplexado numa conexão | Aqueles truques deixam de ser necessários |
 | HTTP/3 | Sobre QUIC/UDP, sem *head-of-line blocking* | Ganho em redes móveis |
@@ -291,7 +310,7 @@ semântica; a versão é responsabilidade da infraestrutura.
 3. Registre, numa tabela:
 
 | Item | Sua observação |
-|---|---|
+| --- | --- |
 | Quantas requisições a primeira página gerou? | |
 | Qual o método e o status da requisição do documento HTML? | |
 | Qual o `Content-Type` da resposta principal? | |
@@ -300,7 +319,7 @@ semântica; a versão é responsabilidade da infraestrutura.
 | Após o login, qual cabeçalho identifica você nas requisições seguintes? | |
 | Alguma resposta veio com 304? O que isso significa? | |
 
-4. Filtre por **Doc**, **XHR** e **Img** e observe a diferença de volume.
+1. Filtre por **Doc**, **XHR** e **Img** e observe a diferença de volume.
 
 ### Prática 2 — Falar HTTP na mão com `curl` (40 min)
 
@@ -381,7 +400,7 @@ curl.exe -i -X POST http://localhost:8000/eco -d '{\"titulo\":\"teste\"}'
 Os pontos a observar — todos comentados no arquivo:
 
 | Trecho do código | O que o framework fará por você |
-|---|---|
+| --- | --- |
 | `new URL(req.url, ...)` + a tabela `rotas` | **Roteamento.** No M03 vira `@Get(":id")` |
 | `req.on("data", ...)` juntando pedaços | **Ler o corpo.** Vira `@Body()` |
 | `JSON.parse` dentro de `try` | **Validação.** Vira o `ValidationPipe` (M07) |
@@ -410,7 +429,7 @@ fazendo.
 ## ⚠️ Erros comuns
 
 | Erro | Por que é errado |
-|---|---|
+| --- | --- |
 | Usar GET para excluir/alterar | Bots, pré-carregamento e cache disparam a ação sem intenção do usuário |
 | "POST é seguro porque não mostra os dados" | Só o HTTPS protege; o corpo do POST trafega em texto puro em HTTP |
 | Confiar em validação de JavaScript | Qualquer pessoa desabilita JS ou usa `curl` |

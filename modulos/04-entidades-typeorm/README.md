@@ -19,6 +19,25 @@ Ao final você será capaz de:
 4. Justificar cada `nullable`, cada `unique` e cada índice que você criar.
 5. Reconhecer o limite do `synchronize` — o que motiva o M05.
 
+## 🧭 Por que este módulo vem agora
+
+No M03, a aplicação respondia; os dados ainda eram provisórios. O M04 introduz a primeira
+decisão que dá permanência ao sistema: como representar o domínio do BiblioCom no banco.
+
+O aluno não começa pelo CRUD porque ainda precisa aprender a perguntar:
+
+- que coisas existem no domínio;
+- quais dados são obrigatórios ou únicos;
+- como as coisas se relacionam;
+- o que deve acontecer quando uma delas for removida.
+
+Essa ordem é didaticamente importante. Antes de consultar e alterar dados no M06, o estudante
+precisa saber de onde vieram as tabelas e quais regras elas já expressam. O M05, colocado logo
+depois, transforma essa modelagem em histórico reproduzível.
+
+> O resultado esperado não é apenas “o banco subiu”. É o aluno conseguir defender o modelo como
+uma tradução do domínio, e não como uma coleção de decorators copiados.
+
 ---
 
 ## 🧭 O que você vai construir
@@ -40,7 +59,7 @@ Mesmo formato do M03: **uma entidade por vez**, e cada etapa termina com o banco
 conferir. Se um passo falhar, você sabe qual linha foi.
 
 | Parte | O que é |
-|---|---|
+| --- | --- |
 | **Faça** | O comando ou o código, para digitar |
 | **Linha a linha** | Uma tabela explicando **cada elemento** |
 | **Rode** | Como verificar |
@@ -52,7 +71,7 @@ conferir. Se um passo falhar, você sabe qual linha foi.
 ### As dezoito etapas
 
 | # | Etapa | Min | O que entra |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | [Subir o banco](#etapa-1--subir-o-banco-15-min) | 15 | Docker Compose |
 | 2 | [Instalar o TypeORM](#etapa-2--instalar-o-typeorm-10-min) | 10 | ORM, driver |
 | 3 | [A variável de conexão](#etapa-3--a-variável-de-conexão-15-min) | 15 | `DATABASE_URL`, e uma armadilha |
@@ -94,7 +113,7 @@ docker compose up -d
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `docker compose` | Lê o `docker-compose.yml` da pasta e sobe os serviços descritos nele |
 | `up` | Cria e inicia os contêineres |
 | `-d` | *detached*: devolve o terminal. Sem ele, o banco ocupa a janela e você precisa de outra |
@@ -119,7 +138,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\dt"
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `exec db` | Executa um comando **dentro** do contêiner chamado `db` |
 | `psql` | O cliente de linha de comando do PostgreSQL, que já vem na imagem |
 | `-U bibliocom -d bibliocom` | Usuário e banco, ambos definidos no `docker-compose.yml` |
@@ -145,7 +164,7 @@ npm install @nestjs/typeorm typeorm pg
 **Linha a linha:**
 
 | Pacote | Para quê |
-|---|---|
+| --- | --- |
 | `typeorm` | O ORM propriamente dito: quem traduz classe em tabela e método em SQL |
 | `@nestjs/typeorm` | A ponte com o Nest. É ela que permite injetar repositórios pelo construtor, como no M03 |
 | `pg` | O **driver** do PostgreSQL: quem realmente fala o protocolo do banco pela rede. O TypeORM não conversa com banco nenhum sozinho |
@@ -172,7 +191,7 @@ DATABASE_URL=postgres://bibliocom:devpassword@localhost:5432/bibliocom
 **Linha a linha** — a URL tem cinco partes:
 
 | Parte | Valor | O que é |
-|---|---|---|
+| --- | --- | --- |
 | esquema | `postgres://` | Qual banco. É o que o TypeORM lê para escolher o driver |
 | usuário e senha | `bibliocom:devpassword` | Definidos no `docker-compose.yml` |
 | host | `localhost` | A sua máquina. O contêiner publicou a porta nela |
@@ -243,7 +262,7 @@ export class AppModule {}
 **Linha a linha:**
 
 | Opção | O que faz |
-|---|---|
+| --- | --- |
 | `forRoot` | Mesma convenção do `ConfigModule` no M03: "configure este módulo aqui, uma vez só" |
 | `type: "postgres"` | Diz ao TypeORM qual dialeto falar. É o que faz ele escolher o driver `pg` |
 | `url: process.env.DATABASE_URL` | O endereço da etapa 3. Repare que a **ordem importa**: o `ConfigModule` vem antes na lista, e é ele que carrega o `.env` para dentro do `process.env` |
@@ -288,7 +307,7 @@ const obra = rows[0];        // tipo: any. O TypeScript não sabe nada sobre ist
 Funciona. E tem três problemas que só aparecem quando o projeto cresce:
 
 | Problema | Como se manifesta |
-|---|---|
+| --- | --- |
 | **Sem tipo** | `obra.titolo`, com o erro de digitação, **compila**. O TypeScript não tem como saber o que aquele `SELECT` devolve. O erro aparece em produção, como `undefined` na tela |
 | **SQL espalhado** | A mesma consulta aparece em cinco arquivos, com variações sutis. Alguém acrescenta uma coluna e corrige quatro das cinco |
 | **Esquema em dois lugares** | A tabela está no banco, a expectativa está no código, e **nada garante que combinem**. A coluna `ano_publicacao` foi renomeada no banco? O código só descobre ao rodar |
@@ -333,7 +352,7 @@ divergir dela. E a tabela **também** nasce da classe — que é o item da ement
 Duas formas de o TypeORM aplicar isso no banco — e você vai usar as duas, uma por módulo:
 
 | Modo | Como funciona | Quando |
-|---|---|---|
+| --- | --- | --- |
 | `synchronize: true` | A cada inicialização, compara entidades × banco e **altera a tabela** | **Só em desenvolvimento**, e só neste módulo |
 | Migrações | Você gera um arquivo versionado com o `ALTER TABLE` e o aplica de propósito | Sempre que houver dado que importa. É o M05 |
 
@@ -370,7 +389,7 @@ export class Autor {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@Entity()` | "Esta classe é uma tabela." Sem este decorator, a classe é só uma classe e nada acontece |
 | `@PrimaryGeneratedColumn()` | Chave primária inteira, gerada pelo banco a cada inserção |
 | `@Column({ length: 150 })` | Uma coluna. O `length` vira `varchar(150)` |
@@ -396,7 +415,7 @@ export class AcervoModule {}
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `forFeature([Autor])` | Declara **quais entidades este módulo usa**. É o que disponibiliza os repositórios para injeção no M06 |
 | `.js` no import | A regra do M03, etapa 5a: import de arquivo seu termina em `.js` |
 
@@ -423,7 +442,7 @@ CONSTRAINT "PK_51d3959df48c82010ae1c4907fb" PRIMARY KEY ("id"))
 tomou está ali:
 
 | No SQL | Veio de |
-|---|---|
+| --- | --- |
 | `"autor"` | O nome da classe, em minúsculas. O TypeORM converte por convenção |
 | `SERIAL NOT NULL` + `PRIMARY KEY` | `@PrimaryGeneratedColumn()` |
 | `character varying(150)` | `length: 150` |
@@ -456,7 +475,7 @@ percebê-las, porque são elas que separam modelagem de digitação.
 ```
 
 | Opção | A pergunta que ela responde |
-|---|---|
+| --- | --- |
 | `type` | Que tipo de coluna? Sem isto, o TypeORM infere do tipo TS — e `number` vira `integer`, o que **quebra valores decimais** |
 | `length` | Qual o limite? `varchar(200)` é uma **regra de negócio**, não detalhe técnico: alguém decidiu que título de obra cabe em 200 caracteres |
 | `nullable` | Este dado pode não existir? |
@@ -471,7 +490,7 @@ descuidado se paga em `if` espalhados por toda a aplicação, para sempre.
 Compare as duas colunas que você escreveu:
 
 | Coluna | Escolha | Por quê |
-|---|---|---|
+| --- | --- | --- |
 | `nascimento` | `nullable: true` | Nem toda data de nascimento é conhecida. **Aqui o nulo é honesto**: ele significa "não sabemos", que é diferente de qualquer data |
 | `biografia` | `default: ""` | Texto opcional. Aqui o nulo seria **redundante**: string vazia já significa "sem biografia" |
 
@@ -486,7 +505,7 @@ significa naquela coluna.
 **Exercite agora**, por escrito, antes de seguir. Para cada dado, qual `@Column`?
 
 | Dado | `type` | `nullable`? | `default`? |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | CPF do associado | | | |
 | Valor da multa por atraso | | | |
 | Data de devolução efetiva | | | |
@@ -572,7 +591,7 @@ export class Obra {
 **Linha a linha** — só o que é novo:
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `anoPublicacao: number \| null` | Obra sem ano conhecido existe. E o tipo TS acompanha o `nullable`, como na etapa 8 |
 | `@CreateDateColumn()` | O TypeORM preenche na inserção e **nunca mais altera** |
 | `@UpdateDateColumn()` | O TypeORM atualiza a cada `save`. Você não escreve uma linha para isso |
@@ -614,7 +633,7 @@ import { Autor } from "./autor.entity.js";
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@ManyToOne` | "Muitas obras para uma autora". **É este lado que carrega a chave estrangeira** |
 | `() => Autor` | Uma função, não a classe direto. Os dois arquivos se referenciam, e a função adia a resolução — sem ela, dá erro de importação circular |
 | `(autor) => autor.obras` | Aponta o **outro lado** da relação. É o que permite navegar nos dois sentidos |
@@ -635,7 +654,7 @@ import { Obra } from "./obra.entity.js";
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@OneToMany` | **Não cria coluna nenhuma.** Só permite navegar de autora para obras |
 | `obras: Obra[]` | Um array. Ele vem vazio até você pedir a relação explicitamente — assunto do M06 |
 
@@ -679,7 +698,7 @@ essa é a linha que decide o que acontece com o acervo quando alguém aperta "ex
 **As três opções:**
 
 | Valor | O que o banco faz | Quando é a resposta certa |
-|---|---|---|
+| --- | --- | --- |
 | `RESTRICT` | **Impede** apagar a autora enquanto houver obras dela | **Padrão sensato.** Erro alto é melhor que perda silenciosa |
 | `CASCADE` | Apaga as obras junto | Só quando o filho **não existe** sem o pai |
 | `SET NULL` | Zera a referência, mantém a obra | Quando o vínculo é genuinamente opcional |
@@ -702,7 +721,7 @@ você ia apagar algo que importa. A justificativa tem de ser de negócio.
 **Anote, por escrito**, para as relações que este módulo vai criar:
 
 | Relação | `onDelete` | Justificativa **de negócio** |
-|---|---|---|
+| --- | --- | --- |
 | `Obra` → `Autor` | `RESTRICT` | |
 | `Exemplar` → `Obra` | | |
 | `Emprestimo` → `Exemplar` | | |
@@ -748,7 +767,7 @@ import { Categoria } from "./categoria.entity.js";
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@ManyToMany` | Declara a relação nos dois lados |
 | `@JoinTable` | **Vai em um lado só** — o "dono" — e é ele que cria a tabela intermediária |
 | `{ name: "obra_categoria" }` | Sem isto o TypeORM inventa um nome. Nomear é melhor: você vai ler esse nome em log e em migração |
@@ -774,7 +793,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d obra_categoria"
 **Três coisas que o log entregou de graça:**
 
 | Observação | Por que importa |
-|---|---|
+| --- | --- |
 | A tabela **não tem `id` próprio** | A chave primária é o **par**. É isso que impede a mesma obra receber a mesma categoria duas vezes — a regra está no banco, não num `if` |
 | Vieram **dois `CREATE INDEX`**, um por coluna | Sem eles, "quais obras desta categoria" varreria a tabela inteira |
 | Nem `obra` nem `categoria` ganharam coluna | Numa N:N a ligação mora **fora** das duas tabelas. É a diferença estrutural para a 1:N da etapa 11 |
@@ -842,7 +861,7 @@ import { Exemplar } from "./exemplar.entity.js";
 **Linha a linha:**
 
 | Decisão | Por quê |
-|---|---|
+| --- | --- |
 | `tombo` com `unique` | O número de tombo é o identificador **físico** do volume. Duplicado é erro de catalogação, e o banco deve recusar |
 | `enum` em vez de texto livre | O conjunto de estados é fechado. Texto livre vira `"Bom"`, `"bom"` e `"BOM"` no mesmo banco, e aí nenhum relatório fecha |
 | `estado` **e** `disponivel` separados | `estado` é a condição **física** do volume; `disponivel` diz se ele está na estante ou emprestado. Um exemplar em bom estado pode estar fora, e um desgastado pode estar disponível |
@@ -899,7 +918,7 @@ query: CREATE INDEX "IDX_825ff861a4d720c3dce9c2aa54" ON "obra" ("isbn")
 **A regra:** indexe o que aparece em `WHERE`, `ORDER BY` ou `JOIN` **com frequência**.
 
 | Fato | Consequência |
-|---|---|
+| --- | --- |
 | Índice ocupa espaço | Uma tabela pode ter mais índice que dado |
 | Índice deixa a **escrita** mais lenta | Cada `INSERT` atualiza a tabela **e** todos os índices dela |
 | Chave primária e estrangeira **já vêm indexadas** | Você não precisa declará-las de novo — e declarar cria um índice duplicado, que só custa |
@@ -968,7 +987,7 @@ tipo aparecendo, e deduziu que era uma renomeação.
 ### 16d. A conclusão, que não é a óbvia
 
 | Mudança | O que o `synchronize` fez | Custo |
-|---|---|---|
+| --- | --- | --- |
 | Renomear coluna | Deduziu e renomeou | Nenhum — **desta vez** |
 | Encurtar coluna com dado | Apagou e recriou, vazia | Perda total, **sem aviso** |
 
@@ -1026,7 +1045,7 @@ escolheu, e você consegue defender cada escolha usando o critério da etapa 12.
 A etapa 5 prometeu esta conversa. Você já viu o que o ORM entrega — agora o preço.
 
 | Custo | Onde este curso trata |
-|---|---|
+| --- | --- |
 | Você escreve menos SQL — e por isso **entende** menos SQL | O M06 exige ler o SQL gerado antes de aceitar qualquer consulta. É por isso que o `logging: true` fica ligado |
 | Consultas ingênuas viram lentidão silenciosa (problema N+1) | O M06 dedica uma seção ao N+1, **com medição**, não com aviso |
 | A abstração vaza: casos difíceis exigem SQL de novo | O M06 mostra o `QueryBuilder` e quando descer para SQL puro |
@@ -1050,7 +1069,7 @@ frequentes — e agora você sabe responder aos dois.
 ## ⚠️ Erros comuns
 
 | Sintoma | Diagnóstico |
-|---|---|
+| --- | --- |
 | `ECONNREFUSED ::1:5432` | O contêiner do banco não está de pé. `docker compose ps` |
 | `no PostgreSQL user name specified in startup packet` | `DATABASE_URL` chegou vazia. Quase sempre: falta a chave no esquema do `validate` — ver etapa 3 |
 | `password authentication failed` | `DATABASE_URL` não bate com o `docker-compose.yml` |

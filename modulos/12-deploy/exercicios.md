@@ -1,4 +1,4 @@
-# M16 — Exercícios
+# M12 — Exercícios
 
 ## E14.1 — Deploy do zero (individual) ⭐
 
@@ -26,6 +26,7 @@ Depois, rode e cole a saída:
 ```bash
 curl -I https://SEU-DOMINIO/          # Linux/macOS/WSL/Git Bash
 ```
+
 ```powershell
 curl.exe -I https://SEU-DOMINIO/      # Windows PowerShell
 ```
@@ -39,7 +40,7 @@ E o relatório do securityheaders.com. Meta: **nota A**.
 Provoque cada falha em produção, capture a evidência e corrija:
 
 | # | Falha | Como provocar | Sintoma | Correção |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | 1 | `ALLOWED_HOSTS` errado | Remover o domínio | | |
 | 2 | SPA não construída | Remover `npm run -w frontend build` do comando de build | | |
 | 3 | Migração não aplicada | Remover `migrate` do release | | |
@@ -86,7 +87,7 @@ pessoas em staging (por quê?); rollback documentado e **testado**.
 Implante a mesma aplicação em duas plataformas diferentes e compare:
 
 | Critério | Plataforma A | Plataforma B |
-|---|---|---|
+| --- | --- | --- |
 | Tempo até o primeiro deploy | | |
 | Passos manuais necessários | | |
 | Custo mensal estimado (fora do free tier) | | |

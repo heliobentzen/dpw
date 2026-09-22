@@ -90,7 +90,7 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 ## 9. Segurança e proteção de dados (1 página)
 
 - Medidas adotadas (autenticação, autorização, cabeçalhos, validação)
-- Resultado do `check --deploy` e das verificações do M13
+- Resultado do `check --deploy` e das verificações do M09
 - **Mapa de dados pessoais** (dado, finalidade, base legal, retenção)
 - Aviso de privacidade
 - Como o sistema atende aos direitos do titular
@@ -127,7 +127,7 @@ ABNT NBR 6023. Inclua documentação oficial, livros, artigos e a legislação c
 ## Apêndices
 
 | Apêndice | Conteúdo |
-|---|---|
+| --- | --- |
 | A | Manual do usuário |
 | B | Modelo de dados completo |
 | C | Backlog final com situação de cada história |

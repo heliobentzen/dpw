@@ -13,6 +13,25 @@ pergunta que o resto do curso executa: **onde o HTML é montado, e quem decide i
 3. Explicar o que é o **contrato** entre cliente e servidor e por que ele vem primeiro.
 4. Projetar os recursos e as rotas de uma API REST a partir de um domínio.
 
+## 🧭 Por que este módulo vem antes do backend
+
+O M02 é um módulo de decisão, não apenas de definição. Ele responde à pergunta que muitas
+turmas tentam ignorar: "quem é responsável por fazer o quê?"
+
+Quando o aluno entende arquitetura desacoplada, ele deixa de pensar em uma aplicação monolítica
+como uma única caixa e passa a enxergar duas responsabilidades distintas:
+
+- o cliente cuida da experiência e da interface;
+- o servidor cuida da verdade, da regra de negócio e dos dados.
+
+Esse entendimento é o que torna o resto do curso possível. O M03 pode até parecer uma aula de
+NestJS, mas por trás dela há uma decisão arquitetural: a API existe para servir um cliente
+independente, com contrato explícito, e não para misturar tudo em um único bloco.
+
+> Em outras palavras, o M02 ensina o aluno a pensar em interfaces antes de escrever rotas. Isso
+> reduz retrabalho e evita o clássico erro de “escrever o backend sem definir o que o frontend
+> precisa de verdade”.
+
 ---
 
 ## 📖 Teoria (2h)
@@ -58,7 +77,7 @@ recarrega a página — o roteamento acontece no cliente (M10).
 #### Comparação honesta
 
 | Critério | MPA (servidor) | SPA (cliente) |
-|---|---|---|
+| --- | --- | --- |
 | Primeiro carregamento | Rápido | Mais lento (baixa o *bundle*) |
 | Navegação seguinte | Recarrega tudo | Instantânea (só dados) |
 | Funciona sem JavaScript | ✅ Sim | ❌ Não |
@@ -101,7 +120,7 @@ Separar cliente e servidor não elimina trabalho — **desloca** trabalho. O que
 uma chamada de função vira uma requisição de rede, com tudo que isso implica.
 
 | Preocupação | MPA | SPA + API |
-|---|---|---|
+| --- | --- | --- |
 | Roteamento | Só no servidor | Servidor **e** cliente (dois mapas de rotas) |
 | Validação | Uma vez (form do servidor) | Duas vezes (UX no cliente, **segurança** no servidor) |
 | Autenticação | Sessão + cookie, direto | Sessão + CORS, ou token (M12) |
@@ -120,7 +139,7 @@ Três consequências que a turma vai sentir na pele:
    integridade. Ambas são obrigatórias (M07 e M11).
 3. **O contrato pode quebrar em silêncio.** O backend renomeia `titulo` para `nome`, o
    frontend continua compilando e a tela mostra `undefined`. As defesas: OpenAPI + tipos
-   gerados (M07) e testes de contrato (M14).
+   gerados (M07) e testes de contrato (M10).
 
 ### 3. O contrato de API (40 min) ⭐
 
@@ -134,7 +153,7 @@ A URL nomeia **coisas** (substantivos); o método diz o que se faz com elas (ver
 é o M01 aplicado.
 
 | ❌ Verbo na URL | ✅ Recurso + método |
-|---|---|
+| --- | --- |
 | `GET /criarObra` | `POST /api/obras/` |
 | `POST /atualizarObra?id=42` | `PATCH /api/obras/42/` |
 | `GET /deletarObra/42` | `DELETE /api/obras/42/` |
@@ -147,7 +166,7 @@ recurso, uma sub-rota de ação é aceitável e mais clara que forçar um `PATCH
 #### O contrato do BiblioCom
 
 | Recurso | Método | Rota | O que faz | Sucesso |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Obras | GET | `/api/obras/` | Lista, com filtros e paginação | 200 |
 | | POST | `/api/obras/` | Cria | 201 |
 | | GET | `/api/obras/{id}/` | Detalha | 200 |
@@ -252,7 +271,7 @@ implementaram é, ela mesma, o aprendizado.
 ## ⚠️ Erros comuns
 
 | Erro | Por que é problema |
-|---|---|
+| --- | --- |
 | Escolher SPA por moda | Complexidade sem contrapartida; o ADR existe para evitar isso |
 | Verbo na URL (`/criarObra`) | Ignora a semântica do HTTP (M01) |
 | Contrato só na cabeça de alguém | Frontend e backend divergem e ninguém percebe |

@@ -3,7 +3,7 @@
 ## E07.1 — Corrigir o desenho da API (individual)
 
 | # | Rota errada | Correta | Por quê |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | `POST /api/criarObra` | | |
 | 2 | `GET /api/obras/deletar/42` | | |
 | 3 | `GET /api/buscarObrasPorAutor?id=3` | | |
@@ -20,7 +20,7 @@ um *crawler* ou o *prefetch* do navegador percorre essa URL.
 ## E07.2 — Status corretos (individual)
 
 | Situação | Status |
-|---|---|
+| --- | --- |
 | `POST /obras` com sucesso | |
 | `POST /obras` com título vazio | |
 | `GET /obras/9999` inexistente | |
@@ -49,6 +49,7 @@ Escreva `CriarExemplarDto`, `AtualizarExemplarDto` e `ExemplarResposta`:
 - `adquiridoEm`: data ISO, opcional, **não pode ser futura**
 
 **Verificação:**
+
 - [ ] `tombo` inválido responde 400 com mensagem útil
 - [ ] Data futura é recusada (exige validador customizado ou `@MaxDate`)
 - [ ] `AtualizarExemplarDto` usa `PartialType`
@@ -66,7 +67,7 @@ Escreva `CriarExemplarDto`, `AtualizarExemplarDto` e `ExemplarResposta`:
 5. Ligue `forbidNonWhitelisted: true` e repita.
 
 | Configuração | O que aconteceu com `destaque` | Status |
-|---|---|---|
+| --- | --- | --- |
 | Sem `whitelist` | | |
 | `whitelist` | | |
 | `whitelist` + `forbidNonWhitelisted` | | |
@@ -114,7 +115,7 @@ automaticamente**, sem ninguém decidir.
 3. Gere de novo. O `git diff` mostra a mudança?
 4. Escreva o passo de CI que **falha** quando o arquivo commitado diverge do gerado.
 
-> Este exercício é a ponte para o M15: quando o contrato é verificável, mudar a API sem
+> Este exercício é a ponte para o M11: quando o contrato é verificável, mudar a API sem
 > avisar o frontend deixa de ser possível.
 
 ---

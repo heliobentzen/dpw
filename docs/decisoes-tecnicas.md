@@ -57,9 +57,9 @@ interface deixou de ser obrigatória e passou a ser complementar:
 | Mapeamento de URLs | `@Controller('obras')` + `@Get(':id')` (M07) **e** React Router (M10) |
 | Classes / métodos / funções para requisições | Controllers são **classes**, *handlers* são **métodos**, Providers são serviços injetados (M07) |
 | **Templates: criação de interfaces** | Componentes React + Tailwind (opcional, M08–M11) — ver ADR-11 |
-| Gestão de usuários | Passport + Guards + entidade `Usuario` (M12) |
-| Segurança | M13 (OWASP aplicado a API e ao frontend opcional) |
-| Implantação | M16 (API em produção) |
+| Gestão de usuários | Passport + Guards + entidade `Usuario` (M08) |
+| Segurança | M09 (OWASP aplicado a API e ao frontend opcional) |
+| Implantação | M12 (API em produção) |
 
 **Por que TypeORM e não Prisma.** Prisma é excelente e cresce rápido, mas seu schema é uma
 **DSL própria** (`schema.prisma`), não classes. A ementa pede literalmente *"classes para
@@ -79,7 +79,7 @@ E é o framework TypeScript de backend com maior adoção corporativa.
 | O backend fica mais focado e a curva de aprendizagem da disciplina se reduz | O frontend deixou de ser obrigatório e vira material complementar |
 | O código do backend fica mais homogêneo e alinhado a vagas de Node/TypeScript | Fica mais difícil demonstrar fluxo completo de interface por ausência do SPA |
 | `class-validator` no backend continua alinhado ao modelo mental de validação da turma | O ecossistema frontend deixa de ser revisado em profundidade |
-| O material torna a entrega principal mais consistente com o escopo pedagógico | Segurança deixa de ser "o framework já protege" e passa a ser configuração explícita (M13 muda de tom) |
+| O material torna a entrega principal mais consistente com o escopo pedagógico | Segurança deixa de ser "o framework já protege" e passa a ser configuração explícita (M09 muda de tom) |
 
 ---
 
@@ -109,7 +109,7 @@ framework escolhido para a camada de interface sendo o React.
 - **Status:** aceito · **Data:** 2026-08-18 · **Consequência do ADR-10**
 
 **Contexto.** O Django Admin dava, de graça, um painel administrativo completo — e o
-material dedicava 2h (M15) a customizá-lo. NestJS não tem equivalente.
+material dedicava 2h (M11) a customizá-lo. NestJS não tem equivalente.
 
 **Alternativas consideradas.**
 
@@ -118,7 +118,7 @@ material dedicava 2h (M15) a customizá-lo. NestJS não tem equivalente.
 | AdminJS (painel automático para Node) | Adiciona uma dependência pesada e opinativa para ensinar a customizá-la — conhecimento que não transfere |
 | Construir um CRUD administrativo em React | Duplica exatamente o que M07–M11 já ensinam. Repetição sem conceito novo |
 
-**Decisão.** As 2h do M15 passam a ensinar **tipos compartilhados entre backend e
+**Decisão.** As 2h do M11 passam a ensinar **tipos compartilhados entre backend e
 frontend** — um pacote `@bibliocom/tipos` no monorepo, consumido pelas duas camadas, com
 teste de contrato no CI.
 
@@ -126,7 +126,7 @@ teste de contrato no CI.
 mudar um campo na entidade quebra a compilação do frontend **antes** do deploy, não em
 produção. Rende mais que customizar um painel que a turma não levaria consigo.
 
-A "gestão de usuários" da ementa continua atendida pelo M12, que ganhou o CRUD
+A "gestão de usuários" da ementa continua atendida pelo M08, que ganhou o CRUD
 administrativo de usuários e papéis que antes ficava implícito no Admin.
 
 ---
@@ -151,7 +151,7 @@ bibliocom/
 
 **Consequências.** Um `npm install` na raiz resolve as três. Um PR mostra a mudança
 completa (entidade → DTO → tipo → tela). Em contrapartida, a turma precisa entender
-*workspaces* — 20 minutos no M03, que se pagam no M15.
+*workspaces* — 20 minutos no M03, que se pagam no M11.
 
 ---
 
@@ -178,13 +178,13 @@ M05" e entra na "antes do M04". SQLite deixa de aparecer no material.
 
 | Alternativa | Por que não |
 | --- | --- |
-| Manter SQLite e adiar a troca para o M16 | Piora: a divergência só apareceria no deploy, com o projeto inteiro em cima |
+| Manter SQLite e adiar a troca para o M12 | Piora: a divergência só apareceria no deploy, com o projeto inteiro em cima |
 | SQLite no curso, PostgreSQL só em produção | As migrações nunca seriam testadas contra o banco real. É a origem do "funciona local, falha no deploy" |
-| PostgreSQL nativo, sem Docker | Instalação diferente em cada sistema operacional, e o M16 usa contêiner de qualquer forma |
+| PostgreSQL nativo, sem Docker | Instalação diferente em cada sistema operacional, e o M12 usa contêiner de qualquer forma |
 
 **Consequências.**
 
-*A favor:* um único dialeto do M04 ao M16; nada do que a turma escreve é descartado; o enum
+*A favor:* um único dialeto do M04 ao M12; nada do que a turma escreve é descartado; o enum
 nativo do PostgreSQL torna o M04 mais rico (o `CREATE TYPE` antes do `CREATE TABLE` vira
 conteúdo); as migrações de desenvolvimento são as mesmas que rodam em produção.
 
@@ -216,7 +216,7 @@ reprodutibilidade da turma; os pacotes `@nestjs/*` deixam de precisar de versão
 | --- | --- | --- |
 | Instalar um pacote `@nestjs/*` | Precisa fixar versão, e **as versões são inconsistentes**: `@nestjs/config@4`, `@nestjs/swagger@11`, `@nestjs/typeorm@11`. Errar dá `ERESOLVE` com um muro de texto sobre *peer dependencies* | `npm install @nestjs/swagger` e pronto |
 | Import de arquivo próprio | `from "./acervo.service"` | `from "./acervo.service.js"` — mesmo o arquivo sendo `.ts` |
-| Executor de testes | **Dois**: Jest no backend, Vitest no frontend. O M14 precisava de um parágrafo explicando que a API é parecida | **Um só**, nas duas camadas |
+| Executor de testes | **Dois**: Jest no backend, Vitest no frontend. O M10 precisava de um parágrafo explicando que a API é parecida | **Um só**, nas duas camadas |
 | Sistema de módulos | Backend CommonJS, frontend ESM — duas convenções no mesmo repositório | ESM nos dois lados |
 | CLI do TypeORM | `typeorm-ts-node-commonjs` | `typeorm-ts-node-esm`, e o `ts-node` precisa ser instalado explicitamente |
 
@@ -233,11 +233,11 @@ a correção **muda de pacote para pacote**. É um atrito que não vira regra �
 ao professor.
 
 Os dois ganhos colaterais decidiram o empate: **um executor de testes em vez de dois** (o
-M14 encolhe) e **um sistema de módulos em vez de dois** no mesmo repositório.
+M10 encolhe) e **um sistema de módulos em vez de dois** no mesmo repositório.
 
 **Consequências.**
 
-*A favor:* instalar pacote do Nest volta a ser trivial; M14 ensina uma ferramenta em vez de
+*A favor:* instalar pacote do Nest volta a ser trivial; M10 ensina uma ferramenta em vez de
 duas; backend e frontend passam a compartilhar a convenção de módulos; o material deixa de
 nascer uma versão principal atrasado.
 
@@ -289,7 +289,7 @@ todo comando que a turma encontrar fora do material.
 e `npm run` são o vocabulário que a turma vai reencontrar em qualquer lugar.
 
 *Contra:* perde-se o rigor do pnpm — em npm, importar um pacote que você não declarou
-funciona por acaso, e só quebra na máquina de outra pessoa. O M14 compensa parcialmente,
+funciona por acaso, e só quebra na máquina de outra pessoa. O M10 compensa parcialmente,
 rodando `npm ci` no CI a partir do `package-lock.json`, que falha quando o lock não bate com
 o `package.json`.
 
@@ -359,9 +359,9 @@ os quatro estados de tela que o M08 ensina.
 
 **Justificativa.** Token em `localStorage` é legível por qualquer JavaScript da página: um
 XSS vira roubo de sessão. Cookie `HttpOnly` não é acessível por script. Como os dois
-artefatos são publicados no mesmo domínio (M16), não há motivo para JWT.
+artefatos são publicados no mesmo domínio (M12), não há motivo para JWT.
 
-**O raciocínio é o conteúdo.** O M13 ensina a decidir pelo modelo de ameaça, não a decorar
+**O raciocínio é o conteúdo.** O M09 ensina a decidir pelo modelo de ameaça, não a decorar
 que "JWT é melhor". JWT é a escolha certa quando há múltiplos domínios ou clientes móveis —
 não é o nosso caso, e o material diz por quê.
 
@@ -391,8 +391,8 @@ utilitários consegue usar qualquer biblioteca depois; o contrário não vale.
 | --- | --- |
 | M08 (React) cai de 5h para 4h — TypeScript já é conhecido desde o M03 | **−1h** |
 | M03 sobe de 3h para 4h — injeção de dependência e decorators exigem mais | **+1h** |
-| M15 troca Django Admin por tipos compartilhados | 2h → 2h |
-| M12 absorve o CRUD de usuários que o Admin dava de graça | dentro das 5h |
+| M11 troca Django Admin por tipos compartilhados | 2h → 2h |
+| M08 absorve o CRUD de usuários que o Admin dava de graça | dentro das 5h |
 
 O total dos módulos segue **69h**, e a disciplina, **100h (40T + 60P)**.
 
@@ -405,7 +405,7 @@ O total dos módulos segue **69h**, e a disciplina, **100h (40T + 60P)**.
   chegam antes de a turma ter um sistema para justificá-los. A mitigação é o M02, que
   apresenta a arquitetura antes do código.
 - **Segurança dá mais trabalho.** O Django protegia por padrão; aqui, `helmet`,
-  `ValidationPipe` e CSRF são configuração explícita. Isso custa tempo no M13 — mas em
+  `ValidationPipe` e CSRF são configuração explícita. Isso custa tempo no M09 — mas em
   compensação a turma **vê** cada proteção, em vez de herdá-la sem saber.
 - **Testes seguem apertados** (3h para Jest no backend e Vitest no frontend). O módulo
   prioriza teste de regra de negócio e de componente crítico; e2e vira leitura. Ganho

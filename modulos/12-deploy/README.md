@@ -1,6 +1,6 @@
-# M16 — Implantação da API em produção
+# M12 — Deploy da API
 
-> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 16** · **Pré-requisitos:** M14, M15
+> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 12** · **Pré-requisitos:** M10, M11
 > **Ementa:** *Tópicos relevantes: Implantação (deploy) do sistema.*
 
 O módulo em que o projeto deixa de ser exercício e vira sistema. Regra: ao final desta semana
@@ -17,6 +17,23 @@ aplicar migrações e tornar o processo reproduzível.
 3. Publicar API e SPA sob o **mesmo site**, com HTTPS e banco gerenciado.
 4. Configurar o *fallback* de rotas da SPA e as variáveis de build.
 5. Executar migrações em produção com segurança e saber reverter.
+
+## 🧭 Por que este módulo vem perto do fim
+
+Até aqui, o BiblioCom foi construído e verificado em ambiente controlado. O M12 introduz a
+diferença decisiva entre “funciona na minha máquina” e “pode ser usado por outras pessoas”.
+
+O aluno precisa chegar ao deploy já tendo aprendido contrato, segurança e testes, porque publicar
+uma aplicação amplia tanto seu valor quanto o impacto de seus erros. Por isso o módulo trata
+deploy como processo reproduzível, e não como um botão mágico:
+
+- o ambiente de produção tem restrições próprias;
+- configuração e segredos não podem depender do código local;
+- migrações alteram dados reais e exigem plano de reversão;
+- uma URL pública só é evidência de sucesso se o sistema puder ser verificado.
+
+> A mudança de competência aqui é operacional: o aluno deixa de apenas construir software e
+aprende a entregar uma versão controlada, repetível e responsável.
 
 ---
 
@@ -48,7 +65,7 @@ aplicar migrações e tornar o processo reproduzível.
 **A decisão central: mesmo site.** SPA em `/` e API em `/api/`, no mesmo domínio.
 
 | | Mesmo site (adotado) | Domínios separados |
-|---|---|---|
+| --- | --- | --- |
 | CORS | Não existe | Precisa configurar |
 | Cookie de sessão | Funciona naturalmente | `SameSite=None; Secure` + CORS com credenciais |
 | CSRF | Simples | Complicado |
@@ -60,7 +77,7 @@ a escolha de autenticação por sessão **depende** desta topologia.
 ### 2. Dois processos de build (20 min)
 
 | | Backend | Frontend |
-|---|---|---|
+| --- | --- | --- |
 | Artefato | Pasta `dist/` com JavaScript compilado | Pasta `dist/` com HTML, JS, CSS |
 | Quando é montado | No deploy (`nest build`) | No deploy (`vite build`) |
 | Configuração | Lida em **tempo de execução** | Embutida em **tempo de build** |
@@ -144,7 +161,7 @@ se as mudanças de API forem **compatíveis para trás** — que é o mesmo prin
 expandir → migrar → contrair do M05, aplicado ao contrato.
 
 | Mudança na API | Compatível para trás? | Como fazer |
-|---|---|---|
+| --- | --- | --- |
 | Adicionar campo na resposta | ✅ Sim | Direto |
 | Adicionar campo opcional na entrada | ✅ Sim | Direto |
 | Renomear campo | ❌ Não | Adicionar o novo → migrar o cliente → remover o antigo |
@@ -154,7 +171,7 @@ expandir → migrar → contrair do M05, aplicado ao contrato.
 ### 6. Onde implantar (20 min)
 
 | Opção | Custo | Esforço | Quando |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **PaaS** (Render, Railway, Fly.io) | Grátis a baixo | Baixo | ✅ Recomendado |
 | VPS + Nginx | Baixo/médio | Alto | Requisito de contrato ou custo em escala |
 | Nuvem gerenciada | Variável | Muito alto | Empresa com equipe de infra |
@@ -187,7 +204,7 @@ npm run build            # nest build → dist/main.js
 ```
 
 | Script | Quando roda | O que faz |
-|---|---|---|
+| --- | --- | --- |
 | `build` | No deploy | Compila TypeScript para `dist/` |
 | `start:prod` | A cada boot | Sobe a aplicação. **Sem `--watch`**, sem recompilar |
 | `migration:run:prod` | Antes de subir | Aplica as migrações pendentes (M05) |
@@ -207,7 +224,7 @@ await app.listen(process.env.PORT ?? 3000, "0.0.0.0");
 ```
 
 | Linha | Por quê |
-|---|---|
+| --- | --- |
 | `trust proxy` | Sem ela, o Express acha que a conexão é HTTP e **recusa** enviar o cookie `secure`. Sintoma: login funciona local e falha em produção, sem erro |
 | `"0.0.0.0"` | Escutar em todas as interfaces. Só `localhost` seria inacessível de fora do contêiner |
 | `process.env.PORT` | A plataforma **decide** a porta e a informa por variável. Porta fixa não recebe tráfego |
@@ -273,7 +290,7 @@ Select-String -Recurse "VITE_" dist\* | Select-Object -First 10   # variaveis em
 3. Variáveis:
 
 | Chave | Valor |
-|---|---|
+| --- | --- |
 | `SESSION_SECRET` | gere um **novo**, exclusivo de produção |
 | `NODE_ENV` | `production` |
 | `DATABASE_URL` | a Internal Database URL |
@@ -282,8 +299,8 @@ Select-String -Recurse "VITE_" dist\* | Select-Object -First 10   # variaveis em
 ⚠️ **Não** existe `PORT` nesta lista: a plataforma a define sozinha. Defini-la à mão é um
 jeito comum de o serviço subir e nunca receber tráfego.
 
-4. Deploy. Acompanhe os logs até o fim — as migrações aparecem lá.
-5. Crie o primeiro usuário de coordenação. Como não há painel administrativo pronto, use um
+1. Deploy. Acompanhe os logs até o fim — as migrações aparecem lá.
+2. Crie o primeiro usuário de coordenação. Como não há painel administrativo pronto, use um
    script `npm run seed:admin` que lê e-mail e senha do ambiente:
 
 ```bash
@@ -293,7 +310,7 @@ ADMIN_EMAIL=voce@exemplo.org ADMIN_SENHA='...' npm run seed:admin
 > Um script versionado é melhor que criar o usuário à mão: é reproduzível, roda igual em
 > qualquer ambiente e fica registrado no repositório o que foi feito.
 
-6. Teste: `curl https://sua-api/api/obras`
+1. Teste: `curl https://sua-api/api/obras`
 
 ### Passo 4 — Publicar a SPA sob o mesmo site (30 min) ⭐
 
@@ -375,7 +392,7 @@ curl.exe -s -o NUL -w "%{http_code}`n" https://sua-app/obras/42
 ## ⚠️ Erros comuns
 
 | Erro | Sintoma | Correção |
-|---|---|---|
+| --- | --- | --- |
 | Sem *fallback* da SPA | F5 em rota interna dá 404 | Regra `/* → /index.html` |
 | `VITE_API_URL` mudada sem rebuild | O site continua chamando a URL antiga | Rebuild |
 | Segredo em `VITE_*` | Publicado no bundle | Nunca; use o backend |

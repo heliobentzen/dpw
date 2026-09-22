@@ -1,6 +1,6 @@
-# M17 — Observabilidade e manutenção
+# M13 — Observabilidade e manutenção
 
-> **CH:** 2h (1h teórica · 1h prática) · **Semana 17** · **Pré-requisito:** M16
+> **CH:** 2h (1h teórica · 1h prática) · **Semana 13** · **Pré-requisito:** M12
 > Módulo complementar. Responde à pergunta que a organização parceira **vai** fazer na
 > Etapa 4: *"e depois que vocês entregarem, quem cuida disso?"*
 
@@ -10,6 +10,25 @@
 2. Monitorar disponibilidade, erros e desempenho.
 3. Garantir backup **e restauração testada**.
 4. Escrever o plano de manutenção e transferência do sistema.
+
+## 🧭 Por que este módulo encerra a trilha
+
+O deploy coloca o sistema no mundo; a observabilidade permite saber o que acontece depois. Esta
+última etapa fecha uma lacuna importante da formação: entregar não é abandonar.
+
+O aluno revisita a aplicação inteira com perguntas de operação:
+
+- como saber que o serviço está saudável;
+- como investigar uma falha sem adivinhar;
+- como detectar degradação antes de uma reclamação;
+- como restaurar os dados e transferir a responsabilidade para outra equipe.
+
+Essa conclusão também muda a relação com o código. No começo da disciplina, o foco era fazer
+algo funcionar. No final, o foco é tornar o funcionamento observável, recuperável e sustentável.
+
+> A evidência final de aprendizagem não é um log bonito: é um procedimento que outra pessoa
+consegue executar para identificar um problema, recuperar o serviço e entender quem fará a
+manutenção.
 
 ---
 
@@ -40,7 +59,7 @@ LoggerModule.forRoot({
 ```
 
 | Opção | O que faz |
-|---|---|
+| --- | --- |
 | `level` por variável | Subir para `debug` em produção sem alterar código, durante um incidente |
 | `transport: pino-pretty` só fora de produção | Colorido para você ler; JSON para a plataforma indexar |
 | **`redact`** | Apaga campos sensíveis **antes** de escrever. Sem isto, o cookie de sessão de cada requisição vai para o log — e quem lê o log assume a sessão |
@@ -70,7 +89,7 @@ inclua contexto suficiente para reconstruir o caso.
 Quatro perguntas, quatro instrumentos:
 
 | Pergunta | Instrumento |
-|---|---|
+| --- | --- |
 | O site está no ar? | Monitor externo (UptimeRobot, BetterStack) batendo num healthcheck |
 | Está dando erro? | Rastreador de exceções (Sentry, GlitchTip) |
 | Está lento? | Métricas de tempo de resposta / APM |
@@ -167,7 +186,7 @@ concreta.
 O plano de manutenção precisa responder:
 
 | Pergunta | Registrado em |
-|---|---|
+| --- | --- |
 | Quem opera o sistema no dia a dia? | Manual do usuário |
 | Quem corrige um erro? | Plano de manutenção |
 | Como pedir ajuda? | Canal e prazo acordados |
@@ -213,7 +232,7 @@ traceback, URL e contexto — **sem** dados pessoais.
 ## ⚠️ Erros comuns
 
 | Erro | Consequência |
-|---|---|
+| --- | --- |
 | `print()` em vez de `logging` | Sem nível, sem contexto, sem filtro |
 | Log com dado pessoal ou senha | Incidente de segurança e violação da LGPD |
 | Healthcheck que não checa o banco | Não detecta a falha mais provável |

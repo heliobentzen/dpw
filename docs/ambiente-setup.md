@@ -50,7 +50,7 @@ dentro do projeto, e o `npm` as encontra pela pasta em que você está.
 | PostgreSQL | 16 | 🔵 | Banco de produção-like |
 
 > O banco entra só no M04, quando há entidade para gerar tabela. Usamos **PostgreSQL desde
-> o primeiro dia de banco**: é o mesmo que roda em produção (M16), então nada do que você
+> o primeiro dia de banco**: é o mesmo que roda em produção (M12), então nada do que você
 > escrever precisa ser refeito depois por diferença de dialeto.
 
 ## 2. Estrutura do repositório
@@ -62,7 +62,7 @@ bibliocom/                    monorepo (workspaces do npm)
 │   ├── src/
 │   ├── openapi.json          contrato gerado (M07)
 │   └── .env
-├── pacotes/tipos/            @bibliocom/tipos — DTOs e enums (M15)
+├── pacotes/tipos/            @bibliocom/tipos — DTOs e enums (M11)
 ├── docker-compose.yml
 ├── .gitignore
 └── README.md
@@ -296,7 +296,7 @@ Sem isso, um `.sh` salvo no Windows chega ao servidor com `\r\n` e o deploy falh
 
 **Atenção ao `.env` do frontend:** ele **não** é secreto (é embutido no bundle em tempo de
 build e qualquer pessoa lê no DevTools), mas segue fora do Git porque muda por ambiente.
-Nunca coloque chave de API nele. Detalhado no M13.
+Nunca coloque chave de API nele. Detalhado no M09.
 
 ---
 

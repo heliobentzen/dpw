@@ -9,7 +9,7 @@ Linux/macOS e você precisar do equivalente. Ele traz a tabela de equivalências
 as armadilhas em detalhe (seções 2 e 4).
 
 | Preciso de… | Vá para |
-|---|---|
+| --- | --- |
 | Instalar Node, Git, Docker | [`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md) |
 | Traduzir um comando do roteiro | [seção 3](#3-tabela-de-equivalências) deste arquivo |
 | Entender por que algo quebrou | [seção 2](#2-as-cinco-armadilhas-que-não-são-tradução) deste arquivo |
@@ -20,12 +20,12 @@ as armadilhas em detalhe (seções 2 e 4).
 ## 1. Escolha o seu caminho
 
 | Caminho | Como é | Quando escolher |
-|---|---|---|
+| --- | --- | --- |
 | **A. PowerShell nativo** | Windows puro; comandos diferentes | Padrão. Funciona para tudo na disciplina |
 | **B. Git Bash** | Shell Unix sobre Windows (vem com o Git) | Quer colar os comandos do material sem traduzir |
-| **C. WSL2 (Ubuntu)** | Linux completo dentro do Windows | ⭐ Recomendado a partir do M16 (deploy) |
+| **C. WSL2 (Ubuntu)** | Linux completo dentro do Windows | ⭐ Recomendado a partir do M12 (deploy) |
 
-**Recomendação do material:** comece com **A ou B**, e instale o **WSL2** antes do M16.
+**Recomendação do material:** comece com **A ou B**, e instale o **WSL2** antes do M12.
 Produção é Linux; quem faz deploy tendo desenvolvido em Linux encontra menos surpresa. Os
 três caminhos são válidos para a disciplina inteira — nenhuma entrega depende disso.
 
@@ -51,11 +51,11 @@ Nenhuma delas se resolve trocando o comando por um equivalente — todas exigem 
 que o Windows faz de diferente.
 
 | # | Armadilha | Aparece em |
-|---|---|---|
-| [2.1](#21-curl-no-powershell-não-é-o-curl-) | `curl` é apelido de `Invoke-WebRequest` | M01, M07, M12, M13, M16 |
-| [2.2](#22-variáveis-de-ambiente-inline-não-existem-) | Variáveis inline não existem — e ficam na sessão | M13, M16 |
+| --- | --- | --- |
+| [2.1](#21-curl-no-powershell-não-é-o-curl-) | `curl` é apelido de `Invoke-WebRequest` | M01, M07, M08, M09, M12 |
+| [2.2](#22-variáveis-de-ambiente-inline-não-existem-) | Variáveis inline não existem — e ficam na sessão | M09, M12 |
 | [2.3](#23--não-existe-no-powershell-51-) | `&&` não existe no PowerShell 5.1 | todos |
-| [2.4](#24--grava-arquivo-em-utf-16-) | `>` grava arquivo em UTF-16 | M07, M15, M16 |
+| [2.4](#24--grava-arquivo-em-utf-16-) | `>` grava arquivo em UTF-16 | M07, M11, M12 |
 | [2.5](#25-a-crase-de-continuação-e-o-espaço-invisível-) | Espaço depois da crase corta o comando | todos |
 
 ### 2.1 `curl` no PowerShell não é o `curl` ⚠️
@@ -166,7 +166,7 @@ npm ls --depth 0 --json | Out-File -FilePath dependencias.json -Encoding utf8
 > Node, e ele sempre usa UTF-8. O problema é só do `>` do PowerShell.
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `\| Out-File` | Grava a saída num arquivo, com controle explícito de codificação |
 | `-Encoding utf8` | UTF-8. Use `ascii` quando o conteúdo for garantidamente sem acento |
 
@@ -206,7 +206,7 @@ que fiquem. Se precisar quebrar, ative "renderizar espaços em branco" no editor
 ### Ambiente virtual
 
 | Linux/macOS | PowerShell | Git Bash |
-|---|---|---|
+| --- | --- | --- |
 | `npm install` | `npm install` | `npm install` |
 | `npm run -w backend dev` | idem | idem |
 | `deactivate` | `deactivate` | `deactivate` |
@@ -221,7 +221,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ### Arquivos e diretórios
 
 | Linux/macOS | PowerShell |
-|---|---|
+| --- | --- |
 | `ls -la` | `Get-ChildItem -Force` (ou `ls`) |
 | `mkdir -p a/b/c` | `New-Item -ItemType Directory -Force -Path a/b/c` |
 | `rm arquivo` | `Remove-Item arquivo` |
@@ -235,18 +235,19 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ### Busca em arquivos
 
 | Linux/macOS | PowerShell |
-|---|---|
+| --- | --- |
 | `grep "texto" arquivo` | `Select-String "texto" arquivo` |
 | `grep -r "texto" pasta/` | `Select-String -Recurse "texto" pasta/*` |
 | `grep -i "texto"` | `Select-String -Pattern "texto"` (já é case-insensitive) |
 | `comando \| grep "x"` | `comando \| Select-String "x"` |
 
-Exemplo do M13 (procurar segredo no bundle):
+Exemplo do M09 (procurar segredo no bundle):
 
 ```bash
 # Linux/macOS
 grep -r "minha-chave-secreta" dist/
 ```
+
 ```powershell
 # PowerShell
 Select-String -Recurse "minha-chave-secreta" dist/*
@@ -255,7 +256,7 @@ Select-String -Recurse "minha-chave-secreta" dist/*
 ### Processos e portas
 
 | Linux/macOS | PowerShell |
-|---|---|
+| --- | --- |
 | `lsof -ti:8000 \| xargs kill -9` | `Get-NetTCPConnection -LocalPort 8000 \| Select-Object -Expand OwningProcess \| Stop-Process -Force` |
 | `ps aux \| grep node` | `Get-Process node` |
 
@@ -299,7 +300,7 @@ curl.exe -X POST http://localhost:8000/api/obras/ `
 ### Scripts
 
 | Linux/macOS | PowerShell |
-|---|---|
+| --- | --- |
 | `chmod +x build.sh` | (não se aplica) |
 | `./build.sh` | `.\build.ps1` ou `bash build.sh` (Git Bash/WSL) |
 | `cmd1 && cmd2` | linhas separadas (ou `;`, ou PowerShell 7) |
@@ -307,7 +308,7 @@ curl.exe -X POST http://localhost:8000/api/obras/ `
 | `export VAR=x` | `$env:VAR="x"` |
 | `$(comando)` | `$(comando)` ou `(comando)` |
 
-O `build.sh` do M16 **roda na PaaS, que é Linux** — não precisa executá-lo no Windows. Mas
+O `build.sh` do M12 **roda na PaaS, que é Linux** — não precisa executá-lo no Windows. Mas
 veja a seção 4 sobre finais de linha.
 
 ---
@@ -358,7 +359,7 @@ git config --global core.autocrlf input
 ## 5. Outras diferenças que aparecem no curso
 
 | Situação | No Windows |
-|---|---|
+| --- | --- |
 | **Pasta do projeto** | ⚠️ Use `C:\dev`. Dentro do `Documents` o OneDrive sincroniza `node_modules`, travando `npm install` e produzindo mudanças fantasma no Git. Espaços e acentos no caminho também quebram ferramentas |
 | **Docker Desktop** | Exige WSL2 habilitado. Instale o WSL antes do Docker |
 | **PostgreSQL local** | Prefira o container Docker ao instalador nativo |

@@ -21,6 +21,21 @@ Ao final você será capaz de:
 6. Ler configuração de fora do código e **impedir a aplicação de subir** quando faltar.
 7. Publicar a documentação interativa da API com Swagger em `/api/docs` e gerar o schema OpenAPI a partir do código.
 
+## 🧭 Por que este módulo é o ponto de virada
+
+M03 é o primeiro momento em que o aluno passa da leitura do problema para a construção do sistema.
+Até aqui, o foco era ambiente, contrato e linguagem da web. A partir daqui, o aluno começa a
+escrever software executável e a entender que estrutura, organização e documentação não são
+acessórios: são partes do próprio produto.
+
+A evolução pedagógica é clara:
+
+- antes: você entende como a web e a API se comunicam;
+- agora: você organiza a própria API e a torna legível para outras pessoas;
+- depois: você vai evoluir essa API com banco, regras, segurança e operação.
+
+> Este módulo é a primeira "peça de engenharia" do curso: o aluno aprende a leitura do código como estratégia e não como memorização.
+
 ---
 
 ## 🧭 O que você vai construir
@@ -136,7 +151,7 @@ cd C:\dev\bibliocom
 deve ter um campo `workspaces` listando `backend`, `frontend` e `pacotes/*`.
 
 Essas pastas ainda não existem, e é normal: `backend/` nasce daqui a duas etapas,
-`frontend/` no M08 e `pacotes/tipos/` no M15. O campo `workspaces` é uma **declaração de
+`frontend/` no M08 e `pacotes/tipos/` no M11. O campo `workspaces` é uma **declaração de
 intenção** — ele diz ao npm onde procurar projetos quando eles existirem.
 
 ---
@@ -183,7 +198,7 @@ mesmo motivo: previsibilidade vale mais que novidade.
 > 📌 **Nota para quem for atualizar este material.** Quando o Nest 13 sair, troque o `@12`
 > aqui e confira três pontos: se a CLI continua gerando os `import` com `.js` (etapa 5), se
 > os pacotes `@nestjs/*` acompanham a mesma versão principal, e se o executor de testes do
-> M14 continua sendo o Vitest.
+> M10 continua sendo o Vitest.
 
 ---
 
@@ -273,7 +288,7 @@ Pare de digitar. As etapas 5, 6 e 7 são de leitura: são **quatro arquivos pequ
 `Hello World!` que você acabou de ver sai deles.
 
 > Em `src` você vai contar cinco arquivos. O quinto é o `app.controller.spec.ts`, um teste
-> que a CLI deixa de brinde. Ignore-o por enquanto — ele é assunto do M14.
+> que a CLI deixa de brinde. Ignore-o por enquanto — ele é assunto do M10.
 
 Abra `src\main.ts`:
 
@@ -524,7 +539,7 @@ nest generate service acervo --no-spec
 | `generate module acervo` | Cria `src\acervo\acervo.module.ts` **e** o registra no `imports` do `app.module.ts` |
 | `generate controller acervo` | Cria o controller **e** o registra em `controllers` do `AcervoModule` |
 | `generate service acervo` | Cria o service **e** o registra em `providers` |
-| `--no-spec` | Pula o arquivo de teste. Eles entram no M14, com o conteúdo que os justifica |
+| `--no-spec` | Pula o arquivo de teste. Eles entram no M10, com o conteúdo que os justifica |
 
 **Rode:** abra `src\acervo\acervo.module.ts`:
 
@@ -634,7 +649,7 @@ em que essa escolha cobra a conta — e todas as quatro vão acontecer nesta dis
 
 ### Situação 1 — o mesmo dado é preciso em outro lugar
 
-No M12 vai existir um relatório de acervo para a coordenação. Ele precisa da lista de obras,
+No M08 vai existir um relatório de acervo para a coordenação. Ele precisa da lista de obras,
 mas **não é uma requisição HTTP** — é uma tela diferente, com outro formato de saída.
 
 Com a lista dentro do `listar()` do controller, só há duas saídas: chamar um método de
@@ -644,7 +659,7 @@ fica errada em silêncio.
 
 ### Situação 2 — testar a regra exige subir um servidor
 
-No M14 você vai testar a regra "um associado não pode ter mais de três empréstimos em
+No M10 você vai testar a regra "um associado não pode ter mais de três empréstimos em
 aberto". Se essa regra morar no controller, testá-la exige:
 
 ```
@@ -779,7 +794,7 @@ export class AcervoController {
 
 Funciona. E é ruim por dois motivos concretos:
 
-1. **O controller fica soldado a essa implementação.** Num teste (M14), não há como trocar o
+1. **O controller fica soldado a essa implementação.** Num teste (M10), não há como trocar o
    service por um dublê — a linha `new` está dentro dele, e o teste não alcança.
 2. **Quando o service passar a precisar de coisas**, como a conexão de banco do M04, o
    controller passa a ter de saber montá-las. E quem cria o controller, também. A ignorância
@@ -861,7 +876,7 @@ alguém criou uma classe e esqueceu de registrá-la em `providers`.
 
 **Três consequências práticas**, agora que você viu como funciona:
 
-1. **Testar fica barato** — o teste passa um dublê no lugar do service (M14). É a situação 2
+1. **Testar fica barato** — o teste passa um dublê no lugar do service (M10). É a situação 2
    da etapa 11, resolvida.
 2. **Uma instância só** (*singleton*), reaproveitada em toda a aplicação.
 3. **Trocar a implementação não toca quem usa** — é a situação 3 da etapa 11, e você vai
@@ -1017,7 +1032,7 @@ traduziu para HTTP. O service continua sem saber que HTTP existe — é o crité
 funcionando na sua máquina.
 
 O Nest tem uma exceção para cada situação comum: `BadRequestException` (400),
-`ConflictException` (409), `ForbiddenException` (403). O M07 e o M12 usam as outras.
+`ConflictException` (409), `ForbiddenException` (403). O M07 e o M08 usam as outras.
 
 ---
 
@@ -1230,9 +1245,9 @@ await app.listen(process.env.PORT ?? 3000);
 **Deu certo se:** <http://localhost:3000/api/obras> responde a lista, e
 <http://localhost:3000/obras> — que funcionava até agora — passa a dar erro 404.
 
-**Por que fazer isso hoje, e não depois:** no M16 o backend e o frontend vão para o mesmo
+**Por que fazer isso hoje, e não depois:** no M12 o backend e o frontend vão para o mesmo
 domínio, com `/api/*` indo para a API e todo o resto para a aplicação React. Sem um prefixo
-que separe os dois, não há como rotear. Definir agora custa uma linha; definir no M16
+que separe os dois, não há como rotear. Definir agora custa uma linha; definir no M12
 custaria reescrever todas as URLs que o frontend do M08 já tiver escrito.
 
 ---
@@ -1380,7 +1395,7 @@ Nenhuma das caixas vazias exige mexer nas que você construiu — elas se **enca
 É esse o retorno da separação que a etapa 11 justificou: quatro pessoas podem preencher
 caixas diferentes na mesma semana sem colidir.
 
-Guarde o diagrama. Cada módulo daqui em diante preenche uma caixa, e o M13 volta a ele para
+Guarde o diagrama. Cada módulo daqui em diante preenche uma caixa, e o M09 volta a ele para
 mostrar em que camada cada tipo de ataque é barrado.
 
 💼 **No mercado:** "explique injeção de dependência" e "onde você colocaria esta regra" são

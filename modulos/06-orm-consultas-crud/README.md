@@ -17,6 +17,25 @@ Ao final você será capaz de:
 3. Diagnosticar e corrigir o problema **N+1**, com medição.
 4. Escolher entre `Repository`, `QueryBuilder` e SQL puro com critério.
 
+## 🧭 Por que este módulo vem agora
+
+M04 ensinou a representar o domínio e M05 ensinou a versionar a estrutura do banco. Agora o
+aluno precisa fazer o sistema trabalhar com dados reais: ler, filtrar, criar, atualizar e
+remover.
+
+A progressão é deliberada:
+
+- primeiro uma leitura simples, para separar acesso a dados de lógica de apresentação;
+- depois volume e medição, para perceber que código correto também pode ser caro;
+- por fim escrita, consultas complexas e transações, para preservar consistência.
+
+O N+1 aparece de propósito porque esta é uma oportunidade de aprendizagem baseada em evidência:
+o aluno vê o problema nos logs, mede seu custo e só então escolhe uma solução. No M07, essa
+base vira uma API pública com entrada validada e respostas desenhadas para consumidores reais.
+
+> O ganho de competência do M06 é passar de “sei criar tabelas” para “sei buscar e alterar dados
+sem perder de vista desempenho, segurança e consistência”.
+
 ---
 
 ## 🧭 O que você vai construir
@@ -34,7 +53,7 @@ Quinze etapas, indo **do mais simples ao mais caro**: ler antes de escrever, uma
 vez, e só então o `QueryBuilder` e a transação.
 
 | Parte | O que é |
-|---|---|
+| --- | --- |
 | **Faça** | O comando ou o código, para digitar |
 | **Linha a linha** | Uma tabela explicando **cada elemento** |
 | **Rode** | Como verificar |
@@ -46,7 +65,7 @@ vez, e só então o `QueryBuilder` e a transação.
 ### As quinze etapas
 
 | # | Etapa | Min | O que entra |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | [Trocar a memória pelo banco](#etapa-1--trocar-a-memória-pelo-banco-15-min) | 15 | `@InjectRepository` |
 | 2 | [Listar, paginado desde o começo](#etapa-2--listar-paginado-desde-o-começo-20-min) | 20 | `findAndCount`, `skip`/`take` |
 | 3 | [**Por que paginar sempre**](#etapa-3--por-que-paginar-sempre-15-min) | 15 | **paginação não é opcional** |
@@ -91,7 +110,7 @@ export class AcervoService {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@InjectRepository(Obra)` | Pede ao Nest o repositório **daquela** entidade. É a injeção do M03, com um decorator a mais para dizer de qual entidade |
 | `Repository<Obra>` | O genérico é o que dá tipo ao retorno: `find()` devolve `Obra[]`, não `any[]` |
 | por que ele existe | Porque `Obra` está no `forFeature` do `AcervoModule` (M04, etapa 6). Sem aquele registro, este construtor falha com `can't resolve dependencies` |
@@ -130,7 +149,7 @@ async listar(pagina = 1, tamanho = 20) {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `findAndCount` | Devolve a página **e o total** numa chamada. O total é o que permite ao frontend desenhar "página 3 de 41" |
 | `const [itens, total]` | Desestruturação de array: o método devolve um par, e você nomeia os dois de uma vez |
 | `relations: { autor: true }` | Traz a autora junto. **Sem isto, `obra.autor` vem `undefined`** — o TypeORM não busca relação que você não pediu |
@@ -181,7 +200,7 @@ await this.obras.find();     // devolve o banco inteiro
 ```
 
 | Com… | O que acontece |
-|---|---|
+| --- | --- |
 | 20 registros de teste | Instantâneo. Ninguém percebe nada |
 | 800 registros | Uns 200 KB de JSON. Ainda passa |
 | 200 mil registros do cliente | O banco monta tudo em memória, o Node serializa tudo em memória, a rede carrega tudo, o navegador tenta desenhar tudo |
@@ -224,7 +243,7 @@ async buscarUm(id: number): Promise<Obra> {
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `where: { id }` | Atalho do JavaScript para `{ id: id }` |
 | três `relations` | O detalhe da obra mostra autora, categorias e exemplares. A listagem só precisava da autora — **peça o que a tela usa, não tudo** |
 | `findOne` devolve `Obra \| null` | Por isso o `if`. O TypeScript **obriga** você a tratar o caso |
@@ -269,7 +288,7 @@ npx ts-node --esm src/semear.ts
 ```
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `@faker-js/faker` | Gera nomes, títulos e datas plausíveis. `-D` porque é ferramenta de desenvolvimento |
 | `ts-node --esm` | Executa o `.ts` direto. O `--esm` casa com o projeto do M03; o `ts-node` você instalou no M05 |
 | semente fixa no script | Todo mundo da turma gera **os mesmos dados**, o que torna os tempos comparáveis |
@@ -321,7 +340,7 @@ async listarRuim() {
 **Linha a linha:**
 
 | Trecho | Por quê |
-|---|---|
+| --- | --- |
 | `obra.autorId` | O campo que você declarou explicitamente no M04, etapa 11c. **Sem ele seria preciso um `as any`** — e aqui está o dividendo daquela decisão |
 | `if (autor)` | `findOneBy` devolve `Autor \| null`. Sem o `if`, o TypeScript recusa a atribuição — e ele está certo |
 | `await` **dentro** do `for` | É a linha do problema. Cada volta espera uma ida ao banco antes de começar a próxima |
@@ -361,14 +380,14 @@ curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/bom
 *(No macOS ou Linux: `curl -s -o /dev/null -w "%{time_total}s\n" …`)*
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `-o NUL` | Joga o corpo fora — não queremos 50 obras na tela |
 | `-w "%{time_total}s"` | Imprime **só** o tempo total da requisição |
 
 **Preencha:**
 
 | Versão | Consultas | Tempo |
-|---|---|---|
+| --- | --- | --- |
 | Ruim (`take: 50`) | | |
 | Boa (`take: 50`) | | |
 
@@ -379,7 +398,7 @@ contra **2 consultas / ~9 ms**. Os seus números vão diferir; a proporção, n�
 novo:
 
 | Versão | Consultas com 200 | Tempo com 200 |
-|---|---|---|
+| --- | --- | --- |
 | Ruim | | |
 | Boa | | |
 
@@ -392,7 +411,7 @@ Referência: **201 consultas / ~253 ms** contra **2 consultas / ~23 ms**.
 Você tem quatro medições. O que elas mostram não é o que parece à primeira vista.
 
 | Estratégia | 50 itens | 200 itens | Cresce? |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Sem `relations` | 1 | 1 | Não |
 | `relations` + `take` | 2 | 2 | **Não** |
 | Buscar no laço | 51 | 201 | **Sim, linearmente** |
@@ -419,7 +438,7 @@ obra com três categorias comeria três vagas da página. Você pediria 20 obras
 acontece depois:
 
 | Mudança | Versão boa | Versão ruim |
-|---|---|---|
+| --- | --- | --- |
 | O acervo dobra | igual | dobra |
 | A página passa a mostrar 200 | igual | quadruplica |
 | O banco vai para outro servidor | +1 ida e volta | **+201 idas e voltas** |
@@ -467,7 +486,7 @@ async remover(id: number): Promise<void> {
 **Linha a linha:**
 
 | Método | Detalhe que importa |
-|---|---|
+| --- | --- |
 | `create()` | Só monta a instância **em memória** — não grava nada. O nome engana; quem grava é o `save` |
 | `save()` | Faz `INSERT` se o objeto não tem `id`, `UPDATE` se tem. **Uma função, dois comandos** |
 | `Object.assign(obra, dados)` | Copia os campos de `dados` para cima de `obra`, mantendo o `id` — é isso que faz o `save` seguinte virar `UPDATE` |
@@ -524,7 +543,7 @@ um formulário**: ela tem campos que existem por razões internas e que o client
 deveria escrever.
 
 | Problema | Consequência |
-|---|---|
+| --- | --- |
 | Nada valida `titulo` | Obra sem título entra no acervo |
 | O cliente escolhe **quais campos** gravar | Ele pode escrever `criadoEm`, `destaque`, o que existir na tabela |
 | A resposta devolve a **entidade inteira** | Quando `Usuario` existir (M12), a resposta vai levar o hash da senha junto |
@@ -535,7 +554,7 @@ cliente descobre um campo que você não esperava e o escreve.
 ### Isso é o M07 inteiro
 
 | O que resolve | Qual problema |
-|---|---|
+| --- | --- |
 | DTO de **entrada** | As duas primeiras linhas da tabela |
 | DTO de **saída** | A terceira |
 
@@ -552,7 +571,7 @@ mudarem de resposta.
 Até aqui você usou uma só. Existe outra, e saber quando trocar é o conteúdo desta etapa.
 
 | API | Cara de | Boa para | Limite |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `Repository` | Objeto de opções | CRUD e filtros simples | Fica ilegível em consultas compostas |
 | `QueryBuilder` | SQL encadeado | Agregação, `JOIN` explícito, condição **dinâmica** | Mais verboso |
 
@@ -623,7 +642,7 @@ async buscar(termo?: string, categoriaId?: number, ate?: number) {
 **Linha a linha:**
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `createQueryBuilder("obra")` | O `"obra"` é o **apelido** da tabela, usado no resto da consulta |
 | `leftJoinAndSelect` | Faz o `JOIN` **e traz** as colunas. É o equivalente do `relations` |
 | `leftJoin` sem `AndSelect` | Faz o `JOIN` **só para filtrar**, sem carregar os dados. A categoria participa do `WHERE` e não volta na resposta — menos tráfego |
@@ -712,7 +731,7 @@ curl.exe -s "http://localhost:3000/api/obras/buscar?termo=' OR 1=1 --"
 **Deu certo se:** a busca devolve **nada** — porque não existe obra com aquele título
 literal. No log, o `%' OR 1=1 --%` aparece como **parâmetro**, separado do comando.
 
-O M13 volta ao assunto com o restante do OWASP. Aqui fica a regra e a demonstração.
+O M09 volta ao assunto com o restante do OWASP. Aqui fica a regra e a demonstração.
 
 ---
 
@@ -747,7 +766,7 @@ Se **qualquer** linha lançar, tudo é desfeito. Ou as duas escritas acontecem, 
 acontece. Não existe meio-termo.
 
 | Trecho | O que faz |
-|---|---|
+| --- | --- |
 | `dataSource.transaction` | Abre a transação, executa a função e faz `COMMIT` no fim — ou `ROLLBACK` se algo lançar |
 | `manager` | Um "repositório da transação". **Tudo que rodar por ele participa** |
 | `async (manager) => {...}` | Uma função assíncrona recebida como argumento. O TypeORM a chama e cuida do resto |
@@ -818,7 +837,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "SELECT count(*) FROM e
 ## ⚠️ Erros comuns
 
 | Sintoma | Diagnóstico |
-|---|---|
+| --- | --- |
 | `Nest can't resolve dependencies of the AcervoService` | A entidade não está no `forFeature` do módulo (M04) |
 | `obra.autor` é `undefined` | Faltou `relations` ou `leftJoinAndSelect` |
 | API lenta e log com dezenas de SELECTs | N+1 — etapa 8 |

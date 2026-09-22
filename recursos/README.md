@@ -10,8 +10,8 @@
 | Arquivo | Módulo | Para quê |
 | --- | --- | --- |
 | [`servidor-minimo.mjs`](codigo/servidor-minimo.mjs) | M01 | Servidor HTTP sem framework: mostra o que o NestJS faz por você |
-| [`vulneravel.ts`](codigo/vulneravel.ts) | M13 | 🔵 Laboratório com 10 vulnerabilidades de backend |
-| [`vulneravel.tsx`](codigo/vulneravel.tsx) | M13 | 🟣 Laboratório complementar com 8 vulnerabilidades de frontend |
+| [`vulneravel.ts`](codigo/vulneravel.ts) | M09 | 🔵 Laboratório com 10 vulnerabilidades de backend |
+| [`vulneravel.tsx`](codigo/vulneravel.tsx) | M09 | 🟼 Laboratório complementar com 8 vulnerabilidades de frontend |
 | [`verifica-ambiente.mjs`](codigo/verifica-ambiente.mjs) | M00, M03, M05 | **Confere** o ambiente (não instala nada). `--etapa m00\|m03\|m05` cobra só o que já deveria existir |
 | [`semear.ts`](codigo/semear.ts) | M06 | Script que gera dados de volume para os exercícios |
 

@@ -90,7 +90,7 @@ Todos os módulos evoluem **um mesmo sistema**, construído incrementalmente:
 ```
 bibliocom/                    monorepo (workspace do npm)
 ├── backend/       NestJS + TypeORM + PostgreSQL   (M03–M07)
-├── pacotes/tipos/ @bibliocom/tipos — DTOs e enums (M15)
+├── pacotes/tipos/ @bibliocom/tipos — DTOs e enums (M11)
 └── README.md      documentação do escopo backend-first
 ```
 

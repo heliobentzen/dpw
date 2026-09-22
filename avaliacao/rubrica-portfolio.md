@@ -12,10 +12,10 @@
 | **E2** | Caderno de 20 consultas ORM + otimização N+1 | M06 | 🔵 | 6 |
 | **E3** | API documentada com Swagger (CRUD, validação, filtros e OpenAPI) | M07 | 🔵 | 7 |
 | **E4** | Interface opcional consumindo a API | M11 | 🟣 | 11 |
-| **E5** | Autenticação ponta a ponta com matriz de acesso | M12 | ⚪ | 12 |
-| **E6** | Relatório de segurança (18 casos + hardening) | M13 | ⚪ | 13 |
-| **E7** | Suíte de testes verdes no backend | M14 | ⚪ | 14 |
-| **E8** | API do BiblioCom implantada em produção | M16 | ⚪ | 16 |
+| **E5** | Autenticação ponta a ponta com matriz de acesso | M08 | ⬫ | 8 |
+| **E6** | Relatório de segurança (18 casos + hardening) | M09 | ⬫ | 9 |
+| **E7** | Suíte de testes verdes no backend | M10 | ⬫ | 10 |
+| **E8** | API do BiblioCom implantada em produção | M12 | ⬫ | 12 |
 
 Todas as entregas são **individuais**, no repositório pessoal do BiblioCom criado no M00.
 Isso garante que cada estudante percorra o caminho técnico completo — **das duas camadas**

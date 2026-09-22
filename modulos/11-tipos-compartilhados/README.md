@@ -1,6 +1,6 @@
-# M15 — Contrato OpenAPI e integração de clientes
+# M11 — Tipos compartilhados e contrato OpenAPI
 
-> **CH:** 2h (1h teórica · 1h prática) · **Semana 15** · **Pré-requisito:** M14
+> **CH:** 2h (1h teórica · 1h prática) · **Semana 11** · **Pré-requisito:** M10
 
 Uma API profissional não é apenas um conjunto de rotas: ela tem um contrato que clientes,
 testes e equipes conseguem consultar. Neste módulo, o schema gerado pelo Swagger vira um
@@ -15,6 +15,23 @@ Ao final você será capaz de:
 3. Revisar mudanças de contrato antes de aprová-las.
 4. Identificar mudanças compatíveis, incompatíveis e que exigem nova versão.
 5. Testar um consumidor externo com base no contrato, sem ler o código interno.
+
+## Por que este módulo vem depois dos testes
+
+O M10 verifica se a implementação atual funciona. O M11 verifica se ela continua prometendo
+para os consumidores aquilo que o contrato público declara. São garantias diferentes e ambas
+são necessárias.
+
+Neste ponto, o aluno deixa de tratar o Swagger como uma tela de consulta e passa a tratá-lo como
+artefato de engenharia:
+
+- uma mudança de DTO passa a ter impacto observável;
+- o schema pode ser revisado em um diff;
+- o CI consegue impedir divergências antes da integração;
+- um consumidor externo pode usar a API sem conhecer o código interno.
+
+> A competência nova é pensar em compatibilidade. Uma API madura não é apenas aquela que funciona
+hoje, mas aquela que consegue evoluir sem surpreender quem depende dela.
 
 ## Sequência prática
 
