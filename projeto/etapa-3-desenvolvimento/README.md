@@ -81,7 +81,7 @@ Implementa o registro de empréstimo de ferramenta (H07).
 - [x] Impossível emprestar duas vezes (constraint no banco)
 
 ## Testes
-4 testes novos em `emprestimos/tests/test_models.py` e `test_views.py`.
+4 testes novos em `emprestimos/emprestimos.service.spec.ts` e `test/emprestimos.e2e-spec.ts`.
 
 ## Pendências
 Layout do celular precisa de ajuste — issue #23.
@@ -91,71 +91,42 @@ Layout do celular precisa de ajuste — issue #23.
 
 - [ ] Faz o que a história pede? Os critérios de aceite estão cobertos?
 - [ ] Tem teste? O teste falharia se a regra fosse quebrada?
-- [ ] Regra de negócio está no model/service, não espalhada na view?
-- [ ] Alguma consulta N+1? (`select_related`/`prefetch_related`)
+- [ ] Regra de negócio está no *service*, não no *controller*?
+- [ ] Alguma consulta N+1? (`relations` / `leftJoinAndSelect`)
 - [ ] Controle de acesso: o service filtra a consulta pelo usuário da sessão?
-- [ ] Alguma URL literal, `fields = "__all__"` ou payload inseguro?
+- [ ] Entidade devolvida direto na resposta, DTO sem `whitelist` ou payload inseguro?
 - [ ] Nomes claros? Dá para entender daqui a seis meses?
 - [ ] Alguma credencial ou dado real de pessoa no diff?
 
 Revisão é sobre o código, nunca sobre a pessoa. Comentário útil sugere alternativa:
-*"aqui pode dar N+1 na listagem — que tal `select_related('morador')`?"*.
+*"aqui pode dar N+1 na listagem — que tal `leftJoinAndSelect` no morador?"*.
 
 ---
 
-## 3. Requisitos técnicos mínimos (verificados na rubrica)
+## 3. Requisitos técnicos (verificados na rubrica)
 
-### 🔵 Backend — modelagem
+### Piso — sem isto a etapa não é entregue
 
-- [ ] 5+ models com relações 1-N **e** N-N
-- [ ] `on_delete` justificado em cada FK
-- [ ] 2+ restrições de integridade (`CheckConstraint`/`UniqueConstraint`)
-- [ ] Migrações versionadas, sem conflitos pendentes
+- [ ] API em produção com HTTPS e `GET /health` verificando o banco
+- [ ] Swagger em `/api/docs` e `openapi.json` versionado no repositório
+- [ ] Autenticação com 2+ papéis; escrita sem token → 401, papel errado → 403, recurso alheio → 403/404
+- [ ] Banco criado por migrações versionadas (`synchronize` desligado em produção)
+- [ ] Testes automatizados verdes no CI
+- [ ] Nenhum segredo no repositório; README sobe o backend localmente
 
-### 🔵 Backend — API
+### O que diferencia uma API bem feita
 
-- [ ] CRUD completo em 2+ recursos, via ViewSet
-- [ ] DTOs separados para entrada e saída, com os campos declarados explicitamente
-- [ ] Validação de servidor: 3+ `validate_<campo>` e 1 `validate()`
-- [ ] Filtros, busca, ordenação (com `ordering_fields`) e paginação
-- [ ] 2+ ações customizadas (`@action`)
-- [ ] 1+ relatório com agregação
-- [ ] Nenhuma consulta N+1 (medido)
-- [ ] Swagger disponível em `/api/docs/`, com OpenAPI versionado e exemplos dos endpoints e erros principais
-
-### ⚪ Integração e contrato
-
-- [ ] Cliente externo consegue consumir a API sem adivinhar o formato
-- [ ] Status codes claros e consistentes: 200/201/204, 400, 401, 403, 404, 409, 422
-- [ ] Documentação do contrato disponível e revisada
-- [ ] Erros do backend são informativos e padronizados
-- [ ] Payloads e respostas seguem uma estrutura estável e previsível
-
-### ⚪ Segurança e acesso
-
-- [ ] Autenticação com 2+ papéis, ponta a ponta
-- [ ] Autorização por permissão **e** por objeto (sem IDOR)
-- [ ] **Evidência de que a API recusa o que a interface esconde** (saída de `curl`)
-- [ ] `check --deploy` sem avisos
-- [ ] Nenhum segredo no repositório **nem no bundle** (`grep` no `dist/`)
-- [ ] CORS com lista explícita, ou dispensado por *same-site*
-- [ ] Mapa de dados pessoais preenchido
-
-### ⚪ Qualidade
-
-- [ ] 15+ testes no backend (regra, acesso, validação)
-- [ ] Matriz de acesso automatizada
-- [ ] Cobertura ≥ 60% no backend
-- [ ] Teste de contrato no CI (schema e resposta esperada)
-- [ ] CI verde; `main` protegida
-
-### ⚪ Operação
-
-- [ ] API no ar com HTTPS
-- [ ] PostgreSQL gerenciado, com backup
-- [ ] Healthcheck e logs funcionando
-- [ ] `README.md` que sobe o backend em ≤ 8 comandos
-- [ ] `docs/deploy.md` reproduzível
+- **Contrato:** rotas REST coerentes, status corretos (201/204/400/401/403/404/409/422),
+  um único formato de erro, paginação com teto e metadados, OpenAPI com exemplos de erro.
+- **Dados:** relações 1-N e N-N, restrições no banco (`UNIQUE`, `CHECK`, `onDelete`
+  pensado), regras no *service*, transação onde há concorrência, sem N+1 nas listagens.
+- **Segurança:** Argon2/bcrypt, token ou sessão com expiração, *guards* por papel **e**
+  verificação de dono, `ValidationPipe` com `whitelist`, DTO de saída sem campos sensíveis,
+  Helmet, CORS explícito, *rate limit* no login.
+- **Qualidade:** testes e2e (Jest + Supertest) cobrindo regras, validação e matriz de
+  acesso; CI com lint, build, testes e verificação do contrato; PRs revisados.
+- **Operação:** deploy reproduzível (idealmente automático a partir da `main`),
+  configuração por variáveis de ambiente, logs estruturados, backup, `docs/deploy.md`.
 
 ## 4. Plano de teste
 

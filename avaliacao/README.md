@@ -60,9 +60,9 @@ decisão. O fator nunca é aplicado sem que o estudante saiba o motivo.
 **Todas as rubricas são divulgadas no início da etapa correspondente.** Avaliação
 sem critério conhecido antecipadamente é loteria, não avaliação.
 
-## 5. Escala de níveis
+## 5. Escala e cálculo
 
-Todas as rubricas usam a mesma escala:
+Todas as rubricas usam a mesma escala por critério:
 
 | Nível | Pontos | Significado |
 | --- | ---: | --- |
@@ -71,7 +71,12 @@ Todas as rubricas usam a mesma escala:
 | **Em desenvolvimento** | 2 | Cumpre parcialmente; faltam elementos importantes |
 | **Insuficiente** | 0–1 | Não cumpre ou não foi entregue |
 
-Nota do instrumento = (soma dos pontos ÷ pontos máximos) × 10.
+Os pesos de cada rubrica somam 10, então **nota = Σ (nível × peso) ÷ 4**. Quem fica em
+"Adequado" em tudo tira 7,5.
+
+As rubricas de projeto começam por **pré-requisitos sim/não** (o piso) e seguem com
+**4 a 6 critérios** de qualidade. Artefatos intermediários (canvas, matriz de decisão, atas)
+são ferramentas de trabalho: ajudam a equipe, mas não são pontuados um a um.
 
 ## 6. Prazos e atrasos
 
@@ -90,7 +95,7 @@ coletivo. Situações de saúde ou força maior são tratadas individualmente, c
 
 Conforme o regimento da instituição. Sugestão de política:
 
-- **Portfólio:** pode ser reentregue até a semana 19, com nota máxima 7,0.
+- **Portfólio:** entregas com nota ≤ 2 podem ser refeitas até a semana 19, valendo no máximo 3.
 - **Avaliação teórica:** prova substitutiva na semana 19 para quem obteve < 6,0.
 - **Etapa 1:** correção mediante devolutiva, até 1 semana após o feedback.
 - **Etapas 2 e 3 e extensão:** não há recuperação — dependem do processo, não do produto.
