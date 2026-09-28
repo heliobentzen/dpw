@@ -13,6 +13,7 @@ Cada módulo é autocontido e segue a mesma estrutura:
 ```
 README.md          Objetivos · Etapas guiadas · Erros comuns · Checklist · No mercado
 exercicios.md      Atividades sem passo a passo, com critérios de verificação
+cheatsheet.md      Referência rápida (quando o volume de sintaxe justifica)
 ```
 
 A **Duração** de cada módulo é relativa — curta, média ou longa — e serve para calibrar o

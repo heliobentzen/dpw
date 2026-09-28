@@ -72,9 +72,9 @@ if (WINDOWS) {
 // --- Node -----------------------------------------------------------------
 const versaoNode = process.versions.node;
 check(
-  "Node >= 20",
-  maior(versaoNode) >= 20,
-  "Instale o Node 20 LTS (https://nodejs.org) e reabra o terminal",
+  "Node >= 24",
+  maior(versaoNode) >= 24,
+  "Instale o Node 24 LTS (https://nodejs.org) e reabra o terminal",
 );
 info(`Node v${versaoNode}`);
 
@@ -87,7 +87,7 @@ check(
 );
 if (versaoNpm) {
   info(`npm ${versaoNpm}`);
-  check("npm >= 9", maior(versaoNpm) >= 9, "Atualize o Node para a versao 20 LTS ou superior");
+  check("npm >= 11", maior(versaoNpm) >= 11, "Rode: npm install -g npm@11 (o npm 10 falha ao instalar o projeto do Nest 12)");
 }
 
 // --- Git ------------------------------------------------------------------

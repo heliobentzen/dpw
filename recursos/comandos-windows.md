@@ -374,7 +374,7 @@ git config --global core.autocrlf input
 ## 6. Verificação: o ambiente está pronto?
 
 ```powershell
-node --version             # v20+
+node --version             # v24+
 npm --version             # 9+
 git --version
 curl.exe --version         # note o .exe

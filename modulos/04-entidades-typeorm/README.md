@@ -596,14 +596,14 @@ Uma autora tem muitas obras; cada obra tem uma autora. É a relação mais comum
 **Faça:** na `Obra`:
 
 ```ts
-import { ManyToOne } from "typeorm";
+import { ManyToOne, type Relation } from "typeorm";
 import { Autor } from "./autor.entity.js";
 
   @ManyToOne(() => Autor, (autor) => autor.obras, {
     nullable: false,
     onDelete: "RESTRICT",
   })
-  autor: Autor;
+  autor: Relation<Autor>;
 
   @Column()
   autorId: number;
@@ -616,26 +616,44 @@ import { Autor } from "./autor.entity.js";
 | `@ManyToOne` | "Muitas obras para uma autora". **É este lado que carrega a chave estrangeira** |
 | `() => Autor` | Uma função, não a classe direto. Os dois arquivos se referenciam, e a função adia a resolução — sem ela, dá erro de importação circular |
 | `(autor) => autor.obras` | Aponta o **outro lado** da relação. É o que permite navegar nos dois sentidos |
+| `Relation<Autor>` | Para o TypeScript, é só `Autor`. A embalagem existe por causa do ESM — ver o quadro abaixo |
+| `type Relation` no import | `Relation` é só um tipo, não existe em tempo de execução. O `type` avisa o compilador para não procurá-lo no JavaScript gerado |
 | `nullable: false` | Obra sem autora não existe no nosso domínio |
 | `onDelete: "RESTRICT"` | O que acontece com as obras quando a autora é apagada — assunto da etapa 12 |
 | `@Column() autorId` | Declara em TypeScript a coluna que o `@ManyToOne` **já criava** |
+
+> **Por que `Relation<>`: o problema do ovo e da galinha.** `obra.entity.ts` importa `Autor`,
+> e `autor.entity.ts` importa `Obra`. No ESM, quando um arquivo começa a carregar o outro, o
+> segundo encontra o primeiro **pela metade**, ainda sem a classe pronta. Isso seria inofensivo,
+> se não fosse um detalhe: os decorators gravam o tipo de cada propriedade no momento em que o
+> arquivo carrega. Com `autor: Autor`, o TypeScript tenta ler a classe `Autor` justo quando ela
+> ainda não existe, e a API nem sobe:
+>
+> ```
+> ReferenceError: Cannot access 'Autor' before initialization
+> ```
+>
+> `Relation<Autor>` é um tipo que o TypeScript não consegue gravar como classe, então ele
+> grava um genérico `Object` e não procura ninguém. **Regra prática: toda propriedade de
+> relação (`@ManyToOne`, `@OneToMany`, `@ManyToMany`) usa `Relation<>`.** A coluna comum
+> (`@Column`) não precisa.
 
 ### 11b. O outro lado
 
 **Faça:** na `Autor`:
 
 ```ts
-import { OneToMany } from "typeorm";
+import { OneToMany, type Relation } from "typeorm";
 import { Obra } from "./obra.entity.js";
 
   @OneToMany(() => Obra, (obra) => obra.autor)
-  obras: Obra[];
+  obras: Relation<Obra[]>;
 ```
 
 | Trecho | O que faz |
 | --- | --- |
 | `@OneToMany` | **Não cria coluna nenhuma.** Só permite navegar de autora para obras |
-| `obras: Obra[]` | Um array. Ele vem vazio até você pedir a relação explicitamente — assunto do M06 |
+| `Relation<Obra[]>` | Um array de obras, na embalagem da regra prática. Ele vem vazio até você pedir a relação explicitamente — assunto do M06 |
 
 ### 11c. Por que declarar o `autorId` se ele já existia
 
@@ -718,7 +736,7 @@ consegue guardar a referência numa coluna — e é aí que entra uma terceira t
 **Faça:** crie `src\acervo\entidades\categoria.entity.ts`:
 
 ```ts
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn, type Relation } from "typeorm";
 import { Obra } from "./obra.entity.js";
 
 @Entity()
@@ -730,19 +748,19 @@ export class Categoria {
   nome: string;
 
   @ManyToMany(() => Obra, (obra) => obra.categorias)
-  obras: Obra[];
+  obras: Relation<Obra[]>;
 }
 ```
 
 **Faça:** na `Obra`, o lado **dono** — o que leva o `@JoinTable`:
 
 ```ts
-import { JoinTable, ManyToMany } from "typeorm";
+import { JoinTable, ManyToMany, type Relation } from "typeorm";
 import { Categoria } from "./categoria.entity.js";
 
   @ManyToMany(() => Categoria, (categoria) => categoria.obras)
   @JoinTable({ name: "obra_categoria" })
-  categorias: Categoria[];
+  categorias: Relation<Categoria[]>;
 ```
 
 | Trecho | O que faz |
@@ -792,7 +810,7 @@ A diferença entre **obra** e **exemplar** é o coração do domínio: a bibliot
 **Faça:** crie `src\acervo\entidades\exemplar.entity.ts`:
 
 ```ts
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, type Relation } from "typeorm";
 import { Obra } from "./obra.entity.js";
 
 export enum EstadoExemplar {
@@ -820,7 +838,7 @@ export class Exemplar {
     nullable: false,
     onDelete: "CASCADE",
   })
-  obra: Obra;
+  obra: Relation<Obra>;
 
   @Column()
   obraId: number;
@@ -834,7 +852,7 @@ import { OneToMany } from "typeorm";
 import { Exemplar } from "./exemplar.entity.js";
 
   @OneToMany(() => Exemplar, (exemplar) => exemplar.obra)
-  exemplares: Exemplar[];
+  exemplares: Relation<Exemplar[]>;
 ```
 
 **Linha a linha:**
@@ -1012,6 +1030,8 @@ escolheu, e você consegue defender cada escolha usando o critério da etapa 12.
 > **Uma dica sobre o `Emprestimo`:** repare que ele liga duas entidades **e carrega dados
 > próprios** (as três datas). É exatamente o caso que a etapa 13 antecipou — quando a ligação
 > tem dados, ela deixa de ser N:N e vira entidade, com dois `@ManyToOne`.
+> E os dois `@ManyToOne` seguem a regra prática da etapa 11: `Relation<Exemplar>` e
+> `Relation<Associado>`.
 
 > **A justificativa é o exercício.** Modelagem sem justificativa é chute, e o chute cobra a
 > conta no M06, quando as consultas começam a doer, e no M05, quando corrigi-la exige migração
@@ -1053,7 +1073,9 @@ frequentes — e agora você sabe responder aos dois.
 | `no PostgreSQL user name specified in startup packet` | `DATABASE_URL` chegou vazia. Quase sempre: falta a chave no esquema do `validate` — ver etapa 3 |
 | `password authentication failed` | `DATABASE_URL` não bate com o `docker-compose.yml` |
 | `Entity metadata for Obra#autor was not found` | A entidade não está no `forFeature` do módulo |
+| `ReferenceError: Cannot access 'Obra' before initialization` | Propriedade de relação sem `Relation<>` — quadro da etapa 11 |
 | `Cannot read properties of undefined (reading 'name')` na inicialização | Importação circular: use `() => Entidade`, nunca a classe direta |
+| `error TS1272: A type referenced in a decorated signature must be imported with 'import type'` | Faltou o `type` antes de `Relation` no import — etapa 11 |
 | `error TS2835: Relative import paths need explicit file extensions…` | Faltou o `.js` no import da entidade. A própria mensagem sugere a correção |
 | Nenhum `CREATE TABLE` no log | A tabela já existe e já bate com a entidade. Não é erro |
 | Coluna não aparece no banco | O `start:dev` não reiniciou, ou falta `@Column()` na propriedade |

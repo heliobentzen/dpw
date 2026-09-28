@@ -22,7 +22,7 @@ roda no Docker, então também não há PostgreSQL para instalar no Windows.
 
 | Momento | O que entra | Passos |
 | --- | --- | --- |
-| **Semana 1** (M00) | Terminal, Git, Node 20, VS Code, monorepo, primeiro commit | 0 a 5, 8, 9 |
+| **Semana 1** (M00) | Terminal, Git, Node 24, VS Code, monorepo, primeiro commit | 0 a 5, 8, 9 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
 | **Antes do M04** | Docker + PostgreSQL | 7 |
 | **A partir do M08** | Rodar os dois servidores juntos | 10 |
@@ -39,7 +39,7 @@ roda no Docker, então também não há PostgreSQL para instalar no Windows.
 | [1](#passo-1--powershell-e-política-de-scripts) | PowerShell e política de scripts | semana 1 |
 | [2](#passo-2--pasta-de-trabalho) | Pasta de trabalho | semana 1 |
 | [3](#passo-3--git) | Git + SSH | semana 1 |
-| [4](#passo-4--nodejs-e-npm) | Node 20 (o npm vem junto) | semana 1 |
+| [4](#passo-4--nodejs-e-npm) | Node 24 (o npm vem junto) | semana 1 |
 | [5](#passo-5--vs-code) | VS Code | semana 1 |
 | [6](#passo-6--dependências-do-backend) | Backend | **antes do M03** |
 | [7](#passo-7--docker-e-postgresql) | Docker + PostgreSQL | **antes do M04** |
@@ -233,7 +233,7 @@ does not provide shell access.` — a segunda metade **não é erro**, é o espe
 
 ## Passo 4 — Node.js e npm
 
-### 4.1 Instalar o Node 20 LTS
+### 4.1 Instalar o Node 24 LTS
 
 ```powershell
 winget install --id OpenJS.NodeJS.LTS
@@ -248,7 +248,7 @@ node --version
 npm --version
 ```
 
-**Deu certo se:** `node --version` responde `v20.x` ou superior.
+**Deu certo se:** `node --version` responde `v24.x` ou superior.
 
 > **E o `fnm`/`nvm`?** São gerenciadores de versão. No Windows exigem um passo extra —
 > adicionar uma linha ao seu perfil do PowerShell — sem o qual a versão escolhida **não
@@ -266,7 +266,12 @@ você acabou de rodar já provou isso.
 npm --version
 ```
 
-**Deu certo se:** responde `10.x` ou superior.
+**Deu certo se:** responde `11.x` ou superior.
+
+> ⚠️ **Tem um Node mais antigo instalado?** O npm 10 (que vem com o Node 20 e o 22) falha ao
+> instalar o projeto do Nest 12, com a mensagem `Cannot read properties of null (reading
+> 'edgesOut')`. Atualize o Node para o 24 ou, se não puder, só o npm:
+> `npm install -g npm@11`.
 
 > **E o pnpm ou o yarn?** São gerenciadores alternativos, comuns no mercado, e você vai
 > encontrá-los em projetos por aí. Esta disciplina usa **npm** por três motivos concretos:

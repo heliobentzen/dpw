@@ -126,7 +126,11 @@ node --version
 npm --version
 ```
 
-**Deu certo se:** o primeiro responde `v20.` ou superior, e o segundo `10.` ou superior.
+**Deu certo se:** o primeiro responde `v24.` ou superior, e o segundo `11.` ou superior.
+
+> ⚠️ Se o npm responder `10.`, atualize antes de seguir: `npm install -g npm@11`. O npm 10
+> falha ao instalar o projeto do Nest 12 com um erro que não explica nada
+> (`Cannot read properties of null (reading 'edgesOut')`).
 
 **Linha a linha:**
 

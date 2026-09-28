@@ -17,7 +17,7 @@
 | Cliente real | Uso da API pelo parceiro (Swagger ou cliente dele) | Observação | |
 | Carga simples | Desempenho com volume | `logging: true` do TypeORM + `curl -w` | |
 
-**Ambiente de teste:** `<PostgreSQL 16 no Docker, Node 20, dados gerados por src/semear.ts>`
+**Ambiente de teste:** `<PostgreSQL 16 no Docker, Node 24, dados gerados por src/semear.ts>`
 
 ## 2. Testes automatizados
 

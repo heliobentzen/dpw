@@ -143,7 +143,7 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 
 ### Passo 1 — Instalar as ferramentas
 
-Só três coisas hoje: **Node 20, Git e VS Code**. Docker e PostgreSQL entram no M04, quando
+Só três coisas hoje: **Node 24 (LTS), Git e VS Code**. Docker e PostgreSQL entram no M04, quando
 passam a servir para alguma coisa. Instalar tudo agora só antecipa problemas.
 
 Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
@@ -160,14 +160,14 @@ Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
 **Deu certo se:** os quatro comandos abaixo respondem uma versão.
 
 ```bash
-node --version      # v20 ou superior
-npm --version      # 9 ou superior
+node --version      # v24 ou superior
+npm --version       # 11 ou superior
 git --version
 code --version
 ```
 
 > Repare no que **não** está na lista: nenhum segundo runtime, nenhum ambiente virtual para
-> ativar. Backend e frontend rodam sobre o mesmo Node.
+> ativar. Tudo roda sobre o mesmo Node.
 
 ### Passo 2 — Criar o monorepo
 

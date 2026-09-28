@@ -11,7 +11,7 @@
 | Carga horária extensionista | 10 horas (creditadas dentro da CH total) |
 | Modalidade sugerida | Presencial ou híbrida, com laboratório de informática |
 | Pré-requisitos | Lógica de programação; POO; banco de dados relacional; **JavaScript moderno** (atendido — ver §11) |
-| Stack — backend | Node 20, TypeScript, NestJS 12, TypeORM, PostgreSQL 16, Swagger/OpenAPI |
+| Stack — backend | Node 24 LTS, TypeScript, NestJS 12, TypeORM, PostgreSQL 16, Swagger/OpenAPI |
 | Stack — comum | Git/GitHub, Docker, GitHub Actions, deploy em PaaS |
 
 ## 2. Ementa (oficial)
@@ -102,7 +102,7 @@ obrigatória do projeto**. O frontend, quando usado, é complementar e opcional.
 
 ## 8. Recursos necessários
 
-- Laboratório com **Node.js 20+** (o npm vem junto), Git, editor e acesso à internet.
+- Laboratório com **Node.js 24 LTS** (o npm 11 vem junto), Git, editor e acesso à internet.
 - ⚠️ Acesso liberado ao registro npm e ao PyPI. Proxy corporativo bloqueando `npm install`
   é a falha logística nº 1 desta disciplina.
 - Conta GitHub por estudante; organização GitHub para as equipes.

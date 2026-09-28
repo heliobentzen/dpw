@@ -49,25 +49,29 @@ export class Obra {
 ## Relações
 
 ```ts
+import { type Relation } from "typeorm";   // só tipo: exige o "type"
+
 // 1:N — o @ManyToOne carrega a chave estrangeira
 @ManyToOne(() => Autor, (a) => a.obras, { nullable: false, onDelete: "RESTRICT" })
-autor: Autor;
+autor: Relation<Autor>;
 
 @OneToMany(() => Obra, (o) => o.autor)
-obras: Obra[];
+obras: Relation<Obra[]>;
 
 // N:N — @JoinTable em UM só lado
 @ManyToMany(() => Categoria, (c) => c.obras)
 @JoinTable({ name: "obra_categoria" })
-categorias: Categoria[];
+categorias: Relation<Categoria[]>;
 
 // 1:1
 @OneToOne(() => Perfil, { cascade: true })
 @JoinColumn()
-perfil: Perfil;
+perfil: Relation<Perfil>;
 ```
 
-Sempre `() => Entidade` (função), nunca a classe direta — evita erro de importação circular.
+Sempre `() => Entidade` (função), nunca a classe direta, e sempre `Relation<>` no tipo da
+propriedade: os dois evitam o erro de importação circular do ESM
+(`Cannot access 'Obra' before initialization`).
 
 ### `onDelete`
 

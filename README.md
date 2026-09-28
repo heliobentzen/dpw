@@ -3,7 +3,7 @@
 Material didático completo da disciplina **Desenvolvimento de Projeto Web**.
 
 > **Escopo atual do repositório:** backend-first.
-> **Backend** — Node 20 · TypeScript · NestJS 12 · TypeORM · PostgreSQL 16
+> **Backend** — Node 24 LTS · TypeScript · NestJS 12 · TypeORM · PostgreSQL 16
 > **Comum** — monorepo npm · Git/GitHub · Docker · CI · deploy em PaaS
 >
 > Este repositório foi reduzido para priorizar a API, a regra de negócio e a operação do
@@ -147,7 +147,7 @@ cada peça chegando junto com o problema que ela resolve:
 
 | Momento | O que entra | Conferir com |
 | --- | --- | --- |
-| **Início** (M00) | Node 20, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
+| **Início** (M00) | Node 24, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
 | **Antes do M03** | NestJS CLI e as dependências do backend | `--etapa m03` |
 | **Antes do M04** | Docker + PostgreSQL | `--etapa m04` |
 

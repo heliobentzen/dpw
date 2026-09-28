@@ -9,7 +9,7 @@ Como conduzir a disciplina com este material.
 | −6 semanas | Mapear organizações parceiras candidatas para a extensão (ver [`../projeto/extensao/README.md`](../projeto/extensao/README.md)) |
 | −4 semanas | Formalizar parceria com 2–4 organizações (carta de anuência) |
 | −3 semanas | Criar a organização GitHub da turma e o repositório-modelo |
-| −2 semanas | Validar o laboratório: **Node 20**, Git, Docker, portas 3000/5432 |
+| −2 semanas | Validar o laboratório: **Node 24** (npm 11), Git, Docker, portas 3000/5432 |
 | −2 semanas | ⚠️ **Confirmar acesso a `registry.npmjs.org`** — proxy bloqueando `npm install` é a falha logística nº 1 |
 | −2 semanas | 🪟 Se o laboratório é Windows: instalar Git (traz o Git Bash), habilitar WSL2 e excluir a pasta de projetos do Windows Defender |
 | −2 semanas | Criar contas de PaaS ou solicitar GitHub Student Pack |
@@ -41,7 +41,7 @@ necessário**:
 
 | Momento | O que entra | Avise na aula anterior |
 | --- | --- | --- |
-| **Semana 1** (M00) | Node 20, Git, VS Code, monorepo, 1º commit | — |
+| **Semana 1** (M00) | Node 24, Git, VS Code, monorepo, 1º commit | — |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | sim |
 | **Antes do M04** | Docker + PostgreSQL | **sim, com folga** — no Windows exige WSL2 e, às vezes, virtualização na BIOS |
 

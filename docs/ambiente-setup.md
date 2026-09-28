@@ -17,7 +17,7 @@ e nada além disso do lado de linguagem: um único ecossistema de pacotes para m
 
 | Momento | O que entra | Seções |
 | --- | --- | --- |
-| **Semana 1** (M00) | Git, Node 20, VS Code, monorepo, primeiro commit | 1 a 5, 8 |
+| **Semana 1** (M00) | Git, Node 24, VS Code, monorepo, primeiro commit | 1 a 5, 8 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
 | **Antes do M04** | Docker + PostgreSQL | 7, 9 |
 
@@ -39,7 +39,7 @@ dentro do projeto, e o `npm` as encontra pela pasta em que você está.
 
 | Ferramenta | Versão mínima | Camada | Para quê |
 | --- | --- | --- | --- |
-| Node.js | **20 LTS** | principal | Runtime do backend |
+| Node.js | **24 LTS** | principal | Runtime do backend |
 | Git | 2.40 | ambas | Versionamento |
 | VS Code (ou WebStorm) | atual | ambas | Editor |
 | Docker | atual | 🔵 | PostgreSQL local (a partir do M04) |
@@ -97,14 +97,14 @@ ssh -T git@github.com       # deve responder "Hi <usuario>!"
 ```bash
 curl -fsSL https://fnm.vercel.app/install | bash
 exec $SHELL
-fnm install 20 && fnm use 20
+fnm install 24 && fnm use 24
 ```
 
 Alternativa simples: instalador oficial em <https://nodejs.org> (escolha **LTS**), ou o
 gerenciador de pacotes da sua distribuição.
 
 ```bash
-node --version    # v20.x ou superior
+node --version    # v24.x ou superior
 ```
 
 ### npm
@@ -112,7 +112,7 @@ node --version    # v20.x ou superior
 Não há nada a instalar: o npm vem junto com o Node.
 
 ```bash
-npm --version    # 10.x ou superior
+npm --version    # 11.x ou superior
 ```
 
 > **Por que npm?** Ele já está instalado — zero passo extra — e é o que aparece em todo
