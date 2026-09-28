@@ -1,6 +1,6 @@
 # M01 — Fundamentos da web e protocolo HTTP
 
-> **CH:** 5h (3h teóricas · 2h práticas) · **Semanas 1–2** · **Pré-requisito:** M00
+> **Pré-requisito:** M00 · **Duração:** longa
 > **Ementa:** *Introdução a aplicações web: Como funcionam; Protocolo HTTP: métodos POST e GET.*
 
 Este é o módulo mais importante da disciplina. Tudo que vem depois — models, views,
@@ -8,9 +8,9 @@ interfaces, segurança, deploy — é uma resposta a alguma característica do H
 este módulo decora o framework; quem entende este módulo aprende a web.
 
 > Numa arquitetura desacoplada (M02), o HTTP deixa de ser detalhe de infraestrutura e vira
-> **a interface entre as duas metades do sistema**. Cada tela do React conversa com o
-> o framework por requisições que você mesmo vai projetar. Cada erro de integração que a turma
-> encontrar da semana 8 em diante se explica com o que está neste módulo.
+> **a interface entre a API e quem a usa**. Qualquer cliente — navegador, aplicativo, outro
+> sistema — conversa com o backend por requisições que você mesmo vai projetar. Cada erro de
+> integração que a turma encontrar daqui em diante se explica com o que está neste módulo.
 
 ## 🎯 Objetivos
 
@@ -41,9 +41,9 @@ mas sem esse entendimento a abstração vira caixa-preta.
 
 ---
 
-## 📖 Teoria (3h)
+## 📖 Teoria
 
-### 1. O que acontece quando você digita uma URL (35 min)
+### 1. O que acontece quando você digita uma URL
 
 ```
 https://biblioteca.exemplo.org.br/acervo/obra/42?formato=resumo#autor
@@ -83,7 +83,7 @@ Sequência completa:
 Regra que vale para o resto da vida: **validação no cliente é conveniência; validação no
 servidor é segurança**. Tudo que vem do cliente pode ter sido forjado.
 
-### 2. Anatomia de uma mensagem HTTP (35 min)
+### 2. Anatomia de uma mensagem HTTP
 
 **Requisição:**
 
@@ -131,7 +131,7 @@ Estrutura: `VERSÃO STATUS RAZÃO` → cabeçalhos → **linha em branco** → c
 | `Cache-Control` | ↔ | Política de cache |
 | `X-Frame-Options`, `Content-Security-Policy` | ← | Segurança do navegador (M09) |
 
-### 3. Métodos: GET e POST em profundidade (50 min)
+### 3. Métodos: GET e POST em profundidade
 
 A ementa destaca GET e POST porque são os **únicos** que um formulário HTML consegue
 enviar nativamente — e porque confundi-los é a origem de uma classe inteira de bugs e
@@ -231,7 +231,7 @@ Em formulário HTML puro só existem GET e POST:
     qualquer alteração ────▶ POST
 ```
 
-### 4. Códigos de status (20 min)
+### 4. Códigos de status
 
 | Faixa | Significado | Principais |
 | --- | --- | --- |
@@ -252,7 +252,7 @@ Distinções que caem em prova e em code review:
 - **500 vs 502** — 500: sua aplicação lançou exceção. 502: o proxy não conseguiu falar com
   sua aplicação (ela caiu, ou não subiu).
 
-### 5. HTTP não tem memória: cookies e sessões (30 min)
+### 5. HTTP não tem memória: cookies e sessões
 
 O protocolo é **stateless**: cada requisição é independente. Mas aplicações precisam saber
 quem está logado. Solução em duas partes:
@@ -288,7 +288,7 @@ quem está logado. Solução em duas partes:
 Alternativa moderna: **token** (JWT) no cabeçalho `Authorization`, comum em APIs e apps
 mobile. Comparação em M07.
 
-### 6. HTTP/1.1, HTTP/2, HTTP/3 (10 min)
+### 6. HTTP/1.1, HTTP/2, HTTP/3
 
 | Versão | Mudança principal | Impacto no seu código |
 | --- | --- | --- |
@@ -301,9 +301,9 @@ semântica; a versão é responsabilidade da infraestrutura.
 
 ---
 
-## 🛠️ Roteiro prático (2h)
+## 🛠️ Roteiro prático
 
-### Prática 1 — Inspecionar o tráfego real (40 min)
+### Prática 1 — Inspecionar o tráfego real
 
 1. Abra o DevTools (F12) → aba **Network** → marque *Preserve log* e *Disable cache*.
 2. Acesse um site que exija login (use uma conta de teste, nunca a sua conta real de banco).
@@ -321,7 +321,7 @@ semântica; a versão é responsabilidade da infraestrutura.
 
 1. Filtre por **Doc**, **XHR** e **Img** e observe a diferença de volume.
 
-### Prática 2 — Falar HTTP na mão com `curl` (40 min)
+### Prática 2 — Falar HTTP na mão com `curl`
 
 > 🪟 **Windows (PowerShell): escreva `curl.exe`, não `curl`.** No PowerShell, `curl` é
 > apelido de `Invoke-WebRequest`, que tem outros parâmetros — os comandos abaixo falham com
@@ -366,7 +366,7 @@ curl -b cookies.txt https://httpbin.org/cookies
 Para cada comando, responda: **qual método, qual status, onde foram os dados** (URL ou
 corpo) e **qual `Content-Type`**.
 
-### Prática 3 — Servidor HTTP mínimo, sem framework (40 min)
+### Prática 3 — Servidor HTTP mínimo, sem framework
 
 Entender o framework exige ver o que ele esconde. Este servidor faz, em ~80 linhas, o que o
 NestJS faz em milhares:
@@ -458,7 +458,7 @@ Documento (2–4 páginas) com:
 4. Um parágrafo final: *qual característica do HTTP mais influencia o modo como
    aplicações web são construídas, e por quê?*
 
-**Prazo:** semana 2. **Peso:** compõe o portfólio (20%).
+**Prazo:** ver o [cronograma](../../docs/cronograma.md). **Peso:** compõe o portfólio (20%).
 
 ## 📚 Para aprofundar
 

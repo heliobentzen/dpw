@@ -1,6 +1,6 @@
 # Etapa 1 — Definição e planejamento do projeto
 
-> **CH:** 8h (3h teóricas · 5h práticas) · **Semanas 6 a 10** · **Entrega P1** (semana 10) · **Peso:** 15%
+> **Entrega:** P1 · **Peso:** 15% · Datas no [cronograma](../../docs/cronograma.md)
 
 ## Atividades previstas
 
@@ -18,7 +18,7 @@ o que exatamente vamos construir e como a equipe vai desenvolver e validar a sol
 
 ---
 
-## 1. Levantamento de problemas (1h30)
+## 1. Levantamento de problemas
 
 ### 1.1 Divergir antes de convergir
 
@@ -60,7 +60,7 @@ Agrupe problemas semelhantes. Quase sempre 12 problemas viram 4 ou 5 temas.
 
 ---
 
-## 2. Seleção do problema (1h)
+## 2. Seleção do problema
 
 ### 2.1 Matriz de decisão
 
@@ -111,7 +111,7 @@ excesso de ambição em 9 de cada 10 casos.
 
 ---
 
-## 3. Proposta de solução (1h30)
+## 3. Proposta de solução
 
 ### 3.1 Canvas do projeto
 

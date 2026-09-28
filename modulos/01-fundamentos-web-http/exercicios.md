@@ -110,7 +110,7 @@ Escreva 5 linhas comparando: **o que explica a diferença de peso e de tempo?**
 
 ---
 
-## E01.6 — Debate dirigido (em grupo, 20 min)
+## E01.6 — Debate dirigido (em grupo)
 
 *"Se o HTTPS criptografa tudo, por que ainda importa se os dados vão por GET ou POST?"*
 

@@ -1,6 +1,6 @@
 # M02 — Arquitetura desacoplada e contrato de API
 
-> **CH:** 2h (2h teóricas · 0h práticas) · **Semana 2** · **Pré-requisito:** M01
+> **Pré-requisito:** M01 · **Duração:** curta
 > **Ementa:** *Introdução a aplicações web: como funcionam.*
 
 Módulo curto e inteiramente conceitual — e um dos mais importantes. Ele responde à
@@ -34,9 +34,9 @@ independente, com contrato explícito, e não para misturar tudo em um único bl
 
 ---
 
-## 📖 Teoria (2h)
+## 📖 Teoria
 
-### 1. Duas formas de montar uma página (30 min)
+### 1. Duas formas de montar uma página
 
 #### Renderização no servidor (MPA — *multi-page application*)
 
@@ -114,7 +114,7 @@ O conteúdo precisa ser indexado por buscadores?
 💼 **No mercado:** essa é uma pergunta real de entrevista e de reunião de arquitetura.
 Responder "SPA, porque é moderno" desqualifica; responder com os requisitos qualifica.
 
-### 2. O que muda quando se desacopla (30 min)
+### 2. O que muda quando se desacopla
 
 Separar cliente e servidor não elimina trabalho — **desloca** trabalho. O que antes era
 uma chamada de função vira uma requisição de rede, com tudo que isso implica.
@@ -141,7 +141,7 @@ Três consequências que a turma vai sentir na pele:
    frontend continua compilando e a tela mostra `undefined`. As defesas: OpenAPI + tipos
    gerados (M07) e testes de contrato (M10).
 
-### 3. O contrato de API (40 min) ⭐
+### 3. O contrato de API ⭐
 
 O contrato é o acordo sobre **quais recursos existem, em quais URLs, com quais métodos, em
 que formato e com quais erros**. Ele vem **antes** do código dos dois lados — é o que
@@ -246,7 +246,7 @@ precisa de um tratamento por endpoint — e não terá.
 > formulário só precisa mandar o id. Resolve-se com DTOs diferentes para
 > leitura e escrita (M07).
 
-### 4. Documentação como fonte de verdade (20 min)
+### 4. Documentação como fonte de verdade
 
 O contrato só funciona se estiver escrito num lugar que **não pode divergir do código**.
 A solução padrão é **OpenAPI** gerado a partir do próprio código:
@@ -266,9 +266,9 @@ defesa concreta contra o problema descrito na seção 2. Implementado no M07.
 
 ---
 
-## 🛠️ Atividade dirigida (dentro das 2h teóricas)
+## 🛠️ Atividade dirigida
 
-### Escrever o contrato do BiblioCom (40 min, em duplas)
+### Escrever o contrato do BiblioCom (em duplas)
 
 1. Liste os recursos do domínio (use os models que você projetará no M04).
 2. Para cada um, defina as rotas, os métodos e os status de sucesso.

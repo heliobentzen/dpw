@@ -1,6 +1,6 @@
 # M12 — Deploy da API
 
-> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 12** · **Pré-requisitos:** M10, M11
+> **Pré-requisitos:** M10, M11 · **Duração:** média
 > **Ementa:** *Tópicos relevantes: Implantação (deploy) do sistema.*
 
 O módulo em que o projeto deixa de ser exercício e vira sistema. Regra: ao final desta semana
@@ -37,9 +37,9 @@ aprende a entregar uma versão controlada, repetível e responsável.
 
 ---
 
-## 📖 Teoria (2h)
+## 📖 Teoria
 
-### 1. O que muda com dois artefatos (25 min)
+### 1. O que muda com dois artefatos
 
 ```
                         Internet
@@ -74,7 +74,7 @@ aprende a entregar uma versão controlada, repetível e responsável.
 Isso realiza o [ADR-07](../../docs/decisoes-tecnicas.md#adr-07--autenticação-por-sessão-com-cookie-não-jwt-em-localstorage):
 a escolha de autenticação por sessão **depende** desta topologia.
 
-### 2. Dois processos de build (20 min)
+### 2. Dois processos de build
 
 | | Backend | Frontend |
 | --- | --- | --- |
@@ -91,7 +91,7 @@ a escolha de autenticação por sessão **depende** desta topologia.
 > literal durante `npm run build`. Mudar a variável na plataforma **não** muda o site: é
 > preciso rodar o build de novo. E, pelo mesmo motivo, ela é pública (M13).
 
-### 3. O *fallback* da SPA (20 min) ⭐
+### 3. O *fallback* da SPA ⭐
 
 O usuário acessa `https://bibliocom.org/obras/42` diretamente, ou dá F5 nessa rota. O
 servidor recebe `GET /obras/42` — e não existe arquivo com esse nome.
@@ -132,7 +132,7 @@ ServeStaticModule.forRoot({
 });
 ```
 
-### 4. Cache e nomes com hash (15 min)
+### 4. Cache e nomes com hash
 
 O Vite gera `index-B7fK2a.js`. O hash muda quando o conteúdo muda, o que permite:
 
@@ -145,7 +145,7 @@ O `index.html` é pequeno e aponta para os arquivos com hash; os arquivos com ha
 de conteúdo. Resultado: cache eterno **e** deploy que chega ao usuário na hora. Resolve de
 vez o clássico "no meu computador aparece a versão nova".
 
-### 5. Migrações em produção (20 min)
+### 5. Migrações em produção
 
 ```
 1. Backup do banco                    ← antes de qualquer coisa
@@ -168,7 +168,7 @@ expandir → migrar → contrair do M05, aplicado ao contrato.
 | Tornar campo obrigatório | ❌ Não | Dois deploys |
 | Remover endpoint | ❌ Não | Depreciar → migrar → remover |
 
-### 6. Onde implantar (20 min)
+### 6. Onde implantar
 
 | Opção | Custo | Esforço | Quando |
 | --- | --- | --- | --- |
@@ -181,9 +181,9 @@ expandir → migrar → contrair do M05, aplicado ao contrato.
 
 ---
 
-## 🛠️ Roteiro prático (2h)
+## 🛠️ Roteiro prático
 
-### Passo 1 — Preparar o backend (25 min)
+### Passo 1 — Preparar o backend
 
 ```bash
 cd ~/dev/bibliocom/backend
@@ -254,7 +254,7 @@ de `dist/`, não do fonte.
 > salvo com CRLF, falha com `bad interpreter: No such file or directory`. Garanta o
 > `.gitattributes` com `*.sh text eol=lf` (M00).
 
-### Passo 2 — Preparar o frontend (20 min)
+### Passo 2 — Preparar o frontend
 
 ```bash
 cd frontend
@@ -281,7 +281,7 @@ Get-ChildItem dist\assets\                                      # nomes com hash
 Select-String -Recurse "VITE_" dist\* | Select-Object -First 10   # variaveis embutidas
 ```
 
-### Passo 3 — PostgreSQL e serviço da API (30 min)
+### Passo 3 — PostgreSQL e serviço da API
 
 1. Na PaaS: **New → PostgreSQL**. Copie a *Internal Database URL*.
 2. **New → Web Service**, apontando para `backend/`:
@@ -312,7 +312,7 @@ ADMIN_EMAIL=voce@exemplo.org ADMIN_SENHA='...' npm run seed:admin
 
 1. Teste: `curl https://sua-api/api/obras`
 
-### Passo 4 — Publicar a SPA sob o mesmo site (30 min) ⭐
+### Passo 4 — Publicar a SPA sob o mesmo site ⭐
 
 Duas estratégias; escolha **uma** e documente a escolha.
 
@@ -359,7 +359,7 @@ npm ci && npm run -w frontend build && npm run -w backend build
 Um serviço, um deploy, zero CORS. Em troca, o build fica mais lento e as camadas ficam
 acopladas na publicação.
 
-### Passo 5 — Verificação pós-deploy (15 min)
+### Passo 5 — Verificação pós-deploy
 
 - [ ] `https://.../` carrega a SPA
 - [ ] `https://.../api/obras/` responde JSON

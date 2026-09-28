@@ -1,6 +1,6 @@
 # DPW — Desenvolvimento de Projeto Web
 
-Material didático completo da disciplina **Desenvolvimento de Projeto Web** — 100 horas
+Material didático completo da disciplina **Desenvolvimento de Projeto Web**.
 
 > **Escopo atual do repositório:** backend-first.
 > **Backend** — Node 20 · TypeScript · NestJS 12 · TypeORM · PostgreSQL 16
@@ -20,10 +20,10 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 | Pasta | O que contém |
 | --- | --- |
 | [`docs/`](docs/) | Plano de ensino, cronograma, setup, decisões técnicas, glossário, troubleshooting |
-| [`modulos/`](modulos/) | 18 módulos de conteúdo (69h), cada um com teoria, roteiro prático, exercícios e checklist |
-| [`projeto/`](projeto/) | Projeto integrador em 4 etapas (20h) + trilha extensionista (10h) |
+| [`modulos/`](modulos/) | 14 módulos de conteúdo (M00–M13), cada um com roteiro guiado, exercícios e checklist |
+| [`projeto/`](projeto/) | Projeto integrador em 3 etapas + trilha extensionista |
 | [`avaliacao/`](avaliacao/) | Rubricas, pesos, política de recuperação e critérios de correção |
-| [`recursos/`](recursos/) | Código de apoio, guia do Windows, referência de JS/TS, checklists imprimíveis |
+| [`recursos/`](recursos/) | Código de apoio, guia do Windows, checklists imprimíveis |
 
 **Comece por aqui:**
 
@@ -33,49 +33,49 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 
 ---
 
-## Trilha de módulos (69h)
+## Trilha de módulos
 
-### Fundamentos — 10h
+A coluna **Duração** é relativa (curta, média, longa) e serve para você calibrar o fôlego de
+cada módulo. A carga horária oficial fica no [plano de ensino](docs/plano-de-ensino.md) e no
+[cronograma](docs/cronograma.md).
 
-| # | Módulo | CH | T | P |
-| --- | --- | ---: | ---: | ---: |
-| 00 | [Ambiente e ferramentas](modulos/00-ambiente-e-ferramentas/) | 3 | 1 | 2 |
-| 01 | [Fundamentos da web e HTTP](modulos/01-fundamentos-web-http/) | 5 | 3 | 2 |
-| 02 | [Arquitetura desacoplada e contrato de API](modulos/02-arquitetura-desacoplada/) | 2 | 2 | 0 |
+### Fundamentos
 
-### Backend — 24h
+| # | Módulo | Duração |
+| --- | --- | --- |
+| 00 | [Ambiente e ferramentas](modulos/00-ambiente-e-ferramentas/) | média |
+| 01 | [Fundamentos da web e HTTP](modulos/01-fundamentos-web-http/) | longa |
+| 02 | [Arquitetura desacoplada e contrato de API](modulos/02-arquitetura-desacoplada/) | curta |
 
-| # | Módulo | CH | T | P |
-| --- | --- | ---: | ---: | ---: |
-| 03 | [NestJS: módulos, controllers e providers](modulos/03-nestjs-primeiros-passos/) | 4 | 2 | 2 |
-| 04 | [Entidades: classes que geram o banco](modulos/04-entidades-typeorm/) | 6 | 3 | 3 |
-| 05 | [Migrações](modulos/05-migracoes/) | 3 | 1 | 2 |
-| 06 | [Repository e QueryBuilder: consultas e CRUD](modulos/06-orm-consultas-crud/) | 5 | 2 | 3 |
-| 07 | [API: rotas, controllers e DTOs](modulos/07-api-controllers-dtos/) | 6 | 3 | 3 |
+### Backend
 
-### Transversais e produção — 21h
+| # | Módulo | Duração |
+| --- | --- | --- |
+| 03 | [NestJS: a primeira API, passo a passo](modulos/03-nestjs-primeiros-passos/) | média |
+| 04 | [Entidades: classes que geram o banco](modulos/04-entidades-typeorm/) | longa |
+| 05 | [Migrações](modulos/05-migracoes/) | média |
+| 06 | [Repository e QueryBuilder: consultas e CRUD](modulos/06-orm-consultas-crud/) | longa |
+| 07 | [API: rotas, controllers e DTOs](modulos/07-api-controllers-dtos/) | longa |
 
-| # | Módulo | CH | T | P |
-| --- | --- | ---: | ---: | ---: |
-| 08 | [Autenticação e autorização na API](modulos/08-autenticacao-usuarios/) | 5 | 2 | 3 |
-| 09 | [Segurança de APIs](modulos/09-seguranca/) | 5 | 3 | 2 |
-| 10 | [Testes e qualidade no backend](modulos/10-testes-e-qualidade/) | 3 | 1 | 2 |
-| 11 | [Tipos compartilhados e contrato OpenAPI](modulos/11-tipos-compartilhados/) | 2 | 1 | 1 |
-| 12 | [Deploy da API](modulos/12-deploy/) | 4 | 2 | 2 |
-| 13 | [Observabilidade e manutenção](modulos/13-observabilidade-e-manutencao/) | 2 | 1 | 1 |
-| | **Subtotal** | **70** | **33** | **37** |
+### Segurança, qualidade e produção
 
-## Projeto integrador (20h) + Extensão (10h)
+| # | Módulo | Duração |
+| --- | --- | --- |
+| 08 | [Autenticação e autorização na API](modulos/08-autenticacao-usuarios/) | longa |
+| 09 | [Segurança de APIs](modulos/09-seguranca/) | longa |
+| 10 | [Testes e qualidade no backend](modulos/10-testes-e-qualidade/) | média |
+| 11 | [Tipos compartilhados e contrato OpenAPI](modulos/11-tipos-compartilhados/) | curta |
+| 12 | [Deploy da API](modulos/12-deploy/) | média |
+| 13 | [Observabilidade e manutenção](modulos/13-observabilidade-e-manutencao/) | curta |
 
-| Etapa | CH | T | P |
-| --- | ---: | ---: | ---: |
-| [Atividades extensionistas](projeto/extensao/) | 10 | 2 | 8 |
-| [1. Definição e planejamento](projeto/etapa-1-definicao-do-tema/) | 8 | 3 | 5 |
-| [2. Desenvolvimento](projeto/etapa-3-desenvolvimento/) | 8 | 0 | 8 |
-| [3. Relatório e encerramento](projeto/etapa-4-relatorio-e-encerramento/) | 4 | 2 | 2 |
-| **Subtotal** | **30** | **7** | **23** |
+## Projeto integrador e extensão
 
-**Total geral: 100h — 40h teóricas + 60h práticas.**
+| Etapa | Entrega |
+| --- | --- |
+| [1. Definição e planejamento](projeto/etapa-1-definicao-do-tema/) | P1 |
+| [2. Desenvolvimento](projeto/etapa-3-desenvolvimento/) | P2 |
+| [3. Relatório e encerramento](projeto/etapa-4-relatorio-e-encerramento/) | P3 |
+| [Atividades extensionistas](projeto/extensao/) | X1–X3 |
 
 ---
 
@@ -105,12 +105,13 @@ referência de código, não o entregável.
 
 - 🎯 **Objetivos** — o que você deve saber fazer ao final.
 - 📖 **Teoria** — conceito, com o "porquê" antes do "como".
-- 🛠️ **Roteiro prático** — passo a passo executável, comando a comando.
+- 🛠️ **Etapas guiadas** — cada uma com **Faça** (o comando ou código), **Linha a linha**
+  (o porquê de cada parte), **Rode** e **Deu certo se** (como conferir sozinho).
 - 🧪 **Exercícios** — atividades individuais com critérios de verificação.
 - ⚠️ **Erros comuns** — o que quebra na prática e como diagnosticar.
 - ✅ **Checklist de saída** — critério objetivo de conclusão do módulo.
 - 💼 **No mercado** — como o assunto aparece em vagas, code reviews e produção.
-- 🔵 **Backend** / 🟣 **Frontend** — camada tratada no trecho.
+- 🤖 **IA no fluxo** — onde um assistente de IA ajuda, e o que continua sendo decisão sua.
 
 ### Convenção dos blocos de comando
 
@@ -146,11 +147,11 @@ cada peça chegando junto com o problema que ela resolve:
 
 | Momento | O que entra | Conferir com |
 | --- | --- | --- |
-| **Semana 1** (M00) | Node 20, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
+| **Início** (M00) | Node 20, Git, VS Code, monorepo, primeiro commit | `node recursos/codigo/verifica-ambiente.mjs` |
 | **Antes do M03** | NestJS CLI e as dependências do backend | `--etapa m03` |
 | **Antes do M04** | Docker + PostgreSQL | `--etapa m04` |
 
-**A stack tem um runtime só.** A semana 1 instala **o Node**, e acabou: não há segundo
+**A stack tem um runtime só.** O M00 instala **o Node**, e acabou: não há segundo
 ecossistema de pacotes para manter, nem ambiente virtual para lembrar de ativar.
 
 Guias: [`docs/ambiente-setup.md`](docs/ambiente-setup.md) (Linux/macOS) ou
@@ -160,15 +161,15 @@ Guias: [`docs/ambiente-setup.md`](docs/ambiente-setup.md) (Linux/macOS) ou
 
 O Windows tem **guia de setup próprio e independente** — não é tradução do guia Linux:
 
-📖 **[`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md)** — do zero até os
-dois servidores rodando, com **cada linha explicada** e a conferência de cada etapa.
+📖 **[`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md)** — do zero até a
+API rodando, com **cada linha explicada** e a conferência de cada etapa.
 
 Quem usa Windows segue só esse arquivo. Quem usa Linux/macOS segue
 [`docs/ambiente-setup.md`](docs/ambiente-setup.md). Não é preciso alternar entre os dois.
 
 Durante o curso, quando um roteiro trouxer comando em formato Linux,
 [`recursos/comandos-windows.md`](recursos/comandos-windows.md) traz a tabela de
-equivalências e as **seis armadilhas** que não se resolvem trocando o comando: `curl` é
+equivalências e as **armadilhas** que não se resolvem trocando o comando: `curl` é
 alias de `Invoke-WebRequest`; variáveis de ambiente inline não existem; `&&` não existe no
 PowerShell 5.1; `>` grava arquivos em UTF-16; e um espaço
 depois da crase de continuação corta o comando em silêncio.

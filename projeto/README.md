@@ -1,4 +1,4 @@
-# Projeto Integrador — 20h + 10h de extensão
+# Projeto Integrador e extensão
 
 O projeto é o eixo da disciplina: os módulos existem para viabilizá-lo. Ele é feito em
 **equipes de 3 a 4 pessoas**, sobre um tema escolhido pela própria equipe, e atendendo a
@@ -7,25 +7,31 @@ extensionista.
 
 ## Estrutura
 
-| Etapa | CH | Semanas | Entrega | Peso |
-| --- | ---: | --- | --- | ---: |
-| [1. Definição e planejamento](etapa-1-definicao-do-tema/) | 8 | 6 a 10 | **P1** — Documento de definição e planejamento | 15% |
-| [2. Desenvolvimento do sistema](etapa-3-desenvolvimento/) | 8 | 11 a 18 | **P2** — Sistema desenvolvido, testado e implantado | 30% |
-| [3. Relatório técnico e encerramento](etapa-4-relatorio-e-encerramento/) | 4 | 19 e 20 | **P3** — Relatório + apresentação | 10% |
-| [Atividades extensionistas](extensao/) | 10 | 14, 15, 19 e 20 | **X1–X3** — Plano, evidências e relato | 10% |
-| **Total** | **30** | | | **55%** |
+| Etapa | Entrega | Peso |
+| --- | --- | ---: |
+| [1. Definição e planejamento](etapa-1-definicao-do-tema/) | **P1** — Documento de definição e planejamento | 15% |
+| [2. Desenvolvimento do sistema](etapa-3-desenvolvimento/) | **P2** — Sistema desenvolvido, testado e implantado | 30% |
+| [3. Relatório técnico e encerramento](etapa-4-relatorio-e-encerramento/) | **P3** — Relatório + apresentação | 10% |
+| [Atividades extensionistas](extensao/) | **X1–X3** — Plano, evidências e relato | 10% |
+| **Total** | | **55%** |
 
-> A carga horária das etapas é a **de aula dedicada** ao projeto. O desenvolvimento
-> acontece também fora dela, apoiado pelas atividades práticas dos módulos: cada módulo
-> entrega uma peça que o projeto reaproveita.
+Datas e carga horária no [cronograma](../docs/cronograma.md). O desenvolvimento acontece
+também fora das aulas dedicadas ao projeto, apoiado pelas atividades práticas dos módulos:
+cada módulo entrega uma peça que o projeto reaproveita.
 
 ## Como as etapas se conectam aos módulos
 
-```
-Semana:  1   3   5   6   8   9  11  12  13  14  15  16  17  18  19  20
-Módulos: M00─M03─M05─M06─M07─M07─M11─M08─M09─M10─M07─M12─M13
-Projeto:              ├E1──────────────E1────────────────E2──E2──────E3
-Extensão:                                 ├X1──X1──────────────X2───X3
+```mermaid
+flowchart LR
+    subgraph Modulos[Módulos]
+        direction LR
+        A[M00–M02<br/>fundamentos] --> B[M03–M07<br/>API com dados] --> C[M08–M11<br/>segurança e testes] --> D[M12–M13<br/>produção]
+    end
+    B -. modelagem e contrato .-> P1[Etapa 1<br/>P1]
+    C -. auth, OWASP, testes .-> P2[Etapa 2<br/>P2]
+    D -. deploy e operação .-> P2
+    P1 --> P2 --> P3[Etapa 3<br/>P3]
+    D -. sistema no ar .-> X[Extensão<br/>X1–X3]
 ```
 
 Ao chegar na Etapa 2, a equipe **já sabe** modelar, consultar, roteirizar, validar,

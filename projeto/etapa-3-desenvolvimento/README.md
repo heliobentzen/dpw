@@ -1,6 +1,6 @@
 # Etapa 3 — Desenvolvimento do sistema backend
 
-> **CH:** 8h (0h teóricas · 8h práticas) · **Semanas 17 e 18** · **Entrega P3** (semana 18) · **Peso:** 30%
+> **Entrega:** P2 · **Peso:** 30% · Datas no [cronograma](../../docs/cronograma.md)
 
 ## Atividades previstas
 
@@ -12,9 +12,9 @@
 
 O backend funcionando, testado e **no ar** — a maior entrega da disciplina.
 
-> As 8h em aula são de integração, revisão e resolução de bloqueios. O desenvolvimento
-> acontece continuamente desde a semana 12, aproveitando as atividades práticas de cada
-> módulo. Equipe que começa a programar na semana 17 não entrega.
+> Os encontros em aula são de integração, revisão e resolução de bloqueios. O desenvolvimento
+> acontece continuamente desde o M07, aproveitando as atividades práticas de cada módulo.
+> Equipe que deixa para começar a programar na reta final não entrega.
 
 ---
 

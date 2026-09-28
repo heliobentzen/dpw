@@ -1,11 +1,11 @@
 # M04 — Entidades: classes que geram o banco
 
-> **CH:** 6h (3h teóricas · 3h práticas) · **Semana 4** · **Pré-requisito:** M03
+> **Pré-requisito:** M03 · **Duração:** longa
 
 O módulo central da ementa: *"classes para geração automática do banco de dados"*. Aqui uma
 classe TypeScript vira uma tabela, e a relação entre classes vira chave estrangeira.
 
-> **As horas teóricas não estão num bloco separado.** Elas são as etapas 5, 8, 12 e 18 — em
+> **A teoria não está num bloco separado.** Ela está nas etapas 5, 8, 12 e 18 — em
 > que a gente para de digitar e pensa — mais as explicações dentro de cada etapa. Conceito
 > chega quando o código pede, e não antes.
 
@@ -49,26 +49,26 @@ conferir. Se um passo falhar, você sabe qual linha foi.
 
 ### As dezoito etapas
 
-| # | Etapa | Min | O que entra |
+| # | Etapa | Duração | O que entra |
 | --- | --- | --- | --- |
-| 1 | [Subir o banco](#etapa-1--subir-o-banco-15-min) | 15 | Docker Compose |
-| 2 | [Instalar o TypeORM](#etapa-2--instalar-o-typeorm-10-min) | 10 | ORM, driver |
-| 3 | [A variável de conexão](#etapa-3--a-variável-de-conexão-15-min) | 15 | `DATABASE_URL`, e uma armadilha |
-| 4 | [Ligar o TypeOrmModule](#etapa-4--ligar-o-typeormmodule-15-min) | 15 | `forRoot`, `synchronize`, `logging` |
-| 5 | [**O que um ORM resolve**](#etapa-5--o-que-um-orm-resolve-20-min) | 20 | **o porquê do ORM** |
-| 6 | [A primeira entidade](#etapa-6--a-primeira-entidade-25-min) | 25 | `@Entity`, `@Column`, `forFeature` |
-| 7 | [Ler o `CREATE TABLE`](#etapa-7--ler-o-create-table-15-min) | 15 | do decorator ao SQL |
-| 8 | [**Cada opção é uma decisão**](#etapa-8--cada-opção-é-uma-decisão-25-min) | 25 | **`nullable`, `unique`, `default`** |
-| 9 | [Mudar a classe, ver o `ALTER`](#etapa-9--mudar-a-classe-ver-o-alter-15-min) | 15 | o ciclo do módulo |
-| 10 | [A segunda entidade](#etapa-10--a-segunda-entidade-20-min) | 20 | datas automáticas |
-| 11 | [A primeira relação: 1:N](#etapa-11--a-primeira-relação-1n-30-min) | 30 | `@ManyToOne`, `@OneToMany`, FK |
-| 12 | [**`onDelete` é decisão de negócio**](#etapa-12--ondelete-é-decisão-de-negócio-20-min) | 20 | **`RESTRICT`, `CASCADE`, `SET NULL`** |
-| 13 | [Relação N:N](#etapa-13--relação-nn-25-min) | 25 | `@ManyToMany`, `@JoinTable` |
-| 14 | [1:N com `CASCADE`](#etapa-14--1n-com-cascade-25-min) | 25 | `enum`, campo derivado |
-| 15 | [Índices](#etapa-15--índices-15-min) | 15 | `@Index` |
-| 16 | [O limite do `synchronize`](#etapa-16--o-limite-do-synchronize-25-min) | 25 | dois experimentos destrutivos |
-| 17 | [Modelar empréstimo](#etapa-17--modelar-empréstimo-35-min) | 35 | por sua conta |
-| 18 | [O que o ORM cobra](#etapa-18--o-que-o-orm-cobra-10-min) | 10 | fecho |
+| 1 | [Subir o banco](#etapa-1--subir-o-banco) | média | Docker Compose |
+| 2 | [Instalar o TypeORM](#etapa-2--instalar-o-typeorm) | curta | ORM, driver |
+| 3 | [A variável de conexão](#etapa-3--a-variável-de-conexão) | média | `DATABASE_URL`, e uma armadilha |
+| 4 | [Ligar o TypeOrmModule](#etapa-4--ligar-o-typeormmodule) | média | `forRoot`, `synchronize`, `logging` |
+| 5 | [**O que um ORM resolve**](#etapa-5--o-que-um-orm-resolve) | média | **o porquê do ORM** |
+| 6 | [A primeira entidade](#etapa-6--a-primeira-entidade) | longa | `@Entity`, `@Column`, `forFeature` |
+| 7 | [Ler o `CREATE TABLE`](#etapa-7--ler-o-create-table) | média | do decorator ao SQL |
+| 8 | [**Cada opção é uma decisão**](#etapa-8--cada-opção-é-uma-decisão) | longa | **`nullable`, `unique`, `default`** |
+| 9 | [Mudar a classe, ver o `ALTER`](#etapa-9--mudar-a-classe-ver-o-alter) | média | o ciclo do módulo |
+| 10 | [A segunda entidade](#etapa-10--a-segunda-entidade) | média | datas automáticas |
+| 11 | [A primeira relação: 1:N](#etapa-11--a-primeira-relação-1n) | longa | `@ManyToOne`, `@OneToMany`, FK |
+| 12 | [**`onDelete` é decisão de negócio**](#etapa-12--ondelete-é-decisão-de-negócio) | média | **`RESTRICT`, `CASCADE`, `SET NULL`** |
+| 13 | [Relação N:N](#etapa-13--relação-nn) | longa | `@ManyToMany`, `@JoinTable` |
+| 14 | [1:N com `CASCADE`](#etapa-14--1n-com-cascade) | longa | `enum`, campo derivado |
+| 15 | [Índices](#etapa-15--índices) | média | `@Index` |
+| 16 | [O limite do `synchronize`](#etapa-16--o-limite-do-synchronize) | longa | dois experimentos destrutivos |
+| 17 | [Modelar empréstimo](#etapa-17--modelar-empréstimo) | longa | por sua conta |
+| 18 | [O que o ORM cobra](#etapa-18--o-que-o-orm-cobra) | curta | fecho |
 
 > 📦 **Instale o Docker antes desta aula** — o PostgreSQL sobe nele, logo na etapa 1.
 > 🐧 [`ambiente-setup.md`, seção 7](../../docs/ambiente-setup.md#7-postgresql-via-docker-a-partir-do-m04) ·
@@ -77,7 +77,7 @@ conferir. Se um passo falhar, você sabe qual linha foi.
 
 ---
 
-## Etapa 1 — Subir o banco (15 min)
+## Etapa 1 — Subir o banco
 
 **Faça:**
 
@@ -128,7 +128,7 @@ exatamente o que queremos: as tabelas vão nascer das suas classes.
 
 ---
 
-## Etapa 2 — Instalar o TypeORM (10 min)
+## Etapa 2 — Instalar o TypeORM
 
 **Faça:**
 
@@ -156,7 +156,7 @@ npm install @nestjs/typeorm typeorm pg
 
 ---
 
-## Etapa 3 — A variável de conexão (15 min)
+## Etapa 3 — A variável de conexão
 
 O endereço do banco não pode estar escrito no código: ele muda entre a sua máquina e o
 servidor. Vai para o `.env`, como o M03 ensinou.
@@ -213,7 +213,7 @@ este sintoma** — ele custa meia hora de quem não o conhece.
 
 ---
 
-## Etapa 4 — Ligar o TypeOrmModule (15 min)
+## Etapa 4 — Ligar o TypeOrmModule
 
 **Faça:** em `src\app.module.ts`, ao lado do `ConfigModule`:
 
@@ -268,7 +268,7 @@ Confira com `docker compose ps` antes de mexer no código.
 
 ---
 
-## Etapa 5 — O que um ORM resolve (20 min)
+## Etapa 5 — O que um ORM resolve
 
 Pare o teclado. Você acabou de conectar a aplicação a um banco e ainda não consultou nada.
 Antes de escrever a primeira entidade, vale entender o que exatamente essa peça vai fazer
@@ -340,7 +340,7 @@ entrega. Agora, a primeira entidade.
 
 ---
 
-## Etapa 6 — A primeira entidade (25 min)
+## Etapa 6 — A primeira entidade
 
 Uma só, para ver o mecanismo inteiro sem ruído.
 
@@ -406,7 +406,7 @@ a próxima etapa.
 
 ---
 
-## Etapa 7 — Ler o `CREATE TABLE` (15 min)
+## Etapa 7 — Ler o `CREATE TABLE`
 
 **Rode:** role o terminal do `start:dev` para cima. Entre as consultas de inspeção, esta
 linha apareceu:
@@ -444,7 +444,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d autor"
 
 ---
 
-## Etapa 8 — Cada opção é uma decisão (25 min)
+## Etapa 8 — Cada opção é uma decisão
 
 Você escreveu quatro colunas e tomou quatro decisões sem talvez perceber. Esta etapa é para
 percebê-las, porque são elas que separam modelagem de digitação.
@@ -496,7 +496,7 @@ significa naquela coluna.
 
 ---
 
-## Etapa 9 — Mudar a classe, ver o `ALTER` (15 min)
+## Etapa 9 — Mudar a classe, ver o `ALTER`
 
 Este é o ciclo que o resto do módulo repete: **muda a classe, olha o SQL, confere o banco.**
 
@@ -530,7 +530,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d autor"
 
 ---
 
-## Etapa 10 — A segunda entidade (20 min)
+## Etapa 10 — A segunda entidade
 
 **Faça:** crie `src\acervo\entidades\obra.entity.ts` — ainda **sem relação nenhuma**:
 
@@ -587,7 +587,7 @@ export class Obra {
 
 ---
 
-## Etapa 11 — A primeira relação: 1:N (30 min)
+## Etapa 11 — A primeira relação: 1:N
 
 Uma autora tem muitas obras; cada obra tem uma autora. É a relação mais comum que existe.
 
@@ -669,7 +669,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d obra"
 
 ---
 
-## Etapa 12 — `onDelete` é decisão de negócio (20 min)
+## Etapa 12 — `onDelete` é decisão de negócio
 
 Você escreveu `onDelete: "RESTRICT"` na etapa anterior sem discutir. Agora discuta — porque
 essa é a linha que decide o que acontece com o acervo quando alguém aperta "excluir".
@@ -710,7 +710,7 @@ Você vai precisar dessas respostas na etapa 17.
 
 ---
 
-## Etapa 13 — Relação N:N (25 min)
+## Etapa 13 — Relação N:N
 
 Uma obra tem várias categorias; uma categoria tem várias obras. Nenhum dos dois lados
 consegue guardar a referência numa coluna — e é aí que entra uma terceira tabela.
@@ -784,7 +784,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d obra_categoria"
 
 ---
 
-## Etapa 14 — 1:N com `CASCADE` (25 min)
+## Etapa 14 — 1:N com `CASCADE`
 
 A diferença entre **obra** e **exemplar** é o coração do domínio: a biblioteca tem *um*
 "Dom Casmurro" no catálogo e *três* volumes na estante.
@@ -870,7 +870,7 @@ estrangeira com `ON DELETE CASCADE`.
 
 ---
 
-## Etapa 15 — Índices (15 min)
+## Etapa 15 — Índices
 
 O banco varre a tabela inteira quando não há índice. Com 50 registros ninguém nota; com 50
 mil, a tela trava.
@@ -911,7 +911,7 @@ Por que o `isbn` merece um: busca por ISBN é o que o balcão faz o dia inteiro,
 
 ---
 
-## Etapa 16 — O limite do `synchronize` (25 min)
+## Etapa 16 — O limite do `synchronize`
 
 Até aqui tudo funcionou porque as mudanças eram fáceis: coluna nova, tabela nova. Agora
 provoque o difícil — **com dado dentro do banco**, que é a única situação em que a diferença
@@ -986,7 +986,7 @@ mesmo tipo de uma vez e o palpite pode trocar as duas.
 
 ---
 
-## Etapa 17 — Modelar empréstimo (35 min)
+## Etapa 17 — Modelar empréstimo
 
 Agora é com você, e sem código pronto. Duas entidades: `Associado` e `Emprestimo`.
 
@@ -1019,7 +1019,7 @@ escolheu, e você consegue defender cada escolha usando o critério da etapa 12.
 
 ---
 
-## Etapa 18 — O que o ORM cobra (10 min)
+## Etapa 18 — O que o ORM cobra
 
 A etapa 5 prometeu esta conversa. Você já viu o que o ORM entrega — agora o preço.
 
@@ -1034,7 +1034,7 @@ A etapa 5 prometeu esta conversa. Você já viu o que o ORM entrega — agora o 
 > do CRUD. Os outros 10% continuam sendo seus, e são justamente os que decidem se a aplicação
 > aguenta o segundo ano de uso.
 
-E o que você conquistou nestas seis horas, em uma frase: **o banco inteiro do BiblioCom
+E o que você conquistou neste módulo, em uma frase: **o banco inteiro do BiblioCom
 existe e nasceu de classes TypeScript**, com cada coluna, cada chave estrangeira e cada
 índice saindo de uma decisão que você consegue defender.
 

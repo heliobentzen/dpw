@@ -38,9 +38,9 @@
 | Views: mapeamento de URLs | M07 (`@Controller`, `@Get`, `@Post`) | 🔵 |
 | Views: classes/métodos/funções de processamento de requisições | M07 (controllers como classes, *handlers* como métodos, services injetados) | 🔵 |
 | **Interface com o usuário** | API documentada e consumida por clientes externos | 🔵 |
-| Segurança | M09 (transversal em M07, M08, M12) | 🔵🟣 |
-| Gestão de usuários | M08 | 🔵🟣 |
-| Implantação (deploy) | M12 (+ M13 pós-deploy) | 🔵🟣 |
+| Segurança | M09 (transversal em M07, M08, M12) | 🔵 |
+| Gestão de usuários | M08 | 🔵 |
+| Implantação (deploy) | M12 (+ M13 pós-deploy) | 🔵 |
 | Atividades extensionistas | `projeto/extensao/` | — |
 
 Conteúdos **complementares** (não exigidos pela ementa, incluídos por demanda de mercado):
@@ -60,8 +60,8 @@ Ao final da disciplina, o estudante será capaz de:
 
 1. Explicar o ciclo requisição–resposta e o papel do HTTP, incluindo a diferença semântica
    e prática entre GET e POST, e como ela se manifesta numa API REST.
-2. Justificar a escolha entre renderização no servidor e SPA a partir de requisitos, e
-   definir o **contrato** entre cliente e servidor.
+2. Justificar a separação entre API e cliente a partir de requisitos, e definir o
+   **contrato** entre os dois.
 3. Modelar um domínio em classes e evoluir o esquema do banco por meio de migrações
    versionadas.
 4. Implementar CRUD com a API do ORM, com consultas filtradas, agregadas e otimizadas.
@@ -119,8 +119,8 @@ Detalhamento em [`../avaliacao/README.md`](../avaliacao/README.md).
 | Atividades práticas dos módulos (portfólio E0–E8) | 20% | Contínuo |
 | Avaliação teórica | 15% | Semana 10 |
 | Projeto — Etapa 1 (definição e planejamento) | 15% | Semana 10 |
-| Projeto — Etapa 3 (sistema desenvolvido e implantado) | 30% | Semana 18 |
-| Projeto — Etapa 3 (relatório técnico + apresentação) | 10% | Semanas 19 e 20 |
+| Projeto — Etapa 2 (sistema desenvolvido e implantado) | 30% | Semana 18 |
+| Projeto — Etapa 3 (relatório técnico + apresentação) | 10% | Semana 20 |
 | Atividades extensionistas | 10% | Semanas 15–20 |
 
 **Aprovação:** média ponderada ≥ 6,0 **e** frequência conforme regimento **e** entrega

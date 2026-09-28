@@ -1,6 +1,6 @@
 # M00 — Ambiente e ferramentas
 
-> **CH:** 3h (1h teórica · 2h prática) · **Semana 1** · **Pré-requisito:** nenhum
+> **Pré-requisito:** nenhum · **Duração:** média
 
 Módulo complementar: a ementa não pede, mas sem ele nada funciona. Pode virar
 pré-atividade assíncrona.
@@ -49,7 +49,7 @@ A lógica didática é simples:
 
 ---
 
-## 📖 Teoria (1h)
+## 📖 Teoria
 
 ### 1. Por que dependências ficam no projeto
 
@@ -139,9 +139,9 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 
 ---
 
-## 🛠️ Roteiro prático (2h)
+## 🛠️ Roteiro prático
 
-### Passo 1 — Instalar as ferramentas (20 min)
+### Passo 1 — Instalar as ferramentas
 
 Só três coisas hoje: **Node 20, Git e VS Code**. Docker e PostgreSQL entram no M04, quando
 passam a servir para alguma coisa. Instalar tudo agora só antecipa problemas.
@@ -169,7 +169,7 @@ code --version
 > Repare no que **não** está na lista: nenhum segundo runtime, nenhum ambiente virtual para
 > ativar. Backend e frontend rodam sobre o mesmo Node.
 
-### Passo 2 — Criar o monorepo (25 min)
+### Passo 2 — Criar o monorepo
 
 Aqui começa o conteúdo do módulo. **Digite os comandos, não cole sem ler.** Cada linha
 corresponde a um conceito que a avaliação teórica cobra.
@@ -234,7 +234,7 @@ produção na sexta-feira.
 segundo é o bolo. Confundir os dois é como versionar 30 mil arquivos que qualquer um
 reconstrói com um comando, e é assim que nasce repositório de 500 MB.
 
-### Passo 3 — Versionar o projeto (25 min)
+### Passo 3 — Versionar o projeto
 
 O ambiente existe, mas nada dele está versionado. Agora criamos o repositório e, antes do
 primeiro commit, decidimos **o que não entra nele**.
@@ -391,10 +391,10 @@ node ~/dpw/recursos/codigo/verifica-ambiente.mjs
 Este script **não instala nada**. Ele confere e, para cada falha, diz o comando exato que
 corrige. Rode-o sempre que algo parar de funcionar.
 
-**Só avance com os itens da semana 1 em OK.** As dependências do backend e o Docker aparecem
+**Só avance com os itens do M00 em OK.** As dependências do backend e o Docker aparecem
 como pendentes até os módulos em que entram, e isso é esperado.
 
-### Passo 4 — Publicar no GitHub (20 min)
+### Passo 4 — Publicar no GitHub
 
 Crie o repositório **vazio** em github.com. Sem README, sem `.gitignore`: você já tem os dois, e deixar o GitHub criar outros só rende conflito no primeiro push.
 
@@ -404,7 +404,7 @@ git branch -M main
 git push -u origin main
 ```
 
-### Passo 5 — Ciclo de branch e Pull Request (30 min, em duplas)
+### Passo 5 — Ciclo de branch e Pull Request (em duplas)
 
 Uma pessoa é dona do repositório e adiciona a outra como colaboradora
 (*Settings → Collaborators*).
@@ -430,7 +430,7 @@ git branch -d docs/instrucoes-de-uso
 
 Inverta os papéis e repita.
 
-### Passo 6 — Proteger a branch principal (extra, 5 min)
+### Passo 6 — Proteger a branch principal (extra)
 
 Em *Settings → Branches → Add rule*: exija Pull Request antes do merge e ao menos uma
 aprovação. Vale para o projeto da equipe também, e evita o clássico push direto na `main` às

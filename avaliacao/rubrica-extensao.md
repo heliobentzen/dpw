@@ -46,7 +46,7 @@ Dado pessoal exposto nas evidências rebaixa o critério 2 em um nível.
 | Município / território | |
 | Área temática | `<Tecnologia e Produção / Educação / Cultura / ...>` |
 | Público atingido (direto / indireto) | |
-| Carga horária extensionista por estudante | 10h |
+| Carga horária extensionista por estudante | A prevista no [plano de ensino](../docs/plano-de-ensino.md) |
 | Período de execução | |
 | Estudantes envolvidos | |
 | Docente responsável | |

@@ -1,6 +1,6 @@
 # M08 — Autenticação e autorização na API
 
-> **CH:** 5h (2h teóricas · 3h práticas) · **Semana 8** · **Pré-requisito:** M07
+> **Pré-requisito:** M07 · **Duração:** longa
 > **Ementa:** gestão de usuários
 
 A API agora precisa distinguir quem está fazendo uma requisição e o que essa pessoa pode

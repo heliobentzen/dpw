@@ -1,6 +1,6 @@
 # M09 — Segurança de APIs
 
-> **CH:** 5h (3h teóricas · 2h práticas) · **Semana 9** · **Pré-requisitos:** M07, M08
+> **Pré-requisitos:** M07, M08 · **Duração:** longa
 > **Ementa:** tópicos relevantes de segurança
 
 Segurança não é uma etapa decorativa depois do CRUD. Neste módulo, as ameaças são ligadas

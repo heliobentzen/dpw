@@ -1,6 +1,6 @@
 # Atividades extensionistas
 
-> **CH:** 10h (2h teóricas · 8h práticas) · **Semanas 14, 15, 19 e 20** · **Peso:** 10%
+> **Entregas:** X1, X2 e X3 · **Peso:** 10% · Datas no [cronograma](../../docs/cronograma.md)
 > **Ementa:** *Desenvolvimento de atividades extensionistas.*
 
 ## O que é (e o que não é) extensão
@@ -26,21 +26,21 @@ empresa, nem projeto interno da própria instituição sem demanda externa.
 
 ---
 
-## Cronograma (10h)
+## Sequência
 
-| Semana | Atividade | h | Entrega |
-| ---: | --- | ---: | --- |
-| 14 | Diagnóstico participativo com a organização | 1 | Ata + diagnóstico |
-| 15 | Planejamento da ação e pactuação com a organização | 3 | **X1** — Plano de ação |
-| 19 | Execução: capacitação, implantação assistida, acompanhamento | 5 | **X2** — Evidências |
-| 20 | Devolutiva e sistematização | 1 | **X3** — Relato de experiência |
+| Momento | Atividade | Entrega |
+| --- | --- | --- |
+| 1 | Diagnóstico participativo com a organização | Ata + diagnóstico |
+| 2 | Planejamento da ação e pactuação com a organização | **X1** — Plano de ação |
+| 3 | Execução: capacitação, implantação assistida, acompanhamento | **X2** — Evidências |
+| 4 | Devolutiva e sistematização | **X3** — Relato de experiência |
 
-> As 10h são a **carga formal**. Reuniões de acompanhamento com a organização ocorrem ao
-> longo de todo o semestre, integradas às sprints da Etapa 3.
+> Estes são os encontros **formais**. Reuniões de acompanhamento com a organização ocorrem
+> ao longo de todo o semestre, integradas às sprints do desenvolvimento.
 
 ---
 
-## Semana 14 — Diagnóstico participativo (1h)
+## 1. Diagnóstico participativo
 
 Retome e aprofunde o diagnóstico da Etapa 1, agora com o sistema em construção.
 
@@ -59,7 +59,7 @@ internet permite adaptar; descobrir na semana 20, não.
 
 ---
 
-## Semana 15 — Plano de ação (3h) — Entrega X1
+## 2. Plano de ação — Entrega X1
 
 | Campo | Conteúdo |
 | --- | --- |
@@ -85,11 +85,11 @@ Indicador precisa ser **medido**, não estimado. Defina agora como será coletad
 
 ---
 
-## Semana 19 — Execução (5h) — Entrega X2
+## 3. Execução — Entrega X2
 
 A ação principal. Componentes obrigatórios:
 
-### 1. Implantação assistida (2h)
+### 3.1 Implantação assistida
 
 Colocar o sistema em uso real, no ambiente da organização, com dados reais. Não é
 demonstração — é operação acompanhada.
@@ -102,7 +102,7 @@ Checklist:
 - [ ] Testado no equipamento e na conexão **da organização**
 - [ ] Impresso um guia rápido de uma página, deixado no local
 
-### 2. Capacitação (2h)
+### 3.2 Capacitação
 
 Formato: **mão na massa**, não palestra.
 
@@ -115,7 +115,7 @@ Formato: **mão na massa**, não palestra.
 Registre: lista de presença, fotos (com autorização de uso de imagem), dificuldades
 observadas e ajustes feitos no sistema em resposta.
 
-### 3. Acompanhamento (1h)
+### 3.3 Acompanhamento
 
 Uma semana depois, volte ou ligue:
 
@@ -143,7 +143,7 @@ Corrija o que aparecer. **Este retorno é o que separa entrega de abandono.**
 
 ---
 
-## Semana 20 — Devolutiva e sistematização (1h) — Entrega X3
+## 4. Devolutiva e sistematização — Entrega X3
 
 ### Devolutiva
 

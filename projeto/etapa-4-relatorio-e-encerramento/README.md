@@ -1,6 +1,6 @@
 # Etapa 3 — Relatório técnico e encerramento
 
-> **CH:** 4h (2h teóricas · 2h práticas) · **Semanas 19 e 20** · **Entrega P3** · **Peso:** 10%
+> **Entrega:** P3 · **Peso:** 10% · Datas no [cronograma](../../docs/cronograma.md)
 
 ## Atividades previstas
 
@@ -14,7 +14,7 @@ responsável** do sistema para a organização parceira.
 
 ---
 
-## 1. Relatório técnico (2h)
+## 1. Relatório técnico
 
 Documento de 12 a 20 páginas. Estrutura obrigatória:
 
@@ -83,7 +83,7 @@ Modelo em [`../modelos-de-documentos/relato-de-experiencia.md`](../modelos-de-do
 
 ---
 
-## 3. Apresentação (2h)
+## 3. Apresentação
 
 ### Formato
 

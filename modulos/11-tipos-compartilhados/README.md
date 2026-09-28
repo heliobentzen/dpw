@@ -1,6 +1,6 @@
 # M11 — Tipos compartilhados e contrato OpenAPI
 
-> **CH:** 2h (1h teórica · 1h prática) · **Semana 11** · **Pré-requisito:** M10
+> **Pré-requisito:** M10 · **Duração:** curta
 
 Uma API profissional não é apenas um conjunto de rotas: ela tem um contrato que clientes,
 testes e equipes conseguem consultar. Neste módulo, o schema gerado pelo Swagger vira um

@@ -1,6 +1,6 @@
 # M07 — API: rotas, controllers e DTOs
 
-> **CH:** 6h (3h teóricas · 3h práticas) · **Semana 7** · **Pré-requisitos:** M03, M06
+> **Pré-requisitos:** M03, M06 · **Duração:** longa
 
 Fecha o backend. Aqui a ementa é atendida em dois itens: *"mapeamento de URLs"* e *"criação
 de classes, métodos e funções para processamento das requisições"*.
@@ -8,7 +8,7 @@ de classes, métodos e funções para processamento das requisições"*.
 O M06 terminou com um CRUD que funciona e **aceita qualquer coisa**. Este módulo conserta o
 "qualquer coisa" — e ao final a API está pronta para consumo externo e integração segura.
 
-> **As horas teóricas não estão num bloco separado.** Elas são as etapas 2, 5, 10, 12, 13,
+> **A teoria não está num bloco separado.** Ela está nas etapas 2, 5, 10, 12, 13,
 > 15 e 17 — em que a gente para de digitar e pensa — mais as explicações dentro de cada
 > etapa.
 
@@ -78,30 +78,30 @@ não deveria — e o resto constrói a solução por partes.
 
 ### As dezoito etapas
 
-| # | Etapa | Min | O que entra |
+| # | Etapa | Duração | O que entra |
 | --- | --- | --- | --- |
-| 1 | [Ligar a validação global](#etapa-1--ligar-a-validação-global-15-min) | 15 | `ValidationPipe` |
-| 2 | [**Por que nada mudou**](#etapa-2--por-que-nada-mudou-15-min) | 15 | **o pipe precisa de um DTO** |
-| 3 | [O primeiro DTO de entrada](#etapa-3--o-primeiro-dto-de-entrada-25-min) | 25 | `class-validator` |
-| 4 | [Ver a validação agir](#etapa-4--ver-a-validação-agir-20-min) | 20 | três casos |
-| 5 | [**Por que DTO e não a entidade**](#etapa-5--por-que-dto-e-não-a-entidade-25-min) | 25 | ***mass assignment*** |
-| 6 | [O DTO de atualização](#etapa-6--o-dto-de-atualização-15-min) | 15 | `PartialType` |
-| 7 | [A query também é entrada](#etapa-7--a-query-também-é-entrada-20-min) | 20 | teto de paginação |
-| 8 | [O service passa a falar em DTO](#etapa-8--o-service-passa-a-falar-em-dto-25-min) | 25 | tradução DTO → entidade |
-| 9 | [DTO de saída](#etapa-9--dto-de-saída-30-min) | 30 | desenhar a resposta |
-| 10 | [**O recurso é um substantivo**](#etapa-10--o-recurso-é-um-substantivo-25-min) | 25 | **REST na prática** |
-| 11 | [O controller completo](#etapa-11--o-controller-completo-25-min) | 25 | as cinco rotas |
-| 12 | [**Escolher o status certo**](#etapa-12--escolher-o-status-certo-20-min) | 20 | **201, 204, 400, 404** |
-| 13 | [**Erros no formato do domínio**](#etapa-13--erros-no-formato-do-domínio-10-min) | 10 | exceções do Nest |
-| 14 | [Upload: receber o arquivo](#etapa-14--upload-receber-o-arquivo-25-min) | 25 | `multipart`, `FileInterceptor` |
-| 15 | [**Upload: as três decisões**](#etapa-15--upload-as-três-decisões-30-min) | 30 | **segurança de arquivo** |
-| 16 | [Regerar o contrato](#etapa-16--regerar-o-contrato-15-min) | 15 | OpenAPI com formatos |
-| 17 | [**As quatro camadas**](#etapa-17--as-quatro-camadas-15-min) | 15 | **fecho do backend** |
-| 18 | [O que vai para o projeto](#etapa-18--o-que-vai-para-o-projeto-5-min) | 5 | — |
+| 1 | [Ligar a validação global](#etapa-1--ligar-a-validação-global) | média | `ValidationPipe` |
+| 2 | [**Por que nada mudou**](#etapa-2--por-que-nada-mudou) | média | **o pipe precisa de um DTO** |
+| 3 | [O primeiro DTO de entrada](#etapa-3--o-primeiro-dto-de-entrada) | longa | `class-validator` |
+| 4 | [Ver a validação agir](#etapa-4--ver-a-validação-agir) | média | três casos |
+| 5 | [**Por que DTO e não a entidade**](#etapa-5--por-que-dto-e-não-a-entidade) | longa | ***mass assignment*** |
+| 6 | [O DTO de atualização](#etapa-6--o-dto-de-atualização) | média | `PartialType` |
+| 7 | [A query também é entrada](#etapa-7--a-query-também-é-entrada) | média | teto de paginação |
+| 8 | [O service passa a falar em DTO](#etapa-8--o-service-passa-a-falar-em-dto) | longa | tradução DTO → entidade |
+| 9 | [DTO de saída](#etapa-9--dto-de-saída) | longa | desenhar a resposta |
+| 10 | [**O recurso é um substantivo**](#etapa-10--o-recurso-é-um-substantivo) | longa | **REST na prática** |
+| 11 | [O controller completo](#etapa-11--o-controller-completo) | longa | as cinco rotas |
+| 12 | [**Escolher o status certo**](#etapa-12--escolher-o-status-certo) | média | **201, 204, 400, 404** |
+| 13 | [**Erros no formato do domínio**](#etapa-13--erros-no-formato-do-domínio) | curta | exceções do Nest |
+| 14 | [Upload: receber o arquivo](#etapa-14--upload-receber-o-arquivo) | longa | `multipart`, `FileInterceptor` |
+| 15 | [**Upload: as três decisões**](#etapa-15--upload-as-três-decisões) | longa | **segurança de arquivo** |
+| 16 | [Regerar o contrato](#etapa-16--regerar-o-contrato) | média | OpenAPI com formatos |
+| 17 | [**As quatro camadas**](#etapa-17--as-quatro-camadas) | média | **fecho do backend** |
+| 18 | [O que vai para o projeto](#etapa-18--o-que-vai-para-o-projeto) | curta | — |
 
 ---
 
-## Etapa 1 — Ligar a validação global (15 min)
+## Etapa 1 — Ligar a validação global
 
 **Faça:**
 
@@ -156,7 +156,7 @@ quê.
 
 ---
 
-## Etapa 2 — Por que nada mudou (15 min)
+## Etapa 2 — Por que nada mudou
 
 Você ligou uma proteção global e o ataque continuou funcionando. Isso não é bug: é como o
 mecanismo funciona, e entender por quê evita duas horas de confusão.
@@ -200,7 +200,7 @@ O pipe está ligado e funcionando. Falta dar a ele o que ler — é a etapa 3.
 
 ---
 
-## Etapa 3 — O primeiro DTO de entrada (25 min)
+## Etapa 3 — O primeiro DTO de entrada
 
 **Faça:** crie `src\acervo\dto\criar-obra.dto.ts`:
 
@@ -271,7 +271,7 @@ não é um campo da entidade. **Deixe o erro aí** — a etapa 8 conserta o serv
 
 ---
 
-## Etapa 4 — Ver a validação agir (20 min)
+## Etapa 4 — Ver a validação agir
 
 Os três casos que justificam o módulo.
 
@@ -330,7 +330,7 @@ mensagem de erro. Você declarou o formato; o framework fez o resto.
 
 ---
 
-## Etapa 5 — Por que DTO e não a entidade (25 min)
+## Etapa 5 — Por que DTO e não a entidade
 
 Você acabou de ver a proteção funcionar. Agora o raciocínio completo — porque são **três**
 problemas distintos, e o DTO de entrada resolve só o primeiro.
@@ -397,7 +397,7 @@ só uma normalmente decorou.
 
 ---
 
-## Etapa 6 — O DTO de atualização (15 min)
+## Etapa 6 — O DTO de atualização
 
 O `PATCH` aceita qualquer subconjunto dos campos. Escrever outra classe com tudo opcional
 seria duplicação — e duplicação sai de sincronia.
@@ -437,7 +437,7 @@ atualizar(@Param("id", ParseIntPipe) id: number, @Body() dto: AtualizarObraDto) 
 
 ---
 
-## Etapa 7 — A query também é entrada (20 min)
+## Etapa 7 — A query também é entrada
 
 Quase todo mundo valida o corpo e esquece a *query string*. Ela vem do mesmo lugar — do
 cliente — e merece o mesmo tratamento.
@@ -504,7 +504,7 @@ etapa, essa mesma URL mandava o banco inteiro pela rede.
 
 ---
 
-## Etapa 8 — O service passa a falar em DTO (25 min)
+## Etapa 8 — O service passa a falar em DTO
 
 Agora o erro de tipo que a etapa 3 deixou pendente. O service precisa lidar com
 `categoriaIds`, que é um campo do **pedido** e não da tabela.
@@ -551,7 +551,7 @@ async atualizar(id: number, dto: AtualizarObraDto): Promise<Obra> {
 
 ---
 
-## Etapa 9 — DTO de saída (30 min)
+## Etapa 9 — DTO de saída
 
 Falta o lado da resposta — o problema 2 da etapa 5.
 
@@ -625,7 +625,7 @@ async buscarUm(@Param("id", ParseIntPipe) id: number) {
 
 ---
 
-## Etapa 10 — O recurso é um substantivo (25 min)
+## Etapa 10 — O recurso é um substantivo
 
 Você tem entrada e saída resolvidas. Falta desenhar **as rotas** — e há uma convenção que
 economiza discussão em toda equipe.
@@ -682,7 +682,7 @@ verificação por cada tela.
 
 ---
 
-## Etapa 11 — O controller completo (25 min)
+## Etapa 11 — O controller completo
 
 **Faça:** junte tudo:
 
@@ -754,7 +754,7 @@ curl.exe -s -o NUL -w "%{http_code}`n" -X DELETE http://localhost:3000/api/obras
 
 ---
 
-## Etapa 12 — Escolher o status certo (20 min)
+## Etapa 12 — Escolher o status certo
 
 Você usou cinco status. Vale saber escolher, porque é decisão de projeto e cai em entrevista.
 
@@ -807,7 +807,7 @@ caminho de arquivo. O Nest já protege por padrão em produção; o M09 confere 
 
 ---
 
-## Etapa 13 — Erros no formato do domínio (10 min)
+## Etapa 13 — Erros no formato do domínio
 
 Você já usa isso desde o M03, sem ter visto o conjunto.
 
@@ -836,7 +836,7 @@ errada.
 
 ---
 
-## Etapa 14 — Upload: receber o arquivo (25 min)
+## Etapa 14 — Upload: receber o arquivo
 
 Toda obra tem capa. É o requisito mais comum de qualquer CRUD e um dos que mais aparecem mal
 feitos.
@@ -897,7 +897,7 @@ curl.exe -s -o NUL -w "%{http_code}`n" -X POST http://localhost:3000/api/obras/1
 
 ---
 
-## Etapa 15 — Upload: as três decisões (30 min)
+## Etapa 15 — Upload: as três decisões
 
 O código da etapa 14 funciona e ainda está inseguro. Três decisões que ninguém toma no seu
 lugar.
@@ -973,7 +973,7 @@ item 1 — e é exatamente assim que se hospeda malware sem querer.
 
 ---
 
-## Etapa 16 — Regerar o contrato (15 min)
+## Etapa 16 — Regerar o contrato
 
 O `gerar:schema` já existe desde o M03. Agora que há DTOs de entrada e saída, ele tem muito
 mais o que descrever.
@@ -1016,7 +1016,7 @@ o contrato deixa de ser promessa e vira verificação.
 
 ---
 
-## Etapa 17 — As quatro camadas (15 min)
+## Etapa 17 — As quatro camadas
 
 O backend está pronto. Vale ver o conjunto, porque agora todas as peças existem.
 
@@ -1072,7 +1072,7 @@ construiu. **Elas se encaixam em volta**, que era exatamente a promessa da etapa
 
 ---
 
-## Etapa 18 — O que vai para o projeto (5 min)
+## Etapa 18 — O que vai para o projeto
 
 O backend está pronto para integração. O que a equipe entrega aos consumidores da API:
 

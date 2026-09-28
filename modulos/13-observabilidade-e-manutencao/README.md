@@ -1,6 +1,6 @@
 # M13 — Observabilidade e manutenção
 
-> **CH:** 2h (1h teórica · 1h prática) · **Semana 13** · **Pré-requisito:** M12
+> **Pré-requisito:** M12 · **Duração:** curta
 > Módulo complementar. Responde à pergunta que a organização parceira **vai** fazer na
 > Etapa 4: *"e depois que vocês entregarem, quem cuida disso?"*
 
@@ -32,9 +32,9 @@ manutenção.
 
 ---
 
-## 📖 Teoria (1h)
+## 📖 Teoria
 
-### 1. Logs (20 min)
+### 1. Logs
 
 Log existe para responder perguntas depois que o problema aconteceu. Um log que ninguém
 consegue pesquisar não é log — é ruído.
@@ -84,7 +84,7 @@ campo e você consegue filtrar por `emprestimoId`. Nunca registre senha,
 token, cookie ou dado pessoal desnecessário; registre **identificadores**, não nomes;
 inclua contexto suficiente para reconstruir o caso.
 
-### 2. Monitoramento (20 min)
+### 2. Monitoramento
 
 Quatro perguntas, quatro instrumentos:
 
@@ -147,7 +147,7 @@ if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
 Repare no `sendDefaultPii: false`. Enviar dados pessoais para um serviço externo é
 tratamento de dados sob a LGPD, com todas as obrigações que isso implica.
 
-### 3. Backup (10 min)
+### 3. Backup
 
 ```bash
 # Linux / macOS / WSL / Git Bash
@@ -176,7 +176,7 @@ Regra 3-2-1: **3** cópias, em **2** mídias diferentes, com **1** fora do local
 > **Backup nunca restaurado não é backup.** Coloque a restauração no calendário
 > trimestral, com registro do teste. É a diferença entre ter um plano e ter um arquivo.
 
-### 4. Manutenção e transferência (10 min)
+### 4. Manutenção e transferência
 
 Um sistema entregue e abandonado deixa de funcionar em meses — dependência que quebra,
 certificado que expira, disco que enche. Para um projeto extensionista, isso é
@@ -197,9 +197,9 @@ O plano de manutenção precisa responder:
 
 ---
 
-## 🛠️ Roteiro prático (1h)
+## 🛠️ Roteiro prático
 
-### Passo 1 — Logs (15 min)
+### Passo 1 — Logs
 
 Configure o `LOGGING`, registre eventos relevantes (login, empréstimo, devolução, acesso
 negado, erro de integração) e verifique que aparecem no painel de logs da plataforma.
@@ -207,7 +207,7 @@ negado, erro de integração) e verifique que aparecem no painel de logs da plat
 Faça uma busca real: *"todos os acessos negados das últimas 24h"*. Se não conseguir, o log
 está mal estruturado — ajuste.
 
-### Passo 2 — Healthcheck e monitor (15 min)
+### Passo 2 — Healthcheck e monitor
 
 1. Implemente `/healthz/` conforme a teoria.
 2. Cadastre no UptimeRobot (gratuito) com verificação a cada 5 minutos e alerta por e-mail.
@@ -215,12 +215,12 @@ está mal estruturado — ajuste.
 
 Monitor que nunca disparou é monitor não testado.
 
-### Passo 3 — Sentry (15 min)
+### Passo 3 — Sentry
 
 Configure, provoque um erro 500 de propósito e confirme que a exceção aparece com
 traceback, URL e contexto — **sem** dados pessoais.
 
-### Passo 4 — Backup e restauração (15 min)
+### Passo 4 — Backup e restauração
 
 1. Faça o backup do banco de produção.
 2. Restaure num banco **local**.

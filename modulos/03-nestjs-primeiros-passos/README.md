@@ -1,11 +1,11 @@
 # M03 — NestJS: a primeira API, passo a passo
 
-> **CH:** 4h (2h teóricas · 2h práticas) · **Semana 3** · **Pré-requisitos:** M01, M02
+> **Pré-requisitos:** M01, M02 · **Duração:** média
 
 Este é o primeiro código do backend, e o primeiro TypeScript da disciplina. Ao final existe
 uma API que responde de verdade, e você entende cada linha dela.
 
-> **As horas teóricas não estão num bloco separado.** Elas são as etapas 5, 6, 7, 11 e 20 —
+> **A teoria não está num bloco separado.** Ela está nas etapas 5, 6, 7, 11 e 20 —
 > em que a gente para de digitar e lê — mais as explicações dentro de cada etapa. Conceito
 > chega quando o código pede, e não antes.
 
@@ -86,32 +86,32 @@ material escreve `curl.exe`; no macOS e no Linux, apague o `.exe`.
 
 ### As vinte etapas
 
-| # | Etapa | Min | O que entra |
+| # | Etapa | Duração | O que entra |
 | --- | --- | --- | --- |
-| 1 | [Conferir as ferramentas](#etapa-1--conferir-as-ferramentas-5-min) | 5 | — |
-| 2 | [Instalar a CLI do Nest](#etapa-2--instalar-a-cli-do-nest-5-min) | 5 | o que é uma CLI |
-| 3 | [Criar o projeto](#etapa-3--criar-o-projeto-10-min) | 10 | `nest new` |
-| 4 | [Subir o servidor](#etapa-4--subir-o-servidor-10-min) | 10 | scripts, recarga automática |
-| 5 | [Ler o `main.ts`](#etapa-5--ler-o-maints-15-min) | 15 | `import`/`export`, `await`, **a regra do `.js`** |
-| 6 | [Ler o controller e o service](#etapa-6--ler-o-controller-e-o-service-15-min) | 15 | **decorators** |
-| 7 | [Ler o módulo](#etapa-7--ler-o-módulo-10-min) | 10 | `@Module` e suas três listas |
-| 8 | [A primeira mudança sua](#etapa-8--a-primeira-mudança-sua-5-min) | 5 | editar → salvar → ver |
-| 9 | [Criar o seu módulo](#etapa-9--criar-o-seu-módulo-15-min) | 15 | `nest generate` |
-| 10 | [O primeiro endpoint seu](#etapa-10--o-primeiro-endpoint-seu-15-min) | 15 | rota própria, JSON |
-| 11 | [**Por que separar em camadas**](#etapa-11--por-que-separar-em-camadas-20-min) | 20 | **o porquê das camadas** |
-| 12 | [Mover os dados para o service](#etapa-12--mover-os-dados-para-o-service-15-min) | 15 | service |
-| 13 | [Como o controller recebe o service](#etapa-13--como-o-controller-recebe-o-service-20-min) | 20 | **injeção de dependência** |
-| 14 | [Parâmetro na URL](#etapa-14--parâmetro-na-url-20-min) | 20 | `@Param`, **pipes** |
-| 15 | [Responder 404](#etapa-15--responder-404-15-min) | 15 | exceções de domínio |
-| 16 | [Configuração fora do código](#etapa-16--configuração-fora-do-código-15-min) | 15 | `.env`, `ConfigModule` |
-| 17 | [Não subir quebrado](#etapa-17--não-subir-quebrado-10-min) | 10 | validação na inicialização |
-| 18 | [O prefixo `/api`](#etapa-18--o-prefixo-api-5-min) | 5 | `setGlobalPrefix` |
-| 19 | [Documentação automática](#etapa-19--documentação-automática-10-min) | 10 | Swagger / OpenAPI |
-| 20 | [O mapa que você percorreu](#etapa-20--o-mapa-que-você-percorreu-5-min) | 5 | — |
+| 1 | [Conferir as ferramentas](#etapa-1--conferir-as-ferramentas) | curta | — |
+| 2 | [Instalar a CLI do Nest](#etapa-2--instalar-a-cli-do-nest) | curta | o que é uma CLI |
+| 3 | [Criar o projeto](#etapa-3--criar-o-projeto) | curta | `nest new` |
+| 4 | [Subir o servidor](#etapa-4--subir-o-servidor) | curta | scripts, recarga automática |
+| 5 | [Ler o `main.ts`](#etapa-5--ler-o-maints) | média | `import`/`export`, `await`, **a regra do `.js`** |
+| 6 | [Ler o controller e o service](#etapa-6--ler-o-controller-e-o-service) | média | **decorators** |
+| 7 | [Ler o módulo](#etapa-7--ler-o-módulo) | curta | `@Module` e suas três listas |
+| 8 | [A primeira mudança sua](#etapa-8--a-primeira-mudança-sua) | curta | editar → salvar → ver |
+| 9 | [Criar o seu módulo](#etapa-9--criar-o-seu-módulo) | média | `nest generate` |
+| 10 | [O primeiro endpoint seu](#etapa-10--o-primeiro-endpoint-seu) | média | rota própria, JSON |
+| 11 | [**Por que separar em camadas**](#etapa-11--por-que-separar-em-camadas) | média | **o porquê das camadas** |
+| 12 | [Mover os dados para o service](#etapa-12--mover-os-dados-para-o-service) | média | service |
+| 13 | [Como o controller recebe o service](#etapa-13--como-o-controller-recebe-o-service) | média | **injeção de dependência** |
+| 14 | [Parâmetro na URL](#etapa-14--parâmetro-na-url) | média | `@Param`, **pipes** |
+| 15 | [Responder 404](#etapa-15--responder-404) | média | exceções de domínio |
+| 16 | [Configuração fora do código](#etapa-16--configuração-fora-do-código) | média | `.env`, `ConfigModule` |
+| 17 | [Não subir quebrado](#etapa-17--não-subir-quebrado) | curta | validação na inicialização |
+| 18 | [O prefixo `/api`](#etapa-18--o-prefixo-api) | curta | `setGlobalPrefix` |
+| 19 | [Documentação automática](#etapa-19--documentação-automática) | curta | Swagger / OpenAPI |
+| 20 | [O mapa que você percorreu](#etapa-20--o-mapa-que-você-percorreu) | curta | — |
 
 ---
 
-## Etapa 1 — Conferir as ferramentas (5 min)
+## Etapa 1 — Conferir as ferramentas
 
 Antes de criar qualquer coisa, confirme que o Node está instalado e que você está na pasta
 certa.
@@ -156,7 +156,7 @@ intenção** — ele diz ao npm onde procurar projetos quando eles existirem.
 
 ---
 
-## Etapa 2 — Instalar a CLI do Nest (5 min)
+## Etapa 2 — Instalar a CLI do Nest
 
 **Faça:**
 
@@ -202,7 +202,7 @@ mesmo motivo: previsibilidade vale mais que novidade.
 
 ---
 
-## Etapa 3 — Criar o projeto (10 min)
+## Etapa 3 — Criar o projeto
 
 **Faça:**
 
@@ -241,7 +241,7 @@ causa disso.
 
 ---
 
-## Etapa 4 — Subir o servidor (10 min)
+## Etapa 4 — Subir o servidor
 
 **Faça:**
 
@@ -282,7 +282,7 @@ são para entender de onde ele veio.
 
 ---
 
-## Etapa 5 — Ler o `main.ts` (15 min)
+## Etapa 5 — Ler o `main.ts`
 
 Pare de digitar. As etapas 5, 6 e 7 são de leitura: são **quatro arquivos pequenos**, e o
 `Hello World!` que você acabou de ver sai deles.
@@ -364,7 +364,7 @@ você criar daqui em diante vai, direta ou indiretamente, pendurar nele.
 
 ---
 
-## Etapa 6 — Ler o controller e o service (15 min)
+## Etapa 6 — Ler o controller e o service
 
 Estes dois arquivos são de onde o texto `Hello World!` realmente vem.
 
@@ -445,7 +445,7 @@ seu, e é aí que ele gruda.
 
 ---
 
-## Etapa 7 — Ler o módulo (10 min)
+## Etapa 7 — Ler o módulo
 
 Falta o arquivo que amarra os outros três. Abra `src\app.module.ts`:
 
@@ -487,7 +487,7 @@ vem depois é mais do mesmo, em maior quantidade.
 
 ---
 
-## Etapa 8 — A primeira mudança sua (5 min)
+## Etapa 8 — A primeira mudança sua
 
 Antes de acrescentar conceito, feche o ciclo básico: editar, salvar, ver o resultado.
 
@@ -513,7 +513,7 @@ e reinicia sozinho. Atualize o navegador.
 
 ---
 
-## Etapa 9 — Criar o seu módulo (15 min)
+## Etapa 9 — Criar o seu módulo
 
 O `AppModule` é a raiz. Coisas de verdade ficam em módulos próprios, um por área do domínio.
 O nosso se chama **acervo**.
@@ -590,7 +590,7 @@ de rota. Nós queremos `/obras`. Troque:
 
 ---
 
-## Etapa 10 — O primeiro endpoint seu (15 min)
+## Etapa 10 — O primeiro endpoint seu
 
 Agora você escreve. Comece pelo mais simples que existe: uma rota que devolve uma lista fixa.
 
@@ -637,7 +637,7 @@ e o Express da conversa do M02.
 
 ---
 
-## Etapa 11 — Por que separar em camadas (20 min)
+## Etapa 11 — Por que separar em camadas
 
 Pare o teclado. Esta etapa é a mais importante do módulo, e ela é de raciocínio.
 
@@ -730,7 +730,7 @@ Este é o ponto do M02 com nome e endereço. Um projeto Express típico começa 
 app.get("/obras", (req, res) => { /* consulta o banco, valida, responde */ });
 ```
 
-Funciona lindamente na semana 3. Na semana 12, com 40 rotas, isso é um arquivo de 800 linhas
+Funciona lindamente no primeiro mês. Meses depois, com 40 rotas, isso é um arquivo de 800 linhas
 onde ninguém acha nada, nada é testável isoladamente e cada pessoa da equipe organizou do seu
 jeito.
 
@@ -743,7 +743,7 @@ As próximas duas etapas aplicam essa decisão ao endpoint que você acabou de e
 
 ---
 
-## Etapa 12 — Mover os dados para o service (15 min)
+## Etapa 12 — Mover os dados para o service
 
 **Faça:** em `src\acervo\acervo.service.ts`:
 
@@ -780,7 +780,7 @@ controller ainda não sabe que o service existe. É a próxima etapa.
 
 ---
 
-## Etapa 13 — Como o controller recebe o service (20 min)
+## Etapa 13 — Como o controller recebe o service
 
 ### 13a. A forma que não usamos
 
@@ -884,7 +884,7 @@ alguém criou uma classe e esqueceu de registrá-la em `providers`.
 
 ---
 
-## Etapa 14 — Parâmetro na URL (20 min)
+## Etapa 14 — Parâmetro na URL
 
 Listar todas é fácil. Buscar uma exige ler um pedaço da URL.
 
@@ -977,7 +977,7 @@ Recoloque o `ParseIntPipe` antes de seguir.
 
 ---
 
-## Etapa 15 — Responder 404 (15 min)
+## Etapa 15 — Responder 404
 
 **Rode:** chame `/obras/999`.
 
@@ -1036,7 +1036,7 @@ O Nest tem uma exceção para cada situação comum: `BadRequestException` (400)
 
 ---
 
-## Etapa 16 — Configuração fora do código (15 min)
+## Etapa 16 — Configuração fora do código
 
 O nome da biblioteca não pode estar escrito no meio do código: ele muda por instalação, e
 alguém sem acesso ao repositório precisa poder trocá-lo.
@@ -1147,7 +1147,7 @@ Rota literal sempre vem antes de rota com parâmetro. O M07 volta a isso.
 
 ---
 
-## Etapa 17 — Não subir quebrado (10 min)
+## Etapa 17 — Não subir quebrado
 
 Hoje, se alguém apagar `NOME_BIBLIOTECA` do `.env`, a aplicação sobe normalmente e o erro só
 aparece quando alguém abre a tela que usa aquele valor — possivelmente em produção,
@@ -1228,7 +1228,7 @@ Descomente e ela volta. Depois experimente `NOME_BIBLIOTECA=` (vazia): a mensage
 
 ---
 
-## Etapa 18 — O prefixo `/api` (5 min)
+## Etapa 18 — O prefixo `/api`
 
 **Faça:** em `src\main.ts`, uma linha entre o `create` e o `listen`:
 
@@ -1253,7 +1253,7 @@ estiver chamando as URLs antigas — e você não controla quando eles atualizam
 
 ---
 
-## Etapa 19 — Documentação automática (10 min)
+## Etapa 19 — Documentação automática
 
 O M02 falou em **contrato de API**. Aqui ele deixa de ser conversa.
 
@@ -1358,7 +1358,7 @@ antes do deploy.
 
 ---
 
-## Etapa 20 — O mapa que você percorreu (5 min)
+## Etapa 20 — O mapa que você percorreu
 
 Agora o diagrama faz sentido, porque você construiu três das caixas:
 

@@ -1,11 +1,11 @@
 # M06 — Repository e QueryBuilder: consultas e CRUD
 
-> **CH:** 5h (2h teóricas · 3h práticas) · **Semana 6** · **Pré-requisitos:** M04, M05
+> **Pré-requisitos:** M04, M05 · **Duração:** longa
 
 O item da ementa *"realização de consultas e operações de CRUD utilizando a API do
 framework"*. Aqui a entidade deixa de ser esquema e passa a ser dado consultado.
 
-> **As horas teóricas não estão num bloco separado.** Elas são as etapas 3, 8, 10, 11, 13 e
+> **A teoria não está num bloco separado.** Ela está nas etapas 3, 8, 10, 11, 13 e
 > 14 — em que a gente para de digitar e pensa — mais as explicações dentro de cada etapa.
 
 ## 🎯 Objetivos
@@ -64,27 +64,27 @@ vez, e só então o `QueryBuilder` e a transação.
 
 ### As quinze etapas
 
-| # | Etapa | Min | O que entra |
+| # | Etapa | Duração | O que entra |
 | --- | --- | --- | --- |
-| 1 | [Trocar a memória pelo banco](#etapa-1--trocar-a-memória-pelo-banco-15-min) | 15 | `@InjectRepository` |
-| 2 | [Listar, paginado desde o começo](#etapa-2--listar-paginado-desde-o-começo-20-min) | 20 | `findAndCount`, `skip`/`take` |
-| 3 | [**Por que paginar sempre**](#etapa-3--por-que-paginar-sempre-15-min) | 15 | **paginação não é opcional** |
-| 4 | [Buscar uma, com as relações](#etapa-4--buscar-uma-com-as-relações-15-min) | 15 | `relations` |
-| 5 | [Popular o banco](#etapa-5--popular-o-banco-15-min) | 15 | volume para medir |
-| 6 | [A versão ruim, de propósito](#etapa-6--a-versão-ruim-de-propósito-20-min) | 20 | o laço que mata |
-| 7 | [Medir](#etapa-7--medir-20-min) | 20 | contar consultas |
-| 8 | [**O que os números dizem**](#etapa-8--o-que-os-números-dizem-15-min) | 15 | **N+1** |
-| 9 | [Escrever: criar, atualizar, remover](#etapa-9--escrever-criar-atualizar-remover-30-min) | 30 | `create`, `save`, `delete` |
-| 10 | [**O que está errado de propósito**](#etapa-10--o-que-está-errado-de-propósito-15-min) | 15 | **a ponte para o M07** |
-| 11 | [**As duas APIs do TypeORM**](#etapa-11--as-duas-apis-do-typeorm-20-min) | 20 | **Repository × QueryBuilder** |
-| 12 | [QueryBuilder e busca](#etapa-12--querybuilder-e-busca-30-min) | 30 | filtros opcionais |
-| 13 | [**Parâmetro não é concatenação**](#etapa-13--parâmetro-não-é-concatenação-20-min) | 20 | **injeção de SQL** |
-| 14 | [**Por que transações existem**](#etapa-14--por-que-transações-existem-20-min) | 20 | **atomicidade** |
-| 15 | [Transação na prática](#etapa-15--transação-na-prática-30-min) | 30 | por sua conta |
+| 1 | [Trocar a memória pelo banco](#etapa-1--trocar-a-memória-pelo-banco) | média | `@InjectRepository` |
+| 2 | [Listar, paginado desde o começo](#etapa-2--listar-paginado-desde-o-começo) | média | `findAndCount`, `skip`/`take` |
+| 3 | [**Por que paginar sempre**](#etapa-3--por-que-paginar-sempre) | média | **paginação não é opcional** |
+| 4 | [Buscar uma, com as relações](#etapa-4--buscar-uma-com-as-relações) | média | `relations` |
+| 5 | [Popular o banco](#etapa-5--popular-o-banco) | média | volume para medir |
+| 6 | [A versão ruim, de propósito](#etapa-6--a-versão-ruim-de-propósito) | média | o laço que mata |
+| 7 | [Medir](#etapa-7--medir) | média | contar consultas |
+| 8 | [**O que os números dizem**](#etapa-8--o-que-os-números-dizem) | média | **N+1** |
+| 9 | [Escrever: criar, atualizar, remover](#etapa-9--escrever-criar-atualizar-remover) | longa | `create`, `save`, `delete` |
+| 10 | [**O que está errado de propósito**](#etapa-10--o-que-está-errado-de-propósito) | média | **a ponte para o M07** |
+| 11 | [**As duas APIs do TypeORM**](#etapa-11--as-duas-apis-do-typeorm) | média | **Repository × QueryBuilder** |
+| 12 | [QueryBuilder e busca](#etapa-12--querybuilder-e-busca) | longa | filtros opcionais |
+| 13 | [**Parâmetro não é concatenação**](#etapa-13--parâmetro-não-é-concatenação) | média | **injeção de SQL** |
+| 14 | [**Por que transações existem**](#etapa-14--por-que-transações-existem) | média | **atomicidade** |
+| 15 | [Transação na prática](#etapa-15--transação-na-prática) | longa | por sua conta |
 
 ---
 
-## Etapa 1 — Trocar a memória pelo banco (15 min)
+## Etapa 1 — Trocar a memória pelo banco
 
 O `AcervoService` ainda é o do M03: um array em memória e um endpoint temporário com o nome
 da biblioteca. Os dois saem de cena agora.
@@ -130,7 +130,7 @@ erro, a entidade não está no `forFeature`.
 
 ---
 
-## Etapa 2 — Listar, paginado desde o começo (20 min)
+## Etapa 2 — Listar, paginado desde o começo
 
 **Faça:** no service:
 
@@ -188,7 +188,7 @@ banco ainda não tem obras — a etapa 5 resolve isso.
 
 ---
 
-## Etapa 3 — Por que paginar sempre (15 min)
+## Etapa 3 — Por que paginar sempre
 
 Você acabou de escrever `take` sem discutir. Vale discutir, porque essa é a diferença entre
 uma API que aguenta o segundo ano e uma que não.
@@ -227,7 +227,7 @@ não capricho — e é o M07 que põe o teto, junto com a validação da entrada
 
 ---
 
-## Etapa 4 — Buscar uma, com as relações (15 min)
+## Etapa 4 — Buscar uma, com as relações
 
 **Faça:** no service:
 
@@ -270,7 +270,7 @@ prometido na situação 3**. Guarde: era uma promessa, agora é um fato observad
 
 ---
 
-## Etapa 5 — Popular o banco (15 min)
+## Etapa 5 — Popular o banco
 
 Precisamos de volume para que os problemas de desempenho apareçam.
 
@@ -308,7 +308,7 @@ curl.exe -s "http://localhost:3000/api/obras?tamanho=5"
 
 ---
 
-## Etapa 6 — A versão ruim, de propósito (20 min)
+## Etapa 6 — A versão ruim, de propósito
 
 Você vai escrever código ruim de propósito. É parte do exercício: quem só viu a versão certa
 não reconhece o padrão quando ele aparece disfarçado, dentro de um `map`, em outro arquivo,
@@ -361,7 +361,7 @@ lado de fora, elas são **indistinguíveis**. A diferença está no terminal.
 
 ---
 
-## Etapa 7 — Medir (20 min)
+## Etapa 7 — Medir
 
 Agora conte. Com o `logging: true` do M04 ligado, cada consulta vira uma linha `query:` no
 terminal.
@@ -406,7 +406,7 @@ Referência: **201 consultas / ~253 ms** contra **2 consultas / ~23 ms**.
 
 ---
 
-## Etapa 8 — O que os números dizem (15 min)
+## Etapa 8 — O que os números dizem
 
 Você tem quatro medições. O que elas mostram não é o que parece à primeira vista.
 
@@ -459,7 +459,7 @@ júnior. Quem sabe demonstrá-lo com o log na mão se destaca de quem só cita o
 
 ---
 
-## Etapa 9 — Escrever: criar, atualizar, remover (30 min)
+## Etapa 9 — Escrever: criar, atualizar, remover
 
 Até aqui só lemos. As três operações de escrita fecham o CRUD.
 
@@ -526,7 +526,7 @@ curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: applicatio
 
 ---
 
-## Etapa 10 — O que está errado de propósito (15 min)
+## Etapa 10 — O que está errado de propósito
 
 O CRUD funciona. Agora mande isto:
 
@@ -566,7 +566,7 @@ mudarem de resposta.
 
 ---
 
-## Etapa 11 — As duas APIs do TypeORM (20 min)
+## Etapa 11 — As duas APIs do TypeORM
 
 Até aqui você usou uma só. Existe outra, e saber quando trocar é o conteúdo desta etapa.
 
@@ -613,7 +613,7 @@ garantir a segurança — que é o assunto da etapa 13.
 
 ---
 
-## Etapa 12 — QueryBuilder e busca (30 min)
+## Etapa 12 — QueryBuilder e busca
 
 **Faça:** no service:
 
@@ -673,7 +673,7 @@ tem uma condição na segunda, duas na terceira. É a consulta sendo montada con
 
 ---
 
-## Etapa 13 — Parâmetro não é concatenação (20 min)
+## Etapa 13 — Parâmetro não é concatenação
 
 Olhe de novo a linha do `termo` na etapa 12. Ela poderia ter sido escrita assim:
 
@@ -735,7 +735,7 @@ O M09 volta ao assunto com o restante do OWASP. Aqui fica a regra e a demonstra�
 
 ---
 
-## Etapa 14 — Por que transações existem (20 min)
+## Etapa 14 — Por que transações existem
 
 Última parada de raciocínio. Emprestar um exemplar é **duas escritas**:
 
@@ -797,7 +797,7 @@ trocou uma consulta por uma **obrigação de sincronia**. A transação é o pre
 
 ---
 
-## Etapa 15 — Transação na prática (30 min)
+## Etapa 15 — Transação na prática
 
 Agora é com você.
 

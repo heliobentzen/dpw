@@ -1,6 +1,6 @@
 # M05 — Migrações: evoluir o banco com segurança
 
-> **CH:** 3h (1h teórica · 2h prática) · **Semana 5** · **Pré-requisito:** M04
+> **Pré-requisito:** M04 · **Duração:** média
 
 No M04, as entidades criaram o primeiro esquema. Agora o banco passa a ter histórico: cada
 mudança de classe vira uma migração revisável, aplicável em qualquer ambiente e reversível

@@ -13,7 +13,7 @@ as armadilhas em detalhe (seções 2 e 4).
 | Instalar Node, Git, Docker | [`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md) |
 | Traduzir um comando do roteiro | [seção 3](#3-tabela-de-equivalências) deste arquivo |
 | Entender por que algo quebrou | [seção 2](#2-as-cinco-armadilhas-que-não-são-tradução) deste arquivo |
-| Instalar o WSL2 | [seção 1.1](#instalar-o-wsl2-opcional-10-min) deste arquivo |
+| Instalar o WSL2 | [seção 1.1](#instalar-o-wsl2-opcional) deste arquivo |
 
 ---
 
@@ -29,7 +29,7 @@ as armadilhas em detalhe (seções 2 e 4).
 Produção é Linux; quem faz deploy tendo desenvolvido em Linux encontra menos surpresa. Os
 três caminhos são válidos para a disciplina inteira — nenhuma entrega depende disso.
 
-### Instalar o WSL2 (opcional, 10 min)
+### Instalar o WSL2 (opcional)
 
 ```powershell
 wsl --install -d Ubuntu
