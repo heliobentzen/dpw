@@ -59,9 +59,9 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 - Decisões técnicas relevantes e alternativas descartadas
 
 > ❌ Não escreva "NestJS é um framework Node.js que usa TypeScript…".
-> ✅ Escreva "Escolhemos manter as duas camadas em TypeScript porque, com 5 meses e uma
-> equipe pequena, compartilhar os tipos entre backend e frontend evitou a classe de erro que
-> mais nos custou tempo na primeira sprint: campo renomeado de um lado e não do outro."
+> ✅ Escreva "Escolhemos gerar o `openapi.json` no CI e falhar o build quando ele diverge
+> do commitado porque, com 5 meses e uma equipe pequena, a classe de erro que mais nos
+> custou tempo na primeira sprint foi campo renomeado na API sem o parceiro saber."
 
 ## 6. Desenvolvimento (2–3 páginas)
 

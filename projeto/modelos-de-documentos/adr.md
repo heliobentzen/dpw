@@ -55,7 +55,7 @@ Vamos usar autenticação por **sessão** (`express-session` + `passport-local`)
 a sessão do servidor; não há refresh token para gerenciar.
 
 **Fica mais difícil:** se houver app mobile no futuro, será preciso adicionar
-autenticação por token (o DRF suporta as duas simultaneamente — custo estimado: 1 sprint).
+autenticação por token (o Passport suporta as duas estratégias lado a lado — custo estimado: 1 sprint).
 
 **Precisa acontecer:** configurar `SESSION_COOKIE_SECURE` e `CSRF_COOKIE_SECURE` no deploy.
 ```

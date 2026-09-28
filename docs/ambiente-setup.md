@@ -11,16 +11,15 @@
 ## Um runtime só
 
 A stack principal do curso é **backend em TypeScript**. Você instala **o Node** (que já traz o npm),
-e nada além disso do lado de linguagem — não há Python, `venv`, `pip` nem um segundo ecossistema de
-pacotes para manter. O frontend, quando usado, é opcional e não define o núcleo da disciplina.
+e nada além disso do lado de linguagem: um único ecossistema de pacotes para manter.
 
 ## O que entra em cada momento
 
 | Momento | O que entra | Seções |
 | --- | --- | --- |
-| **Semana 1** (M00) | Git, Node 20, VS Code, monorepo, primeiro commit | 1 a 5, 8, 9 |
+| **Semana 1** (M00) | Git, Node 20, VS Code, monorepo, primeiro commit | 1 a 5, 8 |
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
-| **Antes do M04** | Docker + PostgreSQL | 7 |
+| **Antes do M04** | Docker + PostgreSQL | 7, 9 |
 
 **Tempo da semana 1:** 20–30 min.
 
@@ -30,9 +29,6 @@ pacotes para manter. O frontend, quando usado, é opcional e não define o núcl
 cd ~/dev/bibliocom
 npm run dev:api      # backend → http://localhost:3000
 ```
-
-> O comando de frontend é opcional e só faz sentido quando você quiser explorar a camada
-> visual complementar do material.
 
 Sem ativar ambiente virtual, sem `source` nenhum: as dependências vivem em `node_modules/`
 dentro do projeto, e o `npm` as encontra pela pasta em que você está.
@@ -68,8 +64,8 @@ bibliocom/                    monorepo (workspaces do npm)
 └── README.md
 ```
 
-**O repositório principal é backend-first.** O frontend, quando existir, continua como
-material complementar e opcional.
+**O repositório é backend-first:** não há pasta de frontend. Qualquer cliente (navegador,
+aplicativo, outro sistema) fala com a API pelo contrato OpenAPI.
 
 ---
 
@@ -223,24 +219,18 @@ falha, imprime o comando exato que corrige.
 
 **Só avance com todos os itens da etapa em `OK`.**
 
-## 9. Rodar o sistema completo (dois terminais)
+## 9. Rodar a API no dia a dia
 
-> ⏭️ A partir do **M08**, quando o frontend passa a existir.
+> ⏭️ A partir do **M04**, quando o PostgreSQL entra no projeto.
 
 ```bash
-# terminal 1 — backend
-cd ~/dev/bibliocom/backend
-npm run start:dev            # http://localhost:3000
-
-# terminal 2 — frontend
-cd ~/dev/bibliocom/frontend
-npm run dev                  # http://localhost:5173
+cd ~/dev/bibliocom
+docker compose up -d         # PostgreSQL em segundo plano
+cd backend
+npm run start:dev            # http://localhost:3000/api/docs
 ```
 
-Ou, da raiz, usando os scripts do workspace: `npm run dev:api` e `npm run dev:web`.
-
-O Vite encaminha `/api` ao NestJS, então o navegador vê tudo na mesma origem — evita CORS em
-desenvolvimento e reproduz a topologia de produção.
+O `docker compose up -d` não faz nada se o banco já estiver de pé, então pode rodá-lo sempre.
 
 ## 10. `.gitignore` do repositório
 
@@ -248,7 +238,6 @@ desenvolvimento e reproduz a topologia de produção.
 # Node
 node_modules/
 dist/
-.vite/
 *.tsbuildinfo
 coverage/
 
@@ -294,10 +283,6 @@ Sem isso, um `.sh` salvo no Windows chega ao servidor com `\r\n` e o deploy falh
 > Este arquivo é responsabilidade de **quem cria o repositório**, mesmo que essa pessoa use
 > Linux: ele protege a equipe inteira, inclusive quem entra depois sem configurar nada.
 
-**Atenção ao `.env` do frontend:** ele **não** é secreto (é embutido no bundle em tempo de
-build e qualquer pessoa lê no DevTools), mas segue fora do Git porque muda por ambiente.
-Nunca coloque chave de API nele. Detalhado no M09.
-
 ---
 
 ## 11. Problemas frequentes
@@ -308,10 +293,8 @@ Nunca coloque chave de API nele. Detalhado no M09.
 | `Cannot find module '@bibliocom/tipos'` | Workspace não resolvido | `npm install` na raiz; confira o campo `workspaces` do `package.json` |
 | `EACCES` ao instalar pacote global | Permissão | Use `fnm` ou mude o prefixo do npm, nunca `sudo npm -g` |
 | `npm ERR! network` no laboratório | Proxy/firewall | Libere `registry.npmjs.org` |
-| `port 5173 already in use` | Outro Vite rodando | `npm run dev --port 5174` |
 | `port 3000 already in use` | Outro Nest rodando | `PORT=3001 npm run start:dev` |
 | `port 5432 already in use` | PostgreSQL local ativo | Pare o serviço ou use `5433:5432` |
-| Requisição do front dá **CORS error** | Chamou `localhost:3000` direto | Use o caminho `/api` (proxy do Vite) |
 | Editor acusa erro que o `tsc` não acusa | Versões diferentes de TypeScript | `"typescript.tsdk"` no `settings.json` |
 
 🪟 **Erros de Windows** têm tabela própria:

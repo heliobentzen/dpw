@@ -44,7 +44,7 @@ Três a quatro itens verificáveis. O restante dos exercícios do módulo é pr�
 | **E3** | CRUD de 2+ recursos · DTOs de entrada (`whitelist`) e de saída separados · status corretos (201, 204, 400, 404, 409/422) · paginação com teto · `/api/docs` com erros documentados |
 | **E4** | Senha com hash · login emitindo token/sessão com expiração · 2 papéis · `curl` mostrando 401 e 403 · ADR da escolha token × sessão |
 | **E5** | Casos de IDOR, entrada hostil e segredos testados e corrigidos · Helmet, CORS e *rate limit* configurados · antes/depois registrado |
-| **E6** | Testes e2e (Jest + Supertest) de regra, validação e acesso · CI rodando lint + testes · badge no README |
+| **E6** | Testes e2e (Vitest + Supertest) de regra, validação e acesso · CI rodando lint + testes · badge no README |
 | **E7** | `openapi.json` no repositório · CI falha se o schema divergir · um cliente consumindo a API só pelo contrato |
 | **E8** | URL pública com HTTPS · `/health` verificando o banco · migrações aplicadas em produção · `docs/deploy.md` que outra pessoa consegue seguir |
 

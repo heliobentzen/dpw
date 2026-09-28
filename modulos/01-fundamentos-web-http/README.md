@@ -129,7 +129,7 @@ Estrutura: `VERSÃO STATUS RAZÃO` → cabeçalhos → **linha em branco** → c
 | `Authorization` | → | Credencial (`Bearer <token>`) |
 | `Location` | ← | Destino do redirecionamento (com 3xx) |
 | `Cache-Control` | ↔ | Política de cache |
-| `X-Frame-Options`, `Content-Security-Policy` | ← | Segurança do navegador (M13) |
+| `X-Frame-Options`, `Content-Security-Policy` | ← | Segurança do navegador (M09) |
 
 ### 3. Métodos: GET e POST em profundidade (50 min)
 
@@ -248,7 +248,7 @@ Distinções que caem em prova e em code review:
 - **301 vs 302** — 301 é permanente e fica em cache do navegador (difícil de reverter);
   302/303 é temporário. Em PRG, use 302/303.
 - **404 vs 403 em recurso privado** — devolver 404 para recurso que existe mas não é seu
-  evita revelar a existência dele (ver IDOR, M13).
+  evita revelar a existência dele (ver IDOR, M09).
 - **500 vs 502** — 500: sua aplicação lançou exceção. 502: o proxy não conseguiu falar com
   sua aplicação (ela caiu, ou não subiu).
 
@@ -405,7 +405,7 @@ Os pontos a observar — todos comentados no arquivo:
 | `req.on("data", ...)` juntando pedaços | **Ler o corpo.** Vira `@Body()` |
 | `JSON.parse` dentro de `try` | **Validação.** Vira o `ValidationPipe` (M07) |
 | `responder(res, 404, ...)` escrito à mão | **Status HTTP.** Vira `NotFoundException` |
-| `X-Content-Type-Options` digitado | **Cabeçalhos de segurança.** Vira `helmet` (M13) |
+| `X-Content-Type-Options` digitado | **Cabeçalhos de segurança.** Vira `helmet` (M09) |
 
 ⚠️ Repare no que **não** existe aqui: nada valida a entrada, nada trata erro de forma
 uniforme, nada impede uma rota de derrubar o processo. Cada uma dessas ausências é uma

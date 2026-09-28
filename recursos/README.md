@@ -11,11 +11,10 @@
 | --- | --- | --- |
 | [`servidor-minimo.mjs`](codigo/servidor-minimo.mjs) | M01 | Servidor HTTP sem framework: mostra o que o NestJS faz por você |
 | [`vulneravel.ts`](codigo/vulneravel.ts) | M09 | 🔵 Laboratório com 10 vulnerabilidades de backend |
-| [`vulneravel.tsx`](codigo/vulneravel.tsx) | M09 | 🟼 Laboratório complementar com 8 vulnerabilidades de frontend |
 | [`verifica-ambiente.mjs`](codigo/verifica-ambiente.mjs) | M00, M03, M05 | **Confere** o ambiente (não instala nada). `--etapa m00\|m03\|m05` cobra só o que já deveria existir |
 | [`semear.ts`](codigo/semear.ts) | M06 | Script que gera dados de volume para os exercícios |
 
-> ⚠️ `vulneravel.ts` e `vulneravel.tsx` são **deliberadamente inseguros** e servem apenas
+> ⚠️ `vulneravel.ts` é **deliberadamente inseguro** e servem apenas
 > para estudo. Nunca use nada deles em produção.
 
 ## Ambiente e plataforma
@@ -23,12 +22,6 @@
 | Arquivo | Quando usar |
 |---|---|
 | [`comandos-windows.md`](comandos-windows.md) | 🪟 **Leia a seção 2 antes da primeira aula.** Equivalências PowerShell/Git Bash/WSL2 e as cinco armadilhas do Windows: `curl` como alias, variáveis inline, `&&` no PowerShell 5.1, `>` em UTF-16 e finais de linha (CRLF) |
-
-## Ponte para JavaScript moderno
-
-| Arquivo | Quando usar |
-|---|---|
-| [`js-para-react.md`](js-para-react.md) | **Material complementar** para quem quiser explorar a camada visual opcional. Não é requisito do projeto backend e serve apenas como apoio individual para os módulos 08–11. |
 
 ## Checklists
 
@@ -44,12 +37,12 @@
 | Categoria | Ferramenta | Para quê |
 | --- | --- | --- |
 | Editor | VS Code / WebStorm | Desenvolvimento |
-| Lint e formatação | oxlint no backend; Prettier no backend e no frontend opcional | Padrão de código |
-| Testes | 🔵 Jest, Supertest · 🟣 Vitest, Testing Library, MSW (opcional) | Testes automatizados |
-| Depuração | 🔵 logging do TypeORM, Pino · 🟣 React DevTools, TanStack Query Devtools (opcional) | Consultas, estado, cache |
+| Lint e formatação | oxlint, Prettier | Padrão de código |
+| Testes | 🔵 Vitest, Supertest | Testes automatizados |
+| Depuração | 🔵 logging do TypeORM, Pino, depurador do VS Code | Consultas, logs, execução passo a passo |
 | Tipos | openapi-typescript | Contrato garantido pelo compilador |
-| Segurança | `npm audit`, detect-secrets, axe DevTools | Dependências, segredos, acessibilidade |
-| Diagramas | Mermaid, dbdiagram.io, Excalidraw | ER, arquitetura, protótipo |
+| Segurança | `npm audit`, detect-secrets | Dependências e segredos |
+| Diagramas | Mermaid (C4, ER, sequência), dbdiagram.io, Excalidraw | Arquitetura e dados como código, versionados no repositório |
 | Gestão | GitHub Projects, GitHub Issues | Backlog e sprints |
 | Monitoramento | UptimeRobot, Sentry/GlitchTip | Disponibilidade e erros |
 | API | httpie, curl, Bruno/Insomnia | Testar requisições |
@@ -61,18 +54,16 @@
 - [NestJS](https://docs.nestjs.com/)
 - [TypeORM](https://typeorm.io/)
 - [npm trends](https://npmtrends.com/) — comparar bibliotecas
+- [C4 Model](https://c4model.com/) e [Mermaid](https://mermaid.js.org/) — diagramas como código
 
-**Documentação — frontend**
+**Documentação — web**
 
-- [React](https://react.dev/learn)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [React Router](https://reactrouter.com/)
-- [TanStack Query](https://tanstack.com/query/latest)
-- [MDN Web Docs (pt-br)](https://developer.mozilla.org/pt-BR/)
+- [MDN Web Docs (pt-br)](https://developer.mozilla.org/pt-BR/) — HTTP, cabeçalhos, CORS, cookies
 
 **Segurança**
 
 - [OWASP Top 10 (pt-br)](https://owasp.org/Top10/pt_BR/)
+- [OWASP API Security Top 10](https://owasp.org/API-Security/)
 - [OWASP Cheat Sheets](https://cheatsheetseries.owasp.org/)
 - [securityheaders.com](https://securityheaders.com)
 

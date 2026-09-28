@@ -1,132 +1,100 @@
-# Checklist de deploy
+# Checklist de deploy da API
 
 Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira vez.
 
-## Antes (local) — 🔵 backend
+## Antes (local)
 
-- [ ] `npm run test` verde nas duas camadas
-- [ ] `ruff check .` sem erros
-- [ ] `npm run migration:generate` não gera nada novo (esquema em dia com as entidades)
+- [ ] `npm test` verde
 - [ ] `npm run lint` e `npx tsc --noEmit` sem erros
-- [ ] `requirements.txt` atualizado, com versões fixadas
+- [ ] `npm run migration:generate src/migracoes/Conferencia` **não** gera arquivo novo
+      (esquema em dia com as entidades; se gerar, apague o arquivo e crie a migração de verdade)
+- [ ] `package-lock.json` versionado
 - [ ] `npm run build` conclui e `node dist/main.js` sobe localmente
       (mesmo comando nas três plataformas)
-- [ ] 🪟 `.gitattributes` com `*.sh text eol=lf` (senão o deploy falha com `bad interpreter`)
-- [ ] `collectstatic` roda sem erro
+- [ ] 🪟 `.gitattributes` com `*.sh text eol=lf` (senão um script falha na PaaS com
+      `bad interpreter`)
 - [ ] `.env.example` reflete todas as variáveis necessárias
+- [ ] `openapi.json` regenerado e sem diferença no `git diff`
 - [ ] Nenhum segredo no diff (`git diff --staged`)
-
-## Antes (local) — 🟣 frontend
-
-- [ ] `npm run lint` e `npx tsc --noEmit` sem erros
-- [ ] `npx vitest run` verde
-- [ ] `npm run build` conclui sem aviso
-- [ ] `npm run preview` funciona, **e o F5 numa rota interna também**
-- [ ] Tipos regenerados do schema mais recente (`npm run tipos` + `git diff` limpo)
-- [ ] `grep` no `dist/` não revela segredo
-- [ ] `VITE_API_URL` apontando para o caminho correto do ambiente alvo
 
 ## Primeiro deploy
 
-- [ ] Banco PostgreSQL criado (gerenciado, não SQLite)
+- [ ] Banco PostgreSQL gerenciado criado, com a mesma versão principal do Docker local
 - [ ] `SESSION_SECRET` **nova**, gerada só para produção
-- [ ] `DEBUG=False`
-- [ ] `ALLOWED_HOSTS` com o domínio real
-- [ ] `DATABASE_URL` configurada
-- [ ] `CSRF_TRUSTED_ORIGINS` com `https://<domínio>`
-- [ ] Comando de build/release do backend definido (inclui `migrate` e `collectstatic`)
-- [ ] Build do frontend definido (`npm install && npm run build`, publicando `dist/`)
-- [ ] **Regra de fallback configurada** (`/* → /index.html`)
-- [ ] Roteamento `/api/*` para o backend, no mesmo site
-- [ ] `CSRF_TRUSTED_ORIGINS` com o domínio `https://`
-- [ ] Armazenamento de mídia externo (ou ciência de que uploads somem no deploy)
+- [ ] `NODE_ENV=production`
+- [ ] `DATABASE_URL` configurada (a URL **interna** da plataforma)
+- [ ] `CORS_ORIGENS` com as origens reais dos clientes, se houver algum no navegador
+- [ ] `PORT` **não** definida à mão: a plataforma decide a porta
+- [ ] Build: `npm ci && npm run build`
+- [ ] Start: `npm run migration:run:prod && npm run start:prod`
+- [ ] `trust proxy` ligado no `main.ts` (a PaaS termina o HTTPS)
+- [ ] Armazenamento de arquivos externo (ou ciência de que uploads somem no próximo deploy)
 - [ ] Backup automático do banco ativado
-- [ ] Superusuário e grupos de permissão criados
+- [ ] Primeiro usuário administrador criado por script (`npm run seed:admin`), não à mão
 
 ## Depois de cada deploy
 
-- [ ] SPA carrega na raiz
-- [ ] `/api/obras/` responde JSON
-- [ ] **F5 numa rota interna (`/obras/42`) devolve 200**, não 404
-- [ ] Nenhum erro de CORS no console
+- [ ] `GET /api/health` responde 200
+- [ ] `GET /api/obras` responde JSON
 - [ ] HTTPS ativo; HTTP redireciona
-- [ ] CSS/JS carregando (Network sem 404)
 - [ ] Login funcionando
 - [ ] Uma operação de escrita funcionando de ponta a ponta
 - [ ] Migrações aplicadas (confira nos logs)
-- [ ] Página 404 personalizada (não o traceback)
-- [ ] Erro 500 não vaza código, settings nem SQL
+- [ ] Rota inexistente devolve 404 em JSON, não uma página HTML
+- [ ] Erro 500 não vaza *stack trace*, caminho de arquivo nem SQL
 - [ ] Logs sem exceções novas nos primeiros 10 minutos
 - [ ] Tempo de resposta comparável ao anterior
 
 ## Comandos de verificação
 
-> 🪟 **No PowerShell, use `curl.exe`** em todos os comandos abaixo.
-
-```bash
-# Linux / macOS / WSL / Git Bash
-curl -I https://SEU-DOMINIO/
-curl -I https://SEU-DOMINIO/ | grep -iE "strict-transport|x-frame|x-content|referrer"
-curl -s -o /dev/null -w "%{http_code} %{time_total}s\n" https://SEU-DOMINIO/
-curl -I http://SEU-DOMINIO/            # deve redirecionar para https
-curl -s -o /dev/null -w "%{http_code}\n" https://SEU-DOMINIO/obras/42   # fallback: 200
-curl -s https://SEU-DOMINIO/api/obras/ | head -c 200                     # API respondendo
-```
-
 ```powershell
-# Windows PowerShell
-curl.exe -I https://SEU-DOMINIO/
-curl.exe -I https://SEU-DOMINIO/ | Select-String "strict-transport|x-frame|x-content|referrer"
-curl.exe -s -o NUL -w "%{http_code} %{time_total}s`n" https://SEU-DOMINIO/
-curl.exe -I http://SEU-DOMINIO/
-curl.exe -s -o NUL -w "%{http_code}`n" https://SEU-DOMINIO/obras/42
-(Invoke-WebRequest https://SEU-DOMINIO/api/obras/).Content.Substring(0, 200)
+# Windows PowerShell (no Git Bash/Linux, troque curl.exe por curl e NUL por /dev/null)
+curl.exe -i https://SEU-DOMINIO/api/health
+curl.exe -I https://SEU-DOMINIO/api/obras
+curl.exe -s -o NUL -w "%{http_code} %{time_total}s`n" https://SEU-DOMINIO/api/obras
+curl.exe -I http://SEU-DOMINIO/api/obras        # deve redirecionar para https
+curl.exe -i https://SEU-DOMINIO/api/nao-existe  # 404 em JSON
 ```
+
+| Comando | O que você está conferindo |
+| --- | --- |
+| `-i .../health` | A API subiu e alcança o banco |
+| `-I .../obras` | Cabeçalhos: `strict-transport-security`, `x-content-type-options`, sem `x-powered-by` |
+| `-w "%{http_code} %{time_total}s"` | Status e tempo, sem despejar o corpo na tela |
+| `http://` | O redirecionamento para HTTPS existe |
+| `nao-existe` | O erro segue o formato do contrato (M02), e não uma página do servidor |
 
 ## Se der errado
 
-1. **Não** ligue `DEBUG=True` em produção para depurar. Leia os logs.
+1. **Não** troque `NODE_ENV` para `development` em produção para "ver o erro". Leia os logs.
 2. Reverta o deploy (a plataforma tem "rollback"; ou faça `git revert` + push).
-3. Migração já aplicada? Se foi compatível para trás (expandir/contrair), o código antigo
-   funciona com o esquema novo — reverter é seguro.
+3. Migração já aplicada? Se ela foi compatível para trás (expandir → migrar → contrair, M05),
+   o código antigo funciona com o esquema novo — reverter o código é seguro.
 4. Se o banco foi alterado de forma incompatível, restaure o backup. Você testou a
    restauração antes, certo?
 5. Registre o incidente: o que quebrou, por quê, o que evitaria a repetição.
 
 ## Variáveis de ambiente mínimas
 
-### 🔵 Backend (tempo de execução — secretas)
-
 ```ini
-# valores configurados no painel da PaaS (ou no .env local)
-SESSION_SECRET=            # >= 50 caracteres aleatórios, exclusiva de produção
-DEBUG=False
-ALLOWED_HOSTS=seu-dominio.com
-CSRF_TRUSTED_ORIGINS=https://seu-dominio.com
+# configuradas no painel da PaaS (ou no .env local)
+NODE_ENV=production
+SESSION_SECRET=            # >= 32 bytes aleatórios, exclusiva de produção
 DATABASE_URL=postgres://usuario:senha@host:5432/banco
+CORS_ORIGENS=https://app.seu-dominio.com
 # opcionais
-EMAIL_HOST=
-EMAIL_HOST_USER=
-EMAIL_HOST_PASSWORD=
-DEFAULT_FROM_EMAIL=
 SENTRY_DSN=
 ```
 
-### 🟣 Frontend (tempo de **build** — públicas)
-
-```ini
-VITE_API_URL=/api      # caminho relativo: mesmo site, sem CORS
-VITE_SENTRY_DSN=       # desenhado para ser público
-```
-
-> ⚠️ Toda `VITE_*` é embutida no bundle e legível por qualquer pessoa. **Nunca** coloque
-> segredo aqui. E mudar o valor na plataforma exige **rebuild** — não basta reiniciar.
+> Toda variável obrigatória precisa estar no schema de validação do `ConfigModule`. Chave
+> que não está no schema é **descartada**: a API sobe sem ela e falha só na primeira
+> requisição que precisar do valor.
 
 ## Rotina periódica
 
 | Frequência | Tarefa |
 |---|---|
 | Semanal | Revisar logs de erro; conferir se o backup rodou |
-| Mensal | `pip-audit`; atualizar dependências com correção de segurança |
+| Mensal | `npm audit`; atualizar dependências com correção de segurança |
 | Trimestral | **Testar a restauração do backup** em ambiente separado |
 | Semestral | Revisar acessos e permissões; remover contas inativas |

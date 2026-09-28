@@ -97,7 +97,7 @@ não deveria — e o resto constrói a solução por partes.
 | 15 | [**Upload: as três decisões**](#etapa-15--upload-as-três-decisões-30-min) | 30 | **segurança de arquivo** |
 | 16 | [Regerar o contrato](#etapa-16--regerar-o-contrato-15-min) | 15 | OpenAPI com formatos |
 | 17 | [**As quatro camadas**](#etapa-17--as-quatro-camadas-15-min) | 15 | **fecho do backend** |
-| 18 | [O que vai para o M08](#etapa-18--o-que-vai-para-o-m08-5-min) | 5 | — |
+| 18 | [O que vai para o projeto](#etapa-18--o-que-vai-para-o-projeto-5-min) | 5 | — |
 
 ---
 
@@ -318,7 +318,7 @@ e o terceiro responde 400 com:
 ### Duas coisas para reparar
 
 **A segunda resposta traz as duas falhas, não a primeira que apareceu.** O `class-validator`
-avalia tudo e devolve a lista completa. É por isso que um formulário no M11 consegue marcar
+avalia tudo e devolve a lista completa. É por isso que qualquer formulário que consuma a API consegue marcar
 dois campos errados de uma vez, em vez de fazer o usuário descobrir um por vez.
 
 **O terceiro caso é o `forbidNonWhitelisted` em ação.** O mesmo `destaque` que passou na
@@ -355,7 +355,7 @@ de nada sofisticado — basta descobrir um campo que você não esperava.
 | `criadoEm` | Forjar a data de cadastro |
 | `papel` (numa entidade `Usuario`) | **Virar administrador** |
 
-A última linha é a que aparece nos relatórios de incidente. E ela vai existir no M12.
+A última linha é a que aparece nos relatórios de incidente. E ela vai existir no M08.
 
 > **A regra:** o DTO define **o que é aceito**; o resto vai para o lixo. `whitelist: true` é a
 > linha que executa isso.
@@ -368,7 +368,7 @@ O inverso, e o DTO de entrada não resolve. Hoje o controller devolve a **entida
 return this.acervo.buscarUm(id);   // devolve tudo que a tabela tem
 ```
 
-Enquanto a entidade é `Obra`, o prejuízo é excesso de dados. Quando existir `Usuario` (M12),
+Enquanto a entidade é `Obra`, o prejuízo é excesso de dados. Quando existir `Usuario` (M08),
 com um campo `senhaHash`, devolvê-la inteira **publica o hash de todo mundo**.
 
 E não adianta lembrar de tirar: alguém acrescenta um campo sensível à entidade seis meses
@@ -677,7 +677,7 @@ deu certo. Com status correto, ele decide olhando um número:
 if (resposta.status >= 400) → mostrar erro
 ```
 
-É por confiar no status que o M08 consegue tratar erro **num lugar só**, em vez de espalhar
+É por confiar no status que um cliente consegue tratar erro **num lugar só**, em vez de espalhar
 verificação por cada tela.
 
 ---
@@ -803,7 +803,7 @@ caminho de arquivo. O Nest já protege por padrão em produção; o M09 confere 
 | `PATCH /obras/42` sem estar autenticado | |
 
 > As duas últimas merecem discussão em sala. E a de autenticação é para **responder no
-> papel**: a API do M07 ainda é aberta, e os guards chegam no M12.
+> papel**: a API do M07 ainda é aberta, e os guards chegam no M08.
 
 ---
 
@@ -893,7 +893,7 @@ curl.exe -s -o NUL -w "%{http_code}`n" -X POST http://localhost:3000/api/obras/1
 > 🔒 **Este endpoint está aberto, e não deveria.** Upload é escrita: qualquer pessoa na
 > internet pode encher o seu disco. O M08 traz autenticação e volta aqui para pôr um
 > `@UseGuards` nesta rota. **Anote a dívida no código**, com um comentário
-> `// TODO(M12): exigir autenticação`, para ela não sumir de vista.
+> `// TODO(M08): exigir autenticação`, para ela não sumir de vista.
 
 ---
 
@@ -1067,7 +1067,7 @@ POST /api/obras {"titulo":"X","autorId":1}
 ```
 
 Compare com o diagrama do M03, etapa 20: as caixas que estavam vazias foram preenchidas.
-Faltam duas — `Guard` (M12) e `Middleware` (M13) —, e nenhuma delas exige mexer no que você
+Faltam duas — `Guard` (M08) e `Middleware` (M09) —, e nenhuma delas exige mexer no que você
 construiu. **Elas se encaixam em volta**, que era exatamente a promessa da etapa 11 do M03.
 
 ---
@@ -1125,7 +1125,7 @@ implementar as duas respostas.
 - [ ] Os três casos da etapa 4 testados e a tabela preenchida
 - [ ] Upload com teto de tamanho, filtro de tipo, nome gerado no servidor e conferência de conteúdo
 - [ ] O PDF renomeado para `.jpg` foi **recusado**
-- [ ] `// TODO(M12)` anotado na rota de upload
+- [ ] `// TODO(M08)` anotado na rota de upload
 - [ ] `/api/docs` completo, com os caminhos de erro documentados
 - [ ] `openapi.json` regerado e versionado
 - [ ] Você sabe explicar *mass assignment* e as duas coisas que o impedem

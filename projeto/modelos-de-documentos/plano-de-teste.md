@@ -1,6 +1,6 @@
 # Plano de Teste
 
-> Etapa 3 · Salve em `docs/plano-de-teste.md`.
+> Etapa 2 · Salve em `docs/plano-de-teste.md`.
 
 **Projeto:** `<nome>` · **Versão testada:** `<commit/tag>` · **Data:** `<AAAA-MM-DD>`
 
@@ -10,24 +10,24 @@
 
 | Nível | O que cobre | Ferramenta | Quantidade |
 |---|---|---|---|
-| Unitário | Regras de negócio nos services | Jest | |
-| Integração | Controller + banco | Jest + Supertest | |
-| Permissões | Matriz papel × rota | Jest com `it.each` | |
+| Unitário | Regras de negócio nos services | Vitest | |
+| Integração | Controller + banco | Vitest + Supertest | |
+| Permissões | Matriz papel × rota | Vitest com `it.each` | |
 | Manual | Fluxos principais | Roteiro humano | |
-| Usuário real | Usabilidade | Observação | |
-| Carga simples | Desempenho com volume | Debug Toolbar | |
+| Cliente real | Uso da API pelo parceiro (Swagger ou cliente dele) | Observação | |
+| Carga simples | Desempenho com volume | `logging: true` do TypeORM + `curl -w` | |
 
-**Ambiente de teste:** `<PostgreSQL 16, Node 20, dados gerados por src/semear.ts>`
+**Ambiente de teste:** `<PostgreSQL 16 no Docker, Node 20, dados gerados por src/semear.ts>`
 
 ## 2. Testes automatizados
 
 | # | Arquivo::teste | O que garante | Regra relacionada |
 |---|---|---|---|
-| 1 | `test_models.py::test_prazo_padrao` | Prazo de devolução é 7 dias | RN-01 |
+| 1 | `emprestimos.service.spec.ts` › calcula prazo padrão | Prazo de devolução é 7 dias | RN-01 |
 | 2 | | | |
 
 **Cobertura:** `<X>%` geral · `<Y>%` nas regras de negócio
-**Comando:** `npm run test --coverage`
+**Comando:** `npm test -- --coverage`
 
 ## 3. Matriz de acesso
 
@@ -89,25 +89,25 @@ Todas as células cobertas por teste automatizado? `<sim/não>` · Arquivo: `<..
 
 Com `<N>` registros no banco:
 
-| Página | Tempo | Nº de consultas | N+1? | Ação |
+| Rota | Tempo | Nº de consultas | N+1? | Ação |
 |---|---:|---:|:---:|---|
-| Listagem principal | | | | |
-| Detalhe | | | | |
-| Relatório | | | | |
+| `GET` da listagem principal | | | | |
+| `GET` do detalhe | | | | |
+| `GET` do relatório | | | | |
 
-Meta: nenhuma página acima de 2s; nenhuma consulta N+1.
+Meta: nenhuma rota acima de 2s; nenhuma consulta N+1.
 
 ## 7. Segurança
 
 | Verificação | Resultado |
 |---|---|
-| `check --deploy` sem avisos | |
+| Checklist de segurança ([`recursos/checklists/seguranca.md`](../../recursos/checklists/seguranca.md)) percorrido | |
 | Acesso a recurso de outro usuário (IDOR) | |
-| POST sem token CSRF | |
-| `<script>alert(1)</script>` em cada campo de texto | |
+| Rota de escrita sem autenticação (espera 401) | |
+| Campo extra no corpo, como `"papel":"admin"` (espera 400) | |
 | `' OR '1'='1` em cada busca | |
 | Rota administrativa como usuário comum | |
-| `pip-audit` | |
+| `npm audit --audit-level=high` | |
 
 ## 8. Bugs encontrados
 

@@ -55,7 +55,7 @@ vale o que está aqui.
 | 11 | M11 Tipos compartilhados (2h) · **Etapa 2** — início do desenvolvimento (3h) | 5 | Sprint 1 iniciada |
 | 12 | M08 Autenticação ponta a ponta (2h) · **Etapa 2** — desenvolvimento (3h) | 5 | **E5**: login, papéis e rotas protegidas |
 | 13 | M09 Segurança (2h) · **Etapa 2** — desenvolvimento (3h) | 5 | **E6**: checklist OWASP aplicado |
-| 14 | M10 Testes (3h) · **Etapa 2** — desenvolvimento (2h) | 5 | **E7**: suíte verde (Jest + Supertest) |
+| 14 | M10 Testes (3h) · **Etapa 2** — desenvolvimento (2h) | 5 | **E7**: suíte verde (Vitest + Supertest) |
 | 15 | M11 Tipos compartilhados (2h) · **Extensão** — diagnóstico e plano (3h) | 5 | **X1**: plano de ação extensionista |
 | 16 | M12 Deploy da API (4h) · **Etapa 2** (1h) | 5 | **E8**: API implantada |
 | 17 | M13 Observabilidade (2h) · **Etapa 2** (3h) | 5 | Integração e correções finais |

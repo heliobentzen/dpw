@@ -89,13 +89,13 @@ Todos os módulos constroem o mesmo sistema, incrementalmente.
 | --- | --- | --- |
 | M02 | Contrato de API definido (recursos, rotas, formatos) | ⚪ |
 | M03 | `backend/` (NestJS) respondendo JSON, com Swagger UI e schema OpenAPI configurados | 🔵 |
-| M04 | `Autor`, `Editora`, `Obra`, `Exemplar`, `Associado`, `Empréstimo` | 🔵 |
+| M04 | `Autor`, `Obra`, `Categoria`, `Exemplar`, `Associado`, `Emprestimo` | 🔵 |
 | M05 | Migrações versionadas e PostgreSQL reproduzível | 🔵 |
 | M06 | Consultas de catálogo, disponibilidade, atrasos, relatórios | 🔵 |
 | M07 | `/api/obras/`, `/api/empréstimos/`, filtros, paginação e documentação Swagger/OpenAPI revisada | 🔵 |
 | M08 | Login, papéis e rotas protegidas na API | ⬫ |
 | M09 | Correção de vulnerabilidades da API | ⬫ |
-| M10 | Jest/Supertest, lint e CI do backend | ⬫ |
+| M10 | Vitest/Supertest, lint e CI do backend | ⬫ |
 | M11 | Schema OpenAPI versionado e integração de cliente | ⬫ |
 | M12 | API no ar, HTTPS, banco gerenciado e CI/CD | ⬫ |
 | M13 | Logs, healthcheck, backup e plano de manutenção | ⬫ |

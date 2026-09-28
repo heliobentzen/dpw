@@ -57,12 +57,12 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web** —
 
 | # | Módulo | CH | T | P |
 | --- | --- | ---: | ---: | ---: |
-| 12 | [Autenticação e gestão de usuários](modulos/12-autenticacao-usuarios/) | 5 | 2 | 3 |
-| 13 | [Segurança](modulos/13-seguranca/) | 5 | 3 | 2 |
-| 14 | [Testes e qualidade](modulos/14-testes-e-qualidade/) | 3 | 1 | 2 |
-| 15 | [Tipos compartilhados entre as camadas](modulos/15-tipos-compartilhados/) | 2 | 1 | 1 |
-| 16 | [Deploy dos dois artefatos](modulos/16-deploy/) | 4 | 2 | 2 |
-| 17 | [Observabilidade e manutenção](modulos/17-observabilidade-e-manutencao/) | 2 | 1 | 1 |
+| 08 | [Autenticação e autorização na API](modulos/08-autenticacao-usuarios/) | 5 | 2 | 3 |
+| 09 | [Segurança de APIs](modulos/09-seguranca/) | 5 | 3 | 2 |
+| 10 | [Testes e qualidade no backend](modulos/10-testes-e-qualidade/) | 3 | 1 | 2 |
+| 11 | [Tipos compartilhados e contrato OpenAPI](modulos/11-tipos-compartilhados/) | 2 | 1 | 1 |
+| 12 | [Deploy da API](modulos/12-deploy/) | 4 | 2 | 2 |
+| 13 | [Observabilidade e manutenção](modulos/13-observabilidade-e-manutencao/) | 2 | 1 | 1 |
 | | **Subtotal** | **70** | **33** | **37** |
 
 ## Projeto integrador (20h) + Extensão (10h)

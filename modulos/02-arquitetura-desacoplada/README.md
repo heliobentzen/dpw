@@ -72,7 +72,7 @@ navegador                          servidor
 ```
 
 O servidor entrega **dados**; o navegador monta a interface. Navegar entre telas não
-recarrega a página — o roteamento acontece no cliente (M10).
+recarrega a página — o roteamento acontece no cliente.
 
 #### Comparação honesta
 
@@ -107,7 +107,7 @@ O conteúdo precisa ser indexado por buscadores?
 ```
 
 > **O BiblioCom cabe nos dois modelos.** Adotamos SPA + API por decisão pedagógica e de
-> mercado, registrada em [ADR-01](../../docs/decisoes-tecnicas.md#adr-10--typescript-ponta-a-ponta-nestjs--typeorm--react) —
+> mercado, registrada em [ADR-01](../../docs/decisoes-tecnicas.md#adr-10--backend-em-typescript-com-frontend-opcional-nestjs--typeorm) —
 > e com o custo declarado no [ADR-09](../../docs/decisoes-tecnicas.md#adr-09--o-custo-em-carga-horária).
 > Reconhecer que a alternativa era viável é parte de decidir bem.
 
@@ -123,8 +123,8 @@ uma chamada de função vira uma requisição de rede, com tudo que isso implica
 | --- | --- | --- |
 | Roteamento | Só no servidor | Servidor **e** cliente (dois mapas de rotas) |
 | Validação | Uma vez (form do servidor) | Duas vezes (UX no cliente, **segurança** no servidor) |
-| Autenticação | Sessão + cookie, direto | Sessão + CORS, ou token (M12) |
-| Estado da tela | Não existe (a página recarrega) | Existe e precisa ser gerenciado (M11) |
+| Autenticação | Sessão + cookie, direto | Sessão + CORS, ou token (M08) |
+| Estado da tela | Não existe (a página recarrega) | Existe e precisa ser gerenciado pelo cliente |
 | Erros | Página de erro | Cada requisição pode falhar; a tela precisa reagir |
 | Carregamento | Não existe (o HTML já vem) | Todo dado tem "carregando" e "erro" |
 | Deploy | Um artefato | Dois artefatos e um contrato entre eles |
@@ -136,7 +136,7 @@ Três consequências que a turma vai sentir na pele:
    só precisava pensar no terceiro. Cobrado na rubrica da Etapa 3.
 2. **Validar no cliente não é validar.** O `curl` do M01 já provou que dá para pular a
    interface. A validação do cliente existe para a experiência; a do servidor, para a
-   integridade. Ambas são obrigatórias (M07 e M11).
+   integridade. A do servidor é a única que você controla sempre — e é a do M07.
 3. **O contrato pode quebrar em silêncio.** O backend renomeia `titulo` para `nome`, o
    frontend continua compilando e a tela mostra `undefined`. As defesas: OpenAPI + tipos
    gerados (M07) e testes de contrato (M10).
@@ -154,11 +154,11 @@ A URL nomeia **coisas** (substantivos); o método diz o que se faz com elas (ver
 
 | ❌ Verbo na URL | ✅ Recurso + método |
 | --- | --- |
-| `GET /criarObra` | `POST /api/obras/` |
-| `POST /atualizarObra?id=42` | `PATCH /api/obras/42/` |
-| `GET /deletarObra/42` | `DELETE /api/obras/42/` |
-| `GET /listarObrasDoAutor/7` | `GET /api/obras/?autor=7` |
-| `POST /devolverEmprestimo/15` | `POST /api/emprestimos/15/devolver/` ✅ |
+| `GET /criarObra` | `POST /api/obras` |
+| `POST /atualizarObra?id=42` | `PATCH /api/obras/42` |
+| `GET /deletarObra/42` | `DELETE /api/obras/42` |
+| `GET /listarObrasDoAutor/7` | `GET /api/obras?autorId=7` |
+| `POST /devolverEmprestimo/15` | `POST /api/emprestimos/15/devolver` ✅ |
 
 A última linha mostra a exceção legítima: quando a operação **não** é um CRUD sobre o
 recurso, uma sub-rota de ação é aceitável e mais clara que forçar um `PATCH`.
@@ -167,50 +167,64 @@ recurso, uma sub-rota de ação é aceitável e mais clara que forçar um `PATCH
 
 | Recurso | Método | Rota | O que faz | Sucesso |
 | --- | --- | --- | --- | --- |
-| Obras | GET | `/api/obras/` | Lista, com filtros e paginação | 200 |
-| | POST | `/api/obras/` | Cria | 201 |
-| | GET | `/api/obras/{id}/` | Detalha | 200 |
-| | PATCH | `/api/obras/{id}/` | Atualiza parcialmente | 200 |
-| | DELETE | `/api/obras/{id}/` | Remove | 204 |
-| Exemplares | GET | `/api/obras/{id}/exemplares/` | Exemplares da obra | 200 |
-| Empréstimos | GET | `/api/emprestimos/` | Lista (filtrada pelo usuário) | 200 |
-| | POST | `/api/emprestimos/` | Registra empréstimo | 201 |
-| | POST | `/api/emprestimos/{id}/devolver/` | Registra devolução | 200 |
-| Sessão | POST | `/api/auth/login/` | Autentica | 200 |
-| | POST | `/api/auth/logout/` | Encerra sessão | 204 |
-| | GET | `/api/auth/eu/` | Usuário atual | 200 / 401 |
+| Obras | GET | `/api/obras` | Lista, com filtros e paginação | 200 |
+| | POST | `/api/obras` | Cria | 201 |
+| | GET | `/api/obras/{id}` | Detalha | 200 |
+| | PATCH | `/api/obras/{id}` | Atualiza parcialmente | 200 |
+| | DELETE | `/api/obras/{id}` | Remove | 204 |
+| Exemplares | GET | `/api/obras/{id}/exemplares` | Exemplares da obra | 200 |
+| Empréstimos | GET | `/api/emprestimos` | Lista (filtrada pelo usuário) | 200 |
+| | POST | `/api/emprestimos` | Registra empréstimo | 201 |
+| | POST | `/api/emprestimos/{id}/devolver` | Registra devolução | 200 |
+| Sessão | POST | `/api/auth/login` | Autentica | 200 |
+| | POST | `/api/auth/logout` | Encerra sessão | 204 |
+| | GET | `/api/auth/eu` | Usuário atual | 200 / 401 |
 
 #### Formato das respostas
 
-**Lista paginada** (formato padrão do DRF):
+**Lista paginada** — o formato que o M06 implementa com `findAndCount`:
 
 ```json
 {
-  "count": 128,
-  "next": "https://bibliocom.org/api/obras/?page=3",
-  "previous": "https://bibliocom.org/api/obras/?page=1",
-  "results": [
+  "itens": [
     {
       "id": 42,
       "titulo": "Dom Casmurro",
+      "anoPublicacao": 1899,
       "autor": { "id": 7, "nome": "Machado de Assis" },
-      "ano_publicacao": 1899,
-      "exemplares_total": 3,
-      "exemplares_disponiveis": 1
+      "categorias": ["Romance"],
+      "exemplaresDisponiveis": 1
     }
-  ]
+  ],
+  "total": 128,
+  "pagina": 2,
+  "tamanho": 20
 }
 ```
 
-**Erro de validação** (422 ou 400, campo a campo):
+Com `total` e `tamanho`, o cliente calcula sozinho quantas páginas existem (128 ÷ 20 = 7).
+
+**Erro de validação** — o formato que o `ValidationPipe` do M07 devolve:
 
 ```json
 {
-  "titulo": ["Este campo é obrigatório."],
-  "isbn": ["O ISBN deve ter 10 ou 13 dígitos."],
-  "non_field_errors": ["Já existe uma obra com este ISBN."]
+  "message": [
+    "titulo must be longer than or equal to 1 characters",
+    "anoPublicacao must not be greater than 2100"
+  ],
+  "error": "Bad Request",
+  "statusCode": 400
 }
 ```
+
+**Erro de domínio** — o formato das exceções do Nest (M03, M07):
+
+```json
+{ "message": "Obra 999 não encontrada", "error": "Not Found", "statusCode": 404 }
+```
+
+Repare que os dois erros têm a **mesma forma**: `message`, `error`, `statusCode`. A única
+diferença é `message` ser lista na validação (várias falhas de uma vez) e texto nos demais.
 
 O formato de erro **é parte do contrato**. Se cada endpoint errar de um jeito, o frontend
 precisa de um tratamento por endpoint — e não terá.
@@ -223,9 +237,9 @@ precisa de um tratamento por endpoint — e não terá.
 - [ ] Formato de datas (**sempre** ISO 8601: `2026-08-11T14:32:07-03:00`)
 - [ ] Formato de valores monetários (string decimal `"12.50"`, nunca `float`)
 - [ ] Paginação: estilo e tamanho padrão
-- [ ] Como se filtra, ordena e busca (`?q=`, `?ordering=`, `?autor=`)
+- [ ] Como se filtra, ordena e busca (`?busca=`, `?autorId=`, `?pagina=`, `?tamanho=`)
 - [ ] Formato do erro de validação e do erro de permissão
-- [ ] Relações: id (`"autor": 7`) ou objeto aninhado (`"autor": {...}`)?
+- [ ] Relações: id (`"autorId": 7`) ou objeto aninhado (`"autor": {...}`)?
 
 > A última decisão é a que mais gera retrabalho. Regra prática do material: **aninhe na
 > leitura, use id na escrita.** A tela quer o nome do autor sem uma segunda requisição; o
@@ -238,7 +252,7 @@ O contrato só funciona se estiver escrito num lugar que **não pode divergir do
 A solução padrão é **OpenAPI** gerado a partir do próprio código:
 
 ```
-código do DRF  ──drf-spectacular──▶  schema.yml (OpenAPI)
+decorators do Nest ──@nestjs/swagger──▶  openapi.json
                                           │
                           ┌───────────────┼────────────────┐
                           ▼               ▼                ▼

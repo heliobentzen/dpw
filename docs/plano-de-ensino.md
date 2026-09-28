@@ -36,7 +36,7 @@
 | Atualização do banco a partir das alterações nas classes | M05 (migrações) | 🔵 |
 | Consultas ao BD e CRUD pela API do framework | M06 (Repository/QueryBuilder) + M07 (Controllers) | 🔵 |
 | Views: mapeamento de URLs | M07 (`@Controller`, `@Get`, `@Post`) | 🔵 |
-| Views: classes/métodos/funções de processamento de requisições | M07 (FBV, `APIView`, `ViewSet`) | 🔵 |
+| Views: classes/métodos/funções de processamento de requisições | M07 (controllers como classes, *handlers* como métodos, services injetados) | 🔵 |
 | **Interface com o usuário** | API documentada e consumida por clientes externos | 🔵 |
 | Segurança | M09 (transversal em M07, M08, M12) | 🔵🟣 |
 | Gestão de usuários | M08 | 🔵🟣 |
@@ -85,7 +85,7 @@ Ao final da disciplina, o estudante será capaz de:
 | Construção de API REST | API documentada em OpenAPI | "REST", "NestJS", "API design" |
 | Modelagem relacional | Entidades, migrações e consultas do backend | "TypeORM", "SQL", "modelo de dados" |
 | Segurança aplicada | Checklist OWASP do projeto | "OWASP", "LGPD" |
-| Testes automatizados | Suíte verde no CI | "Jest", "Supertest", "testes de API" |
+| Testes automatizados | Suíte verde no CI | "Vitest", "Jest", "Supertest", "testes de API" |
 | Deploy e configuração | API em produção com HTTPS e banco gerenciado | "CI/CD", "cloud", "12-factor" |
 | Comunicação técnica | Relatório + apresentação | Toda vaga |
 

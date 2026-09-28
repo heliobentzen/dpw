@@ -364,7 +364,7 @@ git config --global core.autocrlf input
 | **Docker Desktop** | Exige WSL2 habilitado. Instale o WSL antes do Docker |
 | **PostgreSQL local** | Prefira o container Docker ao instalador nativo |
 | **Caminhos longos** | `node_modules` pode passar de 260 caracteres. Habilite: `git config --system core.longpaths true` e ative *Long Paths* no Windows |
-| **Antivírus** | Windows Defender pode deixar `npm install` e `runserver` lentos. Adicione a pasta do projeto às exclusões |
+| **Antivírus** | Windows Defender pode deixar `npm install` e o `start:dev` lentos. Adicione a pasta do projeto às exclusões |
 | **Node e npm** | Funcionam nativamente, sem ressalva |
 | **`make`** | Não existe. Use scripts do `package.json` (`npm run <script>`) |
 | **Emoji/acentos no terminal** | Se aparecerem quebrados: `chcp 65001` ou use o Windows Terminal |

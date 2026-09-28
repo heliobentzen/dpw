@@ -220,7 +220,8 @@ Isso cria um `package.json`. Abra-o e **edite** para:
 | `scripts` | Atalhos que rodam de qualquer pasta. `npm run dev:api` sobe o backend sem você precisar entrar nele |
 | `-w backend` | "*workspace* backend": roda o script lá dentro, a partir da raiz |
 
-As pastas ainda não existem: nascem no M03 e no M08. Declará-las agora é o que faz o
+As pastas ainda não existem: `backend/` nasce no M03, `pacotes/tipos/` no M11, e `frontend/`
+só existe se a turma optar pelo cliente web complementar. Declará-las agora é o que faz o
 `npm install` já saber onde procurar quando elas chegarem.
 
 **Por que monorepo:** um único PR mostra a mudança completa, de entidade a tela. Com dois

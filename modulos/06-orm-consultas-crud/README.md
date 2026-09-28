@@ -546,7 +546,7 @@ deveria escrever.
 | --- | --- |
 | Nada valida `titulo` | Obra sem título entra no acervo |
 | O cliente escolhe **quais campos** gravar | Ele pode escrever `criadoEm`, `destaque`, o que existir na tabela |
-| A resposta devolve a **entidade inteira** | Quando `Usuario` existir (M12), a resposta vai levar o hash da senha junto |
+| A resposta devolve a **entidade inteira** | Quando `Usuario` existir (M08), a resposta vai levar o hash da senha junto |
 
 O segundo tem nome — ***mass assignment*** — e é uma das falhas mais exploradas em API. O
 cliente descobre um campo que você não esperava e o escreve.

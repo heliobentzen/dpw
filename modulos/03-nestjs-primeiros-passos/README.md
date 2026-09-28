@@ -150,8 +150,8 @@ cd C:\dev\bibliocom
 **Deu certo se:** existe um `package.json` nessa pasta. Confira abrindo-o no VS Code — ele
 deve ter um campo `workspaces` listando `backend`, `frontend` e `pacotes/*`.
 
-Essas pastas ainda não existem, e é normal: `backend/` nasce daqui a duas etapas,
-`frontend/` no M08 e `pacotes/tipos/` no M11. O campo `workspaces` é uma **declaração de
+Essas pastas ainda não existem, e é normal: `backend/` nasce daqui a duas etapas e
+`pacotes/tipos/` no M11. `frontend/` só existe se a turma fizer o cliente web complementar. O campo `workspaces` é uma **declaração de
 intenção** — ele diz ao npm onde procurar projetos quando eles existirem.
 
 ---
@@ -356,8 +356,8 @@ Duas coisas que ajudam a não sofrer com isso:
    você vai encontrar no curso — aproveite, porque nem todos são assim.
 
 > Isso se chama **ESM** (*ECMAScript Modules*), o sistema de módulos oficial do JavaScript.
-> O frontend que você vai escrever a partir do M08 já usa ESM também — então backend e
-> frontend passam a falar a mesma língua, em vez de duas.
+> Todo frontend moderno (React, Vue, Angular com Vite) também é ESM — então quem consumir
+> a sua API fala a mesma língua de módulos que o seu backend.
 
 **O que reter da etapa:** toda a aplicação sai de **um** módulo, o `AppModule`. Tudo o que
 você criar daqui em diante vai, direta ou indiretamente, pendurar nele.
@@ -1245,10 +1245,11 @@ await app.listen(process.env.PORT ?? 3000);
 **Deu certo se:** <http://localhost:3000/api/obras> responde a lista, e
 <http://localhost:3000/obras> — que funcionava até agora — passa a dar erro 404.
 
-**Por que fazer isso hoje, e não depois:** no M12 o backend e o frontend vão para o mesmo
-domínio, com `/api/*` indo para a API e todo o resto para a aplicação React. Sem um prefixo
-que separe os dois, não há como rotear. Definir agora custa uma linha; definir no M12
-custaria reescrever todas as URLs que o frontend do M08 já tiver escrito.
+**Por que fazer isso hoje, e não depois:** no M12 a API vai para um domínio público, e é
+comum ela dividir esse domínio com outras coisas — a documentação, um painel, um site. O
+prefixo `/api` é o que deixa o proxy da plataforma separar "isto é da API" do resto. Definir
+agora custa uma linha; definir depois do deploy custaria avisar **todo cliente** que já
+estiver chamando as URLs antigas — e você não controla quando eles atualizam.
 
 ---
 
@@ -1365,10 +1366,10 @@ Agora o diagrama faz sentido, porque você construiu três das caixas:
 GET /api/obras/42
     │
     ▼
-[ Middleware ]      logging, helmet                        ○ M13
+[ Middleware ]      logging, helmet                        ○ M09
     │
     ▼
-[ Guard ]           "pode entrar?" — autenticação/papel    ○ M12
+[ Guard ]           "pode entrar?" — autenticação/papel    ○ M08
     │
     ▼
 [ Pipe ]            ParseIntPipe                           ● etapa 14

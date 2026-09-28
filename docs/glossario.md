@@ -36,7 +36,7 @@ do servidor.
 **Cookie** — Par chave-valor que o servidor pede ao navegador para guardar e reenviar.
 
 **Sessão** — Estado do usuário mantido no servidor, identificado por um cookie
-(`sessionid`).
+(no `express-session`, o cookie `connect.sid`).
 
 **Statelessness** — HTTP não lembra requisições anteriores; sessão e token são as formas
 de simular memória.
@@ -44,7 +44,7 @@ de simular memória.
 **DNS** — Traduz nome (`exemplo.com.br`) em endereço IP.
 
 **Porta** — Número que identifica o serviço na máquina: 80 (HTTP), 443 (HTTPS), 3000
-(NestJS em desenvolvimento), 5173 (Vite), 5432 (PostgreSQL).
+(NestJS em desenvolvimento), 5432 (PostgreSQL).
 
 **Servidor de aplicação** — Processo que executa o seu código e responde a requisições. Em
 Node, é o próprio `node dist/main.js`: não há um processo separado entre ele e o proxy.
@@ -57,138 +57,153 @@ termina TLS, serve estáticos e distribui carga.
 **Framework** — Conjunto de código que **chama o seu código** (inversão de controle),
 oferecendo estrutura pronta. Diferente de biblioteca, que você chama.
 
-**MVC** — *Model–View–Controller*.
+**Arquitetura desacoplada** — Backend e cliente separados, conversando só por HTTP e JSON.
+O backend não sabe se quem chama é navegador, app ou outro serviço (M02).
 
-**MVC** — *Model–View–Controller*. No NestJS: a **entidade** é o Model, o **controller** é
-o Controller, e a **View** é o React — que roda no navegador, não no servidor.
+**C4 Model** — Forma de desenhar arquitetura em quatro níveis de zoom: **C**ontexto (o
+sistema e quem o usa), **C**ontêineres (API, banco, cliente), **C**omponentes (módulos,
+controllers, services) e **C**ódigo. Desenha-se em texto, com Mermaid, e o diagrama fica
+versionado junto com o código (M02).
 
-**Módulo (NestJS)** — Unidade que agrupa controllers e providers de um domínio, e declara
-o que expõe. O `AppModule` é a raiz da árvore; cada domínio (acervo, contas) é um módulo
-reutilizável dentro do projeto.
+**Camadas** — Divisão de responsabilidades: **DTO** (formato), **controller** (HTTP),
+**service** (regra de negócio), **repository** (dados). Critério do M03: *se o código não
+mudaria vindo de um comando de terminal, é service*.
 
-**`app.module.ts`** — Módulo raiz: onde a configuração global e os demais módulos entram.
+**Módulo (NestJS)** — Unidade que agrupa controllers e providers de um domínio e declara o
+que expõe, pelas listas `imports`, `controllers` e `providers`. O `AppModule` é a raiz.
 
-**`main.ts`** — Ponto de entrada: cria a aplicação, aplica pipes e middlewares globais, sobe o servidor.
+**Controller** — Classe que traduz HTTP em chamada de método: lê rota, parâmetros e corpo,
+chama o service, devolve dados. Não guarda dados nem decide regra.
 
-**Middleware** — Camada que processa toda requisição/resposta, antes/depois da view.
+**Provider / Service** — Classe marcada com `@Injectable()` que concentra a regra de
+negócio. Não sabe que HTTP existe.
+
+**Injeção de dependência** — A classe declara **o que precisa** no construtor, e o
+framework entrega pronto. Como uma tomada: o aparelho não sabe de que usina vem a energia,
+só exige o padrão certo. Torna o teste barato e a troca de implementação indolor (M03).
+
+**Decorator** — Função que **anexa informação** a uma classe, método ou parâmetro
+(`@Controller`, `@Get`, `@Entity`, `@IsString`). O framework lê essas anotações na
+inicialização. Não executa nada sozinho.
+
+**Pipe** — Peça que roda **entre a requisição e o método**, convertendo ou validando a
+entrada. Pode recusar sozinho com 400 (`ParseIntPipe`, `ValidationPipe`).
+
+**Guard** — Peça que decide **se a requisição pode entrar**. Autenticação e papéis (M08).
+
+**Middleware** — Camada que processa toda requisição antes do roteamento: cabeçalhos de
+segurança, log, CORS (M09, M13).
+
+**Interceptor** — Peça que envolve a execução do método, podendo moldar a resposta.
+
+**`main.ts`** — Ponto de entrada: cria a aplicação, aplica prefixo, pipes e middlewares
+globais, sobe o servidor.
+
+**ESM** — *ECMAScript Modules*, o sistema de módulos oficial do JavaScript. No projeto do
+Nest 12, todo `import` de arquivo próprio termina em `.js`, mesmo o arquivo sendo `.ts` (M03).
 
 ## Dados e ORM
 
 **ORM** — *Object-Relational Mapper*. Traduz classes ↔ tabelas, objetos ↔ linhas,
 atributos ↔ colunas.
 
-**Model** — Classe que descreve uma entidade e gera a tabela correspondente.
+**Entidade** — Classe marcada com `@Entity()` que descreve uma tabela. Cada `@Column` vira
+uma coluna (M04).
 
-**Campo (field)** — Atributo do model que vira coluna: `CharField`, `IntegerField`,
-`ForeignKey`…
+**Repository** — Objeto que dá acesso aos dados de uma entidade (`find`, `save`, `delete`).
+Injetado com `@InjectRepository(Entidade)` (M06).
 
-**Migração (migration)** — Arquivo versionado que descreve uma mudança de esquema do
-banco. É código, entra no Git e roda em ordem.
+**`synchronize`** — Modo do TypeORM que altera o banco a cada boot para casar com as
+entidades. Útil para aprender; **proibido em produção**, porque pode apagar dados sem aviso.
 
-**`makemigrations`** — Compara models com as migrações existentes e **gera** o arquivo de
-migração.
+**Migração (migration)** — Arquivo versionado que descreve uma mudança de esquema, com
+`up()` para aplicar e `down()` para desfazer. É código, entra no Git e roda em ordem (M05).
 
-**`migrate`** — **Aplica** as migrações pendentes ao banco.
+**`migration:generate`** — Compara entidades × banco e **escreve** a migração. Não aplica.
+
+**`migration:run` / `migration:revert`** — **Aplica** as pendentes / **desfaz** a última.
 
 **Chave primária (PK)** — Identificador único da linha. `@PrimaryGeneratedColumn()` a cria.
 
-**Chave estrangeira (FK)** — Referência a outra tabela; no TypeORM, `@ManyToOne` (relação
-1-N).
+**Chave estrangeira (FK)** — Referência a outra tabela; no TypeORM, o lado `@ManyToOne` a
+carrega. Declarar `@Column() autorId` junto expõe a coluna ao TypeScript.
 
 **Relação N-N** — `@ManyToMany` + `@JoinTable`; o TypeORM cria a tabela intermediária.
 
-**Relação 1-1** — `OneToOneField`; típico para estender o usuário com um perfil.
+**`onDelete`** — O que acontece com os filhos quando o pai é apagado: `RESTRICT` (impede),
+`CASCADE` (apaga junto), `SET NULL`. É decisão de negócio, não de banco.
 
-**`related_name`** — Nome do acesso reverso: de `Emprestimo.associado` para
-`associado.emprestimos`.
+**QueryBuilder** — API que monta consultas por encadeamento; boa para filtros opcionais e
+agregações. Nada vai ao banco até `getMany()` ou `getOne()`.
 
-**QueryBuilder** — Objeto que monta uma consulta por encadeamento. É **preguiçoso**: só vai ao
-banco quando os dados são realmente usados.
+**Problema N+1** — Uma consulta para a lista e mais uma por item. Corrige-se pedindo a
+relação (`relations`), que o ORM resolve com `JOIN` (M06).
 
-**Manager** — Interface de consulta do model, acessível por `Model.objects`.
+**Agregação** — Valor calculado pelo banco (`COUNT`, `AVG`), obtido com `addSelect` +
+`groupBy`.
 
-**Lookup** — Sufixo de filtro: `__gte`, `__icontains`, `__in`, `__isnull`, `__date`.
+**Transação** — Bloco atômico: ou tudo é gravado, ou nada. `dataSource.transaction(...)`,
+usando **sempre** o `manager` recebido lá dentro.
 
-**`select_related` / `prefetch_related`** — Otimizações que evitam o problema **N+1**
-(uma consulta extra por objeto do loop).
+**Seed** — Script que popula o banco com dados de teste (`recursos/codigo/semear.ts`).
 
-**Agregação** — `Count`, `Sum`, `Avg`, `Max`, `Min` calculados pelo banco.
+## Rotas, DTOs e contrato
 
-**Agregação** — Valor calculado pelo banco (`COUNT`, `AVG`), obtido com `addSelect` + `groupBy`.
+**Roteamento** — Mapeamento de URL para método, feito pelos decorators `@Controller` e
+`@Get`/`@Post`/`@Patch`/`@Delete`.
 
-**Transação** — Bloco atômico: ou tudo é gravado, ou nada. `transaction.atomic()`.
+**Prefixo de rota** — Definido em `@Controller("obras")`; todas as rotas da classe partem
+dele. O prefixo global (`/api`) é definido uma vez, em `main.ts`.
 
-**`fixtures`** — Dados iniciais em JSON/YAML carregados com `loaddata`.
+**Parâmetro de rota** — Trecho variável da URL (`/obras/:id`), lido com `@Param("id")`.
+Rotas literais (`/obras/buscar`) devem ser declaradas **antes** das paramétricas.
 
-## Views, URLs e templates
+**DTO** — *Data Transfer Object*: classe que descreve **o que entra** ou **o que sai** da
+API, separada da entidade que descreve **o que é guardado** (M07).
 
-**View** — Função ou classe que recebe uma `HttpRequest` e devolve uma `HttpResponse`.
+**`ValidationPipe`** — Pipe global que lê os decorators do DTO e recusa com 400 o que não
+bate. Com `whitelist`, descarta campos não declarados.
 
-**FBV / CBV** — *Function-Based View* / *Class-Based View*.
+***Mass assignment*** — Falha em que o cliente grava campos que não deveria (`papel`,
+`criadoEm`) porque a API aceitou o corpo inteiro. Impedida por DTO + `whitelist`.
 
-**View genérica** — CBV pronta para um caso comum: `ListView`, `DetailView`, `CreateView`,
-`UpdateView`, `DeleteView`.
+**OpenAPI** — Formato padrão de descrição de API, legível por máquina. No curso é gerado
+dos decorators (`openapi.json`) e exibido pelo Swagger UI em `/api/docs`.
 
-**Roteamento** — Mapeamento de URL para método, feito pelos decorators `@Controller` e `@Get`.
-
-**Path converter** — Tipagem no padrão da URL: `<int:pk>`, `<slug:slug>`, `<uuid:id>`.
-
-**Prefixo de rota** — Definido em `@Controller("obras")`; todas as rotas da classe partem dele.
-O prefixo global (`/api`) é definido uma vez, em `main.ts`.
-
-**Slug** — Identificador textual amigável para URL: `guia-de-nestjs-para-iniciantes`.
-
-**Componente** — Função que recebe *props* e devolve JSX. É a unidade de interface do React —
-o equivalente ao "template" de frameworks com renderização no servidor.
-
-**Props** — Dados que o componente pai passa ao filho. São somente leitura.
-
-**Composição** — Montar telas combinando componentes pequenos, em vez de herdar layouts.
-
-**Arquivo estático** — CSS, JS, imagens da aplicação (`STATIC_URL`).
-
-**Arquivo de mídia** — Arquivo enviado pelo usuário (`MEDIA_URL`). Não confunda os dois.
-
-**Padrão PRG** — *Post/Redirect/Get*: após um POST bem-sucedido, redirecione, para que o
-F5 não reenvie o formulário.
-
-## Formulários e validação
-
-**`Form` / `ModelForm`** — Classes que declaram campos, validam entrada e renderizam HTML.
-`ModelForm` deriva os campos de um model.
-
-**DTO validado** — Instância da classe do DTO, já validada e com os tipos convertidos pelo `ValidationPipe`.
-
-**`clean_<campo>()` / `clean()`** — Validações customizadas de um campo / entre campos.
-
-**Framework de mensagens** — `messages.success(...)`: feedback de uma requisição para a
-próxima.
+**Contrato de API** — O acordo sobre recursos, rotas, formatos e erros. Escrito antes do
+código (M02), verificado pelo CI depois (M10, M11).
 
 ## Autenticação e autorização
 
-**Autenticação** — Quem é você. **Autorização** — o que você pode fazer.
+**Autenticação** — Quem é você (falha: `401`). **Autorização** — o que você pode fazer
+(falha: `403`).
 
-**`AUTH_USER_MODEL`** — Configuração que aponta o model de usuário. Defina **antes** da
-primeira migração.
+**Hash de senha** — Senha nunca é armazenada; guarda-se um hash lento (Argon2, bcrypt) que
+já embute o *salt*.
 
-**Permissão** — Direito granular (`acervo.add_obra`), criado automaticamente por model.
+**Sessão × token** — Sessão guarda o estado no servidor e manda só um identificador no
+cookie; token (JWT) carrega os dados assinados no próprio cliente. Escolhe-se pelo modelo de
+ameaça, não pela moda (M08).
 
-**Grupo** — Conjunto de permissões atribuível a usuários (papéis).
+**Cookie `HttpOnly`** — Cookie que o JavaScript da página não consegue ler. Protege a sessão
+contra roubo por XSS.
 
-**`login_required` / `LoginRequiredMixin`** — Exigem usuário autenticado.
+**Papel (role)** — Conjunto de permissões atribuído a usuários (associado, bibliotecário,
+coordenação).
 
-**Hash de senha** — Senha nunca é armazenada; guarda-se um hash (PBKDF2/Argon2) com *salt*.
+**Autorização por objeto** — Verificar não só o papel, mas se **aquele registro** pertence a
+quem pede. É o que impede IDOR.
 
 ## Segurança
 
 **OWASP Top 10** — Lista de referência das dez classes de risco mais críticas em
 aplicações web.
 
-**Injeção de SQL** — Entrada do usuário interpretada como SQL. O ORM protege; `raw()` e
-f-strings em SQL, não.
+**Injeção de SQL** — Entrada do usuário interpretada como SQL. Parâmetros nomeados
+(`:termo`) protegem; montar consulta com crase ou `+`, não (M06).
 
-**XSS** — *Cross-Site Scripting*: script do atacante executado no navegador da vítima. O
-React escapa por padrão; `dangerouslySetInnerHTML` desliga a proteção.
+**XSS** — *Cross-Site Scripting*: script do atacante executado no navegador da vítima. Na
+API, o risco é devolver HTML sem escapar ou aceitar arquivo que o navegador execute.
 
 **CSRF** — *Cross-Site Request Forgery*: site malicioso dispara ação autenticada no seu
 site. Mitigado por `SameSite=Lax` no cookie de sessão e por token anti-CSRF nas rotas de escrita.
@@ -209,10 +224,13 @@ finalidade, direitos do titular.
 
 ## Testes, deploy e operação
 
-**Teste unitário / de integração / e2e** — Testam uma unidade isolada / a combinação de
-peças / o fluxo pelo navegador.
+**Teste unitário / de integração / e2e** — Testam uma unidade isolada (um service com
+dublês) / a combinação de peças (service + banco) / o fluxo HTTP inteiro (Supertest).
 
-**Fixture** — Preparação reutilizável para testes; em Jest, `beforeEach` e funções de apoio.
+**Dublê de teste (mock)** — Objeto falso injetado no lugar de uma dependência real. É a
+injeção de dependência pagando dividendo (M10).
+
+**Fixture** — Preparação reutilizável para testes; no Vitest, `beforeEach` e funções de apoio.
 
 **Cobertura** — Percentual de linhas executadas pelos testes. Métrica de apoio, não meta.
 
@@ -221,13 +239,14 @@ peças / o fluxo pelo navegador.
 
 **Variável de ambiente** — Configuração vinda do sistema, fora do código.
 
-**`DEBUG`** — Modo de desenvolvimento. `DEBUG=True` em produção expõe código, configuração
-e trechos de banco. É a falha de configuração mais comum.
+**`NODE_ENV`** — Indica o ambiente (`development`, `test`, `production`). Em produção, o
+Nest deixa de devolver detalhes internos nos erros.
 
-**`ALLOWED_HOSTS`** — Lista de domínios que a aplicação aceita servir.
+**Validação de ambiente** — Conferir as variáveis na inicialização e **não subir** se
+faltar alguma. Melhor falhar alto no boot do que pela metade em produção (M03).
 
-**`collectstatic`** — Reúne os estáticos de todos os apps num diretório para o servidor
-web.
+**Healthcheck** — Rota que diz se a aplicação e suas dependências estão de pé. A plataforma
+a consulta para decidir se reinicia o serviço (M12, M13).
 
 **`node dist/main.js`** — Como a aplicação sobe em produção. É o mesmo comando em Windows,
 macOS, Linux e na plataforma de hospedagem — não há servidor de produção separado.

@@ -1,7 +1,10 @@
 # Checklist de revisão de código (Pull Request)
 
-Para usar na Etapa 3. Revisão leva 15–30 minutos; PR que exige mais que isso está grande
-demais e deveria ser dividido.
+Para usar na Etapa 2 do projeto. Uma revisão leva de 15 a 30 minutos; PR que exige mais que
+isso está grande demais e deveria ser dividido.
+
+> Revisar código é como a segunda leitura de um contrato antes de assinar: quem escreveu
+> lê o que quis dizer; quem revisa lê o que está escrito.
 
 ## Antes de tudo
 
@@ -14,8 +17,8 @@ demais e deveria ser dividido.
 
 - [ ] Faz o que a história pede?
 - [ ] Os critérios de aceite estão todos cobertos?
-- [ ] Os caminhos de erro foram tratados (entrada inválida, objeto inexistente, sem permissão)?
-- [ ] O estado vazio foi tratado?
+- [ ] Os caminhos de erro foram tratados (entrada inválida, recurso inexistente, sem permissão)?
+- [ ] A lista vazia foi tratada (devolve `{"itens":[],"total":0,...}`, não erro)?
 
 ## Testes
 
@@ -24,56 +27,55 @@ demais e deveria ser dividido.
 - [ ] Há teste do caminho de erro, não só do caminho feliz?
 - [ ] Nenhum teste depende da data real, de rede ou da ordem de execução?
 
-## Modelo e dados
+## Entidades e migrações
 
-- [ ] Regra de negócio está no model/service, não espalhada na view?
-- [ ] `on_delete` adequado ao significado da relação?
-- [ ] Migração gerada, nomeada e revisada? (leia o conteúdo, não só o nome)
-- [ ] Migração de dados usa `apps.get_model` e tem `reverse_code`?
-- [ ] Campo novo obrigatório em tabela com dados usa expandir/contrair?
+- [ ] Regra de negócio está no service, não no controller?
+- [ ] `onDelete` adequado ao significado de negócio da relação?
+- [ ] Migração gerada, nomeada e **lida** (o SQL, não só o nome do arquivo)?
+- [ ] A migração tem `down()` que desfaz de verdade o `up()`?
+- [ ] Coluna nova obrigatória em tabela com dados usa expandir → migrar → contrair?
 
 ## Consultas
 
-- [ ] Alguma iteração acessando FK sem `select_related`? (N+1)
-- [ ] Algum `.count()` ou `.exists()` dentro de laço?
-- [ ] Filtro por relação N-N sem `distinct()`?
-- [ ] Incremento numérico lido e reescrito na aplicação, em vez de `UPDATE ... SET x = x + 1`?
-- [ ] Listagem sem paginação?
+- [ ] Algum laço que dispara uma consulta por item? (N+1 — use `relations` ou `leftJoinAndSelect`)
+- [ ] Algum `count()` ou `findOne()` dentro de laço?
+- [ ] Filtro por relação N-N devolvendo linhas repetidas?
+- [ ] Contador lido e reescrito na aplicação, em vez de `UPDATE ... SET x = x + 1`?
+- [ ] Listagem sem paginação, ou paginação sem teto?
 
-## Views e URLs
+## Controllers e rotas
 
-- [ ] Toda ação que altera dados é POST?
-- [ ] Rotas de escrita estão cobertas por `@UseGuards` (não só escondidas na interface)?
-- [ ] POST bem-sucedido redireciona (PRG)?
-- [ ] Nenhuma URL de API escrita literalmente no cliente (use o módulo de API)?
-- [ ] `get_object_or_404` em vez de `get()` solto?
+- [ ] O verbo HTTP combina com o efeito (`GET` nunca altera dados)?
+- [ ] O status de resposta é o do contrato (201 no `POST`, 204 no `DELETE`)?
+- [ ] Rotas de escrita cobertas por guard (`@UseGuards`)?
+- [ ] Rota literal (`/obras/destaques`) declarada **antes** da rota com parâmetro (`/obras/:id`)?
+- [ ] Recurso inexistente vira `NotFoundException`, não `null` com status 200?
+- [ ] Todo `@Body()` usa uma classe DTO, e toda resposta passa por DTO de saída?
+- [ ] O Swagger documenta as respostas de erro, não só a de sucesso?
 
 ## Segurança
 
-- [ ] A view exige autenticação onde deveria?
-- [ ] A view exige permissão onde deveria?
-- [ ] A consulta é filtrada pelo usuário da sessão (sem IDOR)?
-- [ ] `fields` explícito no ModelForm (nada de `"__all__"`)?
-- [ ] Campos sensíveis definidos no servidor, não vindos do cliente?
-- [ ] Nenhum `dangerouslySetInnerHTML` sobre dado do usuário?
-- [ ] Nenhum SQL montado com f-string?
+- [ ] A rota exige autenticação onde deveria?
+- [ ] A rota exige o papel certo onde deveria?
+- [ ] A consulta é filtrada pelo usuário autenticado (sem IDOR)?
+- [ ] Campos sensíveis definidos no servidor, não vindos do corpo?
+- [ ] Nenhum SQL montado com template string?
 - [ ] Nenhuma credencial, token ou dado real de pessoa no diff?
-
-## Interface
-
-- [ ] Funciona em 360px?
-- [ ] Campos têm `<label>` associado?
-- [ ] Ação bem-sucedida dá feedback (mensagem)?
-- [ ] Ação destrutiva pede confirmação?
-- [ ] Textos em português, sem *lorem ipsum* nem placeholder esquecido?
 
 ## Legibilidade
 
-- [ ] Os nomes dizem o que a coisa é? (`obras_disponiveis` > `lista2`)
+- [ ] Os nomes dizem o que a coisa é? (`obrasDisponiveis` > `lista2`)
 - [ ] Alguma função com mais de ~40 linhas ou 3 níveis de indentação?
 - [ ] Alguma duplicação óbvia que pediria extração?
 - [ ] Comentários explicam **por quê**, não **o quê**?
-- [ ] Nenhum `print()`, código comentado ou `TODO` sem issue?
+- [ ] Nenhum `console.log`, código comentado ou `TODO` sem issue?
+
+## Código gerado com IA
+
+- [ ] Quem abriu o PR consegue explicar cada linha, sem reabrir o assistente?
+- [ ] Os pacotes importados existem e são os oficiais (IA inventa nomes plausíveis)?
+- [ ] As APIs usadas existem **na versão do projeto** (NestJS 12, TypeORM 1.x)?
+- [ ] Há teste que prova o comportamento, e não só código que "parece certo"?
 
 ---
 
@@ -81,8 +83,8 @@ demais e deveria ser dividido.
 
 | ❌ | ✅ |
 |---|---|
-| "Isso está errado." | "Aqui pode dar N+1 na listagem — que tal `select_related('autor')`?" |
-| "Código ruim." | "Essa função faz três coisas; extrair a validação para o form deixaria mais fácil de testar." |
+| "Isso está errado." | "Aqui pode dar N+1 na listagem — que tal `relations: { autor: true }`?" |
+| "Código ruim." | "Essa função faz três coisas; extrair a regra para o service deixaria mais fácil de testar." |
 | "Você não sabe fazer isso?" | "Não conhecia essa abordagem — pode me explicar por que escolheu assim?" |
 
 Classifique cada comentário:

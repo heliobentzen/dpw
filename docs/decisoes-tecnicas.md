@@ -54,11 +54,11 @@ interface deixou de ser obrigatória e passou a ser complementar:
 | Classes geram o banco | Classes `@Entity()` do TypeORM + `synchronize` em dev (M04) |
 | Atualizar o banco pelas classes | `migration:generate` compara entidades × banco (M05) |
 | Consultas e CRUD via API do framework | `Repository` e `QueryBuilder` (M06) |
-| Mapeamento de URLs | `@Controller('obras')` + `@Get(':id')` (M07) **e** React Router (M10) |
+| Mapeamento de URLs | `@Controller("obras")` + `@Get(":id")` (M03 e M07) |
 | Classes / métodos / funções para requisições | Controllers são **classes**, *handlers* são **métodos**, Providers são serviços injetados (M07) |
-| **Templates: criação de interfaces** | Componentes React + Tailwind (opcional, M08–M11) — ver ADR-11 |
+| **Templates: criação de interfaces** | A interface da API é o contrato: Swagger UI e OpenAPI (M03, M07, M11) — ver ADR-11 |
 | Gestão de usuários | Passport + Guards + entidade `Usuario` (M08) |
-| Segurança | M09 (OWASP aplicado a API e ao frontend opcional) |
+| Segurança | M09 (OWASP aplicado à API) |
 | Implantação | M12 (API em produção) |
 
 **Por que TypeORM e não Prisma.** Prisma é excelente e cresce rápido, mas seu schema é uma
@@ -198,7 +198,7 @@ mesmo aprendizado lendo o SQL gerado em vez de refazendo o trabalho.
 
 ## ADR-16 — NestJS 12 e módulos ESM
 
-- **Status:** aceito · **Data:** 2026-09-02 · **Atualiza a stack da [ADR-10](#adr-10--typescript-ponta-a-ponta-nestjs--typeorm--react)**
+- **Status:** aceito · **Data:** 2026-09-02 · **Atualiza a stack da [ADR-10](#adr-10--backend-em-typescript-com-frontend-opcional-nestjs--typeorm)**
 
 **Contexto.** O material foi escrito para o NestJS 11. O 12 já é a versão corrente, e o
 `nest new` de hoje produz um projeto diferente do descrito: módulos **ESM** (`"type":

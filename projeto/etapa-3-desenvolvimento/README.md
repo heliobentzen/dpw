@@ -123,7 +123,7 @@ Revisão é sobre o código, nunca sobre a pessoa. Comentário útil sugere alte
 - **Segurança:** Argon2/bcrypt, token ou sessão com expiração, *guards* por papel **e**
   verificação de dono, `ValidationPipe` com `whitelist`, DTO de saída sem campos sensíveis,
   Helmet, CORS explícito, *rate limit* no login.
-- **Qualidade:** testes e2e (Jest + Supertest) cobrindo regras, validação e matriz de
+- **Qualidade:** testes e2e (Vitest + Supertest) cobrindo regras, validação e matriz de
   acesso; CI com lint, build, testes e verificação do contrato; PRs revisados.
 - **Operação:** deploy reproduzível (idealmente automático a partir da `main`),
   configuração por variáveis de ambiente, logs estruturados, backup, `docs/deploy.md`.

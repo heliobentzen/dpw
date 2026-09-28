@@ -1,7 +1,7 @@
 # FAQ e troubleshooting
 
-Erros reais, na ordem em que aparecem no semestre. Antes de pedir ajuda, **leia a última
-linha do traceback** — ela quase sempre diz o que fazer.
+Erros reais, na ordem em que aparecem no semestre. Antes de pedir ajuda, **leia a primeira
+linha do *stack trace*** — ela quase sempre diz o que fazer.
 
 ## Como ler um erro
 
@@ -15,9 +15,10 @@ TypeError: Cannot read properties of undefined (reading 'nome')
 
 Três regras que resolvem a maioria:
 
-1. **Leia de baixo para cima** até achar a primeira linha que aponta para **o seu código** —
-   caminho sem `node_modules/`. É quase sempre ali que está o problema.
-2. **A última linha diz o quê; a primeira do seu código diz onde.**
+1. **A primeira linha diz o quê.** No Node, a mensagem vem no topo, e as chamadas vêm
+   embaixo, da mais recente para a mais antiga.
+2. **Desça até a primeira linha que aponta para o seu código** — caminho sem
+   `node_modules/`. É quase sempre ali que está o problema: ela diz **onde**.
 3. Se o caminho tem `dist/`, é o código **compilado**. A linha corresponde ao `.ts` graças ao
    *source map* — o VS Code abre o original se você clicar.
 
@@ -181,16 +182,18 @@ PostgreSQL em desenvolvimento, em teste e em produção — e gera as migraçõe
 
 ## Autenticação
 
-**Todo endpoint autenticado responde 401 no frontend**
-Faltou `credentials: "include"` no `fetch`. Sem isso o navegador não envia o cookie.
+**Funciona no `curl`, mas um cliente no navegador recebe 401 em tudo**
+O cliente não está enviando o cookie. Num `fetch` de outra origem, falta
+`credentials: "include"` — e, na API, `credentials: true` no CORS com a origem listada.
 
 **Login funciona local e falha em produção**
 Falta `app.set("trust proxy", 1)`. A PaaS termina o TLS, e sem isso o Express acha que a
 conexão é HTTP e recusa enviar o cookie `secure`.
 
 **A sessão some a cada reinício do servidor**
-O armazenamento padrão do `express-session` é em memória. Para produção, use um store
-externo (Redis) — está previsto no M12.
+O armazenamento padrão do `express-session` é em memória. Para produção, guarde as sessões
+no próprio PostgreSQL (por exemplo, `connect-pg-simple`): o banco já existe e sobrevive ao
+reinício.
 
 **Esqueci a senha do usuário de coordenação**
 Rode o script de seed com um e-mail novo, ou atualize o hash direto pelo banco em
@@ -243,20 +246,9 @@ await app.listen(process.env.PORT ?? 3000, "0.0.0.0");
 Porta fixa faz o serviço subir e nunca receber tráfego. `"0.0.0.0"` também é necessário:
 escutar só em `localhost` o torna inacessível de fora do contêiner.
 
-**A API responde HTML em vez de JSON**
-Faltou `exclude: ["/api/{*caminho}"]` no `ServeStaticModule`: os arquivos estáticos estão
-capturando `/api/*` antes dos controllers. Como o status é 200, o diagnóstico engana.
-
-**F5 numa rota interna dá 404**
-Falta a regra de *fallback* (`/* → /index.html`). O tropeço clássico do deploy de SPA — não aparece
-em desenvolvimento porque o Vite já faz o fallback.
-
 **`500 Internal Server Error` sem detalhes**
 É o comportamento **correto**. Leia os logs da plataforma (`render logs`, `fly logs`,
 `railway logs`). Nunca devolva `erro.stack` ao cliente para "facilitar a depuração".
-
-**Mudei `VITE_API_URL` na plataforma e o site não mudou**
-Variável `VITE_*` é embutida em **tempo de build**. É preciso refazer o build, não reiniciar.
 
 **Migração não foi aplicada em produção**
 O comando de start precisa incluí-la: `npm run migration:run:prod && npm run start:prod`.

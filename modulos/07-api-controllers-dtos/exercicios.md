@@ -34,7 +34,7 @@ um *crawler* ou o *prefetch* do navegador percorre essa URL.
 Os dois últimos merecem discussão: 422 ou 400? 500 vaza informação?
 
 > ⚠️ As duas linhas sobre autenticação são para **responder no papel**, não para testar: a
-> API do M07 ainda é aberta, e os guards chegam no M12. Saber qual status usar é conteúdo do
+> API do M07 ainda é aberta, e os guards chegam no M08. Saber qual status usar é conteúdo do
 > M01; implementá-lo é de lá.
 
 ---
@@ -81,7 +81,7 @@ Responda: por que **recusar** é melhor que **ignorar em silêncio**?
 1. Faça um endpoint que devolva a entidade `Associado` **direto**, sem DTO.
 2. Liste os campos que apareceram e que **não** deveriam ser públicos.
 3. Corrija com DTO de saída.
-4. Responda: se `Associado` ganhar um campo `documento` no M12, o que acontece em cada
+4. Responda: se `Associado` ganhar um campo `documento` no M08, o que acontece em cada
    versão?
 
 O item 4 é o argumento central: sem DTO, **toda coluna nova vira campo público
@@ -129,7 +129,7 @@ acessível por `GET` é apagada por quem só passou por perto. 7: erro de autent
 
 **E07.2** — Limite de empréstimos: **422** (sintaxe correta, regra de negócio violada) é mais
 preciso que 400, embora 400 seja aceito. Erro inesperado: **500**, com corpo genérico — o
-traceback vai para o log, nunca para a resposta (M13).
+*stack trace* vai para o log, nunca para a resposta (M13).
 
 **E07.4** — Sem `whitelist`, `destaque` e `criadoEm` são gravados: quem chama a API decide o
 valor de campos que você nunca expôs. Recusar é melhor que ignorar porque o cliente descobre

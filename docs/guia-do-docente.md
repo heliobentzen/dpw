@@ -45,10 +45,10 @@ necessário**:
 | **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | sim |
 | **Antes do M04** | Docker + PostgreSQL | **sim, com folga** — no Windows exige WSL2 e, às vezes, virtualização na BIOS |
 
-A semana 1 instala **um runtime só**. O foco do curso é o backend; a camada visual, quando
-for usada, entra como material opcional e não deve criar uma segunda fricção de ambiente.
+A semana 1 instala **um runtime só**: o Node, que já traz o npm. O banco chega no M04, pelo
+Docker, quando passa a servir para alguma coisa.
 
-Para conferir, `verifica-ambiente.mjs` aceita `--etapa m00|m03|m05` e cobra só o que já
+Para conferir, `verifica-ambiente.mjs` aceita `--etapa m00|m03|m04` e cobra só o que já
 deveria existir. Ele **diagnostica e não instala**: para cada falha, imprime o comando exato
 que corrige, e quem executa é o aluno.
 
@@ -76,28 +76,53 @@ causa.
 ### Diagnóstico de JavaScript — semana 1
 
 O pré-requisito de JS **está atendido** por esta turma, e o cronograma padrão assume isso.
-Ainda assim, aplique o exercício de 20 minutos de
-[`../recursos/js-para-react.md`](../recursos/js-para-react.md) na primeira aula — o
-objetivo mudou:
+Ainda assim, aplique este exercício de 20 minutos, sem consulta, na primeira aula. Ele não
+decide o cronograma: serve para **identificar quem individualmente chega com lacuna** e
+direcionar monitoria antes do M03, que é o primeiro código TypeScript da disciplina.
 
-| Antes servia para | Agora serve para |
+```js
+// 1. O que imprime?
+const nums = [1, 2, 3, 4, 5];
+console.log(nums.filter(n => n % 2 === 0).map(n => n * 10));
+
+// 2. Reescreva com desestruturação
+const obra = { titulo: "Dom Casmurro", autor: { nome: "Machado" }, ano: 1899 };
+const titulo = obra.titulo;
+const nomeAutor = obra.autor.nome;
+
+// 3. Separe `categoriaIds` do resto do objeto numa linha só
+const dto = { titulo: "X", ano: 1900, categoriaIds: [1, 2] };
+
+// 4. Complete, tratando o caso de resposta com erro
+async function buscar() {
+  const r = await fetch("http://localhost:3000/api/obras");
+  // devolva o JSON
+}
+
+// 5. O que imprime cada linha, e por quê?
+console.log(0 || 3000);
+console.log(0 ?? 3000);
+```
+
+| Questão | Onde o curso cobra |
 | --- | --- |
-| Decidir o cronograma | **Identificar quem individualmente chega com lacuna** |
-| Escolher entre nivelamento e modo híbrido | Direcionar monitoria antes da semana 8 |
+| 1 — `filter`/`map` | M06 (transformar resultado de consulta), M07 (`ObraResposta.de`) |
+| 2 e 3 — desestruturação e *rest* | M07, etapa 8: `const { categoriaIds, ...campos } = dto` |
+| 4 — `async`/`await` | Todo service a partir do M06 |
+| 5 — `\|\|` × `??` | M03, etapa 5: `process.env.PORT ?? 3000` |
 
 Uma turma "com base" costuma ter 2 ou 3 pessoas que na prática não têm. Encontrá-las na
-semana 1 custa uma monitoria; encontrá-las na semana 8 custa o bloco de frontend delas.
+semana 1 custa uma monitoria; encontrá-las no M06, quando o código fica assíncrono e as
+consultas encadeadas, custa o bloco de backend delas.
 
-**O que fazer com o pré-requisito atendido:** não acelere o M08 achando que sobra tempo.
-As 4h já foram dimensionadas para o que é difícil em React mesmo para quem sabe JS —
-imutabilidade do estado, array de dependências do `useEffect` e chaves de lista. Gaste-as
-ali, não em sintaxe.
-
-| Resultado do diagnóstico | Ação |
+| Acertos | Ação |
 | --- | --- |
-| Turma confortável (esperado) | Cronograma padrão; monitoria pontual para casos isolados |
-| 20%+ com dificuldade | Monitoria dirigida nas semanas 6–7, sem mexer no cronograma |
-| Maioria com dificuldade | Reavalie: 4h de nivelamento (retire de M06 e M11) ou modo híbrido |
+| 4–5 | Segue normalmente |
+| 2–3 | Indicar revisão pontual dos tópicos errados; monitoria nas semanas 3–4 |
+| 0–1 | Monitoria dirigida **antes** do M03; acompanhar de perto até o M06 |
+
+Se mais de 20% da turma ficar em 0–1, reavalie o cronograma: o M03 é o primeiro módulo em
+que a sintaxe deixa de ser o que se estuda e passa a ser a ferramenta com que se estuda.
 
 ## 2. Ritmo sugerido de uma aula de 5h
 
@@ -133,47 +158,44 @@ dos problemas de acompanhamento e de "eu perdi meu código".
 - **Papéis rotativos** (trocam a cada etapa): *Product Owner* (fala com o parceiro),
   *Tech Lead* (arquitetura e code review), *Scribe* (documentação e atas), *Ops* (deploy,
   CI, ambientes).
-- **Contrato de equipe** obrigatório na Etapa 2 — inclui o que acontece se alguém não
+- **Contrato de equipe** obrigatório na Etapa 1 — inclui o que acontece se alguém não
   entregar.
 
 **Caronas.** Instrumentos objetivos, nesta ordem: (1) histórico de commits por autor,
-(2) autoavaliação e avaliação por pares na Etapa 4, (3) arguição individual na
+(2) autoavaliação e avaliação por pares na Etapa 3, (3) arguição individual na
 apresentação — cada integrante responde sobre uma parte do código que **não** escreveu.
 A nota do projeto é individualizável por fator de participação (0,7–1,1).
 
 ## 5. Compressão do conteúdo
 
-Se precisar reduzir a carga sem ferir a ementa, corte nesta ordem:
+Se precisar reduzir o tempo de aula sem ferir a ementa, comprima nesta ordem:
 
-1. M13 Observabilidade (2h) — complementar
-2. M11 Tipos compartilhados (2h) — pode virar leitura assíncrona
-3. M10 Testes: 3h → 2h (mantenha regra de negócio e matriz de acesso)
-4. M00 Ambiente: transforme em pré-atividade assíncrona
-5. M08 Componentes (2h) — pode ser absorvido pelo M09, com perda
+1. **M13 Observabilidade** — vira leitura com roteiro assíncrono; mantenha o healthcheck
+   e o teste de restauração do backup em aula.
+2. **M11 Tipos compartilhados** — pode virar leitura assíncrona.
+3. **M10 Testes** — reduza à regra de negócio e à matriz de acesso; o resto vira exercício.
+4. **M00 Ambiente** — transforme em pré-atividade assíncrona, com o `verifica-ambiente.mjs`
+   como comprovante.
 
-**Antes de cortar, considere o modo híbrido** ([ADR-04](decisoes-tecnicas.md#adr-11--o-item-templates-da-ementa)):
-ele libera ~8h de uma vez. Com o pré-requisito de JS atendido, porém, a única razão que
-resta para adotá-lo é a **leitura estrita da ementa** — não a capacidade da turma.
-
-**Nunca corte:** M01, M02, M04, M05, M06, M07, M08, M09, M12, M13 — são itens
-explícitos da ementa (ou pré-requisito direto deles). E não corte as etapas do projeto nem
-a extensão: são eliminatórias.
+**Nunca corte:** M01, M02 e M04 a M09, e o M12 — são itens explícitos da ementa (ou
+pré-requisito direto deles). E não corte as etapas do projeto nem a extensão: são
+eliminatórias.
 
 ## 6. Erros de condução mais comuns
 
 | Erro | Efeito | Correção |
 | --- | --- | --- |
 | Ensinar ORM antes de HTTP | Estudante decora comandos, não entende requisição | Mantenha M01 antes de tudo |
-| Deixar o deploy para a última semana | Metade da turma não implanta | M12 na semana 12, com o BiblioCom (não com o projeto) |
-| Aceitar tema de projeto grande demais | Etapa 3 não fecha | Aplicar o filtro de escopo da Etapa 1 com rigor |
+| Deixar o deploy para a última semana | Metade da turma não implanta | M12 antes da reta final, com o BiblioCom (não com o projeto) |
+| Aceitar tema de projeto grande demais | Etapa 2 não fecha | Aplicar o filtro de escopo da Etapa 1 com rigor |
 | Extensão virar "apresentar slides na escola" | Não é extensão, é divulgação | Exigir demanda + entrega + devolutiva registrada |
 | Corrigir só o resultado final | Não se detecta equipe travada | Usar os marcos E0–E8 semanalmente |
 | Turma inteira com o mesmo tema | Cópia entre equipes | Um tema por equipe, aprovado na Etapa 1 |
-| Começar o frontend antes da API existir | Trabalha-se contra dados falsos e retrabalha-se | M08 só depois do M07 (semana 8) |
-| Deixar a equipe se dividir em "front" e "back" | Metade sai sem saber a outra camada | Portfólio individual cobre as duas; papéis rotativos |
+| Começar a autenticação antes de a API existir | Protege-se rota que ainda vai mudar | M08 só depois do M07 |
+| Deixar a equipe se dividir em "quem modela" e "quem faz rota" | Metade sai sem saber a outra parte | Portfólio individual cobre todas; papéis rotativos |
 | Pular o contrato de API (M02) | Integração retrabalhada na Etapa 2 | Contrato escrito é entrega da Etapa 1 |
-| Gastar as horas de React ensinando JavaScript | Perde-se o modelo mental, que é o difícil | Pré-requisito atendido; monitoria para casos isolados |
-| Achar que "a turma sabe JS" dispensa o M08 | React não é JavaScript; o modelo declarativo é novo | As 5h vão para estado, efeitos e imutabilidade |
+| Gastar as aulas de NestJS ensinando JavaScript | Perde-se o modelo mental do framework, que é o difícil | Diagnóstico da semana 1; monitoria para casos isolados |
+| Deixar os testes para o fim | Ninguém escreve teste para código que já "funciona" | Cada módulo a partir do M10 entrega com teste |
 
 ## 7. Correção eficiente
 
@@ -193,8 +215,6 @@ a extensão: são eliminatórias.
 - Internet instável: os módulos M00–M11 funcionam offline após a primeira instalação;
   use um espelho local (`npm config set registry`), ou distribua um `node_modules` já
   populado por pen drive.
-- Requisitos de acessibilidade das interfaces (WCAG básico) são cobrados no M09 e na
-  rubrica da Etapa 3.
 
 ## 9. Integridade acadêmica e uso de IA
 
@@ -203,7 +223,7 @@ Posição sugerida (ajuste ao regimento da instituição):
 - **Permitido e incentivado:** usar assistentes de IA como par de programação, para
   explicar erros, gerar rascunhos e revisar código.
 - **Obrigatório:** declarar o uso no relatório técnico (seção "Ferramentas de apoio"), e
-  **saber explicar cada linha entregue**. A arguição individual da Etapa 4 verifica isso.
+  **saber explicar cada linha entregue**. A arguição individual da Etapa 3 verifica isso.
 - **Proibido:** entregar código que a equipe não sabe explicar; submeter texto de relatório
   gerado sem revisão e sem dados reais do projeto.
 

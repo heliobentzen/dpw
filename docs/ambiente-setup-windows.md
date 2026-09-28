@@ -14,10 +14,9 @@ alterne entre ele e [`ambiente-setup.md`](ambiente-setup.md), que é Linux/macOS
 
 ## Um runtime só
 
-A stack é **TypeScript ponta a ponta**. Isso significa que você instala **o Node** (que já traz o npm), e
-nada além disso do lado de linguagem — não há Python, `venv`, `pip` nem um segundo
-ecossistema de pacotes para manter. É o maior ganho colateral da escolha de stack, e ele
-aparece justo aqui, no setup.
+A stack é **TypeScript no backend**. Você instala **o Node** (que já traz o npm), e nada
+além disso do lado de linguagem: um único ecossistema de pacotes para manter. O banco
+roda no Docker, então também não há PostgreSQL para instalar no Windows.
 
 ## O que entra em cada momento
 
@@ -46,7 +45,7 @@ aparece justo aqui, no setup.
 | [7](#passo-7--docker-e-postgresql) | Docker + PostgreSQL | **antes do M04** |
 | [8](#passo-8--verificação) | Verificação | semana 1 |
 | [9](#passo-9--gitignore-e-gitattributes) | `.gitignore` e `.gitattributes` | no 1º commit |
-| [10](#passo-10--rodar-o-sistema-completo) | Rodar os dois servidores | a partir do M08 |
+| [10](#passo-10--rodar-a-api-no-dia-a-dia) | Rodar a API no dia a dia | a partir do M04 |
 | [11](#passo-11--erros-e-diagnóstico) | **Erros e diagnóstico** | quando quebrar |
 
 ---
@@ -62,7 +61,7 @@ comando: é sobre **onde** e **em que shell** você vai trabalhar.
 | --- | --- | --- |
 | **PowerShell** | O terminal nativo do Windows | ✅ **É o que este guia usa** |
 | **Git Bash** | Um shell Unix que vem junto com o Git | Alternativa: os comandos do guia Linux funcionam como estão |
-| **WSL2 (Ubuntu)** | Um Linux completo dentro do Windows | Instale antes do **M05** (Docker), não agora |
+| **WSL2 (Ubuntu)** | Um Linux completo dentro do Windows | Opcional; útil a partir do **M12** (deploy), não agora |
 
 Se você não tem preferência: **PowerShell**.
 
@@ -80,8 +79,8 @@ Esta é a origem da maior parte dos problemas inexplicáveis no Windows, e **nen
 |---|---|
 | `C:\dev` | Curto (ajuda no limite de 260 caracteres), sem espaço, sem acento, fora do OneDrive |
 
-> ⚠️ Isto pesa mais nesta stack do que em qualquer outra: um monorepo com backend e frontend
-> tem **duas** árvores de `node_modules`, e elas são profundas. Não negocie a pasta.
+> ⚠️ Isto pesa mais em projetos Node do que em outras stacks: `node_modules` é uma árvore
+> profunda, com milhares de arquivos. Não negocie a pasta.
 
 ---
 
@@ -546,29 +545,26 @@ em UTF-16 e o Git lê a primeira linha como lixo.
 
 ---
 
-## Passo 10 — Rodar o sistema completo
+## Passo 10 — Rodar a API no dia a dia
 
-> ⏭️ A partir do **M08**, quando o frontend passa a existir.
+> ⏭️ A partir do **M04**, quando o PostgreSQL entra no projeto.
 
-Dois servidores, cada um na sua janela. No Windows Terminal, `Ctrl+Shift+T` abre uma aba.
-
-**Terminal 1 — backend (porta 3000):**
+Duas coisas precisam estar de pé: o banco (no Docker) e a API. Abra o Docker Desktop e, no
+terminal:
 
 ```powershell
-Set-Location C:\dev\bibliocom\backend
+Set-Location C:\dev\bibliocom
+docker compose up -d
+Set-Location backend
 npm run start:dev
 ```
 
-**Terminal 2 — frontend (porta 5173):**
+| Linha | O que faz |
+| --- | --- |
+| `docker compose up -d` | Sobe o PostgreSQL em segundo plano (`-d`). Se já estiver de pé, não faz nada |
+| `npm run start:dev` | Sobe a API em modo *watch*: salvou um arquivo, ela reinicia sozinha |
 
-```powershell
-Set-Location C:\dev\bibliocom\frontend
-npm run dev
-```
-
-Abra <http://localhost:5173>. O Vite encaminha `/api` ao NestJS (configurado no M03), então
-o navegador vê tudo na mesma origem — o que evita CORS em desenvolvimento e reproduz a
-topologia de produção.
+**Deu certo se:** <http://localhost:3000/api/docs> abre o Swagger.
 
 `Ctrl+C` para parar. **Se a porta estiver em uso:**
 
