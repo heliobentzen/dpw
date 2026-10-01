@@ -257,13 +257,13 @@ Select-String -Recurse "minha-chave-secreta" dist/*
 
 | Linux/macOS | PowerShell |
 | --- | --- |
-| `lsof -ti:8000 \| xargs kill -9` | `Get-NetTCPConnection -LocalPort 8000 \| Select-Object -Expand OwningProcess \| Stop-Process -Force` |
+| `lsof -ti:3000 \| xargs kill -9` | `Get-NetTCPConnection -LocalPort 3000 \| Select-Object -Expand OwningProcess \| Stop-Process -Force` |
 | `ps aux \| grep node` | `Get-Process node` |
 
 Ou, mais simples:
 
 ```powershell
-netstat -ano | findstr :8000      # descubra o PID
+netstat -ano | findstr :3000      # descubra o PID
 taskkill /PID <pid> /F
 ```
 
@@ -271,14 +271,14 @@ taskkill /PID <pid> /F
 
 ```bash
 # Linux/macOS: barra invertida
-curl -X POST http://localhost:8000/api/obras/ \
+curl -X POST http://localhost:3000/api/obras \
      -H "Content-Type: application/json" \
      -d '{"titulo":"X"}'
 ```
 
 ```powershell
 # PowerShell: crase (backtick)
-curl.exe -X POST http://localhost:8000/api/obras/ `
+curl.exe -X POST http://localhost:3000/api/obras `
      -H "Content-Type: application/json" `
      -d '{\"titulo\":\"X\"}'
 ```
@@ -287,14 +287,14 @@ curl.exe -X POST http://localhost:8000/api/obras/ `
 > `curl.exe`. Três saídas, da mais simples à mais robusta:
 >
 > ```powershell
-> # 1. aspas simples por fora, escapando as duplas
-> curl.exe -X POST http://localhost:8000/api/obras/ -H "Content-Type: application/json" -d '{\"titulo\":\"X\"}'
+> # 1. aspas simples por fora, escapando as duplas (PowerShell 5.1; no 7, sem as barras)
+> curl.exe -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"X\"}'
 >
 > # 2. arquivo (melhor para corpos grandes — e é o que o material recomenda)
-> curl.exe -X POST http://localhost:8000/api/obras/ -H "Content-Type: application/json" -d "@obra.json"
+> curl.exe -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d "@obra.json"
 >
 > # 3. Invoke-RestMethod, sem sofrimento com aspas
-> Invoke-RestMethod -Uri "http://localhost:8000/api/obras/" -Method Post -ContentType "application/json" -Body '{"titulo":"X"}'
+> Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Post -ContentType "application/json" -Body '{"titulo":"X"}'
 > ```
 
 ### Scripts

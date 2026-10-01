@@ -143,13 +143,20 @@ configuração sozinho.
 
 ```ts
 import "dotenv/config";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { DataSource } from "typeorm";
+
+// Este arquivo roda de dois jeitos: como .ts pela CLI (desenvolvimento)
+// e como .js já compilado em dist/ (produção). Os caminhos acompanham.
+const pasta = dirname(fileURLToPath(import.meta.url));
+const ext = import.meta.url.endsWith(".ts") ? "ts" : "js";
 
 export default new DataSource({
   type: "postgres",
   url: process.env.DATABASE_URL,
-  entities: ["src/**/*.entity.ts"],
-  migrations: ["src/migracoes/*.ts"],
+  entities: [`${pasta}/**/*.entity.${ext}`],
+  migrations: [`${pasta}/migracoes/*.${ext}`],
   synchronize: false,
 });
 ```
@@ -160,10 +167,16 @@ export default new DataSource({
 |---|---|
 | `import "dotenv/config"` | Carrega o `.env` para dentro do `process.env`. Sem o Nest, o `ConfigModule` não está aqui para fazer isso |
 | `export default` | A CLI procura a **exportação padrão**. Exportação nomeada não serve, e o erro que isso dá não diz isso |
+| `import.meta.url` | O endereço **deste próprio arquivo**, no formato `file:///…/data-source.ts` |
+| `pasta` | A pasta onde o arquivo está: `src` quando a CLI roda o fonte, `dist` quando roda o compilado |
+| `ext` | `ts` ou `js`, conforme a versão que está rodando. Assim o mesmo arquivo serve agora e em produção (M12) |
 | `entities: [...]` | Onde procurar as classes. É delas que a migração é derivada |
 | `migrations: [...]` | Onde gravar os arquivos novos e de onde ler os existentes |
 | `synchronize: false` | **A linha do módulo.** A partir daqui, o banco só muda por migração |
-| `src/**/*.ts` | Caminhos do **fonte**, não do compilado. A CLI lê `.ts`; a aplicação lê `.js`. Volta na etapa 3 |
+
+> **Por que não escrever `"src/**/*.entity.ts"` e pronto?** Funcionaria hoje. Mas em
+> produção só existe o `dist/`, com arquivos `.js`, e esse caminho fixo faria a CLI procurar
+> um `.ts` que o servidor não tem — o erro só apareceria no dia do deploy.
 
 **Faça:** instale as duas dependências que faltam:
 
@@ -213,7 +226,7 @@ TypeOrmModule.forRoot({
 | Programa | Arquivo de configuração | Caminho das migrações |
 |---|---|---|
 | A **aplicação** (`npm run start:dev`) | `app.module.ts` | `dist/migracoes/*.js` — ela roda **compilada** |
-| A **CLI** (`npm run migration:*`) | `data-source.ts` | `src/migracoes/*.ts` — ela roda o **fonte** |
+| A **CLI** (`npm run migration:*`) | `data-source.ts` | `src/migracoes/*.ts` — em desenvolvimento, ela roda o **fonte** |
 
 > Caminhos diferentes para a mesma coisa. **Guarde isso: é o que mais confunde neste módulo.**
 > Se um comando de migração parecer não enxergar seus arquivos, é quase sempre porque você
@@ -745,7 +758,7 @@ e só então `npm run migration:run`.
 | `No changes in database schema were found` | As entidades já batem com o banco. Você salvou o arquivo? |
 | `Cannot find module 'src/data-source.ts'` | Rode o comando de dentro de `backend/` |
 | `DataSource is not set` / a CLI não acha a configuração | Faltou `export default` no `data-source.ts` — etapa 2 |
-| A migração roda pela CLI mas não na aplicação | Caminhos diferentes: `src/**/*.ts` na CLI, `dist/**/*.js` na app — etapa 3 |
+| A migração roda pela CLI mas não na aplicação | Caminhos diferentes: o fonte na CLI, `dist/**/*.js` na app — etapa 3 |
 | `QueryFailedError: relation already exists` | O banco ainda tem as tabelas do `synchronize`. `docker compose down -v` e recrie pelas migrações |
 | As tabelas voltaram a mudar sozinhas | Faltou `synchronize: false` no `app.module.ts` — só o `data-source.ts` não basta |
 | `migration:revert` desfez a errada | Ele reverte **a última aplicada**, sempre. Não escolhe |

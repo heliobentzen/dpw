@@ -73,8 +73,10 @@ não deveria — e o resto constrói a solução por partes.
 | **Deu certo se** | O resultado exato esperado |
 
 > 🪟 No PowerShell, escreva `curl.exe`; no macOS e Linux, `curl`. Para o corpo JSON no
-> PowerShell, use aspas duplas escapadas (`-d "{\"titulo\":\"X\"}"`); no macOS e Linux, aspas
-> simples em volta (`-d '{"titulo":"X"}'`).
+> PowerShell 5.1 (o que vem no Windows), use aspas simples por fora **e** `\"` nas de dentro
+> (`-d '{\"titulo\":\"X\"}'`); no macOS, no Linux e no PowerShell 7, só as aspas simples
+> (`-d '{"titulo":"X"}'`). E evite acento no JSON digitado no terminal: o PowerShell 5.1
+> entrega o texto ao `curl.exe` em outra codificação. Para testar acentos, use o Swagger.
 
 ### As dezoito etapas
 
@@ -148,7 +150,7 @@ app.useGlobalPipes(
 **Rode:** reinicie e repita o `POST` que passou no M06:
 
 ```powershell
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d "{\"titulo\":\"X\",\"autorId\":1,\"destaque\":true}"
+curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"X\",\"autorId\":1,\"destaque\":true}'
 ```
 
 **Deu certo se:** ele **continua passando**. Sim, continua — e a próxima etapa explica por
@@ -278,19 +280,19 @@ Os três casos que justificam o módulo.
 **Faça — 1. o caso válido:**
 
 ```powershell
-curl.exe -s -i -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d "{\"titulo\":\"Memórias Póstumas\",\"anoPublicacao\":1881,\"autorId\":1}"
+curl.exe -s -i -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"Quincas Borba\",\"anoPublicacao\":1891,\"autorId\":1}'
 ```
 
 **Faça — 2. título vazio e ano impossível:**
 
 ```powershell
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d "{\"titulo\":\"\",\"anoPublicacao\":3000,\"autorId\":1}"
+curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"\",\"anoPublicacao\":3000,\"autorId\":1}'
 ```
 
 **Faça — 3. campo que o DTO não declara:**
 
 ```powershell
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d "{\"titulo\":\"X\",\"autorId\":1,\"destaque\":true}"
+curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"X\",\"autorId\":1,\"destaque\":true}'
 ```
 
 **Deu certo se** o segundo responde 400 com **as duas** mensagens:

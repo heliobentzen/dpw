@@ -517,10 +517,10 @@ Acrescente `Body`, `Post`, `Patch` e `Delete` ao `import` de `@nestjs/common`.
 **Rode:**
 
 ```powershell
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d "{\"titulo\":\"Memórias Póstumas\",\"anoPublicacao\":1881,\"autorId\":1}"
+curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"Quincas Borba\",\"anoPublicacao\":1891,\"autorId\":1}'
 ```
 
-*(No macOS ou Linux, use aspas simples em volta do JSON: `-d '{"titulo":…}'`.)*
+*(No macOS, no Linux e no PowerShell 7, tire as barras: `-d '{"titulo":…}'`. No PowerShell 5.1, que vem com o Windows, elas são necessárias.)*
 
 **Deu certo se:** responde a obra criada, com um `id` novo.
 
@@ -531,7 +531,7 @@ curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: applicatio
 O CRUD funciona. Agora mande isto:
 
 ```powershell
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d "{\"titulo\":\"\",\"criadoEm\":\"1999-01-01\",\"autorId\":1}"
+curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"\",\"criadoEm\":\"1999-01-01\",\"autorId\":1}'
 ```
 
 **Passa.** Título vazio, data de criação forjada pelo cliente, e nenhuma reclamação.
