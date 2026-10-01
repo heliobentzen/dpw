@@ -98,7 +98,7 @@ Ao final da disciplina, o estudante será capaz de:
 - **Extensão**: interação dialógica com organização parceira, do diagnóstico à entrega.
 
 Regras de ouro do material: **nenhum módulo termina sem código rodando**, e a **API é a base
-obrigatória do projeto**. O frontend, quando usado, é complementar e opcional.
+obrigatória do projeto**.
 
 ## 8. Recursos necessários
 

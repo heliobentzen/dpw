@@ -94,8 +94,8 @@ coletivo. Situações de saúde ou força maior são tratadas individualmente, c
 **Permitido e incentivado:** consultar documentação, fóruns, colegas e assistentes de IA;
 usar bibliotecas e código aberto com atribuição.
 
-> Isso vale especialmente para o frontend, onde a tentação de colar componentes prontos é
-> maior. Colar é permitido; **não saber explicar o que colou** é o que a arguição
+> Isso vale especialmente para autenticação e segurança, onde a tentação de colar código
+> pronto é maior. Colar é permitido; **não saber explicar o que colou** é o que a arguição
 > individual detecta.
 
 **Obrigatório:** declarar o uso de ferramentas de IA no relatório (Apêndice H) e **saber

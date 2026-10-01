@@ -196,6 +196,45 @@ mesmo aprendizado lendo o SQL gerado em vez de refazendo o trabalho.
 
 ---
 
+## ADR-18 — Sessões guardadas no PostgreSQL
+
+- **Status:** aceito · **Data:** 2026-10-01 · **Complementa a [ADR-07](#adr-07--autenticação-por-sessão-com-cookie-não-jwt-em-localstorage)**
+
+**Contexto.** A ADR-07 escolheu sessão em cookie `HttpOnly`. Por padrão, o `express-session`
+guarda as sessões na memória do processo: em produção, todo deploy, reinício ou troca de
+máquina desloga todo mundo, e duas instâncias da API não enxergam as sessões uma da outra.
+
+**Decisão.** Sessões no próprio PostgreSQL, com `connect-pg-simple`, numa tabela `sessao`
+criada por **migração escrita à mão** (M12). O M08 começa com a memória, para não somar
+um conceito a mais à primeira aula de autenticação.
+
+**Consequências.** *A favor:* nenhum serviço novo para hospedar (o banco já existe); o
+processo volta a ser descartável, como pede o fator VI dos 12 fatores; a migração é mais um
+exemplo de `migration:create`. *Contra:* cada requisição autenticada consulta o banco uma
+vez a mais; com tráfego alto, um armazenamento em memória dedicado seria a evolução natural.
+
+---
+
+## ADR-17 — Node 24 LTS e npm 11
+
+- **Status:** aceito · **Data:** 2026-10-01
+
+**Contexto.** O material pedia Node 20, que saiu de suporte em abril de 2026. Em teste com a
+stack atual, o npm 10 (que acompanha o Node 20 e o 22) **falha** ao instalar o projeto que o
+`nest new` do NestJS 12 gera, com `Cannot read properties of null (reading 'edgesOut')` — um
+erro do resolvedor de dependências que não diz nada a quem está começando.
+
+**Decisão.** Node 24 LTS, que traz o npm 11. Quem não puder atualizar o Node atualiza só o
+npm (`npm install -g npm@11`). O `verifica-ambiente.mjs`, o M00 e o M03 conferem as duas
+versões e dão o comando de correção.
+
+**Consequências.** *A favor:* `nest new` funciona na primeira tentativa; o Node 24 executa
+arquivos `.ts` simples diretamente, o que o M11 usa para rodar o cliente de exemplo sem
+etapa de compilação. *Contra:* laboratórios com imagem antiga precisam ser atualizados antes
+do semestre — item já previsto no guia do docente.
+
+---
+
 ## ADR-16 — NestJS 12 e módulos ESM
 
 - **Status:** aceito · **Data:** 2026-09-02 · **Atualiza a stack da [ADR-10](#adr-10--backend-em-typescript-com-frontend-opcional-nestjs--typeorm)**

@@ -6,7 +6,7 @@
 **Equipe:** `<...>` · **Avaliador:** `<...>` · **Data:** `<...>`
 
 Checkpoint técnico: valida que o núcleo do backend (modelo de dados e API) funciona antes de
-integrar frontend, segurança, implantação e o restante do que será cobrado por inteiro na
+integrar segurança, testes, implantação e o restante do que será cobrado por inteiro na
 [Etapa 3 — sistema final](rubrica-etapa-3.md). Por isso a nota é mais branda e admite
 recuperação — o objetivo é corrigir o rumo cedo, não eliminar quem está atrasado.
 

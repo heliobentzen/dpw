@@ -3,8 +3,8 @@
 
 > **Peso:** 20% da nota final · **Entrega:** semana 18 · **Eliminatória**
 > Consolida e aprofunda o que foi verificado na Etapa 2 (sistema preliminar): modelagem e API
-> são reavaliadas aqui no estado final, junto com segurança, frontend, qualidade e implantação.
-> 🔵 backend · 🟣 frontend · ⚪ transversal
+> são reavaliadas aqui no estado final, junto com segurança, qualidade e implantação.
+> 🔵 backend · ⚪ transversal
 > Escala: 4 Excelente · 3 Adequado · 2 Em desenvolvimento · 0–1 Insuficiente
 =======
 # Rubrica — Etapa 3: Relatório técnico e encerramento

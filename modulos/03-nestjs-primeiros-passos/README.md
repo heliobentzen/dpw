@@ -359,8 +359,8 @@ Duas coisas que ajudam a não sofrer com isso:
    você vai encontrar no curso — aproveite, porque nem todos são assim.
 
 > Isso se chama **ESM** (*ECMAScript Modules*), o sistema de módulos oficial do JavaScript.
-> Todo frontend moderno (React, Vue, Angular com Vite) também é ESM — então quem consumir
-> a sua API fala a mesma língua de módulos que o seu backend.
+> O JavaScript que roda nos navegadores modernos também é ESM — então um cliente web que
+> consumir a sua API fala a mesma língua de módulos que o seu backend.
 
 **O que reter da etapa:** toda a aplicação sai de **um** módulo, o `AppModule`. Tudo o que
 você criar daqui em diante vai, direta ou indiretamente, pendurar nele.

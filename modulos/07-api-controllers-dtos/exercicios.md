@@ -116,7 +116,7 @@ automaticamente**, sem ninguém decidir.
 4. Escreva o passo de CI que **falha** quando o arquivo commitado diverge do gerado.
 
 > Este exercício é a ponte para o M11: quando o contrato é verificável, mudar a API sem
-> avisar o frontend deixa de ser possível.
+> avisar quem consome deixa de ser possível.
 
 ---
 
