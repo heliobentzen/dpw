@@ -271,7 +271,9 @@ npm install argon2
 ```
 
 > O pacote traz o programa já compilado para Windows x64, Linux e macOS com chip Apple — não
-> precisa de compilador instalado.
+> precisa de compilador instalado. O npm 11 pode avisar `install scripts not yet covered by
+> allowScripts` citando o `argon2`: é esperado. O script que ele pulou só serviria para
+> compilar, e o binário pronto já está no pacote.
 
 **Faça:** em `src\auth\auth.service.ts`:
 

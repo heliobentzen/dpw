@@ -76,7 +76,7 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 
 - [ ] `npm audit --audit-level=high` sem vulnerabilidades altas ou críticas
 - [ ] `package-lock.json` versionado
-- [ ] `detect-secrets scan` limpo, inclusive no histórico do Git
+- [ ] `npx @secretlint/quick-start "**/*"` limpo, e o `.env` nunca apareceu no histórico do Git
 - [ ] Backup automatizado do banco **e restauração testada**
 - [ ] Logs de segurança (login, falha, acesso negado, erro 5xx) sendo gravados
 - [ ] Alguém recebe alerta quando a API cai ou erra em série
@@ -88,7 +88,7 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 # Windows PowerShell (no Git Bash/Linux, troque curl.exe por curl)
 cd backend
 npm audit --audit-level=high
-detect-secrets scan
+npx @secretlint/quick-start "**/*"
 curl.exe -I https://SEU-DOMINIO/api/obras
 ```
 

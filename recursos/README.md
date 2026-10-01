@@ -41,7 +41,7 @@
 | Testes | 🔵 Vitest, Supertest | Testes automatizados |
 | Depuração | 🔵 logging do TypeORM, Pino, depurador do VS Code | Consultas, logs, execução passo a passo |
 | Tipos | openapi-typescript | Contrato garantido pelo compilador |
-| Segurança | `npm audit`, detect-secrets | Dependências e segredos |
+| Segurança | `npm audit`, secretlint, helmet | Dependências, segredos, cabeçalhos |
 | Diagramas | Mermaid (C4, ER, sequência), dbdiagram.io, Excalidraw | Arquitetura e dados como código, versionados no repositório |
 | Gestão | GitHub Projects, GitHub Issues | Backlog e sprints |
 | Monitoramento | UptimeRobot, Sentry/GlitchTip | Disponibilidade e erros |
