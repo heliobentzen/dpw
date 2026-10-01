@@ -56,7 +56,7 @@ Content-Type: application/json
 ```http
 HTTP/1.1 301 Moved Permanently
 Location: /obra/17/
-Set-Cookie: sessionid=abc123
+Set-Cookie: bibliocom.sid=abc123
 ```
 
 ---
@@ -69,7 +69,7 @@ Para cada situação, diga qual status você esperaria e o que investigaria prim
 2. Usuário anônimo tenta acessar `/admin/`.
 3. Usuário logado (associado) tenta acessar `/relatorios/financeiro/`.
 4. Requisição `DELETE` para uma rota que só aceita `GET` e `POST`.
-5. Aplicação lança `ZeroDivisionError` dentro da view.
+5. O código lança um erro inesperado (`TypeError: Cannot read properties of undefined`) dentro do controller.
 6. A aplicação está fora do ar e o Nginx continua respondendo.
 7. Usuário tentou logar 50 vezes em 1 minuto.
 8. Navegador já tem a versão atual do CSS em cache.

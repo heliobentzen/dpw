@@ -61,8 +61,8 @@ Sequência completa:
    criptografado.
 4. **Requisição HTTP** — o navegador envia texto (ver seção 2).
 5. **Processamento no servidor** — o proxy reverso repassa ao servidor de aplicação, que
-   roteia para a *view*, que consulta o banco e monta a resposta (HTML, num site
-   tradicional; JSON, na API que construiremos a partir do M07).
+   roteia para o código responsável (o *controller*, no M03), que consulta o banco e monta a
+   resposta (HTML, num site tradicional; JSON, na API que construiremos a partir do M03).
 6. **Resposta HTTP** — status, cabeçalhos e corpo (o HTML).
 7. **Renderização** — o navegador constrói o DOM e, ao encontrar `<link>`, `<script>` e
    `<img>`, dispara **novas requisições** para cada recurso.
@@ -70,6 +70,23 @@ Sequência completa:
 
 > **Consequência prática de (8):** uma página aparentemente simples pode gerar 40
 > requisições. E o servidor não sabe que são "da mesma pessoa" — a menos que haja cookie.
+
+```mermaid
+sequenceDiagram
+    participant N as Navegador
+    participant D as DNS
+    participant S as Servidor
+    N->>D: qual o IP de biblioteca.exemplo.org.br?
+    D-->>N: 203.0.113.10
+    N->>S: conexão TCP + handshake TLS (porta 443)
+    N->>S: GET /acervo/obra/42 (requisição HTTP)
+    S-->>N: 200 OK + corpo
+    Note over S: e esquece tudo
+```
+
+HTTP funciona como uma troca de **cartas**: cada requisição é um envelope com endereço e
+instruções na frente (os cabeçalhos) e o conteúdo dentro (o corpo); a resposta é outra carta.
+E o destinatário não guarda cópia de nada: cada carta precisa se explicar sozinha.
 
 #### Onde roda o quê
 
@@ -93,7 +110,7 @@ Host: biblioteca.exemplo.org.br
 User-Agent: Mozilla/5.0 (X11; Linux x86_64) Firefox/128.0
 Accept: text/html,application/xhtml+xml
 Accept-Language: pt-BR,pt;q=0.9
-Cookie: sessionid=8f3b2a...; csrftoken=Ab3...
+Cookie: bibliocom.sid=s%3A8f3b2a...
 Connection: keep-alive
 
 (corpo vazio — GET normalmente não tem corpo)
@@ -108,7 +125,7 @@ corpo.
 HTTP/1.1 200 OK
 Content-Type: text/html; charset=utf-8
 Content-Length: 4821
-Set-Cookie: sessionid=8f3b2a...; HttpOnly; Secure; SameSite=Lax
+Set-Cookie: bibliocom.sid=s%3A8f3b2a...; HttpOnly; Secure; SameSite=Lax
 X-Frame-Options: DENY
 Cache-Control: no-store
 
@@ -181,7 +198,7 @@ Host: biblioteca.exemplo.org.br
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 63
 
-titulo=Dom+Casmurro&autor=1&ano=1899&csrfmiddlewaretoken=Ab3xY...
+titulo=Dom+Casmurro&autor=1&ano=1899
 ```
 
 | Característica | Consequência prática |
@@ -202,18 +219,25 @@ titulo=Dom+Casmurro&autor=1&ano=1899&csrfmiddlewaretoken=Ab3xY...
 
 #### O padrão Post/Redirect/Get (PRG)
 
-```
-POST /emprestimo/novo
-      │
-      ├─ processa, grava no banco
-      │
-      └─▶ 302 Found + Location: /emprestimo/17/
-                │
-                └─▶ GET /emprestimo/17/  ──▶ 200 OK (página de confirmação)
+```mermaid
+sequenceDiagram
+    participant N as Navegador
+    participant S as Servidor
+    N->>S: POST /emprestimo/novo
+    Note over S: processa, grava no banco
+    S-->>N: 302 Found + Location: /emprestimo/17
+    N->>S: GET /emprestimo/17
+    S-->>N: 200 OK (página de confirmação)
 ```
 
 Sem PRG, o F5 do usuário cria um segundo empréstimo. Com PRG, o F5 apenas recarrega uma
-página de leitura. **Toda** view que processa POST com sucesso deve redirecionar.
+página de leitura. Em sites com formulário HTML, **toda** rota que processa POST com sucesso
+deve redirecionar.
+
+> **E numa API?** Quem chama uma API não é um navegador apertando F5: é um programa, e ele
+> recebe `201 Created` com o recurso criado (M07). O problema do envio duplicado continua
+> existindo — clique duplo, nova tentativa automática depois de falha de rede — e se resolve
+> de outro jeito, com regras de negócio que recusam a duplicata (o `409` do M07).
 
 #### Escolhendo o método: árvore de decisão
 
@@ -257,22 +281,23 @@ Distinções que caem em prova e em code review:
 O protocolo é **stateless**: cada requisição é independente. Mas aplicações precisam saber
 quem está logado. Solução em duas partes:
 
-```
-1) Login:
-   POST /login  (usuario, senha)
-        │
-        ▼
-   servidor valida, cria uma sessão no seu armazenamento:
-        sessionid=8f3b2a...  ->  {user_id: 17, expira: ...}
-        │
-        └──▶ 302 + Set-Cookie: sessionid=8f3b2a...; HttpOnly; Secure; SameSite=Lax
+Pense no **número de protocolo** de um atendimento por telefone. A atendente não lembra de
+você na ligação seguinte — mas, se você disser o protocolo, ela encontra a sua conversa
+anterior no sistema. O cookie de sessão é esse protocolo: um número que o navegador repete a
+cada requisição.
 
-2) Requisições seguintes:
-   GET /meus-emprestimos
-   Cookie: sessionid=8f3b2a...
-        │
-        ▼
-   servidor procura a sessão, descobre user_id=17, responde personalizado
+```mermaid
+sequenceDiagram
+    participant N as Navegador
+    participant S as Servidor
+    participant A as Armazenamento de sessões
+    N->>S: POST /api/sessao (e-mail e senha)
+    S->>A: cria sessão 8f3b2a… → {usuarioId: 17}
+    S-->>N: 200 + Set-Cookie: bibliocom.sid=8f3b2a… (HttpOnly, Secure, SameSite=Lax)
+    N->>S: GET /api/sessao (Cookie: bibliocom.sid=8f3b2a…)
+    S->>A: busca a sessão 8f3b2a…
+    A-->>S: {usuarioId: 17}
+    S-->>N: 200 + dados da usuária 17
 ```
 
 **Atributos de cookie que importam para segurança:**
@@ -285,8 +310,8 @@ quem está logado. Solução em duas partes:
 | `Max-Age` / `Expires` | Tempo de vida |
 | `Domain` / `Path` | Escopo |
 
-Alternativa moderna: **token** (JWT) no cabeçalho `Authorization`, comum em APIs e apps
-mobile. Comparação em M07.
+Alternativa comum: **token** (JWT) no cabeçalho `Authorization`, frequente em aplicativos
+móveis e integrações entre sistemas. A comparação, e a escolha do curso, estão no M08.
 
 ### 6. HTTP/1.1, HTTP/2, HTTP/3
 
@@ -436,6 +461,29 @@ fazendo.
 | Responder 200 com "erro" no corpo | Status é contrato de máquina; clientes e monitoramento leem o status |
 | Usar 301 em redirecionamento temporário | Fica em cache do navegador e é difícil de desfazer |
 | Guardar senha/token na query string | Vai para histórico, logs e `Referer` |
+
+## 🤖 IA no fluxo
+
+Cole uma resposta HTTP inteira — linha de status, cabeçalhos e corpo — num assistente de IA e
+peça para ele explicar cada cabeçalho. É um ótimo jeito de estudar o relatório da entrega E0.
+
+O que ele não faz por você: **observar**. O assistente descreve como o HTTP deveria
+funcionar; o DevTools e o `curl -i` mostram como ele **está** funcionando no seu caso. Quando
+os dois discordarem, quem tem razão é a resposta real.
+
+## 💣 Pegadinha de mercado
+
+**Responder `200 OK` com `{"erro": "…"}` no corpo.** Parece prático — "o cliente lê o
+corpo e vê o erro". Mas todo o resto do ecossistema decide pelo status: caches guardam a
+resposta como sucesso, monitores contam como disponível, bibliotecas de cliente não lançam
+exceção, e os logs mostram uma API saudável enquanto ela falha. O status é parte do
+contrato; mentir nele quebra quem confia nele.
+
+## 🧩 Desafio de fixação
+
+Uma página do catálogo da biblioteca demora 4 segundos para abrir. Usando só o DevTools
+(aba Rede), como você descobre se o tempo está no DNS, na conexão, no servidor ou no
+download? Que coluna olharia primeiro, e o que cada resposta indicaria?
 
 ## ✅ Checklist de saída
 

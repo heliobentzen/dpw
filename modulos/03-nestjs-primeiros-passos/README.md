@@ -652,11 +652,12 @@ em que essa escolha cobra a conta — e todas as quatro vão acontecer nesta dis
 
 ### Situação 1 — o mesmo dado é preciso em outro lugar
 
-No M08 vai existir um relatório de acervo para a coordenação. Ele precisa da lista de obras,
-mas **não é uma requisição HTTP** — é uma tela diferente, com outro formato de saída.
+No M08 vai existir um **script** que roda no terminal, sem HTTP nenhum — o que cria o
+primeiro usuário. Um relatório mensal do acervo para a coordenação seria igual: um comando,
+não uma requisição. E ele precisa da lista de obras.
 
 Com a lista dentro do `listar()` do controller, só há duas saídas: chamar um método de
-controller a partir de outro controller (que arrasta consigo o `@Get`, a rota, o status) ou
+controller fora de uma requisição (que arrasta consigo o `@Get`, a rota, o status) ou
 **copiar a lista**. Todo mundo copia. Aí existem duas cópias, alguém corrige uma, e a outra
 fica errada em silêncio.
 
@@ -727,7 +728,8 @@ Aplique aos casos que você já viu:
 
 ### O que acontece quando não se separa
 
-Este é o ponto do M02 com nome e endereço. Um projeto Express típico começa assim:
+Este é o problema que a separação evita, com nome e endereço. Um projeto Express típico
+começa assim:
 
 ```ts
 app.get("/obras", (req, res) => { /* consulta o banco, valida, responde */ });
@@ -805,7 +807,12 @@ Funciona. E é ruim por dois motivos concretos:
 
 ### 13b. A forma do Nest
 
-A dependência **chega pronta**, pelo construtor.
+Pense numa **geladeira e na tomada**. A geladeira não constrói a própria usina: ela recebe
+energia pela tomada, num formato combinado, e não sabe — nem precisa saber — se a energia vem
+de uma hidrelétrica ou de painéis solares. Trocar a fonte não exige abrir a geladeira.
+
+**Injeção de dependência** é isso: a classe **recebe** as ferramentas de que precisa, em vez
+de fabricá-las. Quem liga os fios é o Nest. A dependência **chega pronta**, pelo construtor.
 
 **Faça:** em `src\acervo\acervo.controller.ts`:
 
@@ -1364,44 +1371,30 @@ antes do deploy.
 
 ## Etapa 20 — O mapa que você percorreu
 
-Agora o diagrama faz sentido, porque você construiu três das caixas:
+Agora o diagrama faz sentido, porque você construiu três das caixas — as de borda grossa.
+As tracejadas chegam nos próximos módulos:
 
+```mermaid
+flowchart TB
+    R(["GET /api/obras/42"]) --> MW["Middleware<br/>helmet, sessão<br/>M08, M09"]
+    MW --> G["Guard<br/>pode entrar?<br/>M08"]
+    G --> P["Pipe<br/>ParseIntPipe<br/>etapa 14"]
+    P --> C["Controller<br/>acervo.buscarUm(42)<br/>etapa 14"]
+    C --> S["Service<br/>regra de negócio, lança 404<br/>etapa 15"]
+    S --> RP["Repository<br/>SELECT … WHERE id = 42<br/>M06"]
+    RP --> D(["JSON da resposta<br/>moldado por DTO de saída — M07"])
+    classDef feito stroke-width:4px
+    classDef futuro stroke-dasharray: 6 4
+    class P,C,S feito
+    class MW,G,RP futuro
 ```
-GET /api/obras/42
-    │
-    ▼
-[ Middleware ]      logging, helmet                        ○ M09
-    │
-    ▼
-[ Guard ]           "pode entrar?" — autenticação/papel    ○ M08
-    │
-    ▼
-[ Pipe ]            ParseIntPipe                           ● etapa 14
-    │
-    ▼
-[ Controller ]      acervo.buscarUm(42)                    ● etapa 14
-    │
-    ▼
-[ Service ]         regra de negócio, lança 404            ● etapa 15
-    │
-    ▼
-[ Repository ]      SELECT ... WHERE id = 42               ○ M06
-    │
-    ▼
-[ Interceptor ]     molda a resposta                       ○ M07
-    │
-    ▼
-JSON
-```
-
-**● o que você já tem · ○ o que os próximos módulos acrescentam.**
 
 Nenhuma das caixas vazias exige mexer nas que você construiu — elas se **encaixam** em volta.
 É esse o retorno da separação que a etapa 11 justificou: quatro pessoas podem preencher
 caixas diferentes na mesma semana sem colidir.
 
-Guarde o diagrama. Cada módulo daqui em diante preenche uma caixa, e o M09 volta a ele para
-mostrar em que camada cada tipo de ataque é barrado.
+Guarde o diagrama. Cada módulo daqui em diante preenche uma caixa: o M06 o *Repository*, o M07
+os DTOs, o M08 o *Guard*, o M09 os *middlewares* de segurança.
 
 💼 **No mercado:** "explique injeção de dependência" e "onde você colocaria esta regra" são
 perguntas de entrevista para vaga júnior de Node. Quem responde com o critério da etapa 11 —
@@ -1429,6 +1422,33 @@ exemplo concreto se destaca de quem responde "no service, porque sim".
 | `EADDRINUSE: address already in use :::3000` | Já há um servidor na porta. Encerre-o ou use outra porta |
 | `npm error ERESOLVE unable to resolve dependency tree` | Um pacote `@nestjs/*` veio de uma versão principal diferente da do projeto. Leia a linha `peer @nestjs/common@…`: ela diz qual versão ele queria. Reinstale fixando a mesma do seu projeto |
 | `error TS2835: Relative import paths need explicit file extensions…` | Faltou o `.js` no fim de um import de arquivo seu. A própria mensagem termina com `Did you mean './x.js'?` — é essa a correção. Ver etapa 5a |
+
+## 🤖 IA no fluxo
+
+Peça a um assistente de IA "um CRUD de obras em NestJS" e ele entrega em segundos — com
+grande chance de vir no formato antigo do Nest (CommonJS, sem o `.js` nos imports, Jest no
+lugar do Vitest), porque é o que mais aparece nos exemplos públicos. O erro `TS2835` da
+etapa 5 é o primeiro sinal.
+
+Use o assistente para **explicar**: cole uma linha que você não entendeu e peça o porquê.
+Use-o com cuidado para **escrever**: todo código que vier, passe pelo critério da etapa 11 —
+*a regra de negócio está no service?* — e pela versão do Nest do seu projeto. Quem decide a
+arquitetura é você; o assistente digita rápido.
+
+## 💣 Pegadinha de mercado
+
+**`new` dentro da classe.** Escrever `private acervo = new AcervoService()` funciona hoje e
+amarra o controller àquela implementação para sempre: não dá para testá-lo com um dublê
+(M10), e quando o service passar a precisar do banco, o controller vai precisar saber montar
+o banco também. Em revisão de código, `new` de um service dentro de outra classe do Nest é
+quase sempre devolvido.
+
+## 🧩 Desafio de fixação
+
+A biblioteca quer uma rota `GET /api/obras/sorteio`, que devolve uma obra aleatória para a
+vitrine "leia isto hoje". Antes de escrever código: o sorteio fica no controller ou no
+service? Em que **posição** do controller a rota precisa ser declarada, e por quê? Que status
+ela devolve se o acervo estiver vazio?
 
 ## ✅ Checklist de saída
 

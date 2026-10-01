@@ -150,7 +150,7 @@ async listar(pagina = 1, tamanho = 20) {
 
 | Trecho | O que faz |
 | --- | --- |
-| `findAndCount` | Devolve a página **e o total** numa chamada. O total é o que permite ao frontend desenhar "página 3 de 41" |
+| `findAndCount` | Devolve a página **e o total** numa chamada. O total é o que permite a quem consome mostrar "página 3 de 41" |
 | `const [itens, total]` | Desestruturação de array: o método devolve um par, e você nomeia os dois de uma vez |
 | `relations: { autor: true }` | Traz a autora junto. **Sem isto, `obra.autor` vem `undefined`** — o TypeORM não busca relação que você não pediu |
 | `order: { titulo: "ASC" }` | Ordena por título |
@@ -208,18 +208,25 @@ await this.obras.find();     // devolve o banco inteiro
 O último caso não fica lento: ele **derruba**. E derruba em produção, porque em
 desenvolvimento ninguém tem 200 mil registros.
 
+É como pedir ao bibliotecário que traga **todos os livros** até o balcão para você escolher
+um. Com dez livros, ele traz. Com o acervo inteiro, o balcão desaba antes de você olhar o
+primeiro.
+
 **Três custos, não um:**
 
-```
-banco monta o resultado  →  Node serializa em JSON  →  rede transporta  →  cliente processa
-     memória do servidor      memória do servidor       tempo e custo       trava a tela
+```mermaid
+flowchart LR
+    B["Banco monta o resultado<br/>memória do servidor"] --> N["Node serializa em JSON<br/>memória do servidor"]
+    N --> R["Rede transporta<br/>tempo e custo"]
+    R --> C["Cliente processa<br/>memória e tempo dele"]
 ```
 
 Paginação corta os quatro de uma vez.
 
 > **A regra deste material:** toda listagem é paginada, sem exceção e desde a primeira linha.
-> Acrescentar paginação depois é fácil no backend e **caro no frontend** — a tela foi
-> desenhada supondo que a lista vem inteira.
+> Acrescentar paginação depois é fácil no backend e **caro para quem consome**: cada
+> cliente foi escrito supondo a lista inteira, e trocar um *array* por um envelope paginado é
+> uma mudança incompatível do contrato (M11).
 
 ⚠️ **Falta uma proteção.** Hoje `?tamanho=999999` funciona: o cliente escolhe o tamanho da
 página e pode pedir o banco inteiro de qualquer forma. **Limite de paginação é segurança**,
@@ -245,7 +252,7 @@ async buscarUm(id: number): Promise<Obra> {
 | Trecho | O que faz |
 | --- | --- |
 | `where: { id }` | Atalho do JavaScript para `{ id: id }` |
-| três `relations` | O detalhe da obra mostra autora, categorias e exemplares. A listagem só precisava da autora — **peça o que a tela usa, não tudo** |
+| três `relations` | O detalhe da obra mostra autora, categorias e exemplares. A listagem só precisava da autora — **peça o que a resposta usa, não tudo** |
 | `findOne` devolve `Obra \| null` | Por isso o `if`. O TypeScript **obriga** você a tratar o caso |
 | `NotFoundException` | O mesmo do M03 |
 
@@ -421,6 +428,10 @@ Você tem quatro medições. O que elas mostram não é o que parece à primeira
 Uma consulta para a lista, mais **uma por item**. Com N itens, N+1 consultas. É a causa mais
 comum de API lenta, e a mais fácil de introduzir sem perceber.
 
+É ir ao mercado **uma vez para cada item da lista de compras**: o arroz, volta para casa;
+o feijão, volta para casa. Cada viagem é curta, e a tarde inteira some. O `relations` é
+levar a lista e comprar tudo de uma vez.
+
 ### Por que 2 e não 1
 
 A versão boa faz **duas** consultas, não uma, e isso é de propósito. Com `take` **e** relação,
@@ -448,7 +459,7 @@ custa microssegundos. Em produção, cada uma paga a rede — e 201 delas viram 
 
 ### Como detectar no seu código
 
-> Com o log de consultas ligado, abra a tela e **conte as linhas de SQL**. Se o número cresce
+> Com o log de consultas ligado, chame a rota e **conte as linhas de SQL**. Se o número cresce
 > com a quantidade de itens da lista, é N+1. Não precisa de ferramenta nenhuma.
 
 **Faça:** apague os dois endpoints temporários antes de seguir. Guarde os métodos no service
@@ -753,6 +764,10 @@ reiniciado no meio:
 O sistema agora mente. O exemplar está na mão de alguém e o catálogo diz que está na
 estante. O segundo leitor que o pedir vai até a prateleira e não encontra.
 
+Pense numa **transferência bancária**: o débito na sua conta e o crédito na conta de
+destino. Se o sistema caísse entre os dois, o dinheiro sumiria. Por isso os bancos tratam as
+duas operações como **uma só**: ou acontecem as duas, ou nenhuma. Isso é uma transação.
+
 ### A solução
 
 ```ts
@@ -833,6 +848,33 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "SELECT count(*) FROM e
 > máquina, com o seu código.
 
 ---
+
+## 🤖 IA no fluxo
+
+Peça a um assistente de IA uma consulta com filtros e ele a escreve em segundos. Três coisas
+para conferir em toda consulta que vier pronta — as três que este módulo mediu:
+
+- [ ] Algum laço com `await` dentro, buscando relação item a item? (N+1, etapa 8)
+- [ ] Algum valor do usuário colado no texto da consulta? (etapa 13)
+- [ ] Duas escritas que precisam ser verdadeiras juntas, fora de transação — ou com
+      `this.repositorio` dentro dela em vez do `manager`? (etapa 14)
+
+E ligue o `logging: true`: o SQL que o TypeORM realmente executou é a única resposta
+definitiva sobre o que a consulta faz.
+
+## 💣 Pegadinha de mercado
+
+**Testar desempenho com 20 registros.** Toda consulta é rápida com o banco de
+desenvolvimento quase vazio — inclusive a que faz 201 viagens ao banco. O N+1 e a listagem
+sem paginação não aparecem nos testes da equipe; aparecem no terceiro mês de uso do cliente.
+Por isso a etapa 5 popula o banco antes de medir: desempenho só se avalia com volume
+parecido com o real.
+
+## 🧩 Desafio de fixação
+
+A coordenação quer um relatório: **as dez obras mais emprestadas no último mês**, com o nome
+do autor e a quantidade de empréstimos. Escreva a consulta com o `QueryBuilder`. Quantas
+consultas SQL ela deve gerar? Confira no log. Onde fica o código: controller ou service?
 
 ## ⚠️ Erros comuns
 

@@ -53,7 +53,7 @@ que não deveria mostrar:
 POST /api/obras  {"titulo":"","anoPublicacao":3000}   → 400, com as duas falhas listadas
 POST /api/obras  {"titulo":"X","destaque":true}       → 400: campo não declarado
 GET  /api/obras?tamanho=999999                        → 400: teto de paginação
-GET  /api/obras/1                                     → só os campos que a tela usa
+GET  /api/obras/1                                     → só os campos que o cliente usa
 POST /api/obras/1/capa                                → upload validado
 GET  /api/docs                                        → contrato completo, com formatos
 ```
@@ -337,6 +337,12 @@ mensagem de erro. Você declarou o formato; o framework fez o resto.
 Você acabou de ver a proteção funcionar. Agora o raciocínio completo — porque são **três**
 problemas distintos, e o DTO de entrada resolve só o primeiro.
 
+Pense no **formulário de um balcão de atendimento**. O atendente só processa os campos que
+estão impressos nele; um bilhete grampeado pedindo "e me promova a gerente" vai para o lixo.
+E, na volta, você recebe um comprovante com o que lhe diz respeito — não a ficha interna da
+empresa. O **DTO de entrada** é o formulário; o **DTO de saída** é o comprovante. A entidade
+é a ficha interna, e nunca deveria atravessar o balcão.
+
 ### Problema 1 — *mass assignment* (entrada)
 
 É o que você testou no caso 3. Com `@Body() dados: Partial<Obra>`, o cliente escolhe **quais
@@ -601,9 +607,9 @@ async buscarUm(@Param("id", ParseIntPipe) id: number) {
 | --- | --- |
 | `criadoEm`, `atualizadoEm` | Auditoria interna. O cliente não usa |
 | `autorId` cru | Redundante: a autora já vem como objeto |
-| A biografia inteira da autora | A tela mostra o nome. Trazer o resto é banda desperdiçada |
+| A biografia inteira da autora | Quem consome mostra o nome. Trazer o resto é banda desperdiçada |
 | `isbn` vazio, `subtitulo` vazio | Campos que só o formulário de cadastro usa |
-| A lista completa de exemplares | Dez objetos com tombo e estado, para a tela mostrar um número |
+| A lista completa de exemplares | Dez objetos com tombo e estado, para o cliente mostrar um número |
 
 | Apareceu | Por quê |
 |---|---|
@@ -680,7 +686,7 @@ if (resposta.status >= 400) → mostrar erro
 ```
 
 É por confiar no status que um cliente consegue tratar erro **num lugar só**, em vez de espalhar
-verificação por cada tela.
+verificação por cada chamada.
 
 ---
 
@@ -1046,26 +1052,14 @@ E o critério original do M03 continua valendo, agora afiado:
 
 ### O caminho completo de uma requisição
 
-```
-POST /api/obras {"titulo":"X","autorId":1}
-        │
-        ▼
-[ ValidationPipe ]   lê o CriarObraDto, recusa o que não bate     ● etapa 1
-        │
-        ▼
-[ Controller ]       extrai o corpo, chama o service              ● etapa 11
-        │
-        ▼
-[ Service ]          separa categoriaIds, monta a entidade        ● etapa 8
-        │
-        ▼
-[ Repository ]       INSERT INTO obra …                           ● M06
-        │
-        ▼
-[ ObraResposta.de ]  monta só o que a tela usa                    ● etapa 9
-        │
-        ▼
-201 + JSON
+```mermaid
+flowchart TB
+    R(["POST /api/obras<br/>{titulo: X, autorId: 1}"]) --> V["ValidationPipe<br/>lê o CriarObraDto, recusa o que não bate<br/>etapa 1"]
+    V --> C["Controller<br/>extrai o corpo, chama o service<br/>etapa 11"]
+    C --> S["Service<br/>separa categoriaIds, monta a entidade<br/>etapa 8"]
+    S --> RP["Repository<br/>INSERT INTO obra …<br/>M06"]
+    RP --> D["ObraResposta.de<br/>monta só o que o cliente usa<br/>etapa 9"]
+    D --> F(["201 + JSON"])
 ```
 
 Compare com o diagrama do M03, etapa 20: as caixas que estavam vazias foram preenchidas.
@@ -1082,7 +1076,7 @@ O backend está pronto para integração. O que a equipe entrega aos consumidore
 | --- | --- |
 | Cinco rotas REST, com métodos e status corretos | `/api/obras` |
 | Entrada validada, com mensagens em lista | `ValidationPipe` + DTOs |
-| Respostas desenhadas para a tela, sem campo interno | `ObraResposta` |
+| Respostas desenhadas para quem consome, sem campo interno | `ObraResposta` |
 | Erros padronizados, distinguíveis pelo status | 400, 404, 409 |
 | **Um contrato legível por máquina** | `openapi.json` |
 
@@ -1096,6 +1090,31 @@ evita mass assignment?"* separam quem copiou tutorial de quem entendeu — e voc
 implementar as duas respostas.
 
 ---
+
+## 🤖 IA no fluxo
+
+Um assistente de IA escreve DTOs e decorators do Swagger com fluência — e costuma pular
+exatamente o que este módulo ensinou a não pular: o `whitelist`, o teto do `tamanho`, o DTO
+de saída ("é só devolver a entidade"), o `@Type(() => Number)` da query.
+
+Antes de aceitar um controller gerado, faça as perguntas das etapas 5 e 9: *o que acontece se
+o cliente mandar um campo a mais? E se alguém acrescentar uma coluna sensível à entidade
+amanhã?* Se a resposta for "aparece na API", o código ainda não está pronto.
+
+## 💣 Pegadinha de mercado
+
+**Devolver a entidade "só por enquanto".** A rota nasce devolvendo `this.repo.findOne(…)`
+porque é mais rápido, e o DTO de saída fica para depois. Depois nunca chega: a coluna
+`senhaHash`, o `observacaoInterna`, o `cpf` entram na entidade meses depois e saem na API
+pública sem ninguém decidir. O M09 encontra exatamente isso na listagem de obras deste
+módulo — procure-a antes dele.
+
+## 🧩 Desafio de fixação
+
+A biblioteca quer `PATCH /api/exemplares/{id}` para mudar o **estado** físico de um exemplar
+(novo, bom, desgastado, descartado). Escreva o DTO de entrada e o de saída. Que status a rota
+devolve ao tentar mudar um exemplar **descartado** para "bom"? Onde fica essa regra — no DTO,
+no controller ou no service?
 
 ## ⚠️ Erros comuns
 

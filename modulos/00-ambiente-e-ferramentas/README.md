@@ -53,16 +53,20 @@ A lógica didática é simples:
 
 ### 1. Por que dependências ficam no projeto
 
-Projeto A precisa do React 18; projeto B, do React 19. Instalados globalmente, um
-sobrescreve o outro.
+Pense em duas **obras de construção** na mesma rua. Se as duas usassem a mesma caixa de
+ferramentas, uma equipe levaria a furadeira bem na hora em que a outra precisa dela — e
+devolveria com outra broca. Cada obra tem a **sua** caixa.
+
+Projetos de software são iguais. O projeto A precisa do NestJS 11; o projeto B, do NestJS 12.
+Instalados num lugar só, para a máquina inteira, um sobrescreve o outro.
 
 O Node resolve isso por padrão: **cada projeto tem sua própria pasta `node_modules/`**, e o
 `import` procura a partir do arquivo que importou, subindo até encontrá-la.
 
 ```
 maquina/
-├── projeto-a/node_modules/     React 18
-└── projeto-b/node_modules/     React 19
+├── projeto-a/node_modules/     NestJS 11
+└── projeto-b/node_modules/     NestJS 12
 ```
 
 Não há comando de "ativar": basta estar dentro da pasta. Outros ecossistemas pedem um passo
@@ -87,8 +91,9 @@ lugar:
 | `docker-compose.yml` | Serviços externos (banco) idênticos para todos |
 
 ⚠️ **O arquivo de lock é versionado.** É ele, e não o `package.json`, que garante que você e
-seu colega instalem exatamente as mesmas versões. O `package.json` diz `"react": "^19.0.0"`,
-o que aceita tanto a 19.0.0 quanto a 19.4.2; o lock registra qual delas foi. Apagar o lock
+seu colega instalem exatamente as mesmas versões. O `package.json` diz
+`"@nestjs/core": "^12.0.0"`, o que aceita tanto a 12.0.0 quanto a 12.4.2; o lock registra
+qual delas foi — como uma receita que diz não só "farinha", mas a marca e o lote. Apagar o lock
 "para resolver um problema" troca o seu bug por um bug que só aparece na máquina dos outros,
 o que é uma forma criativa de não resolver nada.
 
@@ -97,14 +102,18 @@ Times maduros medem esse tempo. A meta é minutos, não dias.
 
 ### 3. Git: o modelo mental
 
-Git guarda **snapshots** do projeto, não diferenças. Três áreas:
+Pense num **álbum de fotos com legenda**. Cada commit é uma foto do projeto inteiro naquele
+momento, com uma frase dizendo o que mudou. Dá para voltar a qualquer foto, comparar duas, ou
+seguir por um caminho alternativo (uma *branch*) sem estragar o álbum principal.
 
-```
-working directory  ──git add──▶  staging area  ──git commit──▶  repositório local
-                                                                     │
-                                                                 git push
-                                                                     ▼
-                                                              repositório remoto
+Git guarda **snapshots** do projeto, não diferenças. Três áreas locais, e uma remota:
+
+```mermaid
+flowchart LR
+    W["Pasta de trabalho<br/>(working directory)"] -- "git add" --> S["Área de preparação<br/>(staging)"]
+    S -- "git commit" --> L[("Repositório local")]
+    L -- "git push" --> R[("Repositório remoto<br/>GitHub")]
+    R -- "git pull" --> W
 ```
 
 Comandos que resolvem 95% do dia a dia:
@@ -128,7 +137,7 @@ git push -u origin feat/cadastro-obra
 feat(acervo): adiciona cadastro de obra
 fix(emprestimo): corrige calculo de data de devolucao
 docs: atualiza instrucoes de instalacao
-refactor(views): extrai regra de disponibilidade para o model
+refactor(acervo): extrai regra de disponibilidade para o service
 test(acervo): cobre limite de emprestimos por associado
 chore: atualiza dependencias
 ```
@@ -222,7 +231,8 @@ Isso cria um `package.json`. Abra-o e **edite** para:
 As pastas ainda não existem: `backend/` nasce no M03 e `pacotes/tipos/` no M11. Declará-las
 agora é o que faz o `npm install` já saber onde procurar quando elas chegarem.
 
-**Por que monorepo:** um único PR mostra a mudança completa, de entidade a tela. Com dois
+**Por que monorepo:** um único PR mostra a mudança completa — da entidade à migração, ao
+contrato e aos tipos gerados (M11). Com dois
 repositórios, a mesma mudança vira dois PRs, que alguém pode mesclar fora de ordem e quebrar
 produção na sexta-feira.
 
@@ -434,6 +444,29 @@ aprovação. Vale para o projeto da equipe também, e evita o clássico push dir
 vésperas da entrega.
 
 ---
+
+## 🤖 IA no fluxo
+
+Assistentes de IA explicam bem mensagens de erro de instalação e de Git — cole a mensagem
+inteira e pergunte o que ela quer dizer. Eles também sugerem mensagens de commit a partir do
+`git diff`.
+
+Duas desconfianças saudáveis: comandos com `sudo`, `--force` ou `Set-ExecutionPolicy
+Unrestricted` (que resolvem o sintoma abrindo uma porta maior), e mensagens de commit que
+descrevem **o quê** em vez de **por quê**. O *diff* já mostra o quê; o porquê só você sabe.
+
+## 💣 Pegadinha de mercado
+
+**Apagar o `package-lock.json` para "resolver" um erro de instalação.** O erro some na sua
+máquina, porque o npm escolheu versões novas — e aparece na do colega, no CI ou em produção,
+com versões diferentes das suas. Em equipe, o lock é contrato: se ele precisa mudar, a
+mudança vai num commit próprio, revisado como qualquer outro código.
+
+## 🧩 Desafio de fixação
+
+Uma pessoa nova entra na equipe amanhã, com um computador recém-formatado. Liste, em ordem,
+**todos** os comandos que ela vai rodar até ver o projeto funcionando — e marque quais deles
+dependem de um arquivo que precisa estar no Git. O seu README de hoje já cobre essa lista?
 
 ## ⚠️ Erros comuns
 

@@ -23,11 +23,20 @@ Ao final você será capaz de:
 
 Seis tabelas, nenhuma linha de SQL escrita por você:
 
+```mermaid
+erDiagram
+    AUTOR ||--o{ OBRA : escreve
+    OBRA }o--o{ CATEGORIA : "classificada em"
+    OBRA ||--o{ EXEMPLAR : "tem cópias"
+    EXEMPLAR ||--o{ EMPRESTIMO : "sai em"
+    ASSOCIADO ||--o{ EMPRESTIMO : faz
 ```
-autor ──1:N──▶ obra ──N:N──▶ categoria
-                 │
-                 └──1:N──▶ exemplar ──1:N──▶ emprestimo ◀──1:N── associado
-```
+
+| Símbolo | Lê-se |
+|---|---|
+| `\|\|` | exatamente um |
+| `o{` | zero ou muitos |
+| `}o--o{` | muitos para muitos — vira uma tabela intermediária (etapa 13) |
 
 Ao final, `\dt` no PostgreSQL lista essas tabelas mais a intermediária `obra_categoria`, e
 cada coluna delas terá saído de uma decisão que você tomou e sabe justificar.
@@ -293,6 +302,11 @@ Funciona. E tem três problemas que só aparecem quando o projeto cresce:
 
 ### O que o ORM faz
 
+Pense num **intérprete numa reunião**: você fala português, a outra pessoa fala japonês, e o
+intérprete traduz nos dois sentidos — sem que você precise aprender japonês para o dia a dia.
+O ORM (*Object-Relational Mapper*) é o intérprete entre os **objetos** do TypeScript e as
+**tabelas** do banco. E, como todo intérprete, às vezes erra o tom — a etapa 18 volta a isso.
+
 Ele torna a classe a **única fonte de verdade**: dela saem o tipo, a consulta e a tabela.
 
 ```ts
@@ -301,14 +315,11 @@ const obra = await this.repo.findOneBy({ id });   // tipo: Obra | null
 
 Os três problemas desaparecem de uma vez:
 
-```
-                    ┌──────────────┐
-                    │   class Obra │
-                    └──────┬───────┘
-              ┌────────────┼────────────┐
-              ▼            ▼            ▼
-        o TIPO que    a TABELA no   a CONSULTA
-        o TS confere    banco        gerada
+```mermaid
+flowchart TB
+    O["class Obra<br/>(com decorators)"] --> T["o TIPO<br/>que o TypeScript confere"]
+    O --> B["a TABELA<br/>no banco"]
+    O --> Q["a CONSULTA<br/>gerada"]
 ```
 
 `obra.titolo` passa a ser erro de compilação. A consulta nasce da classe, então não há como
@@ -1064,6 +1075,32 @@ de dados seis meses depois, com o sistema em produção e o cliente perguntando 
 frequentes — e agora você sabe responder aos dois.
 
 ---
+
+## 🤖 IA no fluxo
+
+Assistentes de IA escrevem entidades TypeORM muito bem — e com as decisões erradas com a
+mesma facilidade: `nullable: true` em tudo "para não dar erro", `CASCADE` em toda relação,
+`float` para dinheiro, e quase nunca o `Relation<>` que o ESM exige (etapa 11).
+
+Use o assistente para gerar o rascunho e para **ler o SQL** que o `logging: true` mostrou
+("explique cada linha deste `CREATE TABLE`"). As decisões das etapas 8 e 12 — o que pode ser
+nulo, o que some junto — são de negócio. Se você não consegue defender uma linha da entidade
+com um motivo do domínio, ela ainda não está pronta.
+
+## 💣 Pegadinha de mercado
+
+**`nullable: true` por precaução.** Parece prudente: "se um dia faltar o dado, não quebra".
+Na prática, cada coluna anulável espalha um `if (x === null)` por todo o código que a lê, e
+o dia em que alguém descobre que metade das obras está sem ano é o dia do relatório da
+diretoria. O padrão é **obrigatório**; anulável é exceção, com justificativa de negócio
+escrita.
+
+## 🧩 Desafio de fixação
+
+A biblioteca passa a cobrar **multa** por atraso: R$ 0,50 por dia, com teto de R$ 10,00. A
+multa é uma coluna em `Emprestimo` ou uma entidade própria? Pense em: o associado pode pagar
+em parcelas? A coordenação pode perdoar uma multa? O valor da diária pode mudar no futuro sem
+alterar multas antigas? Escreva o `@Column` (ou a entidade) e justifique cada opção.
 
 ## ⚠️ Erros comuns
 
