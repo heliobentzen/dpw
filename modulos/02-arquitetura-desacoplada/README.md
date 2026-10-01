@@ -4,153 +4,190 @@
 > **Ementa:** *Introdução a aplicações web: como funcionam.*
 
 Módulo curto e inteiramente conceitual — e um dos mais importantes. Ele responde à
-pergunta que o resto do curso executa: **onde o HTML é montado, e quem decide isso?**
+pergunta que o resto do curso executa: **quem monta a tela, quem guarda a verdade, e como
+os dois combinam o que vão trocar?**
 
 ## 🎯 Objetivos
 
-1. Comparar renderização no servidor (SSR/MPA) e aplicação de página única (SPA).
+1. Comparar renderização no servidor (MPA) e aplicações que consomem uma API.
 2. Escolher entre as duas a partir de requisitos, não de preferência.
-3. Explicar o que é o **contrato** entre cliente e servidor e por que ele vem primeiro.
-4. Projetar os recursos e as rotas de uma API REST a partir de um domínio.
+3. Desenhar a arquitetura de um sistema com o **C4 Model**, em diagramas como código.
+4. Explicar o que é o **contrato** entre cliente e servidor e por que ele vem primeiro.
+5. Projetar os recursos e as rotas de uma API REST a partir de um domínio.
 
 ## 🧭 Por que este módulo vem antes do backend
 
-O M02 é um módulo de decisão, não apenas de definição. Ele responde à pergunta que muitas
-turmas tentam ignorar: "quem é responsável por fazer o quê?"
+Pense num **restaurante com serviço de entrega**. A cozinha não sabe se o pedido veio pelo
+salão, pelo telefone ou por um aplicativo — e não precisa saber. O que todos compartilham é
+o **cardápio**: o que existe, como pedir, o que chega. A cozinha pode trocar de fogão sem
+avisar ninguém; se trocar o cardápio sem avisar, todo canal de pedido quebra.
 
-Quando o aluno entende arquitetura desacoplada, ele deixa de pensar em uma aplicação monolítica
-como uma única caixa e passa a enxergar duas responsabilidades distintas:
+Numa arquitetura desacoplada, o servidor é a cozinha (a regra de negócio e os dados), os
+clientes são os canais (navegador, aplicativo, outro sistema) e a **API** é o cardápio.
 
-- o cliente cuida da experiência e da interface;
-- o servidor cuida da verdade, da regra de negócio e dos dados.
+Este curso constrói **a cozinha**: uma API completa, documentada, segura e no ar. Os clientes
+ficam fora do escopo da disciplina — e é justamente por isso que o cardápio precisa ser
+impecável: quem consumir a API vai conhecê-la **só** por ele.
 
-Esse entendimento é o que torna o resto do curso possível. O M03 pode até parecer uma aula de
-NestJS, mas por trás dela há uma decisão arquitetural: a API existe para servir um cliente
-independente, com contrato explícito, e não para misturar tudo em um único bloco.
-
-> Em outras palavras, o M02 ensina o aluno a pensar em interfaces antes de escrever rotas. Isso
-> reduz retrabalho e evita o clássico erro de “escrever o backend sem definir o que o frontend
-> precisa de verdade”.
+> Em outras palavras, o M02 ensina a pensar no contrato antes de escrever rotas. Isso reduz
+> retrabalho e evita o clássico erro de "escrever o backend sem definir o que quem vai usar
+> precisa de verdade".
 
 ---
 
 ## 📖 Teoria
 
-### 1. Duas formas de montar uma página
+### 1. Duas formas de montar uma tela
 
 #### Renderização no servidor (MPA — *multi-page application*)
 
-```
-navegador                          servidor
-    │  GET /obras/42/                 │
-    ├────────────────────────────────▶│  consulta o banco
-    │                                 │  preenche o template
-    │  200 OK, text/html              │
-    │◀────────────────────────────────┤
-    │  (o HTML já vem pronto)         │
+```mermaid
+sequenceDiagram
+    participant N as Navegador
+    participant S as Servidor
+    N->>S: GET /obras/42
+    Note right of S: consulta o banco<br/>preenche o template HTML
+    S-->>N: 200 OK, text/html (página pronta)
 ```
 
 Cada navegação é uma requisição nova, e o servidor devolve **HTML completo**. É como
-funcionam Rails com ERB, Laravel com Blade, Django com templates e PHP puro.
+funcionam Rails com ERB, Laravel com Blade e PHP tradicional.
 
-#### Aplicação de página única (SPA)
+#### Cliente que consome uma API
 
-```
-navegador                          servidor
-    │  GET /                           │
-    ├─────────────────────────────────▶│
-    │  200 OK, index.html + bundle.js  │   (uma vez só)
-    │◀─────────────────────────────────┤
-    │                                  │
-    │  o JavaScript assume a tela      │
-    │                                  │
-    │  GET /api/obras/42/              │
-    ├─────────────────────────────────▶│  consulta o banco
-    │  200 OK, application/json        │  serializa
-    │◀─────────────────────────────────┤
-    │  o JS monta o HTML no cliente    │
+```mermaid
+sequenceDiagram
+    participant C as Cliente (navegador, app, outro sistema)
+    participant A as API
+    C->>A: GET /api/obras/42
+    Note right of A: consulta o banco<br/>monta o JSON
+    A-->>C: 200 OK, application/json
+    Note left of C: o cliente decide<br/>como mostrar
 ```
 
-O servidor entrega **dados**; o navegador monta a interface. Navegar entre telas não
-recarrega a página — o roteamento acontece no cliente.
+O servidor entrega **dados**; quem consome decide como apresentá-los. A mesma resposta serve
+a uma tela web, a um aplicativo e a uma integração com outro sistema.
 
 #### Comparação honesta
 
-| Critério | MPA (servidor) | SPA (cliente) |
+| Critério | MPA (servidor monta a tela) | API + clientes |
 | --- | --- | --- |
-| Primeiro carregamento | Rápido | Mais lento (baixa o *bundle*) |
-| Navegação seguinte | Recarrega tudo | Instantânea (só dados) |
-| Funciona sem JavaScript | ✅ Sim | ❌ Não |
-| SEO | ✅ Nativo | Exige SSR ou pré-renderização |
-| Complexidade | Baixa: um projeto | Alta: dois projetos, dois deploys |
-| Estado da interface | No servidor (sessão) | No cliente (memória) |
-| Serve app mobile | Não (precisa de API à parte) | ✅ A mesma API |
+| Primeiro carregamento | Rápido | Depende do cliente |
+| Funciona sem JavaScript | ✅ Sim | Depende do cliente |
+| SEO | ✅ Nativo | Exige cuidado extra no cliente web |
+| Complexidade | Baixa: um projeto | Maior: API e clientes, cada um com seu deploy |
+| Serve app mobile e integrações | Não (precisa de API à parte) | ✅ A mesma API |
 | Equipes separadas | Difícil | ✅ Fácil (contrato claro) |
-| Interatividade rica | Trabalhosa | ✅ Natural |
 | Custo de manutenção | Menor | Maior |
 
 **Não existe opção certa em abstrato.** Existe a opção certa para um conjunto de
-requisitos. Um blog institucional em SPA é má engenharia; um painel de operação em tempo
-real com MPA também.
+requisitos. Um blog institucional servido por API e cliente pesado é má engenharia; um
+sistema consumido por três aplicativos diferentes, cada um com seu HTML, também.
 
 #### Como escolher
 
-```
-O conteúdo precisa ser indexado por buscadores?
-├── SIM, e é o principal ────────────────────▶ MPA ou SSR (Next.js, Nuxt)
-└── NÃO (sistema atrás de login)
-     │
-     ├── Existe (ou existirá) app mobile / outro consumidor? ──▶ SPA + API
-     ├── A interface tem muita interação sem recarregar? ──────▶ SPA + API
-     ├── Equipes de front e back separadas? ───────────────────▶ SPA + API
-     └── Nada disso, e a equipe é pequena? ────────────────────▶ MPA (mais simples)
+```mermaid
+flowchart TD
+    Q1{"O conteúdo precisa ser<br/>indexado por buscadores?"}
+    Q1 -- "sim, é o principal" --> MPA["MPA ou renderização no servidor"]
+    Q1 -- "não" --> Q2{"Existe ou existirá<br/>mais de um consumidor?<br/>(app, integração, outra equipe)"}
+    Q2 -- sim --> API["API + clientes"]
+    Q2 -- não --> Q3{"Equipe pequena,<br/>interface simples?"}
+    Q3 -- sim --> MPA2["MPA (mais simples)"]
+    Q3 -- não --> API
 ```
 
-> **O BiblioCom cabe nos dois modelos.** Adotamos SPA + API por decisão pedagógica e de
-> mercado, registrada em [ADR-01](../../docs/decisoes-tecnicas.md#adr-10--backend-em-typescript-com-frontend-opcional-nestjs--typeorm) —
-> e com o custo declarado no [ADR-09](../../docs/decisoes-tecnicas.md#adr-09--o-custo-em-carga-horária).
+> **O BiblioCom cabe nos dois modelos.** O curso adota **API + clientes** porque a
+> organização parceira típica de um projeto extensionista precisa integrar sistemas, e
+> porque é o que o mercado de backend pede. A decisão e o custo estão registrados em
+> [`decisoes-tecnicas.md`](../../docs/decisoes-tecnicas.md#adr-10--backend-em-typescript-com-frontend-opcional-nestjs--typeorm).
 > Reconhecer que a alternativa era viável é parte de decidir bem.
 
 💼 **No mercado:** essa é uma pergunta real de entrevista e de reunião de arquitetura.
-Responder "SPA, porque é moderno" desqualifica; responder com os requisitos qualifica.
+Responder "API, porque é moderno" desqualifica; responder com os requisitos qualifica.
 
-### 2. O que muda quando se desacopla
+### 2. Desenhar a arquitetura: o C4 Model
 
-Separar cliente e servidor não elimina trabalho — **desloca** trabalho. O que antes era
-uma chamada de função vira uma requisição de rede, com tudo que isso implica.
+Para conversar sobre arquitetura, a equipe precisa de **desenhos** — e de desenhos que todo
+mundo leia do mesmo jeito. O **C4 Model** organiza isso como um **mapa com zoom**: primeiro o
+país, depois a cidade, o bairro, a rua. Cada nível responde a uma pergunta, e ninguém mistura
+os níveis num desenho só.
 
-| Preocupação | MPA | SPA + API |
+| Nível | Pergunta | Para quem |
+|---|---|---|
+| **1. Contexto** | Quem usa o sistema, e com que outros sistemas ele conversa? | Qualquer pessoa, inclusive a organização parceira |
+| **2. Contêineres** | Quais peças executáveis existem (API, banco, aplicativos)? | A equipe técnica |
+| **3. Componentes** | Quais módulos existem dentro de uma peça? | Quem desenvolve aquela peça |
+| 4. Código | Quais classes? | Raramente desenhado: o próprio código responde |
+
+**Nível 1 — Contexto do BiblioCom:**
+
+```mermaid
+flowchart TB
+    B(["👤 Bibliotecário<br/>[Pessoa]<br/>cadastra acervo e empréstimos"])
+    C(["👤 Coordenação<br/>[Pessoa]<br/>gerencia usuários e o acervo"])
+    S["📚 BiblioCom<br/>[Sistema]<br/>acervo, associados e empréstimos"]
+    E["🏫 Sistema da escola<br/>[Sistema externo]<br/>consulta atrasos"]
+    B -- "usa" --> S
+    C -- "administra" --> S
+    E -- "consulta pela API" --> S
+```
+
+**Nível 2 — Contêineres:**
+
+```mermaid
+flowchart TB
+    Cli["🖥️ Clientes<br/>[Swagger UI, curl, apps de terceiros]"]
+    subgraph BiblioCom["BiblioCom"]
+        API["⚙️ API<br/>[NestJS, TypeScript]<br/>regras de negócio, autenticação"]
+        DB[("🗄️ Banco<br/>[PostgreSQL]<br/>acervo, usuários, sessões")]
+    end
+    Cli -- "HTTPS, JSON<br/>(o contrato)" --> API
+    API -- "SQL (TypeORM)" --> DB
+```
+
+O nível 3 — os módulos `acervo`, `emprestimos`, `auth` dentro da API — aparece no M03 e
+cresce até o M08.
+
+> **Por que Mermaid?** Estes diagramas são **texto** dentro do Markdown. O GitHub os
+> desenha, o Git versiona, e uma mudança na arquitetura aparece num *diff* como qualquer
+> código. Desenho em imagem envelhece em silêncio; desenho como código é revisado no
+> *pull request*.
+
+### 3. O que muda quando se desacopla
+
+Separar cliente e servidor não elimina trabalho — **desloca** trabalho. O que antes era uma
+chamada de função vira uma requisição de rede, com tudo que isso implica.
+
+| Preocupação | MPA | API + clientes |
 | --- | --- | --- |
-| Roteamento | Só no servidor | Servidor **e** cliente (dois mapas de rotas) |
-| Validação | Uma vez (form do servidor) | Duas vezes (UX no cliente, **segurança** no servidor) |
-| Autenticação | Sessão + cookie, direto | Sessão + CORS, ou token (M08) |
-| Estado da tela | Não existe (a página recarrega) | Existe e precisa ser gerenciado pelo cliente |
-| Erros | Página de erro | Cada requisição pode falhar; a tela precisa reagir |
-| Carregamento | Não existe (o HTML já vem) | Todo dado tem "carregando" e "erro" |
-| Deploy | Um artefato | Dois artefatos e um contrato entre eles |
-| Tipos | Um só ecossistema | Duas linguagens; o contrato precisa ser garantido |
+| Validação | Uma vez, no servidor | No cliente (conforto) **e** no servidor (segurança) |
+| Autenticação | Sessão + cookie, direto | Sessão em cookie ou token, escolhido por tipo de cliente (M08) |
+| Erros | Página de erro | Cada requisição pode falhar, e o erro precisa de formato previsível |
+| Deploy | Um artefato | API e clientes evoluem separados — e o contrato entre eles precisa aguentar |
+| Documentação | Opcional | **Obrigatória**: quem consome não lê o seu código |
 
 Três consequências que a turma vai sentir na pele:
 
-1. **Toda tela tem quatro estados**: carregando, vazio, com conteúdo, erro. Em MPA você
-   só precisava pensar no terceiro. Cobrado na rubrica da Etapa 3.
-2. **Validar no cliente não é validar.** O `curl` do M01 já provou que dá para pular a
-   interface. A validação do cliente existe para a experiência; a do servidor, para a
-   integridade. A do servidor é a única que você controla sempre — e é a do M07.
-3. **O contrato pode quebrar em silêncio.** O backend renomeia `titulo` para `nome`, o
-   frontend continua compilando e a tela mostra `undefined`. As defesas: OpenAPI + tipos
-   gerados (M07) e testes de contrato (M10).
+1. **Validar no cliente não é validar.** O `curl` do M01 já provou que dá para pular
+   qualquer interface. A validação do servidor é a única que você controla sempre — e é a
+   do M07.
+2. **Toda resposta pode ser erro.** Quem consome precisa saber, para cada rota, quais erros
+   esperar e em que formato — por isso o formato de erro é parte do contrato.
+3. **O contrato pode quebrar em silêncio.** O backend renomeia `titulo` para `nome`, a API
+   continua respondendo `200`, e o cliente mostra `undefined`. As defesas: contrato gerado do
+   código (M03, M07), tipos gerados e verificados (M11), testes (M10).
 
-### 3. O contrato de API ⭐
+### 4. O contrato de API ⭐
 
 O contrato é o acordo sobre **quais recursos existem, em quais URLs, com quais métodos, em
-que formato e com quais erros**. Ele vem **antes** do código dos dois lados — é o que
-permite backend e frontend avançarem em paralelo.
+que formato e com quais erros**. Ele vem **antes** do código — é o que permite a API e seus
+consumidores avançarem em paralelo.
 
 #### Recursos, não ações
 
-A URL nomeia **coisas** (substantivos); o método diz o que se faz com elas (verbos). Isso
-é o M01 aplicado.
+A URL nomeia **coisas** (substantivos); o método diz o que se faz com elas (verbos). Isso é
+o M01 aplicado.
 
 | ❌ Verbo na URL | ✅ Recurso + método |
 | --- | --- |
@@ -158,27 +195,29 @@ A URL nomeia **coisas** (substantivos); o método diz o que se faz com elas (ver
 | `POST /atualizarObra?id=42` | `PATCH /api/obras/42` |
 | `GET /deletarObra/42` | `DELETE /api/obras/42` |
 | `GET /listarObrasDoAutor/7` | `GET /api/obras?autorId=7` |
-| `POST /devolverEmprestimo/15` | `POST /api/emprestimos/15/devolver` ✅ |
+| `POST /login` | `POST /api/sessao` — o recurso é a sessão |
+| `POST /devolverEmprestimo/15` | `POST /api/emprestimos/15/devolucao` ✅ |
 
-A última linha mostra a exceção legítima: quando a operação **não** é um CRUD sobre o
-recurso, uma sub-rota de ação é aceitável e mais clara que forçar um `PATCH`.
+A última linha mostra a exceção legítima: quando a operação **não** é um CRUD simples, uma
+sub-rota com substantivo ("a devolução do empréstimo 15") é aceitável e mais clara que
+forçar um `PATCH`.
 
 #### O contrato do BiblioCom
 
-| Recurso | Método | Rota | O que faz | Sucesso |
-| --- | --- | --- | --- | --- |
-| Obras | GET | `/api/obras` | Lista, com filtros e paginação | 200 |
-| | POST | `/api/obras` | Cria | 201 |
-| | GET | `/api/obras/{id}` | Detalha | 200 |
-| | PATCH | `/api/obras/{id}` | Atualiza parcialmente | 200 |
-| | DELETE | `/api/obras/{id}` | Remove | 204 |
-| Exemplares | GET | `/api/obras/{id}/exemplares` | Exemplares da obra | 200 |
-| Empréstimos | GET | `/api/emprestimos` | Lista (filtrada pelo usuário) | 200 |
-| | POST | `/api/emprestimos` | Registra empréstimo | 201 |
-| | POST | `/api/emprestimos/{id}/devolver` | Registra devolução | 200 |
-| Sessão | POST | `/api/auth/login` | Autentica | 200 |
-| | POST | `/api/auth/logout` | Encerra sessão | 204 |
-| | GET | `/api/auth/eu` | Usuário atual | 200 / 401 |
+| Recurso | Método | Rota | O que faz | Sucesso | Módulo |
+| --- | --- | --- | --- | --- | --- |
+| Obras | GET | `/api/obras` | Lista, com busca e paginação | 200 | M06, M07 |
+| | POST | `/api/obras` | Cria | 201 | M07 |
+| | GET | `/api/obras/{id}` | Detalha | 200 | M06, M07 |
+| | PATCH | `/api/obras/{id}` | Atualiza parcialmente | 200 | M07 |
+| | DELETE | `/api/obras/{id}` | Remove | 204 | M07 |
+| Empréstimos | POST | `/api/emprestimos` | Registra empréstimo | 201 | M06, M10 |
+| Sessão | POST | `/api/sessao` | Entra (login) | 200 | M08 |
+| | GET | `/api/sessao` | Quem sou eu | 200 / 401 | M08 |
+| | DELETE | `/api/sessao` | Sai (logout) | 204 | M08 |
+| Usuários | POST | `/api/usuarios` | Cadastro pela coordenação | 201 | M08 |
+| | GET | `/api/usuarios/{id}` | Consulta o próprio cadastro | 200 | M09 |
+| Saúde | GET | `/api/health` | A API e o banco respondem? | 200 / 503 | M12 |
 
 #### Formato das respostas
 
@@ -187,14 +226,7 @@ recurso, uma sub-rota de ação é aceitável e mais clara que forçar um `PATCH
 ```json
 {
   "itens": [
-    {
-      "id": 42,
-      "titulo": "Dom Casmurro",
-      "anoPublicacao": 1899,
-      "autor": { "id": 7, "nome": "Machado de Assis" },
-      "categorias": ["Romance"],
-      "exemplaresDisponiveis": 1
-    }
+    { "id": 42, "titulo": "Dom Casmurro", "anoPublicacao": 1899, "autor": "Machado de Assis" }
   ],
   "total": 128,
   "pagina": 2,
@@ -226,8 +258,8 @@ Com `total` e `tamanho`, o cliente calcula sozinho quantas páginas existem (128
 Repare que os dois erros têm a **mesma forma**: `message`, `error`, `statusCode`. A única
 diferença é `message` ser lista na validação (várias falhas de uma vez) e texto nos demais.
 
-O formato de erro **é parte do contrato**. Se cada endpoint errar de um jeito, o frontend
-precisa de um tratamento por endpoint — e não terá.
+O formato de erro **é parte do contrato**. Se cada rota errar de um jeito, cada cliente
+precisa de um tratamento por rota — e não terá.
 
 #### Decisões que o contrato precisa fixar
 
@@ -241,28 +273,28 @@ precisa de um tratamento por endpoint — e não terá.
 - [ ] Formato do erro de validação e do erro de permissão
 - [ ] Relações: id (`"autorId": 7`) ou objeto aninhado (`"autor": {...}`)?
 
-> A última decisão é a que mais gera retrabalho. Regra prática do material: **aninhe na
-> leitura, use id na escrita.** A tela quer o nome do autor sem uma segunda requisição; o
-> formulário só precisa mandar o id. Resolve-se com DTOs diferentes para
-> leitura e escrita (M07).
+> A última decisão é a que mais gera retrabalho. Regra prática do material: **aninhe (ou
+> resuma) na leitura, use id na escrita.** Quem lê quer o nome do autor sem uma segunda
+> requisição; quem escreve só precisa mandar o id. Resolve-se com DTOs diferentes para
+> leitura e escrita (M07, M09).
 
-### 4. Documentação como fonte de verdade
+### 5. Documentação como fonte de verdade
 
-O contrato só funciona se estiver escrito num lugar que **não pode divergir do código**.
-A solução padrão é **OpenAPI** gerado a partir do próprio código:
+O contrato só funciona se estiver escrito num lugar que **não pode divergir do código**. A
+solução padrão é **OpenAPI** gerado a partir do próprio código:
 
+```mermaid
+flowchart LR
+    D["decorators do Nest<br/>(controllers e DTOs)"] -- "@nestjs/swagger" --> O[("openapi.json")]
+    O --> S["Swagger UI<br/>documentação navegável"]
+    O --> T["openapi-typescript<br/>tipos para clientes"]
+    O --> CI["CI<br/>contrato em dia"]
 ```
-decorators do Nest ──@nestjs/swagger──▶  openapi.json
-                                          │
-                          ┌───────────────┼────────────────┐
-                          ▼               ▼                ▼
-                    Swagger UI     openapi-typescript   testes de
-                  (documentação)    (tipos do front)     contrato
-```
 
-Com isso, renomear um campo no DTO de saída muda o schema, que muda os tipos do frontend,
-que faz o TypeScript acusar erro **na compilação** — antes de chegar ao usuário. É a
-defesa concreta contra o problema descrito na seção 2. Implementado no M07.
+Com isso, renomear um campo no DTO de saída muda o schema, que muda os tipos dos clientes,
+que faz o TypeScript acusar erro **na compilação** — antes de chegar a qualquer usuário. É a
+defesa concreta contra o problema da seção 3. Começa no M03, ganha corpo no M07 e vira
+verificação automática no M11.
 
 ---
 
@@ -270,11 +302,13 @@ defesa concreta contra o problema descrito na seção 2. Implementado no M07.
 
 ### Escrever o contrato do BiblioCom (em duplas)
 
-1. Liste os recursos do domínio (use os models que você projetará no M04).
+1. Liste os recursos do domínio (use as entidades que você vai modelar no M04: autor, obra,
+   categoria, exemplar, associado, empréstimo).
 2. Para cada um, defina as rotas, os métodos e os status de sucesso.
 3. Escreva o JSON de exemplo de uma listagem e de um detalhe.
-4. Defina as 9 decisões do checklist da seção 3.3.
+4. Fixe as 9 decisões da seção 4.
 5. Escreva 3 exemplos de erro: validação, não autenticado, sem permissão.
+6. Desenhe os níveis 1 e 2 do C4 em Mermaid, com os nomes do **seu** sistema.
 
 Guarde em `docs/contrato-api.md` no repositório. Este documento será confrontado com a
 implementação real no M07 — e a diferença entre o que vocês projetaram e o que
@@ -282,27 +316,53 @@ implementaram é, ela mesma, o aprendizado.
 
 ---
 
+## 🤖 IA no fluxo
+
+Um assistente de IA é um bom parceiro para a atividade dirigida: descreva o domínio e peça
+uma primeira versão do contrato, ou peça para ele **criticar** o seu ("encontre verbos na
+URL, formatos inconsistentes e decisões que faltam"). Ele também escreve Mermaid com
+facilidade.
+
+O que fica com você: as decisões que dependem de quem vai usar a API. Se a escola parceira
+precisa saber dos atrasos, isso vira um recurso — e nenhum modelo sabe disso sem você
+perguntar à escola.
+
 ## ⚠️ Erros comuns
 
 | Erro | Por que é problema |
 | --- | --- |
-| Escolher SPA por moda | Complexidade sem contrapartida; o ADR existe para evitar isso |
+| Escolher a arquitetura por moda | Complexidade sem contrapartida; o ADR existe para evitar isso |
 | Verbo na URL (`/criarObra`) | Ignora a semântica do HTTP (M01) |
-| Contrato só na cabeça de alguém | Frontend e backend divergem e ninguém percebe |
-| Formato de erro diferente por endpoint | O cliente precisa de tratamento caso a caso |
-| Data como `"11/08/2026"` | Ambíguo entre locales; use ISO 8601 |
+| Contrato só na cabeça de alguém | API e clientes divergem e ninguém percebe |
+| Formato de erro diferente por rota | O cliente precisa de tratamento caso a caso |
+| Data como `"11/08/2026"` | Ambíguo entre países; use ISO 8601 |
 | Dinheiro como `float` | Erro de ponto flutuante; use string decimal |
-| "Validamos no React, então está validado" | Não está. `curl` ignora seu React |
-| Começar o frontend antes da API existir | Trabalha-se contra dados falsos e retrabalha-se depois |
+| "Validamos no cliente, então está validado" | Não está. O `curl` ignora qualquer cliente |
+| Diagrama misturando níveis do C4 | Pessoa, tabela do banco e classe no mesmo desenho: ninguém entende nada |
+
+## 💣 Pegadinha de mercado
+
+**Desenhar a API a partir das tabelas do banco.** É tentador: uma rota por tabela, um campo
+por coluna. O resultado é uma API que expõe a estrutura interna — mudar o banco passa a
+quebrar todos os clientes, e o cliente precisa de cinco requisições para montar uma tela. O
+contrato nasce do que **quem consome precisa**, e o banco é detalhe de implementação do lado
+de cá.
 
 ## ✅ Checklist de saída
 
-- [ ] Sei explicar MPA × SPA sem usar a palavra "moderno"
-- [ ] Sei escolher entre as duas a partir de requisitos
+- [ ] Sei explicar MPA × API + clientes sem usar a palavra "moderno"
+- [ ] Sei escolher entre os dois a partir de requisitos
+- [ ] Sei desenhar os níveis 1 e 2 do C4 de um sistema, em Mermaid
 - [ ] Sei listar o que a arquitetura desacoplada **adiciona** de trabalho
-- [ ] Sei por que toda tela passa a ter quatro estados
 - [ ] Escrevi o contrato de API do BiblioCom, com as 9 decisões fixadas
 - [ ] Sei o que é OpenAPI e por que gerá-lo do código importa
+
+## 🧩 Desafio de fixação
+
+A escola do bairro quer que o sistema dela mostre, na ficha de cada aluno, se ele tem livro
+atrasado na biblioteca. Desenhe o nível 1 do C4 com essa integração e escreva a rota que
+você acrescentaria ao contrato — método, URL, resposta de sucesso e pelo menos um erro.
+Quem pode chamar essa rota?
 
 ## 🧪 Exercícios
 
@@ -310,8 +370,8 @@ Ver [`exercicios.md`](exercicios.md).
 
 ## 📚 Para aprofundar
 
-- [MDN — SPA](https://developer.mozilla.org/en-US/docs/Glossary/SPA)
+- [C4 Model](https://c4model.com/)
+- [Mermaid — Flowcharts e diagramas de sequência](https://mermaid.js.org/intro/)
 - [Roy Fielding — capítulo 5 da tese que definiu REST](https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm)
-- [Microsoft — API design best practices](https://learn.microsoft.com/pt-br/azure/architecture/best-practices/api-design)
+- [Microsoft — Boas práticas de design de API](https://learn.microsoft.com/pt-br/azure/architecture/best-practices/api-design)
 - [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Nolan Lawson — The Balance has shifted away from SPAs](https://nolanlawson.com/2022/05/21/the-balance-has-shifted-away-from-spas/) (contraponto útil)
