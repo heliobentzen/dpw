@@ -296,7 +296,7 @@ import { ObraResumo, PaginaDeObras } from "./dto/obra-resumo.js";
   @ApiOkResponse({ type: PaginaDeObras })
   async listar(@Query() filtros: ListarObrasDto): Promise<PaginaDeObras> {
     const pagina = await this.acervo.listar(filtros.pagina, filtros.tamanho);
-    return { ...pagina, itens: pagina.itens.map(ObraResumo.de) };
+    return { ...pagina, itens: pagina.itens.map((obra) => ObraResumo.de(obra)) };
   }
 ```
 

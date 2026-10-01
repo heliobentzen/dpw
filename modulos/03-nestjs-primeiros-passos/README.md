@@ -152,11 +152,10 @@ cd C:\dev\bibliocom
 *(No macOS ou Linux: `cd ~/dev/bibliocom`.)*
 
 **Deu certo se:** existe um `package.json` nessa pasta. Confira abrindo-o no VS Code — ele
-deve ter um campo `workspaces` listando `backend`, `frontend` e `pacotes/*`.
+deve ter um campo `workspaces` listando `backend` e `pacotes/*`.
 
 Essas pastas ainda não existem, e é normal: `backend/` nasce daqui a duas etapas e
-`pacotes/tipos/` no M11. `frontend/` só existe se a turma fizer o cliente web complementar. O campo `workspaces` é uma **declaração de
-intenção** — ele diz ao npm onde procurar projetos quando eles existirem.
+`pacotes/tipos/` no M11. O campo `workspaces` é uma **declaração de intenção** — ele diz ao npm onde procurar projetos quando eles existirem.
 
 ---
 

@@ -69,8 +69,8 @@ Não há comando de "ativar": basta estar dentro da pasta. Outros ecossistemas p
 explícito. Em Python, por exemplo, você ativa um *ambiente virtual* em cada terminal novo, e
 esquecer disso rende uma tarde inteira de erro estranho. Aqui esse passo não existe.
 
-> **O que substitui a ativação é a pasta em que você está.** Rodar `npm run test` dentro de
-> `backend/` e dentro de `frontend/` executa suítes diferentes. Quem decide é o
+> **O que substitui a ativação é a pasta em que você está.** Rodar `npm test` dentro de
+> `backend/` e dentro de `pacotes/tipos/` executa suítes diferentes. Quem decide é o
 > `package.json` mais próximo.
 
 ### 2. Reprodutibilidade
@@ -205,10 +205,9 @@ Isso cria um `package.json`. Abra-o e **edite** para:
 {
   "name": "bibliocom",
   "private": true,
-  "workspaces": ["backend", "frontend", "pacotes/*"],
+  "workspaces": ["backend", "pacotes/*"],
   "scripts": {
-    "dev:api": "npm run -w backend start:dev",
-    "dev:web": "npm run -w frontend dev"
+    "dev:api": "npm run -w backend start:dev"
   }
 }
 ```
@@ -216,13 +215,12 @@ Isso cria um `package.json`. Abra-o e **edite** para:
 | Campo | O que faz |
 | --- | --- |
 | `"private": true` | Impede publicação acidental no npm. **Obrigatório** na raiz de um workspace |
-| `"workspaces"` | Declara os projetos do monorepo. É esta linha que faz um único `npm install` na raiz resolver os três |
+| `"workspaces"` | Declara os projetos do monorepo. É esta linha que faz um único `npm install` na raiz resolver todos eles, com **um** `package-lock.json` e **uma** pasta `node_modules`, ambos na raiz |
 | `scripts` | Atalhos que rodam de qualquer pasta. `npm run dev:api` sobe o backend sem você precisar entrar nele |
 | `-w backend` | "*workspace* backend": roda o script lá dentro, a partir da raiz |
 
-As pastas ainda não existem: `backend/` nasce no M03, `pacotes/tipos/` no M11, e `frontend/`
-só existe se a turma optar pelo cliente web complementar. Declará-las agora é o que faz o
-`npm install` já saber onde procurar quando elas chegarem.
+As pastas ainda não existem: `backend/` nasce no M03 e `pacotes/tipos/` no M11. Declará-las
+agora é o que faz o `npm install` já saber onde procurar quando elas chegarem.
 
 **Por que monorepo:** um único PR mostra a mudança completa, de entidade a tela. Com dois
 repositórios, a mesma mudança vira dois PRs, que alguém pode mesclar fora de ordem e quebrar
@@ -346,9 +344,8 @@ Sistema de gestão para bibliotecas comunitárias. Estudo de caso da disciplina 
 ### Linux / macOS
 
 ```bash
-npm install          # instala backend, frontend e pacotes de uma vez
-npm run dev:api          # http://localhost:3000
-npm run dev:web          # http://localhost:5173
+npm install          # instala o backend e os pacotes de uma vez
+npm run dev:api      # http://localhost:3000/api/docs
 ```
 
 Os mesmos comandos valem no Windows, no macOS e no Linux.
