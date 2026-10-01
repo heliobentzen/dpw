@@ -1326,7 +1326,7 @@ async function gerar() {
   console.log("openapi.json gerado");
 }
 
-gerar();
+await gerar();
 ```
 
 | Trecho | O que faz |
@@ -1335,6 +1335,7 @@ gerar();
 | `setGlobalPrefix("api")` | Precisa repetir aqui: este script monta a aplicação por conta própria |
 | `JSON.stringify(x, null, 2)` | Converte para texto. O `2` é a indentação — sem ele o arquivo sai numa linha só e o `git diff` fica inútil |
 | `app.close()` | Encerra a aplicação. **Sem isto o script não termina** e fica pendurado |
+| `await gerar()` | O mesmo `await` no topo do arquivo que o `main.ts` usa (etapa 5). Sem ele, um erro na geração pode passar sem aviso |
 
 **Faça:** o atalho, em `backend\package.json`, ao lado dos scripts que já estão lá:
 

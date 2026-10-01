@@ -97,13 +97,18 @@ export class AtualizarObraDto extends PartialType(CriarObraDto) {}
 
 ```ts
 export class ListarObrasDto {
+  @ApiPropertyOptional({ default: 1, minimum: 1 })   // sem isto, some do contrato (M11)
   @IsOptional() @Type(() => Number) @IsInt() @Min(1)
-  pagina = 1;
+  pagina: number = 1;           // tipo escrito: sem ele o contrato diz "Object"
 
+  @ApiPropertyOptional({ default: 20, maximum: 100 })
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100)
-  tamanho = 20;                 // teto é segurança, não capricho
+  tamanho: number = 20;         // teto é segurança, não capricho
 }
 ```
+
+> Tipo com `|` no DTO de saída precisa do `type` por extenso:
+> `@ApiProperty({ type: Number, nullable: true }) anoPublicacao: number | null;`
 
 ## DTO de saída
 
