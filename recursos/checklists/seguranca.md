@@ -17,7 +17,7 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 - [ ] `.env` no `.gitignore`; `.env.example` só com nomes, sem valores reais
 - [ ] `synchronize: false` fora do desenvolvimento local (o esquema muda só por migração)
 - [ ] `helmet` aplicado e cabeçalhos conferidos na resposta
-- [ ] Swagger (`/api/docs`) desligado em produção **ou** protegido — é um mapa da API
+- [ ] Swagger (`/api/docs`) em produção por **decisão registrada**: público (API aberta, como no projeto da disciplina) ou desligado/protegido (API interna) — ele é um mapa da API
 
 ## Transporte e cabeçalhos
 

@@ -1,144 +1,90 @@
 # M12 — Exercícios
 
-## E14.1 — Deploy do zero (individual) ⭐
+## E12.1 — Deploy de outra pessoa (em duplas) ⭐
 
-Implante o **seu** BiblioCom numa PaaS e documente cada passo em `docs/deploy.md`, de forma
-que outra pessoa consiga reproduzir sem perguntar nada.
+Troquem os `docs/deploy.md`. Cada pessoa faz o deploy do BiblioCom **da outra**, numa conta
+própria, seguindo **só** o documento — sem perguntar nada.
 
-**Entrega:** URL pública + `docs/deploy.md` + prints da página inicial e do painel de logs.
+**Verificação:**
 
-**Critério de aceite:** um colega segue o seu documento e chega ao mesmo resultado. Troque
-o documento com alguém e testem mutuamente — este é o teste real da qualidade da
-documentação.
-
----
-
-## E14.2 — Auditoria pós-deploy (individual)
-
-Percorra o [checklist de deploy](../../recursos/checklists/deploy.md) e registre o
-resultado de cada item, com evidência:
-
-| Item | Resultado | Evidência |
-|---|---|---|
-
-Depois, rode e cole a saída:
-
-```bash
-curl -I https://SEU-DOMINIO/          # Linux/macOS/WSL/Git Bash
-```
-
-```powershell
-curl.exe -I https://SEU-DOMINIO/      # Windows PowerShell
-```
-
-E o relatório do securityheaders.com. Meta: **nota A**.
+- [ ] A API ficou no ar e passou na verificação da etapa 12
+- [ ] Toda dúvida que surgiu foi anotada e virou correção no documento da outra pessoa
+- [ ] Nenhum segredo apareceu no documento
 
 ---
 
-## E14.3 — Simular e corrigir 5 falhas (individual)
+## E12.2 — Cinco falhas de propósito (individual)
 
-Provoque cada falha em produção, capture a evidência e corrija:
+Provoque cada falha **no ensaio geral da sua máquina** (etapa 8) — não em produção — e
+registre o sintoma antes de corrigir:
 
 | # | Falha | Como provocar | Sintoma | Correção |
-| --- | --- | --- | --- | --- |
-| 1 | `ALLOWED_HOSTS` errado | Remover o domínio | | |
-| 2 | SPA não construída | Remover `npm run -w frontend build` do comando de build | | |
-| 3 | Migração não aplicada | Remover `migrate` do release | | |
-| 4 | Variável de ambiente faltando | Remover `SESSION_SECRET` | | |
-| 5 | Porta fixa no código | Trocar `process.env.PORT` por `3000` | | |
+|---|---|---|---|---|
+| 1 | Porta fixa | Trocar `process.env.PORT ?? 3000` por `4000` e subir com `$env:PORT="3000"` | | |
+| 2 | Proxy sem confiança | Comentar o `trust proxy` | | |
+| 3 | Variável faltando | Remover o `SESSION_SECRET` da sessão **e** renomear o `.env` temporariamente (senão ele fornece o valor) | | |
+| 4 | Migração esquecida | Subir com `start:prod` sem o `migration:run:prod`, num banco vazio | | |
+| 5 | Banco fora do ar | `docker compose stop db` com a API rodando | | |
 
-Objetivo: reconhecer o sintoma antes de precisar procurar a causa. Em produção, essa
+O objetivo é reconhecer o **sintoma** antes de precisar procurar a causa. Em produção, essa
 associação vale horas.
 
 ---
 
-## E14.4 — Migração com dados reais (individual)
+## E12.3 — Mudança incompatível em produção (individual) ⭐⭐
 
-Em produção, com dados já cadastrados:
+Com dados cadastrados em produção, acrescente `Obra.idioma`, **obrigatório**, pelo caminho
+expandir → migrar → contrair:
 
-1. Faça backup do banco (e **verifique** que o arquivo tem conteúdo).
-2. Adicione um campo obrigatório usando expandir → migrar → contrair (3 deploys).
-3. Confirme, após cada deploy, que os dados anteriores estão íntegros e o site funciona.
-4. Simule a necessidade de reverter o segundo deploy. O código antigo funciona com o
-   esquema novo? Prove.
+1. Antes de começar: gere um backup e **confira** que o arquivo tem conteúdo.
+2. Deploy 1: coluna opcional.
+3. Deploy 2: migração de dados preenchendo as obras existentes.
+4. Deploy 3: coluna obrigatória.
 
-**Entrega:** log dos 3 deploys + evidência de integridade + resposta ao item 4.
+Depois de cada deploy, rode a verificação da etapa 12 e confira uma obra antiga.
+
+**Responda:** se o deploy 2 tivesse um bug no código (não na migração), reverter só o código
+seria seguro? E se o bug estivesse no deploy 3?
 
 ---
 
-## E14.5 — Deploy automatizado com aprovação (em equipe)
+## E12.4 — A sessão no banco (individual)
 
-Configure o pipeline completo do projeto:
+1. Faça login em produção e guarde o cookie.
+2. Dispare um novo deploy (um commit qualquer).
+3. Use o cookie antigo. Ele ainda vale? Por quê?
+4. Agora rode, contra o banco de produção, `SELECT count(*) FROM sessao;`. Quantas sessões
+   existem? O que acontece com as vencidas?
+
+---
+
+## E12.5 — Homologação antes da produção (em equipe)
+
+Montem o caminho completo do projeto da equipe:
 
 ```
-push → CI (lint, migrações, check --deploy, testes) → merge só com CI verde
-     → deploy automático em STAGING
-     → aprovação manual
-     → deploy em PRODUÇÃO
+push → CI → merge na main → deploy automático em HOMOLOGAÇÃO
+      → verificação manual → promoção para PRODUÇÃO
 ```
 
-Requisitos: dois ambientes com bancos separados; variáveis distintas; nada de dado real de
-pessoas em staging (por quê?); rollback documentado e **testado**.
-
----
-
-## E14.6 — Comparar plataformas (em duplas)
-
-Implante a mesma aplicação em duas plataformas diferentes e compare:
-
-| Critério | Plataforma A | Plataforma B |
-| --- | --- | --- |
-| Tempo até o primeiro deploy | | |
-| Passos manuais necessários | | |
-| Custo mensal estimado (fora do free tier) | | |
-| Facilidade de configurar variáveis | | |
-| Qualidade dos logs | | |
-| Banco gerenciado incluso | | |
-| HTTPS automático | | |
-| Deploy contínuo a partir do Git | | |
-| Facilidade de rollback | | |
-| Limitações do plano gratuito | | |
-
-Recomende uma para o projeto da equipe, com justificativa de 5 linhas.
-
----
-
-## E14.7 — Dockerizar (individual)
-
-Crie `Dockerfile` e `docker-compose.yml` que subam aplicação + PostgreSQL com um comando.
-
-Requisitos: imagem final < 200 MB; não roda como root; usa cache de camadas
-eficientemente (dependências antes do código); `healthcheck` configurado; funciona com
-`docker compose up` sem passo manual.
-
-Responda: **por que copiar o `package.json` e o `package-lock.json` antes do resto do código?**
-
----
-
-## E14.8 — Desafio: plano de continuidade
-
-Escreva o plano de continuidade do sistema em produção, respondendo com procedimentos
-concretos (não intenções):
-
-1. O banco foi apagado por engano. Qual o procedimento? Quanto se perde?
-2. A conta da PaaS foi suspensa. Como sobe em outro lugar? Quanto tempo leva?
-3. A pessoa que fez o deploy saiu da equipe. Quem tem acesso? Onde estão as credenciais?
-4. Vazou a `SESSION_SECRET`. O que fazer, em que ordem, nas primeiras 2 horas?
-5. O site está fora do ar há 30 minutos e ninguém percebeu. Como isso deixa de acontecer?
-6. Um usuário reporta que perdeu dados. Como você investiga?
-
-Este exercício antecipa exatamente as perguntas que a organização parceira vai fazer na
-Etapa 4 — e cuja resposta "não pensamos nisso" custa caro.
+Requisitos: dois serviços, **dois bancos**, variáveis separadas, e nenhum dado real de
+pessoa no banco de homologação. Documentem no `docs/deploy.md` como uma versão sai de um
+ambiente e chega ao outro.
 
 ---
 
 ## Gabarito parcial
 
-**E14.3 (5)** — Fixar a porta faz o processo escutar em 8000 enquanto o roteador da
-plataforma envia tráfego para a porta de `$PORT`. Sintoma: build e start com sucesso nos
-logs, mas toda requisição devolve "Application failed to respond" ou 502.
+**E12.2** — 1: o serviço sobe, e nada responde na porta esperada. 2: login `200` sem
+`Set-Cookie`; a requisição seguinte, `401`. 3: a API **não sobe** — o esquema de validação
+do M03 barra, com mensagem clara (é a vantagem de validar o ambiente). 4: a API sobe, e a
+primeira consulta responde `500` com `relation "…" does not exist` no log. 5: `/api/health`
+responde `503`; as outras rotas, `500`.
 
-**E14.7** — As camadas do Docker são cacheadas em ordem. Copiando os manifestos de dependência
-primeiro e instalando as dependências antes de copiar o código, uma alteração em
-`obras.service.ts` invalida apenas a última camada — o `npm install` é reaproveitado do cache.
-Copiando tudo de uma vez, cada alteração de código reinstala todas as dependências.
+**E12.3** — No deploy 2, sim: o código antigo convive com a coluna opcional. No deploy 3,
+não necessariamente: se o código anterior criava obras sem `idioma`, ele passa a falhar
+contra a coluna obrigatória — reverter o código exige reverter também a migração.
+
+**E12.4** — (3) Vale: a sessão está no PostgreSQL, que não foi recriado pelo deploy. (4) O
+`connect-pg-simple` apaga periodicamente as linhas com `expire` no passado, usando o índice
+criado na migração.

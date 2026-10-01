@@ -25,9 +25,11 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 - [ ] `DATABASE_URL` configurada (a URL **interna** da plataforma)
 - [ ] `CORS_ORIGENS` com as origens reais dos clientes, se houver algum no navegador
 - [ ] `PORT` **não** definida à mão: a plataforma decide a porta
-- [ ] Build: `npm ci && npm run build`
-- [ ] Start: `npm run migration:run:prod && npm run start:prod`
-- [ ] `trust proxy` ligado no `main.ts` (a PaaS termina o HTTPS)
+- [ ] Build (na raiz do repositório): `npm ci && npm run build -w backend`
+- [ ] Start: `npm run migration:run:prod -w backend && npm run start:prod -w backend`
+- [ ] `trust proxy` ligado no `configurarApp` (a PaaS termina o HTTPS)
+- [ ] Sessões no PostgreSQL (`connect-pg-simple`), com a migração `CriaSessao` aplicada
+- [ ] *Health check* da plataforma apontando para `/api/health`
 - [ ] Armazenamento de arquivos externo (ou ciência de que uploads somem no próximo deploy)
 - [ ] Backup automático do banco ativado
 - [ ] Primeiro usuário administrador criado por script (`npm run seed:admin`), não à mão

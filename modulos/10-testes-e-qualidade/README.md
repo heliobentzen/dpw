@@ -808,7 +808,7 @@ describe("Matriz de acesso", () => {
 | `as const` | Diz ao TypeScript que `"get"` é exatamente `"get"`, e não uma `string` qualquer. É o que permite `agentes[quem][metodo]` |
 | `"%s: %s %s → %i"` | O relatório mostra `bibliotecario: delete /api/obras/2 → 403` — a própria matriz, legível |
 | A ordem das linhas | A coordenação apaga a obra 2 **por último**. As linhas rodam em ordem e compartilham o banco |
-| `afterAll(… app.close())` | Fecha a conexão com o banco. Sem isso, o Vitest pode ficar esperando ao final |
+| `afterAll(… app.close())` | Devolve as conexões com o banco. Cada aplicação montada abre várias; com muitos arquivos de teste, as esquecidas esgotam o limite do PostgreSQL |
 
 **Rode:**
 
@@ -1056,7 +1056,7 @@ você, a partir da regra de negócio.
 | E2E: tudo `404` | O teste não chamou o `configurarApp`, e o prefixo `/api` não existe — etapa 11 |
 | E2E: o login responde `429` | Faltou o `overrideGuard(ThrottlerGuard)` — etapa 13 |
 | E2E: um teste passa sozinho e falha junto com os outros | Dependência entre testes: um usa o que o outro deixou no banco. Limpe no `beforeEach` |
-| O Vitest não termina depois dos testes E2E | Faltou o `app.close()` no `afterAll` |
+| E2E: `sorry, too many clients already` | Aplicações montadas e nunca fechadas: falta o `app.close()` no `afterAll` |
 | CI: `npm ci` reclama do lock | O `package-lock.json` não foi commitado, ou está fora de sincronia. Rode `npm install` na raiz e commite |
 | CI: `migration:check` falha e local passa | Alguém mudou entidade sem gerar migração — exatamente o que ele existe para pegar |
 
