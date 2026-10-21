@@ -12,6 +12,14 @@ este módulo decora o framework; quem entende este módulo aprende a web.
 > sistema — conversa com o backend por requisições que você mesmo vai projetar. Cada erro de
 > integração que a turma encontrar daqui em diante se explica com o que está neste módulo.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E0** — ver [📦 Entrega E0](#-entrega-e0--relatório-de-inspeção-http) no fim |
+| [Projeto](../../avaliacao/) | Base da avaliação teórica. |
+| Etapas ➕ opcionais | a seção 6 da teoria e a Prática 1 |
+
 ## 🎯 Objetivos
 
 1. Descrever o ciclo requisição–resposta, do clique ao pixel na tela.
@@ -315,6 +323,8 @@ móveis e integrações entre sistemas. A comparação, e a escolha do curso, es
 
 ### 6. HTTP/1.1, HTTP/2, HTTP/3
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta seção — faça se houver tempo.
+
 | Versão | Mudança principal | Impacto no seu código |
 | --- | --- | --- |
 | HTTP/1.1 | Texto, uma requisição por vez na conexão | Truques como *sprite* e concatenação de CSS |
@@ -329,6 +339,8 @@ semântica; a versão é responsabilidade da infraestrutura.
 ## 🛠️ Roteiro prático
 
 ### Prática 1 — Inspecionar o tráfego real
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta seção — faça se houver tempo.
 
 1. Abra o DevTools (F12) → aba **Network** → marque *Preserve log* e *Disable cache*.
 2. Acesse um site que exija login (use uma conta de teste, nunca a sua conta real de banco).
@@ -497,16 +509,18 @@ download? Que coluna olharia primeiro, e o que cada resposta indicaria?
 
 ## 📦 Entrega E0 — Relatório de inspeção HTTP
 
-Documento (2–4 páginas) com:
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
 
-1. Tabela da Prática 1 preenchida, com prints do DevTools.
-2. Saída comentada de pelo menos 5 comandos `curl` da Prática 2.
-3. Respostas aos 6 experimentos da Prática 3, com o código do servidor mínimo no seu
-   repositório.
-4. Um parágrafo final: *qual característica do HTTP mais influencia o modo como
-   aplicações web são construídas, e por quê?*
+- [ ] 5+ comandos `curl` com a saída comentada (métodos, status, cabeçalhos) — Prática 2
+- [ ] O servidor mínimo no seu repositório — Prática 3
+- [ ] Um parágrafo: *qual característica do HTTP mais influencia o design de APIs, e por quê?*
 
-**Prazo:** ver o [cronograma](../../docs/cronograma.md). **Peso:** compõe o portfólio (20%).
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- A tabela da Prática 1 com prints do DevTools
+- As respostas aos 6 experimentos da Prática 3
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 📚 Para aprofundar
 

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DPW · Slides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #32a041; --green-d: #1e7a2e; --green-b: #5cc56d; --red: #c8191e;
+    --ink: #1d1d1f; --ink-2: #6e6e73; --ink-3: #86868b; --surface: #f5f5f7; --bg: #fff;
+    --font: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+  main { max-width: 1080px; margin: 0 auto; padding: 72px 24px 96px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--ink-2); }
+  .brand b { color: var(--ink); letter-spacing: .04em; }
+  .brand i { width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
+  h1 { font-size: clamp(44px, 7vw, 80px); line-height: 1.04; letter-spacing: -.035em; margin: 48px 0 16px; }
+  h1 span { background: linear-gradient(90deg, var(--green), var(--green-b)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: clamp(19px, 2.4vw, 24px); line-height: 1.45; color: var(--ink-2); max-width: 760px; margin: 0; }
+  .decks { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 56px; }
+  a.deck {
+    display: flex; flex-direction: column; min-height: 280px; padding: 28px; border-radius: 24px;
+    background: var(--surface); color: inherit; text-decoration: none; position: relative; overflow: hidden;
+    transition: transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s;
+  }
+  a.deck:hover { transform: translateY(-4px); box-shadow: 0 24px 48px -24px rgba(0,0,0,.25); }
+  a.deck:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+  .num { font-size: 96px; font-weight: 800; letter-spacing: -.06em; line-height: .9; color: #e8e8ed; position: absolute; right: 20px; bottom: 8px; }
+  .tag { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--green-d); }
+  a.deck h2 { font-size: 28px; letter-spacing: -.02em; line-height: 1.15; margin: 10px 0 10px; position: relative; }
+  a.deck p { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0; position: relative; max-width: 90%; }
+  .go { margin-top: auto; padding-top: 24px; font-weight: 600; color: var(--green-d); position: relative; }
+  .help { margin-top: 64px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; }
+  .help h3 { font-size: 17px; margin: 0 0 8px; }
+  .help p, .help li { font-size: 16px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+  .help ul { padding-left: 18px; margin: 0; }
+  kbd { font-family: inherit; font-size: .85em; border: 1px solid #d2d2d7; border-bottom-width: 2px; border-radius: 6px; padding: 0 6px; }
+  code { font-size: .9em; background: var(--surface); padding: 1px 6px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><b>IFPE</b><i></i>Desenvolvimento de Projeto Web</div>
+  <h1>Slides das <span>aulas</span></h1>
+  <p class="lead">Do primeiro endpoint ao banco consultado com segurança. Cada tecla revela um passo: analogia, conceito, código e prática.</p>
+
+  <section class="decks">
+    <a class="deck" href="m03-nestjs.html">
+      <span class="tag">Módulo 03</span>
+      <h2>NestJS: a primeira API</h2>
+      <p>Camadas, injeção de dependência, pipes, configuração e Swagger.</p>
+      <span class="go">Apresentar →</span>
+      <span class="num">03</span>
+    </a>
+    <a class="deck" href="m04-entidades.html">
+      <span class="tag">Módulo 04</span>
+      <h2>Entidades: classes que geram o banco</h2>
+      <p>TypeORM, decisões de coluna, relações e o limite do <code>synchronize</code>.</p>
+      <span class="go">Apresentar →</span>
+      <span class="num">04</span>
+    </a>
+    <a class="deck" href="m06-consultas-crud.html">
+      <span class="tag">Módulo 06</span>
+      <h2>Consultas e CRUD</h2>
+      <p>Paginação, N+1 medido, QueryBuilder, injeção de SQL e transações.</p>
+      <span class="go">Apresentar →</span>
+      <span class="num">06</span>
+    </a>
+  </section>
+
+  <section class="help">
+    <div>
+      <h3>Apresentar</h3>
+      <ul>
+        <li><kbd>→</kbd> ou <kbd>espaço</kbd> revela o próximo item</li>
+        <li><kbd>←</kbd> volta · <kbd>Shift</kbd>+<kbd>→</kbd> pula o slide</li>
+        <li><kbd>F</kbd> tela cheia · <kbd>B</kbd> tela preta</li>
+        <li><kbd>N</kbd> notas do professor · <kbd>?</kbd> ajuda</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Estudar sozinho</h3>
+      <p>Acrescente <code>?revisao</code> ao endereço para ver cada slide já completo, sem revelar item a item.</p>
+    </div>
+    <div>
+      <h3>Gerar PDF</h3>
+      <p>Abra o deck, <kbd>Ctrl</kbd>+<kbd>P</kbd>, destino "Salvar como PDF" e marque "Gráficos de plano de fundo".</p>
+    </div>
+  </section>
+</main>
+</body>
+</html>

@@ -24,10 +24,10 @@ Sem eles, a entrega volta para a equipe antes de ser pontuada.
 
 | Critério | Peso | 4 — Excelente | 3 — Adequado | 2 — Em desenvolvimento | 0–1 — Insuficiente | Nível |
 | --- | ---: | --- | --- | --- | --- | :---: |
-| **1. Modelo de dados** | 3,0 | 5+ models corretos, com relações, `on_delete` justificado e restrições de integridade testadas | 5+ models corretos, com relações e restrições básicas | 3–4 models ou relações confusas | Menos de 3 models ou modelagem que não sustenta as regras | |
+| **1. Modelo de dados** | 3,0 | 5+ entidades corretas, com relações, `onDelete` justificado e restrições de integridade testadas | 5+ entidades corretas, com relações e restrições básicas | 3–4 entidades ou relações confusas | Menos de 3 entidades ou modelagem que não sustenta as regras | |
 | **2. API e CRUD** | 4,0 | CRUD completo em 3+ recursos, com DTOs de entrada e saída separados | CRUD completo em 2 recursos | CRUD parcial | Não funciona | |
 | **3. Validação e consultas** | 2,0 | Validação de servidor cobrindo as regras, mais filtros ou paginação | Validação de servidor cobrindo as regras principais | Validação incompleta | Sem validação de servidor | |
-| **4. Organização do código** | 1,0 | Código legível, lint limpo, regra de negócio fora da view/controller | Lint limpo, código compreensível | Alguns problemas de organização | Código ilegível ou duplicado | |
+| **4. Organização do código** | 1,0 | Código legível, lint limpo, regra de negócio no service, fora do controller | Lint limpo, código compreensível | Alguns problemas de organização | Código ilegível ou duplicado | |
 | **Total** | **10** | | | | | |
 
 **Nota da etapa** = Σ (nível × peso) ÷ 4

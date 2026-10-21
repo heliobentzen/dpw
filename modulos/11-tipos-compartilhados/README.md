@@ -10,6 +10,14 @@ externo usa — e que o compilador confere por você.
 > **A teoria não está num bloco separado.** Ela está nas etapas 1, 4 e 8 — em que a gente
 > para de digitar e pensa — mais as explicações dentro de cada etapa.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E7** — ver [📦 Entrega E7](#-entrega-e7--schema-openapi-versionado-e-consumidor-externo) no fim |
+| [Projeto](../../avaliacao/) | Etapa 3 · bloco C (contrato e integração). |
+| Etapas ➕ opcionais | nenhuma: todas sustentam algo que é avaliado |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -563,11 +571,19 @@ se mantém o campo antigo por um tempo, ou se cria uma versão nova, e em qualqu
 - [ ] Os furos que o compilador achou foram corrigidos **no backend**
 - [ ] Uma mudança incompatível quebrou o `verificar`, e foi desfeita
 
-## 📦 Entrega E7
+## 📦 Entrega E7 — Schema OpenAPI versionado e consumidor externo
 
-O `openapi.json` atualizado, o pacote `@bibliocom/tipos` com o cliente de exemplo, os dois
-passos novos do CI verdes, e um registro curto (pode ser no README) de uma mudança
-compatível e uma incompatível — com o que você faria em cada caso.
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
+
+- [ ] `openapi.json` no repositório
+- [ ] CI que falha se o schema divergir do código
+- [ ] Um cliente consumindo a API só pelo contrato
+
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- Registro de uma mudança compatível e de uma incompatível, com o que você faria em cada caso
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 🧩 Desafio de fixação
 

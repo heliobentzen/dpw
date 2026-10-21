@@ -1,6 +1,9 @@
 # M09 — Exercícios
 
-## E09.1 — Modelo de ameaça de outra funcionalidade (individual) ⭐
+> **O que é cobrado.** Entrega **E5** do [portfólio](../../avaliacao/rubrica-portfolio.md): IDOR, entrada hostil e segredos testados e corrigidos; Helmet, CORS e *rate limit*; antes e depois registrado.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E09.1 — Modelo de ameaça de outra funcionalidade (individual) ⭐ · ➕ opcional
 
 A biblioteca quer uma rota pública `GET /api/obras/:id/disponibilidade`, que diz quantos
 exemplares estão na estante, para um totem na entrada.
@@ -16,7 +19,7 @@ exemplares estão na estante, para um totem na entrada.
 
 ---
 
-## E09.2 — Caçar IDOR (em duplas)
+## E09.2 — Caçar IDOR (em duplas) · 📌 cobrado
 
 Cada pessoa da dupla cria um usuário bibliotecário. Depois, juntas:
 
@@ -30,7 +33,7 @@ Cada pessoa da dupla cria um usuário bibliotecário. Depois, juntas:
 
 ---
 
-## E09.3 — O que a resposta revela (individual)
+## E09.3 — O que a resposta revela (individual) · ➕ opcional
 
 Para cada situação, anote a resposta da sua API e diga o que um atacante aprende com ela:
 
@@ -47,7 +50,7 @@ cita o nome de alguma tabela ou restrição.
 
 ---
 
-## E09.4 — Limites sob medida (individual)
+## E09.4 — Limites sob medida (individual) · 📌 cobrado
 
 1. O limite de 5 tentativas por minuto vale por IP. Que problema isso causa num laboratório
    em que toda a turma sai pelo mesmo IP?
@@ -58,7 +61,7 @@ cita o nome de alguma tabela ou restrição.
 
 ---
 
-## E09.5 — CORS aberto demais (individual) ⚠️
+## E09.5 — CORS aberto demais (individual) ⚠️ · 📌 cobrado
 
 1. Troque a configuração para `app.enableCors({ origin: true, credentials: true })`.
 2. Repita os dois `curl` da etapa 9. O que mudou na segunda resposta?
@@ -68,7 +71,7 @@ cita o nome de alguma tabela ou restrição.
 
 ---
 
-## E09.6 — Dependência vulnerável (individual)
+## E09.6 — Dependência vulnerável (individual) · ➕ opcional
 
 1. Rode `npm audit` e escolha um aviso (se não houver, use o histórico de avisos de um
    pacote famoso no GitHub Advisory Database).

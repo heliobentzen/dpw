@@ -1,6 +1,9 @@
 # M13 — Exercícios
 
-## E13.1 — O empréstimo que sumiu (individual) ⭐
+> **O que é cobrado.** Nenhuma entrega de portfólio. O backup com restauração testada é cobrado no projeto (Etapa 3, F2; Etapa 4, critério 6).
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E13.1 — O empréstimo que sumiu (individual) ⭐ · ➕ opcional
 
 A organização escreve: *"o empréstimo da associada 7 sumiu ontem à tarde"*.
 
@@ -11,7 +14,7 @@ A organização escreve: *"o empréstimo da associada 7 sumiu ontem à tarde"*.
 
 ---
 
-## E13.2 — O que está no log (individual)
+## E13.2 — O que está no log (individual) · ➕ opcional
 
 Leia 50 linhas do log de produção (ou do ensaio) e preencha:
 
@@ -24,7 +27,7 @@ Os cabeçalhos de resposta ocupam boa parte de cada linha. Pesquise a opção `s
 
 ---
 
-## E13.3 — Alerta de força bruta (em duplas)
+## E13.3 — Alerta de força bruta (em duplas) · ➕ opcional
 
 O `warn` de `login_recusado` existe para isso. Configurem, na plataforma de logs ou no
 monitor, um alerta para **mais de 20 logins recusados em 10 minutos**. Provoquem-no com um
@@ -34,7 +37,7 @@ Respondam: o limite de tentativas do M09 já não resolve? O que este alerta acr
 
 ---
 
-## E13.4 — Restauração cronometrada (individual)
+## E13.4 — Restauração cronometrada (individual) · 📌 cobrado
 
 Repita o ciclo das etapas 7 e 8 cronometrando cada passo:
 
@@ -51,7 +54,7 @@ Esse total é quanto tempo o sistema ficaria fora num desastre. Escreva-o no
 
 ---
 
-## E13.5 — Custo de três anos (em equipe)
+## E13.5 — Custo de três anos (em equipe) · ➕ opcional
 
 Calculem o custo mensal **real** de manter o projeto da equipe no ar por três anos:
 hospedagem quando a camada gratuita acabar, banco, domínio, e as horas de manutenção (uma
@@ -59,7 +62,7 @@ estimativa honesta). Apresentem à organização parceira junto do plano de manu
 
 ---
 
-## E13.6 — Runbook testado por outra pessoa (em duplas)
+## E13.6 — Runbook testado por outra pessoa (em duplas) · ➕ opcional
 
 Troquem os *runbooks* de "a API está fora do ar". Uma pessoa derruba algo no ensaio local da
 outra **sem contar o quê** (banco parado, variável errada, migração pendente). A outra segue

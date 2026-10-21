@@ -1,6 +1,6 @@
 # Checklist de revisão de código (Pull Request)
 
-Para usar na Etapa 2 do projeto. Uma revisão leva de 15 a 30 minutos; PR que exige mais que
+Para usar nas Etapas 2 e 3 do projeto. Uma revisão leva de 15 a 30 minutos; PR que exige mais que
 isso está grande demais e deveria ser dividido.
 
 > Revisar código é como a segunda leitura de um contrato antes de assinar: quem escreveu

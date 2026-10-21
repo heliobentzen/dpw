@@ -19,16 +19,17 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web**.
 
 | Pasta | O que contém |
 | --- | --- |
-| [`docs/`](docs/) | Plano de ensino, cronograma, setup, decisões técnicas, glossário, troubleshooting |
+| [`docs/`](docs/) | Plano de ensino (com calendário), setup do ambiente, decisões técnicas, glossário e FAQ |
 | [`modulos/`](modulos/) | 14 módulos de conteúdo (M00–M13), cada um com roteiro guiado, exercícios e checklist |
 | [`projeto/`](projeto/) | Projeto integrador em 3 etapas + trilha extensionista |
 | [`avaliacao/`](avaliacao/) | Rubricas, pesos, política de recuperação e critérios de correção |
 | [`recursos/`](recursos/) | Código de apoio, guia do Windows, checklists imprimíveis |
+| [`slides/`](slides/) | Apresentações das aulas (M03, M04, M06) em HTML, com revelação passo a passo |
 
 **Comece por aqui:**
 
 1. Estudante → [`docs/plano-de-ensino.md`](docs/plano-de-ensino.md) → [monte o ambiente](#montagem-do-ambiente) → [`modulos/00-ambiente-e-ferramentas/`](modulos/00-ambiente-e-ferramentas/)
-2. Docente → [`docs/guia-do-docente.md`](docs/guia-do-docente.md) → [`docs/cronograma.md`](docs/cronograma.md)
+2. Docente → [`docs/plano-de-ensino.md`](docs/plano-de-ensino.md) (calendário, carga horária e preparação do semestre) → [`avaliacao/`](avaliacao/)
 3. Equipe de projeto → [`projeto/README.md`](projeto/README.md)
 
 ---
@@ -36,8 +37,7 @@ Material didático completo da disciplina **Desenvolvimento de Projeto Web**.
 ## Trilha de módulos
 
 A coluna **Duração** é relativa (curta, média, longa) e serve para você calibrar o fôlego de
-cada módulo. A carga horária oficial fica no [plano de ensino](docs/plano-de-ensino.md) e no
-[cronograma](docs/cronograma.md).
+cada módulo. A carga horária e o calendário ficam no [plano de ensino](docs/plano-de-ensino.md).
 
 ### Fundamentos
 
@@ -73,8 +73,9 @@ cada módulo. A carga horária oficial fica no [plano de ensino](docs/plano-de-e
 | Etapa | Entrega |
 | --- | --- |
 | [1. Definição e planejamento](projeto/etapa-1-definicao-do-tema/) | P1 |
-| [2. Desenvolvimento](projeto/etapa-3-desenvolvimento/) | P2 |
-| [3. Relatório e encerramento](projeto/etapa-4-relatorio-e-encerramento/) | P3 |
+| [2. Sistema preliminar](projeto/etapa-2-sistema-preliminar/) | P2 |
+| [3. Sistema final](projeto/etapa-3-desenvolvimento/) | P3 |
+| [4. Relatório e encerramento](projeto/etapa-4-relatorio-e-encerramento/) | P4 |
 | [Atividades extensionistas](projeto/extensao/) | X1–X3 |
 
 ---
@@ -154,19 +155,11 @@ cada peça chegando junto com o problema que ela resolve:
 **A stack tem um runtime só.** O M00 instala **o Node**, e acabou: não há segundo
 ecossistema de pacotes para manter, nem ambiente virtual para lembrar de ativar.
 
-Guias: [`docs/ambiente-setup.md`](docs/ambiente-setup.md) (Linux/macOS) ou
-[`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md) (Windows).
+Guia único para Windows, Linux e macOS: [`docs/ambiente-setup.md`](docs/ambiente-setup.md).
 
 ## Desenvolvimento no Windows 🪟
 
-O Windows tem **guia de setup próprio e independente** — não é tradução do guia Linux:
-
-📖 **[`docs/ambiente-setup-windows.md`](docs/ambiente-setup-windows.md)** — do zero até a
-API rodando, com **cada linha explicada** e a conferência de cada etapa.
-
-Quem usa Windows segue só esse arquivo. Quem usa Linux/macOS segue
-[`docs/ambiente-setup.md`](docs/ambiente-setup.md). Não é preciso alternar entre os dois.
-
+O [guia de ambiente](docs/ambiente-setup.md) traz o comando 🪟 de cada passo, ao lado do 🐧.
 Durante o curso, quando um roteiro trouxer comando em formato Linux,
 [`recursos/comandos-windows.md`](recursos/comandos-windows.md) traz a tabela de
 equivalências e as **armadilhas** que não se resolvem trocando o comando: `curl` é

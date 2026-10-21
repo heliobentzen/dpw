@@ -7,6 +7,14 @@ classe TypeScript vira tabela; a relação entre classes vira chave estrangeira.
 
 > A teoria vem quando o código pede: as etapas 5, 8, 12 e 18 são de raciocínio.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E1** — ver [📦 Entrega E1](#-entrega-e1--modelo-de-dados) no fim |
+| [Projeto](../../avaliacao/) | Etapa 2 · critério 1 · Etapa 3 · bloco A (modelagem). |
+| Etapas ➕ opcionais | 15, 16, 18 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -65,15 +73,14 @@ vez**, conferindo o banco ao fim de cada etapa.
 | 12 | [**`onDelete` é decisão de negócio**](#etapa-12--ondelete-é-decisão-de-negócio) | média | **`RESTRICT`, `CASCADE`, `SET NULL`** |
 | 13 | [Relação N:N](#etapa-13--relação-nn) | longa | `@ManyToMany`, `@JoinTable` |
 | 14 | [1:N com `CASCADE`](#etapa-14--1n-com-cascade) | longa | `enum`, campo derivado |
-| 15 | [Índices](#etapa-15--índices) | média | `@Index` |
-| 16 | [O limite do `synchronize`](#etapa-16--o-limite-do-synchronize) | longa | dois experimentos destrutivos |
+| 15 | [Índices](#etapa-15--índices) ➕ | média | `@Index` |
+| 16 | [O limite do `synchronize`](#etapa-16--o-limite-do-synchronize) ➕ | longa | dois experimentos destrutivos |
 | 17 | [Modelar empréstimo](#etapa-17--modelar-empréstimo) | longa | por sua conta |
-| 18 | [O que o ORM cobra](#etapa-18--o-que-o-orm-cobra) | curta | fecho |
+| 18 | [O que o ORM cobra](#etapa-18--o-que-o-orm-cobra) ➕ | curta | fecho |
 
-> 📦 **Instale o Docker antes desta aula** — o PostgreSQL sobe nele, logo na etapa 1.
-> 🐧 [`ambiente-setup.md`, seção 7](../../docs/ambiente-setup.md#7-postgresql-via-docker-a-partir-do-m04) ·
-> 🪟 [`ambiente-setup-windows.md`, passo 7](../../docs/ambiente-setup-windows.md#passo-7--docker-e-postgresql)
-> — no Windows o Docker exige o WSL2, então **não deixe para a hora da aula**.
+> 📦 **Instale o Docker antes desta aula** — o PostgreSQL sobe nele, logo na etapa 1. Siga o
+> [guia de ambiente, passo 7](../../docs/ambiente-setup.md#passo-7--docker-e-postgresql-antes-do-m04).
+> No Windows o Docker exige o WSL2, então **não deixe para a hora da aula**.
 
 ---
 
@@ -839,6 +846,8 @@ estrangeira com `ON DELETE CASCADE`.
 
 ## Etapa 15 — Índices
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 Sem índice, o banco varre a tabela inteira — como procurar um assunto num livro sem índice
 remissivo. Com 50 registros ninguém nota; com 50 mil, a requisição trava.
 
@@ -877,6 +886,8 @@ O `isbn` merece um: o balcão busca por ISBN o dia inteiro, e a coluna não é c
 ---
 
 ## Etapa 16 — O limite do `synchronize`
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
 
 Até aqui as mudanças eram fáceis. Agora provoque o difícil — **com dado no banco**, a única
 situação em que a diferença aparece.
@@ -978,6 +989,8 @@ escolheu, e você consegue defender cada escolha usando o critério da etapa 12.
 
 ## Etapa 18 — O que o ORM cobra
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 Você viu o que o ORM entrega. Agora, o preço.
 
 | Custo | Onde este curso trata |
@@ -1053,6 +1066,22 @@ alterar multas antigas? Escreva o `@Column` (ou a entidade) e justifique cada op
 - [ ] Você provocou os dois experimentos da etapa 16 e anotou o que aconteceu em cada
 - [ ] Você sabe dizer por que `Exemplar → Obra` é `CASCADE` e `Obra → Autor` é `RESTRICT`
 - [ ] Você sabe dizer o que o ORM cobra, além do que ele entrega
+
+## 📦 Entrega E1 — Modelo de dados
+
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
+
+- [ ] Entidades TypeORM com relações 1-N e N-N, **migradas** (as migrações chegam no M05)
+- [ ] Diagrama ER (pode ser em Mermaid)
+- [ ] O `onDelete` de cada chave estrangeira justificado por regra de negócio (etapa 12)
+- [ ] *Seed* com dados de exemplo (o `semear.ts` do M06 serve)
+
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- Índices medidos (etapa 15)
+- Os experimentos com o `synchronize` (etapa 16)
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 🧪 Exercícios
 

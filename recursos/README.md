@@ -1,74 +1,49 @@
 # Recursos de apoio
 
-| Pasta | Conteúdo |
-| --- | --- |
-| [`codigo/`](codigo/) | Código de apoio usado nos roteiros práticos |
-| [`checklists/`](checklists/) | Listas de verificação imprimíveis |
+Material de consulta. A coluna **Rubrica** diz o que cada item ajuda a cumprir; os marcados
+➕ são **opcionais**: nenhuma rubrica os cobra.
 
 ## Código
 
-| Arquivo | Módulo | Para quê |
-| --- | --- | --- |
-| [`servidor-minimo.mjs`](codigo/servidor-minimo.mjs) | M01 | Servidor HTTP sem framework: mostra o que o NestJS faz por você |
-| [`vulneravel.ts`](codigo/vulneravel.ts) | M09 | 🔵 Laboratório com 10 vulnerabilidades de backend |
-| [`verifica-ambiente.mjs`](codigo/verifica-ambiente.mjs) | M00, M03, M05 | **Confere** o ambiente (não instala nada). `--etapa m00\|m03\|m05` cobra só o que já deveria existir |
-| [`semear.ts`](codigo/semear.ts) | M06 | Script que gera dados de volume para os exercícios |
+| Arquivo | Módulo | Para quê | Rubrica |
+| --- | --- | --- | --- |
+| [`servidor-minimo.mjs`](codigo/servidor-minimo.mjs) | M01 | Servidor HTTP sem framework | Portfólio E0 |
+| [`semear.ts`](codigo/semear.ts) | M06 | Gera dados de volume no banco | Portfólio E1 (*seed*) e E2 (medição do N+1) |
+| [`verifica-ambiente.mjs`](codigo/verifica-ambiente.mjs) | M00, M03, M04 | **Confere** o ambiente, sem instalar nada; `--etapa m00`, `m03` ou `m04` | Apoio |
+| ➕ [`vulneravel.ts`](codigo/vulneravel.ts) | M09 | Laboratório extra com 10 vulnerabilidades | — |
 
-> ⚠️ `vulneravel.ts` é **deliberadamente inseguro** e servem apenas
-> para estudo. Nunca use nada deles em produção.
-
-## Ambiente e plataforma
-
-| Arquivo | Quando usar |
-|---|---|
-| [`comandos-windows.md`](comandos-windows.md) | 🪟 **Leia a seção 2 antes da primeira aula.** Equivalências PowerShell/Git Bash/WSL2 e as cinco armadilhas do Windows: `curl` como alias, variáveis inline, `&&` no PowerShell 5.1, `>` em UTF-16 e finais de linha (CRLF) |
+> ⚠️ `vulneravel.ts` é **deliberadamente inseguro**. Serve só para estudo; nunca use nada
+> dele em produção.
 
 ## Checklists
 
-| Arquivo | Quando usar |
-| --- | --- |
-| [`seguranca.md`](checklists/seguranca.md) | Antes de colocar no ar e a cada revisão de segurança |
-| [`deploy.md`](checklists/deploy.md) | Antes e depois de cada implantação |
-| [`revisao-de-codigo.md`](checklists/revisao-de-codigo.md) | Ao revisar um Pull Request |
-| [`entrega-de-etapa.md`](checklists/entrega-de-etapa.md) | Antes de cada entrega do projeto |
-
-## Ferramentas recomendadas
-
-| Categoria | Ferramenta | Para quê |
+| Arquivo | Quando usar | Rubrica |
 | --- | --- | --- |
-| Editor | VS Code / WebStorm | Desenvolvimento |
-| Lint e formatação | oxlint, Prettier | Padrão de código |
-| Testes | 🔵 Vitest, Supertest | Testes automatizados |
-| Depuração | 🔵 logging do TypeORM, Pino, depurador do VS Code | Consultas, logs, execução passo a passo |
-| Tipos | openapi-typescript | Contrato garantido pelo compilador |
-| Segurança | `npm audit`, secretlint, helmet | Dependências, segredos, cabeçalhos |
-| Diagramas | Mermaid (C4, ER, sequência), dbdiagram.io, Excalidraw | Arquitetura e dados como código, versionados no repositório |
-| Gestão | GitHub Projects, GitHub Issues | Backlog e sprints |
-| Monitoramento | UptimeRobot, Sentry/GlitchTip | Disponibilidade e erros |
-| API | httpie, curl, Bruno/Insomnia | Testar requisições |
+| [`entrega-de-etapa.md`](checklists/entrega-de-etapa.md) | Na véspera de cada entrega | Todas as etapas e a extensão |
+| [`revisao-de-codigo.md`](checklists/revisao-de-codigo.md) | Ao revisar um Pull Request | Etapa 3 · G2 (PRs revisados) |
+| [`seguranca.md`](checklists/seguranca.md) | Antes de pôr no ar | Portfólio E5 · Etapa 3, bloco D |
+| [`deploy.md`](checklists/deploy.md) | Antes e depois de cada implantação | Portfólio E8 · Etapa 3, bloco F |
 
-## Links de referência rápida
+## Windows
 
-**Documentação — backend**
+| Arquivo | Quando usar | Rubrica |
+| --- | --- | --- |
+| [`comandos-windows.md`](comandos-windows.md) | 🪟 Quando um roteiro trouxer comando de Linux | Apoio. O essencial está no [guia de ambiente](../docs/ambiente-setup.md#passo-10--erros-e-diagnóstico) |
 
-- [NestJS](https://docs.nestjs.com/)
-- [TypeORM](https://typeorm.io/)
-- [npm trends](https://npmtrends.com/) — comparar bibliotecas
-- [C4 Model](https://c4model.com/) e [Mermaid](https://mermaid.js.org/) — diagramas como código
+## ➕ Para ir além
 
-**Documentação — web**
+**Ferramentas** usadas ou citadas no curso: Vitest e Supertest (testes), oxlint e Prettier
+(padrão de código), openapi-typescript (tipos do contrato), `npm audit` e secretlint
+(segurança), Mermaid (diagramas C4 e ER), GitHub Projects (backlog), UptimeRobot (monitor),
+curl, httpie ou Bruno (requisições).
 
-- [MDN Web Docs (pt-br)](https://developer.mozilla.org/pt-BR/) — HTTP, cabeçalhos, CORS, cookies
-
-**Segurança**
-
-- [OWASP Top 10 (pt-br)](https://owasp.org/Top10/pt_BR/)
-- [OWASP API Security Top 10](https://owasp.org/API-Security/)
-- [OWASP Cheat Sheets](https://cheatsheetseries.owasp.org/)
-- [securityheaders.com](https://securityheaders.com)
-
-**Prática**
-
-- [httpbin.org](https://httpbin.org) — eco de requisições HTTP
-- [regex101.com](https://regex101.com) — testar expressões regulares
-- [Learn Git Branching](https://learngitbranching.js.org/?locale=pt_BR)
+**Referências rápidas:**
+[NestJS](https://docs.nestjs.com/) ·
+[TypeORM](https://typeorm.io/) ·
+[MDN — HTTP](https://developer.mozilla.org/pt-BR/docs/Web/HTTP) ·
+[OWASP API Security Top 10](https://owasp.org/API-Security/) ·
+[OWASP Cheat Sheets](https://cheatsheetseries.owasp.org/) ·
+[C4 Model](https://c4model.com/) ·
+[Mermaid](https://mermaid.js.org/) ·
+[httpbin.org](https://httpbin.org) ·
+[Learn Git Branching](https://learngitbranching.js.org/?locale=pt_BR)

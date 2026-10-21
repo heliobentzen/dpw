@@ -1,6 +1,9 @@
 # M01 — Exercícios
 
-## E01.1 — Classificar métodos (individual)
+> **O que é cobrado.** A entrega **E0** do [portfólio](../../avaliacao/rubrica-portfolio.md) está no [roteiro](README.md#-entrega-e0--relatório-de-inspeção-http). Os exercícios abaixo são prática.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E01.1 — Classificar métodos (individual) · ➕ opcional
 
 Para cada operação de uma biblioteca, indique o **método HTTP**, a **URL** e justifique em
 uma linha usando os conceitos de *safe* e *idempotente*.
@@ -25,7 +28,7 @@ uma linha usando os conceitos de *safe* e *idempotente*.
 
 ---
 
-## E01.2 — Ler mensagens HTTP (individual)
+## E01.2 — Ler mensagens HTTP (individual) · ➕ opcional
 
 Identifique **todos** os problemas em cada mensagem e reescreva-a corretamente.
 
@@ -61,7 +64,7 @@ Set-Cookie: bibliocom.sid=abc123
 
 ---
 
-## E01.3 — Diagnóstico por status (individual)
+## E01.3 — Diagnóstico por status (individual) · ➕ opcional
 
 Para cada situação, diga qual status você esperaria e o que investigaria primeiro:
 
@@ -76,7 +79,7 @@ Para cada situação, diga qual status você esperaria e o que investigaria prim
 
 ---
 
-## E01.4 — Estender o servidor mínimo (individual) ⭐
+## E01.4 — Estender o servidor mínimo (individual) ⭐ · ➕ opcional
 
 A partir do `servidor-minimo.mjs` do roteiro prático, implemente:
 
@@ -92,7 +95,7 @@ O item 4 é a primeira experiência prática com XSS — retomada no M09.
 
 ---
 
-## E01.5 — Medir o mundo real (individual)
+## E01.5 — Medir o mundo real (individual) · ➕ opcional
 
 Escolha três sites brasileiros de perfis diferentes (um portal de notícias, um e-commerce,
 um site institucional/governo). Para cada um, colete no DevTools:
@@ -110,7 +113,7 @@ Escreva 5 linhas comparando: **o que explica a diferença de peso e de tempo?**
 
 ---
 
-## E01.6 — Debate dirigido (em grupo)
+## E01.6 — Debate dirigido (em grupo) · ➕ opcional
 
 *"Se o HTTPS criptografa tudo, por que ainda importa se os dados vão por GET ou POST?"*
 

@@ -1,217 +1,153 @@
 # Decisões técnicas do material
 
-Documento que registra **por que** cada escolha foi feita e **como adaptá-la**. Serve
-também de exemplo de ADR (*Architecture Decision Record*) — formato que as equipes vão
-reproduzir na Etapa 2 do projeto.
+Por que a stack é esta, registrado em ADRs (*Architecture Decision Records*). Serve também de
+exemplo do formato que as equipes usam no projeto ([modelo](../projeto/modelos-de-documentos/adr.md)).
 
-> **Histórico.** Este material passou por três versões:
->
-> 1. Django com renderização no servidor (templates DTL);
-> 2. Django/DRF como API + SPA em React (ADR-01, superado);
-> 3. **Backend em TypeScript**: NestJS + TypeORM + PostgreSQL, com suporte opcional a
->    React para prototipagem e interfaces de demonstração (**ADR-10**, vigente).
->
-> Os ADRs superados foram mantidos apenas como contexto histórico. O escopo atual do curso
-> é backend-first, e o frontend foi reduzido a material complementar opcional.
+| ADR | Decisão |
+| --- | --- |
+| [10](#adr-10--backend-em-typescript-nestjs--typeorm) | Backend em TypeScript: NestJS + TypeORM |
+| [11](#adr-11--o-item-templates-da-ementa) | O item "Templates" da ementa é atendido pelo contrato da API |
+| [13](#adr-13--monorepo-com-workspaces) | Monorepo com workspaces do npm |
+| [14](#adr-14--postgresql-desde-o-m04) | PostgreSQL desde o M04, sem SQLite |
+| [15](#adr-15--npm-como-gerenciador-de-pacotes) | npm, e não pnpm |
+| [16](#adr-16--nestjs-12-e-módulos-esm) | NestJS 12 e módulos ESM |
+| [17](#adr-17--node-24-lts-e-npm-11) | Node 24 LTS e npm 11 |
+| [03](#adr-03--configuração-por-variáveis-de-ambiente) | Configuração por variáveis de ambiente |
+| [07](#adr-07--autenticação-por-sessão-com-cookie) | Autenticação por sessão com cookie |
+| [18](#adr-18--sessões-guardadas-no-postgresql) | Sessões guardadas no PostgreSQL |
+
+> **Histórico.** O material começou em Django e passou por uma versão com SPA em React. O
+> escopo atual é **backend-first**; os ADRs daquelas versões (01, 02, 04, 05, 06, 08, 09 e
+> 12) foram superados e retirados deste arquivo. Continuam no histórico do Git.
 
 ---
 
-## ADR-10 — Backend em TypeScript com frontend opcional: NestJS + TypeORM
+## ADR-10 — Backend em TypeScript: NestJS + TypeORM
 
-- **Status:** aceito · **Data:** 2026-08-18 · **Substitui:** ADR-01
+- **Status:** aceito · **Data:** 2026-08-18
 
-**Contexto.** A escolha anterior (Django/DRF + React) resolvia bem a ementa, mas carregava
-duas premissas que foram reexaminadas. Com o escopo reduzido para backend, a camada de
-interface deixou de ser obrigatória e passou a ser complementar:
+**Contexto.** A disciplina tem 100 horas, a turma já sabe JavaScript, e o mercado brasileiro
+de backend em Node/TypeScript é amplo. Ensinar uma segunda linguagem só para o backend
+consumia carga horária sem ganho.
 
-1. **Mercado.** Nas pesquisas de uso mais recentes, Django aparece por volta da 4ª a 6ª
-   posição entre frameworks de backend, atrás de Node/Express, ASP.NET Core e Spring Boot.
-   No mercado brasileiro o descolamento é maior: Java/Spring domina o *enterprise*,
-   Node/NestJS domina *startups* e *scale-ups*, PHP/Laravel domina PME e e-commerce, e o
-   Python brasileiro pende mais para dados e ML do que para web.
-2. **Duas linguagens em 100h.** O material ensinava Python **e** TypeScript. Como o
-   pré-requisito de JavaScript está atendido por esta turma, metade dessa carga era
-   redundante: a turma já traz o modelo mental da linguagem que o frontend usa.
-
-**Decisão.** Uma linguagem principal no backend, com frontend opcional em React.
-
-```
-┌──────────────────────────────┐        ┌──────────────────────────────┐
-│  FRONTEND (OPCIONAL)         │  HTTP  │  BACKEND (PRINCIPAL)         │
-│  React 19 + TypeScript       │ ◀────▶ │  NestJS 12 + TypeScript      │
-│  Vite · Tailwind 4           │  JSON  │  TypeORM · PostgreSQL        │
-│  React Router · TanStack     │        │  class-validator · Swagger   │
-│  React Hook Form + Zod       │        │  Passport · Argon2           │
-└──────────────────────────────┘        └──────────────────────────────┘
-              └──────────── @bibliocom/tipos ────────────┘
-                     tipos compartilhados (quando o frontend existir)
-```
-
-**Justificativa — o mapa da ementa.**
+**Decisão.** Backend em TypeScript, com **NestJS** (framework) e **TypeORM** (ORM), sobre
+PostgreSQL.
 
 | Item da ementa | Onde é atendido |
 | --- | --- |
-| Classes geram o banco | Classes `@Entity()` do TypeORM + `synchronize` em dev (M04) |
-| Atualizar o banco pelas classes | `migration:generate` compara entidades × banco (M05) |
-| Consultas e CRUD via API do framework | `Repository` e `QueryBuilder` (M06) |
-| Mapeamento de URLs | `@Controller("obras")` + `@Get(":id")` (M03 e M07) |
-| Classes / métodos / funções para requisições | Controllers são **classes**, *handlers* são **métodos**, Providers são serviços injetados (M07) |
-| **Templates: criação de interfaces** | A interface da API é o contrato: Swagger UI e OpenAPI (M03, M07, M11) — ver ADR-11 |
-| Gestão de usuários | Passport + Guards + entidade `Usuario` (M08) |
-| Segurança | M09 (OWASP aplicado à API) |
-| Implantação | M12 (API em produção) |
+| Classes geram o banco | `@Entity()` do TypeORM (M04) |
+| Atualizar o banco pelas classes | `migration:generate` (M05) |
+| Consultas e CRUD pela API do framework | `Repository` e `QueryBuilder` (M06) |
+| Mapeamento de URLs | `@Controller` e `@Get` (M03, M07) |
+| Classes / métodos para requisições | Controllers são classes, *handlers* são métodos (M07) |
+| Templates: interface com o usuário | Contrato da API: Swagger e OpenAPI (ADR-11) |
+| Gestão de usuários, segurança, implantação | M08, M09, M12 |
 
-**Por que TypeORM e não Prisma.** Prisma é excelente e cresce rápido, mas seu schema é uma
-**DSL própria** (`schema.prisma`), não classes. A ementa pede literalmente *"classes para
-geração automática do banco de dados"*. No TypeORM, `@Entity()` decora uma classe
-TypeScript comum, e é essa classe que gera a tabela — o item central da ementa fica
-atendido ao pé da letra, não por interpretação. Drizzle tem o mesmo descasamento de Prisma.
+**Alternativas.**
 
-**Por que NestJS e não Express puro.** Express não tem opinião sobre estrutura: em 100h,
-uma turma iniciante produziria um `app.js` de 800 linhas. NestJS traz módulos, injeção de
-dependência e camadas explícitas — que é justamente o que a disciplina precisa **ensinar**.
-E é o framework TypeScript de backend com maior adoção corporativa.
-
-**Consequências.**
-
-| Ganho | Custo |
+| Alternativa | Por que não |
 | --- | --- |
-| O backend fica mais focado e a curva de aprendizagem da disciplina se reduz | O frontend deixou de ser obrigatório e vira material complementar |
-| O código do backend fica mais homogêneo e alinhado a vagas de Node/TypeScript | Fica mais difícil demonstrar fluxo completo de interface por ausência do SPA |
-| `class-validator` no backend continua alinhado ao modelo mental de validação da turma | O ecossistema frontend deixa de ser revisado em profundidade |
-| O material torna a entrega principal mais consistente com o escopo pedagógico | Segurança deixa de ser "o framework já protege" e passa a ser configuração explícita (M09 muda de tom) |
+| Prisma | O schema é uma DSL própria, não classes. A ementa pede *"classes para geração automática do banco"* |
+| Express puro | Sem estrutura: em 100h, uma turma iniciante produz um `app.js` de 800 linhas. O NestJS impõe módulos, injeção e camadas, que é o que a disciplina ensina |
+
+**Consequências.** *A favor:* uma linguagem só; estrutura explícita; alinhamento com vagas de
+Node. *Contra:* o M03 fica denso (módulos, injeção e decorators chegam juntos), e segurança
+vira configuração explícita (`helmet`, `ValidationPipe`), não padrão herdado — o que custa
+tempo no M09, mas deixa cada proteção visível.
 
 ---
 
 ## ADR-11 — O item "Templates" da ementa
 
-- **Status:** aceito · **Herdado do ADR-01, revalidado**
+- **Status:** aceito
 
 A ementa diz *"Templates: criação de interfaces com o usuário utilizando o framework
-escolhido"*. Nesta arquitetura **não existe motor de templates no servidor**: a interface é
-construída com componentes React.
+escolhido"*. No escopo backend-first, a interface do sistema é o **contrato da API**: o
+Swagger em `/api/docs`, gerado pelo próprio NestJS, e o schema OpenAPI consumido por
+clientes externos (M03, M07, M11).
 
-A leitura adotada é que o item **está atendido** — o objetivo pedagógico ("criar a interface
-do usuário com o framework escolhido") é cumprido, com JSX no lugar de um DTL/Blade, e o
-framework escolhido para a camada de interface sendo o React.
-
-> ⚠️ **Esta é a única decisão que depende da sua coordenação.** Se a instituição exigir
-> leitura estrita — um único framework cobrindo Model–View–Template — a alternativa é usar
-> um *template engine* do próprio NestJS (Handlebars ou EJS via `@nestjs/serve-static`)
-> para duas ou três telas administrativas, mantendo o React para o restante. O material
-> registra a alternativa, mas **não a recomenda**: rendimento pedagógico baixo e nenhum
-> alinhamento de mercado.
-
----
-
-## ADR-12 — Back-office: construído, não herdado
-
-- **Status:** aceito · **Data:** 2026-08-18 · **Consequência do ADR-10**
-
-**Contexto.** O Django Admin dava, de graça, um painel administrativo completo — e o
-material dedicava 2h (M11) a customizá-lo. NestJS não tem equivalente.
-
-**Alternativas consideradas.**
-
-| Opção | Por que não |
-| --- | --- |
-| AdminJS (painel automático para Node) | Adiciona uma dependência pesada e opinativa para ensinar a customizá-la — conhecimento que não transfere |
-| Construir um CRUD administrativo em React | Duplica exatamente o que M07–M11 já ensinam. Repetição sem conceito novo |
-
-**Decisão.** As 2h do M11 passam a ensinar **tipos compartilhados entre backend e
-frontend** — um pacote `@bibliocom/tipos` no monorepo, consumido pelas duas camadas, com
-teste de contrato no CI.
-
-**Justificativa.** É o ganho que *só* existe nesta stack e que justifica tê-la escolhido:
-mudar um campo na entidade quebra a compilação do frontend **antes** do deploy, não em
-produção. Rende mais que customizar um painel que a turma não levaria consigo.
-
-A "gestão de usuários" da ementa continua atendida pelo M08, que ganhou o CRUD
-administrativo de usuários e papéis que antes ficava implícito no Admin.
+> ⚠️ **Esta é a única decisão que depende da coordenação.** Se a instituição exigir leitura
+> estrita (telas renderizadas pelo framework), a alternativa é um *template engine* do
+> próprio NestJS (Handlebars ou EJS) em duas ou três telas administrativas. O material
+> registra a alternativa, mas não a recomenda: baixo rendimento pedagógico e pouco
+> alinhamento com o mercado.
 
 ---
 
 ## ADR-13 — Monorepo com workspaces
 
-- **Status:** aceito · **Data:** 2026-08-18
-
-**Contexto.** Com as duas camadas na mesma linguagem, elas podem compartilhar código.
-Compartilhar exige que estejam no mesmo repositório e que o gerenciador de pacotes entenda
-essa relação.
+- **Status:** aceito · **Data:** 2026-08-18 · ferramenta revista pela ADR-15
 
 **Decisão.**
 
-```
+```text
 bibliocom/
-├── package.json          workspaces + scripts na raiz
-├── backend/              NestJS + TypeORM
-├── frontend/             React + Vite
-└── pacotes/tipos/        @bibliocom/tipos — DTOs e enums compartilhados
+├── package.json        workspaces + scripts da raiz
+├── backend/            NestJS + TypeORM
+└── pacotes/tipos/      @bibliocom/tipos — DTOs e enums compartilhados (M11)
 ```
 
-**Consequências.** Um `npm install` na raiz resolve as três. Um PR mostra a mudança
-completa (entidade → DTO → tipo → tela). Em contrapartida, a turma precisa entender
-*workspaces* — 20 minutos no M03, que se pagam no M11.
+**Consequências.** Um `npm install` na raiz resolve tudo, e o pacote de tipos é consumido
+por qualquer cliente da API, com verificação de contrato no CI. Em troca, a turma precisa
+entender *workspaces* — 20 minutos no M00.
 
 ---
 
-## ADR-14 — PostgreSQL desde o M04, sem etapa em SQLite
+## ADR-14 — PostgreSQL desde o M04
 
-- **Status:** aceito · **Data:** 2026-08-26 · **Supera a [ADR-02](#adr-02--banco-sqlite-até-o-m04-postgresql-a-partir-do-m05)**
+- **Status:** aceito · **Data:** 2026-08-26 · supera a antiga ADR-02 (SQLite até o M04)
 
-**Contexto.** A ADR-02 usava SQLite no M04 para evitar instalação, e trocava para PostgreSQL
-no M05. Na prática, a troca invalidava o trabalho anterior: as migrações geradas contra o
-SQLite não rodam no PostgreSQL, e o próprio roteiro mandava apagar `src/migracoes/`, apagar
-o banco e gerar tudo de novo. Cerca de 70 minutos de aula produziam artefatos descartados
-uma hora depois.
+**Contexto.** Começar em SQLite e trocar para PostgreSQL depois invalidava trabalho: as
+migrações geradas num banco não rodam no outro, e o roteiro mandava apagá-las e refazer.
 
-Havia mais efeitos colaterais do que se supunha ao escrever a ADR-02: `simple-enum` no M04
-virando `enum` no M05, a migração de dados escrita à mão com `= 1` em vez de `= true`,
-notas de rodapé "no SQLite use `LIKE`" espalhadas por quatro arquivos, e um módulo de testes
-que mandava usar SQLite em memória enquanto seu próprio gabarito explicava por que isso é má
-ideia.
+**Decisão.** PostgreSQL em Docker desde o primeiro passo do M04. SQLite não aparece no
+material.
 
-**Decisão.** PostgreSQL em Docker desde o passo 1 do M04. O Docker sai da lista "antes do
-M05" e entra na "antes do M04". SQLite deixa de aparecer no material.
-
-**Alternativas consideradas.**
-
-| Alternativa | Por que não |
-| --- | --- |
-| Manter SQLite e adiar a troca para o M12 | Piora: a divergência só apareceria no deploy, com o projeto inteiro em cima |
-| SQLite no curso, PostgreSQL só em produção | As migrações nunca seriam testadas contra o banco real. É a origem do "funciona local, falha no deploy" |
-| PostgreSQL nativo, sem Docker | Instalação diferente em cada sistema operacional, e o M12 usa contêiner de qualquer forma |
-
-**Consequências.**
-
-*A favor:* um único dialeto do M04 ao M12; nada do que a turma escreve é descartado; o enum
-nativo do PostgreSQL torna o M04 mais rico (o `CREATE TYPE` antes do `CREATE TABLE` vira
-conteúdo); as migrações de desenvolvimento são as mesmas que rodam em produção.
-
-*Contra:* a turma precisa de Docker uma semana antes — o que, no Windows, significa WSL2 uma
-semana antes. É o custo real desta decisão, e os guias de setup passam a avisá-lo com a
-antecedência correspondente. A demonstração "troque o `type` e nada mais muda" deixa de ser
-um exercício e vira um parágrafo na teoria do M04, mais o exercício E05.6, que persegue o
-mesmo aprendizado lendo o SQL gerado em vez de refazendo o trabalho.
+**Consequências.** *A favor:* um dialeto só do M04 ao M12; as migrações de desenvolvimento são
+as mesmas de produção; o `enum` nativo vira conteúdo do M04. *Contra:* a turma precisa de
+Docker já no M04 — no Windows, WSL2 — e os guias avisam com antecedência.
 
 ---
 
-## ADR-18 — Sessões guardadas no PostgreSQL
+## ADR-15 — npm como gerenciador de pacotes
 
-- **Status:** aceito · **Data:** 2026-10-01 · **Complementa a [ADR-07](#adr-07--autenticação-por-sessão-com-cookie-não-jwt-em-localstorage)**
+- **Status:** aceito · **Data:** 2026-09-01
 
-**Contexto.** A ADR-07 escolheu sessão em cookie `HttpOnly`. Por padrão, o `express-session`
-guarda as sessões na memória do processo: em produção, todo deploy, reinício ou troca de
-máquina desloga todo mundo, e duas instâncias da API não enxergam as sessões uma da outra.
+**Decisão.** npm, que já vem com o Node. Os projetos do monorepo ficam no campo `workspaces`
+do `package.json` da raiz.
 
-**Decisão.** Sessões no próprio PostgreSQL, com `connect-pg-simple`, numa tabela `sessao`
-criada por **migração escrita à mão** (M12). O M08 começa com a memória, para não somar
-um conceito a mais à primeira aula de autenticação.
+| Critério | npm | pnpm |
+| --- | --- | --- |
+| Instalação | nenhuma | passo extra |
+| Windows | sem ressalva | depende de links simbólicos (Modo de Desenvolvedor ou administrador) |
+| Tutoriais e fóruns | tudo, sem tradução | é preciso traduzir os comandos |
+| Disco e rigor de dependências | duplica; permissivo | compartilha; rigoroso |
 
-**Consequências.** *A favor:* nenhum serviço novo para hospedar (o banco já existe); o
-processo volta a ser descartável, como pede o fator VI dos 12 fatores; a migração é mais um
-exemplo de `migration:create`. *Contra:* cada requisição autenticada consulta o banco uma
-vez a mais; com tráfego alto, um armazenamento em memória dedicado seria a evolução natural.
+**Consequências.** As vantagens do pnpm (disco e rigor) pagam-se em dezenas de repositórios,
+não num curso com um. O rigor perdido é compensado em parte pelo `npm ci` no CI (M10), que
+falha quando o lockfile não bate com o `package.json`.
+
+---
+
+## ADR-16 — NestJS 12 e módulos ESM
+
+- **Status:** aceito · **Data:** 2026-09-02
+
+**Contexto.** O `nest new` do NestJS 12 gera módulos **ESM**, imports de arquivo próprio com
+`.js`, `await` no topo do `main.ts` e **Vitest** no lugar do Jest.
+
+**Decisão.** Adotar o NestJS 12. A CLI é fixada em `@12` (M03, etapa 2), por
+reprodutibilidade da turma; os pacotes `@nestjs/*` acompanham a versão do projeto sem fixar.
+
+| | NestJS 11 | NestJS 12 |
+| --- | --- | --- |
+| Instalar pacote `@nestjs/*` | Versões inconsistentes entre pacotes; erros `ERESOLVE` opacos | `npm install @nestjs/swagger` e pronto |
+| Import de arquivo próprio | `from "./acervo.service"` | `from "./acervo.service.js"` |
+| Testes | Jest | Vitest |
+
+**Consequências.** O `.js` em import de arquivo `.ts` estranha na primeira semana, mas é uma
+regra só, com erro que diz a correção (M03, etapa 5a). O `ERESOLVE` evitado não vira regra:
+vira consulta ao professor. O `ts-node` passa a ser instalado explicitamente (M05).
 
 ---
 
@@ -219,281 +155,52 @@ vez a mais; com tráfego alto, um armazenamento em memória dedicado seria a evo
 
 - **Status:** aceito · **Data:** 2026-10-01
 
-**Contexto.** O material pedia Node 20, que saiu de suporte em abril de 2026. Em teste com a
-stack atual, o npm 10 (que acompanha o Node 20 e o 22) **falha** ao instalar o projeto que o
-`nest new` do NestJS 12 gera, com `Cannot read properties of null (reading 'edgesOut')` — um
-erro do resolvedor de dependências que não diz nada a quem está começando.
+**Contexto.** O Node 20 saiu de suporte em abril de 2026, e o npm 10 falha ao instalar o
+projeto do NestJS 12 (`Cannot read properties of null (reading 'edgesOut')`).
 
 **Decisão.** Node 24 LTS, que traz o npm 11. Quem não puder atualizar o Node atualiza só o
-npm (`npm install -g npm@11`). O `verifica-ambiente.mjs`, o M00 e o M03 conferem as duas
-versões e dão o comando de correção.
+npm (`npm install -g npm@11`). O `verifica-ambiente.mjs`, o M00 e o M03 conferem as versões.
 
-**Consequências.** *A favor:* `nest new` funciona na primeira tentativa; o Node 24 executa
-arquivos `.ts` simples diretamente, o que o M11 usa para rodar o cliente de exemplo sem
-etapa de compilação. *Contra:* laboratórios com imagem antiga precisam ser atualizados antes
-do semestre — item já previsto no guia do docente.
+**Consequências.** `nest new` funciona na primeira tentativa. Laboratórios com imagem antiga
+precisam ser atualizados antes do semestre.
 
 ---
 
-## ADR-16 — NestJS 12 e módulos ESM
-
-- **Status:** aceito · **Data:** 2026-09-02 · **Atualiza a stack da [ADR-10](#adr-10--backend-em-typescript-com-frontend-opcional-nestjs--typeorm)**
-
-**Contexto.** O material foi escrito para o NestJS 11. O 12 já é a versão corrente, e o
-`nest new` de hoje produz um projeto diferente do descrito: módulos **ESM** (`"type":
-"module"` no `package.json`), imports de arquivo próprio terminando em `.js`, `await` de
-topo no `main.ts`, **Vitest** no lugar do Jest e **oxlint** no lugar do ESLint.
-
-A pergunta era se adotar o 12 tornaria o curso mais difícil para uma turma iniciante.
-
-**Decisão.** Adotar o NestJS 12. A CLI é fixada em `@12` na etapa 2 do M03, por
-reprodutibilidade da turma; os pacotes `@nestjs/*` deixam de precisar de versão fixada.
-
-**O que pesou, medido em vez de suposto.**
-
-| | Ficar no 11 | Ir para o 12 |
-| --- | --- | --- |
-| Instalar um pacote `@nestjs/*` | Precisa fixar versão, e **as versões são inconsistentes**: `@nestjs/config@4`, `@nestjs/swagger@11`, `@nestjs/typeorm@11`. Errar dá `ERESOLVE` com um muro de texto sobre *peer dependencies* | `npm install @nestjs/swagger` e pronto |
-| Import de arquivo próprio | `from "./acervo.service"` | `from "./acervo.service.js"` — mesmo o arquivo sendo `.ts` |
-| Executor de testes | **Dois**: Jest no backend, Vitest no frontend. O M10 precisava de um parágrafo explicando que a API é parecida | **Um só**, nas duas camadas |
-| Sistema de módulos | Backend CommonJS, frontend ESM — duas convenções no mesmo repositório | ESM nos dois lados |
-| CLI do TypeORM | `typeorm-ts-node-commonjs` | `typeorm-ts-node-esm`, e o `ts-node` precisa ser instalado explicitamente |
-
-**Justificativa.** O critério foi qual atrito é pior para quem está começando, não qual é
-mais frequente.
-
-O `.js` no import é frequente — aparece em todo arquivo — mas é **uma regra só, com uma razão
-verificável** (o TypeScript não reescreve caminhos; o que roda é o `.js` compilado) e **um
-único sintoma de erro**, que nomeia o arquivo faltante. Além disso, a CLI escreve os imports
-corretos sozinha em tudo que ela gera.
-
-O `ERESOLVE` é raro, mas é opaco: o texto fala de *peer dependencies*, não diz o que fazer, e
-a correção **muda de pacote para pacote**. É um atrito que não vira regra — só vira consulta
-ao professor.
-
-Os dois ganhos colaterais decidiram o empate: **um executor de testes em vez de dois** (o
-M10 encolhe) e **um sistema de módulos em vez de dois** no mesmo repositório.
-
-**Consequências.**
-
-*A favor:* instalar pacote do Nest volta a ser trivial; M10 ensina uma ferramenta em vez de
-duas; backend e frontend passam a compartilhar a convenção de módulos; o material deixa de
-nascer uma versão principal atrasado.
-
-*Contra:* o `.js` em import de arquivo `.ts` é estranho na primeira semana e exige uma
-explicação própria — que está na etapa 5a do M03. O `ts-node` passa a ser instalação
-explícita no M05. E, quando o Nest 13 sair, a checagem a fazer está anotada na etapa 2 do M03.
-
----
-
-## ADR-15 — npm como gerenciador de pacotes, no lugar do pnpm
-
-- **Status:** aceito · **Data:** 2026-09-01 · **Revisa a escolha de ferramenta da ADR-13**
-
-**Contexto.** A ADR-13 adotou pnpm pelos *workspaces* e pela economia de disco. Revendo a
-decisão contra o público real da disciplina — turma iniciante, laboratório e máquinas
-pessoais majoritariamente Windows —, o saldo se inverte.
-
-**Decisão.** npm, que já vem instalado com o Node. O monorepo passa a declarar os projetos
-no campo `workspaces` do `package.json` da raiz, e o `pnpm-workspace.yaml` deixa de existir.
-
-**Comparação, para o público desta disciplina.**
-
-| Critério | npm | pnpm |
-| --- | --- | --- |
-| Instalação | nenhuma: vem com o Node | passo extra (Corepack ou instalador) |
-| Windows | sem ressalva | depende de links simbólicos: pede Modo de Desenvolvedor ou terminal como administrador. O próprio guia de setup já documentava o `EPERM` |
-| Workspaces | desde a v7; testado neste monorepo | sim |
-| Tutoriais, fóruns, respostas de IA | tudo, sem tradução | é preciso traduzir cada comando |
-| Disco entre projetos | duplica | compartilha um armazém |
-| Rigor de dependências | permite usar pacote não declarado | bloqueia |
-
-**Justificativa.** As duas vantagens reais do pnpm — disco e rigor — se pagam para quem
-mantém dezenas de repositórios. Nenhuma delas se paga em 100 horas com um repositório só.
-Os custos, ao contrário, incidem na primeira aula: uma instalação a mais para dar errado, um
-erro de link simbólico específico do Windows, e a fricção constante de traduzir para pnpm
-todo comando que a turma encontrar fora do material.
-
-**Alternativas consideradas.**
-
-| Alternativa | Por que não |
-| --- | --- |
-| Manter pnpm e documentar melhor o `EPERM` | Documentar um problema não é o mesmo que não tê-lo. O erro ocorre na semana 1, antes de a turma ter repertório para diagnosticá-lo |
-| Yarn | Mesmo custo de instalação do pnpm, sem vantagem que compense |
-| Deixar a escolha por conta do aluno | Lockfiles incompatíveis no mesmo repositório. Em trabalho de equipe, isso vira conflito de merge sem causa aparente |
-
-**Consequências.**
-
-*A favor:* a semana 1 perde um passo de instalação e um modo de falha; `npx`, `npm install`
-e `npm run` são o vocabulário que a turma vai reencontrar em qualquer lugar.
-
-*Contra:* perde-se o rigor do pnpm — em npm, importar um pacote que você não declarou
-funciona por acaso, e só quebra na máquina de outra pessoa. O M10 compensa parcialmente,
-rodando `npm ci` no CI a partir do `package-lock.json`, que falha quando o lock não bate com
-o `package.json`.
-
----
-
-## ADR-02 — Banco: SQLite até o M04, PostgreSQL a partir do M05
-
-- **Status:** ❌ **superado pela [ADR-14](#adr-14--postgresql-desde-o-m04-sem-etapa-em-sqlite)**
-
-**Decisão original.** SQLite nos módulos M03–M04, PostgreSQL a partir do M05, com a troca
-servindo de demonstração de que "o código da aplicação não muda".
-
-**Por que foi revista.** A demonstração custava caro: as migrações geradas contra o SQLite
-não rodavam no PostgreSQL, e o próprio material mandava apagá-las e regerar. Ver a ADR-14.
-
----
-
-## ADR-03 — Configuração por variáveis de ambiente, nos dois artefatos
+## ADR-03 — Configuração por variáveis de ambiente
 
 - **Status:** aceito
 
-**Decisão.** Nenhum segredo no código. Backend lê via `@nestjs/config`; frontend via
-`import.meta.env`.
-
-**A distinção que mais gera bug:**
-
-| | Backend (`.env` do NestJS) | Frontend (`VITE_*`) |
-| --- | --- | --- |
-| Quando é lida | **Execução** | **Build** |
-| Quem enxerga | Só o servidor | **Qualquer pessoa**, no bundle |
-| Pode conter segredo | Sim | **Nunca** |
-| Mudar exige | Reiniciar | **Rebuild** |
+**Decisão.** Nenhum segredo no código. O backend lê a configuração via `@nestjs/config`,
+validada na inicialização (M03, etapa 17). O `.env` fica fora do Git; o `.env.example`, com
+as chaves sem valor, fica dentro.
 
 ---
 
-## ADR-05 — TypeScript nas duas camadas
-
-- **Status:** aceito · **Reforçado pelo ADR-10**
-
-**Decisão.** TypeScript no backend e no frontend, com `strict: true`.
-
-**Justificativa.** Antes, TypeScript era só do frontend e custava horas de aprendizado
-isoladas. Agora ele é o idioma único da disciplina: o que a turma aprende sobre tipos no
-M04 (entidades) vale no M11 (formulários). O custo de aprender TS é pago uma vez e rende
-nas duas camadas.
-
----
-
-## ADR-06 — Estado do servidor com TanStack Query
+## ADR-07 — Autenticação por sessão com cookie
 
 - **Status:** aceito
 
-**Decisão.** TanStack Query para dados vindos da API. Sem Redux, sem Zustand.
+**Decisão.** Sessão com cookie `HttpOnly`, `Secure` e `SameSite=Lax`, via `express-session`,
+com senha guardada em Argon2 e *guards* do Nest por papel (M08). **Não** JWT guardado em
+`localStorage`.
 
-**Justificativa.** A maior parte do "estado global" de um CRUD é **cache de servidor**, não
-estado de cliente. TanStack Query resolve carregamento, erro, revalidação e invalidação —
-os quatro estados de tela que o M08 ensina.
-
----
-
-## ADR-07 — Autenticação por sessão com cookie, não JWT em `localStorage`
-
-- **Status:** aceito · **Atualizado para NestJS**
-
-**Decisão.** Sessão com cookie `HttpOnly`, `Secure`, `SameSite=Lax`, via
-`express-session` + `passport-local`. **Não** JWT guardado em `localStorage`.
-
-**Justificativa.** Token em `localStorage` é legível por qualquer JavaScript da página: um
-XSS vira roubo de sessão. Cookie `HttpOnly` não é acessível por script. Como os dois
-artefatos são publicados no mesmo domínio (M12), não há motivo para JWT.
-
-**O raciocínio é o conteúdo.** O M09 ensina a decidir pelo modelo de ameaça, não a decorar
-que "JWT é melhor". JWT é a escolha certa quando há múltiplos domínios ou clientes móveis —
-não é o nosso caso, e o material diz por quê.
+**Justificativa.** Token em `localStorage` é legível por qualquer script da página: um XSS
+vira roubo de sessão. Cookie `HttpOnly` não é. JWT é a escolha certa quando há múltiplos
+domínios ou clientes móveis — o M09 ensina a decidir pelo modelo de ameaça, não por moda, e
+o portfólio (E4) pede um ADR próprio dessa escolha.
 
 ---
 
-## ADR-08 — Tailwind, sem biblioteca de componentes
+## ADR-18 — Sessões guardadas no PostgreSQL
 
-- **Status:** aceito
+- **Status:** aceito · **Data:** 2026-10-01 · complementa a ADR-07
 
-**Decisão.** Tailwind puro, sem Material UI, Chakra ou shadcn/ui.
+**Contexto.** Por padrão, o `express-session` guarda as sessões na memória do processo: todo
+deploy ou reinício desloga todo mundo, e duas instâncias não enxergam as sessões uma da outra.
 
-**Justificativa.** Biblioteca de componentes esconde exatamente o que o M09 precisa
-ensinar: espaçamento, hierarquia visual, estados e responsividade. Quem aprendeu com
-utilitários consegue usar qualquer biblioteca depois; o contrário não vale.
+**Decisão.** Sessões no próprio PostgreSQL, com `connect-pg-simple`, numa tabela criada por
+migração escrita à mão (M12). O M08 começa com a memória, para não somar um conceito à
+primeira aula de autenticação.
 
----
-
-## ADR-09 — O custo em carga horária
-
-- **Status:** aceito · **Revisado pelo ADR-10** · **Registra um trade-off**
-
-**Contexto.** A disciplina tem 100h fixas.
-
-**O que a mudança para TypeScript ponta a ponta liberou e consumiu:**
-
-| Movimento | Horas |
-| --- | --- |
-| M08 (React) cai de 5h para 4h — TypeScript já é conhecido desde o M03 | **−1h** |
-| M03 sobe de 3h para 4h — injeção de dependência e decorators exigem mais | **+1h** |
-| M11 troca Django Admin por tipos compartilhados | 2h → 2h |
-| M08 absorve o CRUD de usuários que o Admin dava de graça | dentro das 5h |
-
-O total dos módulos segue **69h**, e a disciplina, **100h (40T + 60P)**.
-
-**Consequências — declaradas honestamente:**
-
-- **A transição da semana 8 deixou de ser um precipício.** Antes, a turma trocava de
-  linguagem no meio do curso. Agora troca de camada, no mesmo idioma. Este é o maior ganho
-  pedagógico do ADR-10.
-- **O M03 ficou mais denso.** Módulos, providers e injeção de dependência são abstratos, e
-  chegam antes de a turma ter um sistema para justificá-los. A mitigação é o M02, que
-  apresenta a arquitetura antes do código.
-- **Segurança dá mais trabalho.** O Django protegia por padrão; aqui, `helmet`,
-  `ValidationPipe` e CSRF são configuração explícita. Isso custa tempo no M09 — mas em
-  compensação a turma **vê** cada proteção, em vez de herdá-la sem saber.
-- **Testes seguem apertados** (3h para Jest no backend e Vitest no frontend). O módulo
-  prioriza teste de regra de negócio e de componente crítico; e2e vira leitura. Ganho
-  parcial: as duas ferramentas têm API quase idêntica, o que antes não acontecia com
-  pytest.
-- Turma **sem** base de JavaScript não cabe em 100h — e agora o risco é maior, porque não
-  há mais um bloco em outra linguagem para amortecer. Esta oferta tem o pré-requisito
-  atendido. Para outras, o cronograma prevê 4h de nivelamento.
-
----
-
-## ADR-01 — Arquitetura desacoplada: API REST + SPA *(superado)*
-
-- **Status:** superado pelo ADR-10 · **Data:** 2026-08-11
-
-Estabeleceu a separação em dois artefatos, com Django/DRF no backend. **A separação
-continua valendo**; o que mudou foi o framework do backend. Registrado porque a decisão de
-desacoplar é independente da linguagem escolhida — e é ela que o M02 ensina.
-
----
-
-## ADR-04 — Modo híbrido *(superado)*
-
-- **Status:** superado pelo ADR-11
-
-Previa Django com templates + ilhas de React, caso a coordenação exigisse leitura estrita da
-ementa. Substituído pela alternativa registrada no ADR-11.
-
----
-
-## Como escrever um ADR (modelo para a Etapa 2)
-
-```markdown
-# ADR-00X — Título curto e afirmativo
-
-- **Status:** proposto | aceito | superado por ADR-00Y
-- **Data:** AAAA-MM-DD
-
-## Contexto
-O que é verdade hoje que torna esta decisão necessária.
-
-## Decisão
-O que foi decidido, no presente do indicativo.
-
-## Alternativas consideradas
-O que mais foi avaliado e por que foi descartado.
-Uma alternativa sem motivo de descarte não foi avaliada de verdade.
-
-## Consequências
-O que melhora e o que piora. **As duas colunas.**
-Um ADR só com vantagens é propaganda, não decisão.
-```
+**Consequências.** *A favor:* nenhum serviço novo para hospedar; o processo volta a ser
+descartável (12 fatores, fator VI). *Contra:* uma consulta a mais por requisição autenticada.

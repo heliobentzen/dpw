@@ -1,9 +1,12 @@
 # M06 — Exercícios
 
+> **O que é cobrado.** Entrega **E2** do [portfólio](../../avaliacao/rubrica-portfolio.md): consultas com `Repository` e `QueryBuilder` com o SQL gerado, e um N+1 corrigido com medição antes e depois.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
 > Todos exigem o banco populado (`semear.ts`) e `logging: true`. **Leia o SQL de cada
 > consulta que escrever** — é isso que separa usar o ORM de confiar nele.
 
-## E06.1 — Traduzir para o Repository (individual)
+## E06.1 — Traduzir para o Repository (individual) · 📌 cobrado
 
 Escreva cada consulta com a API do `Repository` e cole o SQL gerado:
 
@@ -23,7 +26,7 @@ Pegadinhas: **5** — vazio (`""`) e `NULL` são coisas diferentes; qual é o se
 
 ---
 
-## E06.2 — Caçar o N+1 (individual) ⭐
+## E06.2 — Caçar o N+1 (individual) ⭐ · 📌 cobrado
 
 1. Escreva um endpoint que lista 50 obras e, **para cada uma**, busca o autor num laço.
 2. Chame-o e conte as linhas de SQL no terminal.
@@ -41,7 +44,7 @@ sobre encontrar N+1 em revisão de código?
 
 ---
 
-## E06.3 — Relatórios com QueryBuilder (em duplas) ⭐
+## E06.3 — Relatórios com QueryBuilder (em duplas) ⭐ · 📌 cobrado
 
 | # | Relatório |
 | --- | --- |
@@ -57,7 +60,7 @@ O item 3 é o mais instrutivo: exige `LEFT JOIN` com `IS NULL`, e a versão ing�
 
 ---
 
-## E06.4 — Busca com filtros opcionais (individual)
+## E06.4 — Busca com filtros opcionais (individual) · ➕ opcional
 
 `GET /api/obras/buscar` aceitando `?q=`, `?autorId=`, `?categoriaId=`, `?de=`, `?ate=` —
 todos opcionais e combináveis.
@@ -73,7 +76,7 @@ todos opcionais e combináveis.
 
 ---
 
-## E06.5 — Injeção de SQL na prática (individual) ⚠️
+## E06.5 — Injeção de SQL na prática (individual) ⚠️ · ➕ opcional
 
 Escreva **de propósito** a versão vulnerável:
 
@@ -92,7 +95,7 @@ Apague a versão vulnerável ao terminar. O M09 retoma o assunto.
 
 ---
 
-## E06.6 — Transação com falha (em duplas) ⭐
+## E06.6 — Transação com falha (em duplas) ⭐ · ➕ opcional
 
 Implemente `emprestar(exemplarId, associadoId)` com as cinco regras do roteiro. Depois:
 
@@ -103,7 +106,7 @@ Implemente `emprestar(exemplarId, associadoId)` com as cinco regras do roteiro. 
 
 ---
 
-## E06.7 — Exclusão lógica (individual)
+## E06.7 — Exclusão lógica (individual) · ➕ opcional
 
 Obra retirada do acervo não deve sumir do histórico de empréstimos.
 
@@ -115,7 +118,7 @@ Obra retirada do acervo não deve sumir do histórico de empréstimos.
 
 ---
 
-## E06.8 — Índice medido (individual)
+## E06.8 — Índice medido (individual) · ➕ opcional
 
 1. Consulte `Exemplar` por `tombo` e meça o tempo.
 2. Rode `EXPLAIN` (ou `EXPLAIN ANALYZE`) e anote se houve varredura sequencial.

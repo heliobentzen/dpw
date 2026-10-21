@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M06 · Repository e QueryBuilder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/deck.css">
+</head>
+<body>
+<main class="deck" data-label="M06 · Consultas e CRUD">
+
+<!-- ================================================================ CAPA -->
+<section class="slide title bare">
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="wm">06</div>
+  <div class="brand in"><b>IFPE</b><span class="dot"></span>Desenvolvimento de Projeto Web</div>
+  <div class="title-body">
+    <div class="eyebrow in">Módulo 06</div>
+    <h1 class="in">Consultas e CRUD<br><span class="hl">sem surpresas</span></h1>
+    <p class="lead in">Repository, QueryBuilder e transações — medindo desempenho, fechando a porta da injeção de SQL e preservando a consistência.</p>
+  </div>
+  <div class="meta in">Pré-requisitos: M04, M05 · TypeORM · PostgreSQL</div>
+  <aside class="notes">Item da ementa: "realização de consultas e operações de CRUD utilizando a API do framework". O fio condutor: código correto também pode ser caro, inseguro ou inconsistente.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Ao fim da aula</div>
+  <h2 class="in">O acervo saindo do <span class="hl">banco de verdade</span></h2>
+  <div class="routes">
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras?pagina=2</span><span class="pill g">200</span><span class="what">lista paginada e ordenada</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/1</span><span class="pill g">200</span><span class="what">com autora, categorias e exemplares</span></div>
+    <div class="route f left"><span class="pill k">POST</span><span class="path">/api/obras</span><span class="pill g">201</span><span class="what">criar · PATCH e DELETE também</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/buscar</span><span class="pill g">200</span><span class="what">filtros opcionais, sem injeção</span></div>
+    <div class="route f left"><span class="pill k">POST</span><span class="path">emprestar()</span><span class="pill g">TX</span><span class="what">duas escritas, tudo ou nada</span></div>
+  </div>
+  <div class="note ok f"><b>Meta</b> Passar de "sei criar tabelas" para "sei buscar e alterar dados sem perder de vista desempenho, segurança e consistência".</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Roteiro</div>
+  <h2 class="in">Do mais simples ao <span class="hl">mais caro</span></h2>
+  <div class="grid-3 fill-v">
+    <div class="card f zoom"><span class="tag">01 · 02</span><h3>Ler e paginar</h3><p>Do array ao banco, com paginação desde a primeira linha.</p></div>
+    <div class="card f zoom"><span class="tag">03</span><h3>Medir o N+1</h3><p>Provocar, contar e corrigir o problema mais comum de API.</p></div>
+    <div class="card f zoom"><span class="tag">04</span><h3>Escrever</h3><p>Criar, atualizar e remover — e o que está errado de propósito.</p></div>
+    <div class="card f zoom"><span class="tag">05</span><h3>QueryBuilder</h3><p>Quando o <code>Repository</code> deixa de servir.</p></div>
+    <div class="card f zoom"><span class="tag">06</span><h3>Injeção de SQL</h3><p>Parâmetro não é concatenação.</p></div>
+    <div class="card f zoom"><span class="tag">07</span><h3>Transações</h3><p>Ou acontecem as duas escritas, ou nenhuma.</p></div>
+  </div>
+</section>
+
+<!-- ================================================================ 01 -->
+<section class="slide dark section">
+  <div class="num in">01</div>
+  <h1 class="in">Do array ao banco</h1>
+  <p class="lead in">O <code>AcervoService</code> ainda é o do M03. Ele muda; o controller, não.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · acervo.service.ts</div>
+  <h2 class="in">Pedir ao Nest o <span class="hl">repositório</span></h2>
+  <pre class="code lg in">
+@Injectable()
+export class AcervoService {
+  constructor(
+    @InjectRepository(Obra) private readonly obras: Repository&lt;Obra>,
+    @InjectRepository(Autor) private readonly autores: Repository&lt;Autor>,
+  ) {}
+}
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="4"><b>@InjectRepository(Obra)</b>: a injeção do M03, com um decorator a mais para dizer <b>de qual</b> entidade.</p>
+    <p class="f" data-hl="4"><b>Repository&lt;Obra></b>: o genérico dá tipo ao retorno — <code>find()</code> devolve <code>Obra[]</code>, não <code>any[]</code>.</p>
+    <p class="f" data-hl="4-5">Só funciona porque as entidades estão no <code>forFeature</code> (M04). Senão: <code>can't resolve dependencies</code>.</p>
+    <p class="f" data-hl="5">O repositório de <code>Autor</code> serve para demonstrar o N+1, na seção 03.</p>
+  </div>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">E apague o <code>@Get("nome")</code></div>
+  <div class="big in">Endpoint temporário que sobrevive ao módulo vira <span class="hl-red">permanente por acidente</span>.</div>
+  <p class="sub f">Ele já provou que o <code>ConfigService</code> funcionava. Em três meses, ninguém saberia se pode remover.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · listar</div>
+  <h2 class="in">Paginado <span class="hl">desde o começo</span></h2>
+  <div class="split code-wide">
+    <pre class="code sm in">
+async listar(pagina = 1, tamanho = 20) {
+  const [itens, total] = await this.obras.findAndCount({
+    relations: { autor: true },
+    order: { titulo: "ASC" },
+    skip: (pagina - 1) * tamanho,
+    take: tamanho,
+  });
+  return { itens, total, pagina, tamanho };
+}
+</pre>
+    <div class="captions" style="align-self:center;margin:0">
+      <p class="f" data-hl="1"><b>Valores padrão</b>: quem chama sem argumento recebe a primeira página.</p>
+      <p class="f" data-hl="2"><b>findAndCount</b> devolve a página <b>e o total</b> — o que permite mostrar "página 3 de 41".</p>
+      <p class="f" data-hl="3"><b>relations</b>: sem isto, <code>obra.autor</code> vem <code>undefined</code>. O TypeORM não busca o que você não pediu.</p>
+      <p class="f" data-hl="5-6"><b>skip / take</b> = <code>OFFSET</code> / <code>LIMIT</code>. Página 1 tem <code>skip: 0</code> — daí o <code>- 1</code>.</p>
+      <p class="f" data-hl="4"><b>order</b> não é enfeite. Próximo slide.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Armadilha · sem <code>order</code></div>
+  <h2 class="in">O banco devolve na ordem que <span class="hl-red">lhe convier</span></h2>
+  <div class="vs fill-v">
+    <div class="card big f left">
+      <span class="tag">Página 1</span>
+      <h3>Dom Casmurro · Iracema · <span class="hl-red">Memórias Póstumas</span></h3>
+    </div>
+    <div class="card big f right">
+      <span class="tag">Página 2</span>
+      <h3><span class="hl-red">Memórias Póstumas</span> · O Cortiço · Senhora</h3>
+    </div>
+  </div>
+  <div class="note warn f"><b>Sintoma</b> A página 2 repete itens da página 1 — porque, sem ordenação explícita, a ordem <b>pode mudar entre consultas</b>.</div>
+</section>
+
+<!-- ================================================================ 02 -->
+<section class="slide dark section">
+  <div class="num in">02</div>
+  <h1 class="in">Por que paginar sempre</h1>
+  <p class="lead in">A diferença entre uma API que aguenta o segundo ano e uma que não.</p>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Analogia</div>
+  <div class="big in">Pedir ao bibliotecário <span class="hl">todos os livros</span> no balcão para escolher um.</div>
+  <p class="sub f">Com dez livros, ele traz. Com o acervo inteiro, o balcão desaba antes de você olhar o primeiro.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in"><code>await this.obras.find()</code> sem <code>take</code></div>
+  <h2 class="in">O volume <span class="hl-red">não perdoa</span></h2>
+  <div class="bars fill-v">
+    <div class="bar-row f"><span class="lbl">20 registros</span><div class="track"><div class="fill" style="--v:1"></div></div><span class="val">instantâneo</span></div>
+    <div class="bar-row f"><span class="lbl">800 registros</span><div class="track"><div class="fill" style="--v:5"></div></div><span class="val">~200 KB</span></div>
+    <div class="bar-row f"><span class="lbl">200 mil registros</span><div class="track"><div class="fill r" style="--v:100"></div></div><span class="val hl-red">derruba</span></div>
+  </div>
+  <div class="note warn f"><b>E pior</b> Derruba em <b>produção</b>: em desenvolvimento ninguém tem 200 mil registros.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Quatro custos, não um</div>
+  <h2 class="in">Paginar corta <span class="hl">os quatro</span> de uma vez</h2>
+  <div class="flow fill-v">
+    <div class="node f">Banco monta<small>memória do servidor</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">Node serializa<small>memória do servidor</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">Rede transporta<small>tempo e custo</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">Cliente processa<small>memória dele</small></div>
+  </div>
+  <div class="stack">
+    <div class="note ok f"><b>Regra do curso</b> Toda listagem é paginada, desde a primeira linha. Paginar depois quebra o contrato de quem já consome a API.</div>
+    <div class="note warn f"><b>Falta</b> Hoje <code>?tamanho=999999</code> ainda pede tudo. <b>Limite de paginação é segurança</b> — o M07 põe o teto.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · buscarUm</div>
+  <h2 class="in">Peça <span class="hl">o que a resposta usa</span>, não tudo</h2>
+  <pre class="code lg in">
+async buscarUm(id: number): Promise&lt;Obra> {
+  const obra = await this.obras.findOne({
+    where: { id },
+    relations: { autor: true, categorias: true, exemplares: true },
+  });
+  if (!obra) throw new NotFoundException(`Obra ${id} não encontrada`);
+  return obra;
+}
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="4">O detalhe mostra autora, categorias e exemplares. A listagem só precisava da autora.</p>
+    <p class="f" data-hl="6"><b>findOne</b> devolve <code>Obra | null</code>, e o TypeScript <b>obriga</b> você a tratar o caso.</p>
+    <p class="f" data-hl="">O array virou PostgreSQL e <b>o contrato HTTP não mudou nada</b>. A situação 3 do M03 era promessa; agora é fato observado.</p>
+  </div>
+</section>
+
+<!-- ================================================================ 03 -->
+<section class="slide dark section">
+  <div class="num in">03</div>
+  <h1 class="in">O problema N+1</h1>
+  <p class="lead in">Provocar, medir — com número na tabela — e corrigir.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · popular o banco</div>
+  <h2 class="in">Com 20 registros, tudo é rápido — <span class="hl-red">inclusive o errado</span></h2>
+  <pre class="code term in" data-lang="sh">
+npm install -D @faker-js/faker
+npx ts-node --esm src/semear.ts
+</pre>
+  <div class="grid-3 fill-v">
+    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="60">60</div><div class="stat-label">autores</div></div>
+    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="800">800</div><div class="stat-label">obras</div></div>
+    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="2000">2.000</div><div class="stat-label">exemplares</div></div>
+  </div>
+  <div class="note info f"><b>Semente fixa</b> Toda a turma gera os mesmos dados — os tempos ficam comparáveis.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">A versão ruim, de propósito</div>
+  <h2 class="in">Quem só viu a certa <span class="hl">não reconhece</span> a errada</h2>
+  <pre class="code sm red in">
+async listarRuim() {
+  const obras = await this.obras.find({ take: 50 });
+  for (const obra of obras) {
+    const autor = await this.autores.findOneBy({ id: obra.autorId });
+    if (autor) obra.autor = autor;
+  }
+  return obras;
+}
+</pre>
+  <div class="captions" style="margin-top:14px">
+    <p class="f" data-hl="2">Uma consulta para a lista. Sem <code>relations</code>, <code>obra.autor</code> vem vazio.</p>
+    <p class="f" data-hl="3-4">A tentação: buscar cada autora num laço. <b class="r">await dentro do for</b>: cada volta espera uma ida ao banco.</p>
+    <p class="f" data-hl="4"><b>autorId</b> é o campo declarado no M04. Sem ele, <code>as any</code>.</p>
+  </div>
+  <pre class="code sm f" style="margin-top:12px">
+async listarBom() {   // ✅ a versão boa
+  return this.obras.find({ take: 50, relations: { autor: true } });
+}
+</pre>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · medir</div>
+  <h2 class="in">De fora são <span class="hl">indistinguíveis</span>. O terminal conta outra história.</h2>
+  <pre class="code term in" data-lang="sh">
+curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/ruim
+curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/bom
+</pre>
+  <ol class="steps mt">
+    <li class="f">Exponha as duas versões em rotas temporárias, <b>acima</b> do <code>@Get(":id")</code>.</li>
+    <li class="f">Limpe o terminal do <code>start:dev</code>, chame uma rota e <b>conte as linhas <code>query:</code></b>.</li>
+    <li class="f">Repita com a outra. Depois troque <code>take: 50</code> por <code>take: 200</code> e meça de novo.</li>
+  </ol>
+  <aside class="notes">-o NUL joga o corpo fora; -w imprime só o tempo. No macOS/Linux: -o /dev/null e "\n".</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Resultados de referência</div>
+  <h2 class="in">Consultas por requisição</h2>
+  <div class="bars fill-v">
+    <div class="bar-row f"><span class="lbl">Boa · 50 itens</span><div class="track"><div class="fill" style="--v:1"></div></div><span class="val"><span data-count="2">2</span> · 9 ms</span></div>
+    <div class="bar-row f"><span class="lbl">Ruim · 50 itens</span><div class="track"><div class="fill r" style="--v:25.4"></div></div><span class="val"><span data-count="51">51</span> · 60 ms</span></div>
+    <div class="bar-row f"><span class="lbl">Boa · 200 itens</span><div class="track"><div class="fill" style="--v:1"></div></div><span class="val"><span data-count="2">2</span> · 23 ms</span></div>
+    <div class="bar-row f"><span class="lbl">Ruim · 200 itens</span><div class="track"><div class="fill r" style="--v:100"></div></div><span class="val"><span data-count="201">201</span> · 253 ms</span></div>
+  </div>
+  <div class="note ok f"><b>O que importa</b> Não é 1 nem 2. É que <b>2 não cresce</b> e <b>51 cresce</b>. Seus números vão diferir; a proporção, não.</div>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">O problema tem nome</div>
+  <div class="big xl in"><span class="hl">1</span> + <span class="hl-red">N</span></div>
+  <p class="sub f">Uma consulta para a lista, mais <b>uma por item</b>. A causa mais comum de API lenta — e a mais fácil de introduzir sem perceber.</p>
+  <p class="sub f">É ir ao mercado <b>uma vez por item da lista</b>: o arroz, volta para casa; o feijão, volta. Cada viagem é curta, e a tarde some. O <code>relations</code> é levar a lista e comprar tudo de uma vez.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Detalhe · por que 2 e não 1</div>
+  <h2 class="in">Com <code>take</code> e relação, o TypeORM faz <span class="hl">duas</span> consultas</h2>
+  <div class="flow fill-v">
+    <div class="node f">1. seleciona os <b>ids</b> da página<small>LIMIT conta obras</small></div>
+    <div class="arrow f"></div>
+    <div class="node g f">2. busca esses ids com JOIN<small>dados completos</small></div>
+  </div>
+  <div class="note warn f"><b>Se fosse uma só</b> o <code>LIMIT</code> contaria linhas do JOIN, não obras: uma obra com três categorias comeria três vagas. Você pediria 20 e receberia 7.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Por que 60 ms já é problema</div>
+  <h2 class="in">O que acontece <span class="hl-red">depois</span></h2>
+  <table class="tbl">
+    <tr class="in"><th>Mudança</th><th>Versão boa</th><th>Versão ruim</th></tr>
+    <tr class="f"><td>O acervo dobra</td><td class="ans">igual</td><td class="hl-red">dobra</td></tr>
+    <tr class="f"><td>A página passa a mostrar 200</td><td class="ans">igual</td><td class="hl-red">quadruplica</td></tr>
+    <tr class="f"><td>O banco vai para outro servidor</td><td class="ans">+1 ida e volta</td><td class="hl-red"><b>+201 idas e voltas</b></td></tr>
+  </table>
+  <div class="note ok f mt"><b>Como detectar</b> Log ligado, chame a rota e <b>conte as linhas de SQL</b>. Se o número cresce com o tamanho da lista, é N+1. Depois, apague as rotas temporárias.</div>
+</section>
+
+<!-- ================================================================ 04 -->
+<section class="slide dark section">
+  <div class="num in">04</div>
+  <h1 class="in">Escrever</h1>
+  <p class="lead in">Criar, atualizar e remover fecham o CRUD.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · escrita no service</div>
+  <h2 class="in">Três métodos, <span class="hl">três detalhes</span> que importam</h2>
+  <pre class="code sm in">
+async criar(dados: Partial&lt;Obra>): Promise&lt;Obra> {
+  const obra = this.obras.create(dados);
+  return this.obras.save(obra);
+}
+async atualizar(id: number, dados: Partial&lt;Obra>): Promise&lt;Obra> {
+  const obra = await this.buscarUm(id);
+  Object.assign(obra, dados);
+  return this.obras.save(obra);
+}
+async remover(id: number): Promise&lt;void> {
+  const resultado = await this.obras.delete(id);
+  if (resultado.affected === 0) throw new NotFoundException(`Obra ${id} não encontrada`);
+}
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="2"><b>create()</b> só monta em memória — <b>não grava</b>. O nome engana; quem grava é o <code>save</code>.</p>
+    <p class="f" data-hl="3,8"><b>save()</b>: <code>INSERT</code> se não tem <code>id</code>, <code>UPDATE</code> se tem. Uma função, dois comandos.</p>
+    <p class="f" data-hl="6-7"><b>buscarUm + assign</b>: valida a existência (404) antes de atualizar.</p>
+    <p class="f" data-hl="11-12"><b>delete()</b> não erra se o id não existe — devolve <code>affected: 0</code>. Por isso conferimos.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O que está errado de propósito</div>
+  <h2 class="in">O CRUD funciona. E <span class="hl-red">aceita qualquer coisa.</span></h2>
+  <pre class="code term in" data-lang="sh">
+curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" `
+  -d '{\"titulo\":⟦\"\"⟧,⟦\"criadoEm\":\"1999-01-01\"⟧,\"autorId\":1}'
+> 201 Created
+</pre>
+  <table class="tbl" style="margin-top:16px">
+    <tr class="in"><th>Problema</th><th>Consequência</th></tr>
+    <tr class="f"><td>Nada valida <code>titulo</code></td><td>Obra sem título entra no acervo</td></tr>
+    <tr class="f"><td>O cliente escolhe os campos</td><td><i>Mass assignment</i>: escreve <code>criadoEm</code>, <code>destaque</code>…</td></tr>
+    <tr class="f"><td>A resposta é a entidade inteira</td><td>Com <code>Usuario</code> (M08), vaza o hash da senha</td></tr>
+  </table>
+  <div class="note info f" style="margin-top:16px"><b>Ponte para o M07</b> <code>Partial&lt;Obra&gt;</code> não é formulário. Guarde este comando: o M07 começa por ele.</div>
+</section>
+
+<!-- ================================================================ 05 -->
+<section class="slide dark section">
+  <div class="num in">05</div>
+  <h1 class="in">As duas APIs do TypeORM</h1>
+  <p class="lead in">Comece pelo <code>Repository</code>. Saiba quando trocar.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">A mesma consulta, duas formas</div>
+  <h2 class="in">Objeto de opções <span class="muted">×</span> <span class="hl">SQL encadeado</span></h2>
+  <div class="vs">
+    <div class="stack">
+      <pre class="code sm in" data-title="Repository">
+await this.obras.find({
+  where: { anoPublicacao: LessThan(1900) },
+  order: { titulo: "ASC" },
+});
+</pre>
+      <div class="card f"><span class="tag">Bom para</span><p>CRUD e filtros simples. Mais curto.</p></div>
+    </div>
+    <div class="stack">
+      <pre class="code sm in" data-title="QueryBuilder">
+await this.obras.createQueryBuilder("obra")
+  .where("obra.anoPublicacao &lt; :ano",
+         { ano: 1900 })
+  .orderBy("obra.titulo", "ASC")
+  .getMany();
+</pre>
+      <div class="card g f"><span class="tag">Bom para</span><p>Agregação, <code>JOIN</code> explícito e condição <b>dinâmica</b>.</p></div>
+    </div>
+  </div>
+  <div class="note ok f"><b>Regra prática</b> Migre para o <code>QueryBuilder</code> quando o objeto de opções virar quebra-cabeça — <b>não antes</b>.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O ponto de virada · filtro opcional</div>
+  <h2 class="in">Cada filtro é um <code>if</code> que <span class="hl">acrescenta uma linha</span></h2>
+  <pre class="code sm in">
+async buscar(termo?: string, categoriaId?: number, ate?: number) {
+  const qb = this.obras.createQueryBuilder("obra")
+    .leftJoinAndSelect("obra.autor", "autor")
+    .leftJoin("obra.categorias", "categoria");
+  if (termo) {
+    qb.andWhere("(obra.titulo ILIKE :termo OR autor.nome ILIKE :termo)",
+      { termo: `%${termo}%` });
+  }
+  if (categoriaId) qb.andWhere("categoria.id = :categoriaId", { categoriaId });
+  if (ate) qb.andWhere("obra.anoPublicacao &lt;= :ate", { ate });
+  return qb.orderBy("obra.titulo", "ASC").take(20).getMany();
+}
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="2"><b>"obra"</b> é o apelido da tabela no resto da consulta.</p>
+    <p class="f" data-hl="3"><b>leftJoinAndSelect</b> faz o JOIN <b>e traz</b> as colunas — o equivalente do <code>relations</code>.</p>
+    <p class="f" data-hl="4"><b>leftJoin</b> sem Select: só para filtrar. Menos tráfego.</p>
+    <p class="f" data-hl="5-10"><b>andWhere dentro de if</b>: o SQL é montado conforme o que veio.</p>
+    <p class="f" data-hl="6-7"><b>:termo</b> é parâmetro; os <code>%</code> ficam no <b>valor</b>, não no comando.</p>
+    <p class="f" data-hl="11"><b>getMany()</b> executa. Sem ele, o <code>qb</code> é só uma receita.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Rode · e leia o SQL de cada chamada</div>
+  <h2 class="in">O <code>WHERE</code> <span class="hl">muda</span> conforme a entrada</h2>
+  <pre class="code term in" data-lang="sh">
+curl.exe -s "http://localhost:3000/api/obras/buscar"
+> SELECT … ORDER BY "obra"."titulo" ASC
+curl.exe -s "http://localhost:3000/api/obras/buscar?termo=maria"
+> SELECT … ⟪WHERE (obra.titulo ILIKE $1 OR autor.nome ILIKE $1)⟫ …
+curl.exe -s "http://localhost:3000/api/obras/buscar?termo=maria&amp;ate=1900"
+> SELECT … ⟪WHERE (… ILIKE $1) AND obra.anoPublicacao &lt;= $2⟫ …
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="1-2">Sem filtro: nenhuma condição.</p>
+    <p class="f" data-hl="3-4">Um filtro: uma condição.</p>
+    <p class="f" data-hl="5-6">Dois filtros: duas condições. E repare no <code>$1</code>, <code>$2</code>: os valores vão <b>separados</b>.</p>
+  </div>
+</section>
+
+<!-- ================================================================ 06 -->
+<section class="slide dark section">
+  <div class="num in">06</div>
+  <h1 class="in">Parâmetro não é concatenação</h1>
+  <p class="lead in">A vulnerabilidade mais antiga e mais explorada da web.</p>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Analogia</div>
+  <div class="big in">No campo "valor" do formulário do banco, escrever <span class="hl-red">"R$ 10 e transfira todo o saldo"</span> não vira ordem.</div>
+  <p class="sub f">O caixa sabe que naquele campo só cabe um valor. A concatenação <b>apaga essa fronteira</b> entre campo e instrução.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Parecem equivalentes</div>
+  <h2 class="in">Não <span class="hl-red">são</span></h2>
+  <pre class="code lg in">
+.where(`obra.titulo = '${termo}'`)                  // ❌ colado no comando
+.where("obra.titulo = :titulo", { titulo: termo })  // ✅ parâmetro
+</pre>
+  <p class="f mt">Se alguém buscar por <code>' OR 1=1 --</code> na primeira forma, o banco recebe:</p>
+  <pre class="code lg f" data-lang="sql">
+SELECT * FROM obra WHERE obra.titulo = ''⟦ OR 1=1 --⟧'
+</pre>
+  <div class="captions">
+    <p class="f"><b class="r">OR 1=1</b> é sempre verdadeiro; <b class="r">--</b> comenta o resto. Devolve <b>a tabela inteira</b>.</p>
+    <p class="f">Com um pouco mais de criatividade, devolve a tabela de <b class="r">usuários</b>.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O que acontece na forma certa</div>
+  <h2 class="in">Comando e valores viajam <span class="hl">separados</span></h2>
+  <div class="vs fill-v">
+    <div class="card big f left"><span class="tag">Comando</span><h3><code>SELECT * FROM obra WHERE obra.titulo = $1</code></h3><p>O banco compila primeiro.</p></div>
+    <div class="card big g f right"><span class="tag">Valores</span><h3><code>["' OR 1=1 --"]</code></h3><p>Depois encaixa o valor. É texto, sempre — mesmo que pareça SQL.</p></div>
+  </div>
+  <div class="note ok f"><b>A regra</b> A única proteção que importa, e é <b>gratuita</b>. Crase ou <code>+</code> montando consulta com dado do usuário está errado — sem exceção, sem "mas eu validei antes".</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Rode · teste o ataque</div>
+  <h2 class="in">A busca devolve <span class="hl">nada</span></h2>
+  <pre class="code term lg in" data-lang="sh">
+curl.exe -s "http://localhost:3000/api/obras/buscar?termo=' OR 1=1 --"
+> []
+> query: SELECT … WHERE (obra.titulo ILIKE $1 …) -- PARAMETERS: ⟪["%' OR 1=1 --%"]⟫
+</pre>
+  <ol class="steps mt">
+    <li class="f">Não existe obra com aquele título literal — logo, lista vazia.</li>
+    <li class="f">No log, o ataque aparece como <b>parâmetro</b>, separado do comando.</li>
+    <li class="f">Confira o seu código: todos os valores passam por <code>:nome</code>? O M09 volta ao tema com o OWASP.</li>
+  </ol>
+</section>
+
+<!-- ================================================================ 07 -->
+<section class="slide dark section">
+  <div class="num in">07</div>
+  <h1 class="in">Transações</h1>
+  <p class="lead in">Emprestar um exemplar é <b>duas</b> escritas.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O cenário</div>
+  <h2 class="in">E se a segunda escrita <span class="hl-red">falhar</span>?</h2>
+  <div class="flow fill-v">
+    <div class="node g f">✓ empréstimo criado<small>escrita 1</small></div>
+    <div class="arrow r f"><span class="arrow-label">queda de rede, servidor reiniciado…</span></div>
+    <div class="node r f">✕ exemplar "disponível"<small>escrita 2 não aconteceu</small></div>
+  </div>
+  <div class="note warn f"><b>O sistema mente</b> O volume está na mão de alguém e o catálogo diz que está na estante. O próximo leitor vai à prateleira e não encontra.</div>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Analogia</div>
+  <div class="big in">Uma <span class="hl">transferência bancária</span>: débito numa conta, crédito na outra.</div>
+  <p class="sub f">Se o sistema caísse entre os dois, o dinheiro sumiria. Por isso as duas operações são <b>uma só</b>: ou acontecem ambas, ou nenhuma.</p>
+  <p class="sub f" style="color:var(--ink)">Isso é uma <b>transação</b>.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">A solução</div>
+  <h2 class="in">Tudo pelo <code>manager</code></h2>
+  <pre class="code lg in">
+await this.dataSource.transaction(async (manager) => {
+  await manager.save(emprestimo);
+  await manager.update(Exemplar, exemplar.id, { disponivel: false });
+});
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="1"><b>transaction</b> abre a transação, executa a função e faz <code>COMMIT</code> no fim — ou <code>ROLLBACK</code> se algo lançar.</p>
+    <p class="f" data-hl="2-3"><b>manager</b> é o "repositório da transação": <b>tudo que roda por ele participa</b>.</p>
+    <p class="f" data-hl="">Se <b>qualquer</b> linha lançar, tudo é desfeito. Não há meio-termo.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in" style="color:var(--red)">A armadilha silenciosa</div>
+  <h2 class="in">Uma linha <span class="hl-red">fora</span> da transação</h2>
+  <pre class="code lg red in">
+await this.dataSource.transaction(async (manager) => {
+  await manager.save(emprestimo);                     // ✅ dentro
+  await this.exemplares.update(id, { disponivel: false }); // ❌ FORA
+});
+</pre>
+  <ul class="clean mt focus-list">
+    <li class="f" data-hl="3"><code>this.exemplares</code> é o repositório normal: roda fora e <b>não é desfeito</b> no ROLLBACK.</li>
+    <li class="f">Compila. Os testes felizes passam.</li>
+    <li class="f">O problema só aparece no dia em que algo falha no meio — justamente quando a transação deveria salvar você.</li>
+  </ul>
+</section>
+
+<section class="slide dark statement">
+  <div class="eyebrow in">A regra</div>
+  <div class="big in">Se existe um estado intermediário que seria <span class="hl">mentira</span>, precisa de transação.</div>
+  <p class="sub f">E é aqui que o <code>disponivel</code> do M04 cobra a conta: campo derivado gera obrigação de sincronia. A transação é o preço.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · por sua conta</div>
+  <h2 class="in"><code>EmprestimosService.emprestar()</code></h2>
+  <div class="split" style="align-items:start">
+    <ol class="steps">
+      <li class="f">Buscar o exemplar; erro se não existir.</li>
+      <li class="f">Recusar se já estiver indisponível.</li>
+      <li class="f">Recusar se o associado tiver 3 em aberto.</li>
+      <li class="f"><b>Criar o empréstimo</b> (devolução em 14 dias).</li>
+      <li class="f"><b>Marcar o exemplar</b> como indisponível.</li>
+    </ol>
+    <div class="stack">
+      <div class="card g f"><span class="tag">Transação</span><p>Passos 4 e 5 juntos. Os três primeiros só verificam e ficam fora.</p></div>
+      <div class="card r f"><span class="tag">Prove</span><p>Lance um erro <b>entre</b> 4 e 5 e confira que o empréstimo <b>não</b> ficou no banco.</p></div>
+      <div class="card f"><span class="tag">Compare</span><p>Sem o <code>manager</code>, o empréstimo <b>fica</b>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ FECHO -->
+<section class="slide">
+  <div class="eyebrow in">IA no fluxo</div>
+  <h2 class="in">Em toda consulta pronta, confira <span class="hl">três coisas</span></h2>
+  <ul class="checks">
+    <li class="f fade">Algum <code>await</code> dentro de laço buscando relação item a item? <span class="muted">(N+1)</span></li>
+    <li class="f fade">Algum valor do usuário colado no texto da consulta? <span class="muted">(injeção)</span></li>
+    <li class="f fade">Escritas que precisam ser verdadeiras juntas fora de transação — ou com <code>this.repositorio</code> dentro dela? <span class="muted">(consistência)</span></li>
+  </ul>
+  <div class="note ok f mt"><b>E sempre</b> Mantenha o <code>logging: true</code>: o SQL executado é a única resposta definitiva.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in" style="color:var(--red)">Pegadinha de mercado</div>
+  <h2 class="in">Testar desempenho com <span class="hl-red">20 registros</span></h2>
+  <ul class="clean focus-list">
+    <li class="f">Com o banco quase vazio, até a consulta de 201 viagens é rápida.</li>
+    <li class="f">N+1 e listagem sem paginação não aparecem nos testes da equipe.</li>
+    <li class="f">Aparecem no terceiro mês de uso do cliente.</li>
+  </ul>
+  <div class="note ok f mt"><b>Regra</b> Desempenho só se avalia com volume parecido com o real.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Desafio de fixação</div>
+  <h2 class="in">As dez obras <span class="hl">mais emprestadas</span> do mês</h2>
+  <p class="lead in">Com o nome do autor e a quantidade de empréstimos. Escreva com o <code>QueryBuilder</code>.</p>
+  <ol class="steps mt">
+    <li class="f">Quantas consultas SQL ela deve gerar? Confira no log.</li>
+    <li class="f">Onde fica o código: controller ou service?</li>
+    <li class="f">Que parte do resultado precisa de agregação (<code>COUNT</code>, <code>GROUP BY</code>)?</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Checklist de saída</div>
+  <h2 class="in">Você terminou o M06 se…</h2>
+  <ul class="checks two">
+    <li class="f fade">CRUD completo pelos cinco endpoints</li>
+    <li class="f fade">Listagem paginada e ordenada, com <code>total</code></li>
+    <li class="f fade">Banco populado (≥ 800 obras)</li>
+    <li class="f fade">N+1 reproduzido, medido e corrigido</li>
+    <li class="f fade">Sabe dizer qual versão piorou com 200 e por quê</li>
+    <li class="f fade">Busca com filtros opcionais e parâmetros</li>
+    <li class="f fade">Nenhuma consulta por concatenação</li>
+    <li class="f fade">Transação testada com falha proposital</li>
+    <li class="f fade">Rotas temporárias apagadas</li>
+    <li class="f fade">Sabe o que há de errado em <code>Partial&lt;Obra&gt;</code></li>
+  </ul>
+</section>
+
+<section class="slide title bare">
+  <div class="glow g1"></div>
+  <div class="brand in"><b>IFPE</b><span class="dot"></span>Desenvolvimento de Projeto Web</div>
+  <div class="title-body">
+    <div class="eyebrow in">Próximo</div>
+    <h1 class="in">M07 · API:<br><span class="hl">rotas, controllers e DTOs</span></h1>
+    <p class="lead in">Roteiro completo e exercícios em <code>modulos/06-orm-consultas-crud/</code>.</p>
+  </div>
+  <div class="meta in">Traga o <code>curl</code> da seção 04: o M07 começa por ele.</div>
+</section>
+
+</main>
+<script src="assets/deck.js"></script>
+</body>
+</html>

@@ -1,184 +1,111 @@
-# Etapa 3 — Desenvolvimento do sistema backend
+# Etapa 3 — Sistema final
 
-> **Entrega:** P2 · **Peso:** 30% · Datas no [cronograma](../../docs/cronograma.md)
-
-## Atividades previstas
-
-- Criação dos módulos definidos no projeto
-- Implementação da API e da regra de negócio
-- Realização dos testes e deploy do backend
+> **Entrega:** P3 · **Semana:** 18 · **Peso:** 20% · **Eliminatória** ·
+> **Rubrica:** [`rubrica-etapa-3.md`](../../avaliacao/rubrica-etapa-3.md)
 
 ## 🎯 O que esta etapa produz
 
-O backend funcionando, testado e **no ar** — a maior entrega da disciplina.
-
-> Os encontros em aula são de integração, revisão e resolução de bloqueios. O desenvolvimento
-> acontece continuamente desde o M07, aproveitando as atividades práticas de cada módulo.
-> Equipe que deixa para começar a programar na reta final não entrega.
+A API **completa, segura, testada e no ar** — a maior entrega da disciplina. Parte do núcleo
+aprovado na [Etapa 2](../etapa-2-sistema-preliminar/) e acrescenta segurança, testes e
+implantação.
 
 ---
 
-## 1. Ritmo de trabalho
+## Condições eliminatórias
 
-### Sprints de 2 semanas
+A etapa é considerada **não entregue** se qualquer uma ocorrer:
 
-| Sprint | Semanas | Foco sugerido |
+- O backend não está no ar
+- Não há autenticação, ou a API aceita operação sem a autorização adequada
+- Uma vulnerabilidade crítica apontada não foi corrigida
+- Não há nenhum teste automatizado
+- O código não está em repositório acessível
+
+---
+
+## O que entregar, bloco por bloco
+
+A rubrica tem sete blocos. A nota de cada bloco é a média dos seus critérios.
+
+| Bloco | Peso | Para chegar a "Adequado" | Módulo |
+| --- | ---: | --- | --- |
+| **A. Modelagem** | 3 | 5+ entidades com 1-N e N-N; `onDelete` justificado; 2+ constraints; migrações versionadas | M04, M05 |
+| **B. API** | 4 | Todas as histórias *Must*; CRUD em 2+ recursos; validação; filtros e paginação; regra no *service*; `/api/docs` com schema versionado | M06, M07 |
+| **C. Contrato e integração** | 4 | Contrato estável; um cliente externo consome sem adivinhar o formato; um único padrão de erro | M02, M07, M11 |
+| **D. Segurança** | 4 | Login com 2+ papéis; autorização por papel **e** por dono; segredos fora do código; mapa de dados pessoais | M08, M09 |
+| **E. Qualidade** | 3 | 15+ testes, incluindo a matriz de acesso; CI bloqueante; 1 teste com usuário real; lint limpo | M10 |
+| **F. Implantação** | 3 | API no ar com HTTPS; PostgreSQL gerenciado com backup; deploy documentado | M12, M13 |
+| **G. Processo** | 2 | Todos contribuíram; PRs revisados; quadro em uso | — |
+
+> **Os blocos mais pesados são B, C e D.** Uma API completa, com contrato claro e acesso bem
+> controlado, vale mais que qualquer detalhe extra.
+
+---
+
+## Ritmo de trabalho
+
+| Sprint | Semanas | Foco |
 | --- | --- | --- |
-| S1 | 12–13 | 🔵 Models, migrações, admin, dados de exemplo, **contrato de API** |
-| S2 | 14–15 | 🔵 API completa (DTOs, validação, filtros, autenticação) |
-| S3 | 16–17 | ⚪ Segurança, autorização, testes e **deploy** do backend |
-| S4 | 18 | Ajustes com a organização parceira, documentação e validação final |
+| S2 | 13–14 | Histórias *Must* restantes, autenticação e papéis |
+| S3 | 15–16 | Autorização por dono, segurança (M09), testes e **deploy** |
+| S4 | 17–18 | Teste com usuário real, correções, documentação |
 
-> **A ordem não é negociável:** o contrato de API na S1 e a API funcionando na S2 são o que
-> permitem que o backend suporte a integração real com o cliente/usuário. Equipe que começa
-> sem contrato retrabalha a integração inteira.
+**Deploy na semana 16**, não na véspera. Quem descobre na semana 18 que a API não sobe em
+produção não entrega.
 
-### Rituais (curtos e obrigatórios)
+Rituais curtos: planejamento no início da sprint (30 min), acompanhamento 2×/semana
+(10 min), revisão e retrospectiva no fim (50 min).
 
-| Ritual | Quando | Duração | Pergunta |
-| --- | --- | --- | --- |
-| Planejamento | Início da sprint | 30 min | O que entra nesta sprint? |
-| Acompanhamento | 2×/semana | 10 min | O que fiz, o que farei, o que me trava |
-| Revisão | Fim da sprint | 30 min | Demonstrar o que ficou pronto |
-| Retrospectiva | Fim da sprint | 20 min | O que manter, parar, começar |
+## Fluxo de trabalho
 
-A retrospectiva é a que mais se pula e a que mais rende. 20 minutos honestos na semana 14
-evitam a crise da semana 18.
-
----
-
-## 2. Fluxo de trabalho técnico
-
-```
-issue (história) → branch → commits → PR → CI verde → revisão → merge → deploy staging
+```text
+história → branch → commits pequenos → PR → CI verde → revisão → merge → deploy
 ```
 
-```bash
-git switch main
-git pull
-git switch -c feat/h07-registrar-emprestimo
-# ... desenvolve, com commits pequenos e coerentes ...
-git push -u origin feat/h07-registrar-emprestimo
-# abre PR referenciando a issue: "Closes #7"
-```
+Todo PR descreve **o que muda**, **como testar** e quais **critérios de aceite** cobre. Na
+revisão, confira:
 
-### Padrão de Pull Request
+- [ ] A regra está no *service* e tem teste que falharia se ela quebrasse?
+- [ ] O service filtra pelo usuário da sessão (sem IDOR)?
+- [ ] Sem N+1 nas listagens?
+- [ ] A resposta usa DTO de saída, sem campo sensível?
+- [ ] Nenhum segredo ou dado pessoal real no diff?
 
-```markdown
-## O que muda
-Implementa o registro de empréstimo de ferramenta (H07).
+Checklist completo em [`recursos/checklists/revisao-de-codigo.md`](../../recursos/checklists/revisao-de-codigo.md).
 
-## Como testar
-1. Login como secretária
-2. /ferramentas/ → escolher uma disponível → "Emprestar"
-3. Selecionar morador → confirmar
-4. Verificar a data prevista e a indisponibilidade da ferramenta
+## Teste com usuário real (critério E4)
 
-## Critérios de aceite
-- [x] Só ferramentas disponíveis na lista
-- [x] Só moradores adimplentes
-- [x] Data prevista calculada (7 dias)
-- [x] Impossível emprestar duas vezes (constraint no banco)
+O teste mais valioso da etapa:
 
-## Testes
-4 testes novos em `emprestimos/emprestimos.service.spec.ts` e `test/emprestimos.e2e-spec.ts`.
+1. Peça a alguém da organização para fazer uma tarefa real usando a API (pelo `/api/docs`
+   ou por um cliente simples).
+2. **Não ajude. Só observe e anote:** onde hesitou, onde errou, quanto tempo levou.
+3. Corrija os 3 problemas mais graves.
+4. Registre tudo em `docs/teste-usuario.md`.
 
-## Pendências
-Layout do celular precisa de ajuste — issue #23.
-```
+Os demais testes vão no [plano de teste](../modelos-de-documentos/plano-de-teste.md).
 
-### Revisão de código: o que olhar
+## 📦 Entrega P3
 
-- [ ] Faz o que a história pede? Os critérios de aceite estão cobertos?
-- [ ] Tem teste? O teste falharia se a regra fosse quebrada?
-- [ ] Regra de negócio está no *service*, não no *controller*?
-- [ ] Alguma consulta N+1? (`relations` / `leftJoinAndSelect`)
-- [ ] Controle de acesso: o service filtra a consulta pelo usuário da sessão?
-- [ ] Entidade devolvida direto na resposta, DTO sem `whitelist` ou payload inseguro?
-- [ ] Nomes claros? Dá para entender daqui a seis meses?
-- [ ] Alguma credencial ou dado real de pessoa no diff?
-
-Revisão é sobre o código, nunca sobre a pessoa. Comentário útil sugere alternativa:
-*"aqui pode dar N+1 na listagem — que tal `leftJoinAndSelect` no morador?"*.
-
----
-
-## 3. Requisitos técnicos (verificados na rubrica)
-
-### Piso — sem isto a etapa não é entregue
-
-- [ ] API em produção com HTTPS e `GET /health` verificando o banco
-- [ ] Swagger em `/api/docs` e `openapi.json` versionado no repositório
-- [ ] Autenticação com 2+ papéis; escrita sem token → 401, papel errado → 403, recurso alheio → 403/404
-- [ ] Banco criado por migrações versionadas (`synchronize` desligado em produção)
-- [ ] Testes automatizados verdes no CI
-- [ ] Nenhum segredo no repositório; README sobe o backend localmente
-
-### O que diferencia uma API bem feita
-
-- **Contrato:** rotas REST coerentes, status corretos (201/204/400/401/403/404/409/422),
-  um único formato de erro, paginação com teto e metadados, OpenAPI com exemplos de erro.
-- **Dados:** relações 1-N e N-N, restrições no banco (`UNIQUE`, `CHECK`, `onDelete`
-  pensado), regras no *service*, transação onde há concorrência, sem N+1 nas listagens.
-- **Segurança:** Argon2/bcrypt, token ou sessão com expiração, *guards* por papel **e**
-  verificação de dono, `ValidationPipe` com `whitelist`, DTO de saída sem campos sensíveis,
-  Helmet, CORS explícito, *rate limit* no login.
-- **Qualidade:** testes e2e (Vitest + Supertest) cobrindo regras, validação e matriz de
-  acesso; CI com lint, build, testes e verificação do contrato; PRs revisados.
-- **Operação:** deploy reproduzível (idealmente automático a partir da `main`),
-  configuração por variáveis de ambiente, logs estruturados, backup, `docs/deploy.md`.
-
-## 4. Plano de teste
-
-Além dos automatizados, produza o
-[plano de teste](../modelos-de-documentos/plano-de-teste.md) com:
-
-**4.1 Testes automatizados** — lista do que cada um garante.
-
-**4.2 Testes manuais de fluxo** — roteiro passo a passo dos 3 fluxos principais, com
-resultado esperado e obtido.
-
-**4.3 Teste com usuário real** ⭐ — o mais valioso desta etapa:
-
-1. Peça a alguém da organização parceira para executar uma tarefa real no sistema.
-2. **Não ajude. Não explique. Só observe e anote.**
-3. Registre: onde hesitou, onde errou, o que perguntou, quanto tempo levou.
-4. Corrija os 3 problemas mais graves.
-5. Repita com outra pessoa.
-
-Cinco minutos observando alguém usar o sistema ensinam mais que cinco horas de reunião
-sobre usabilidade.
-
-**4.4 Teste de carga simples** — com dados de volume (300+ registros), verifique que
-nenhuma página passa de 2 segundos e que não há N+1 (Debug Toolbar).
-
----
-
-## 📦 Entrega P3 — Sistema desenvolvido
-
-**Prazo:** semana 18
+**Semana 18**
 
 | Item | Onde |
 | --- | --- |
-| Código-fonte completo | Repositório GitHub |
-| Sistema no ar | URL pública, HTTPS |
-| Suíte de testes verde | CI com badge no README |
-| Plano de teste executado | `docs/plano-de-teste.md` |
-| Evidências de uso real | `docs/teste-usuario.md` + registros |
+| Código completo | Repositório da equipe |
+| API no ar | URL pública com HTTPS e `/health` |
+| Contrato | `/api/docs` e `openapi.json` versionado |
+| Testes verdes | CI com badge no README |
+| Teste com usuário | `docs/teste-usuario.md` |
+| Como rodar e implantar | `README.md` e `docs/deploy.md` |
 | Histórico de trabalho | Commits, PRs e quadro do projeto |
-| README funcional | Raiz do repositório |
-| Documentação de deploy | `docs/deploy.md` |
-
-Rubrica em [`../../avaliacao/rubrica-etapa-3.md`](../../avaliacao/rubrica-etapa-3.md).
 
 ## ⚠️ Erros que derrubam esta etapa
 
-| Erro | Sintoma | Prevenção |
-| --- | --- | --- |
-| Começar tarde | Semana 17 com models incompletos | Sprints desde a semana 12 |
-| Ninguém integra até o fim | Três branches enormes que não se juntam | PR pequeno, merge frequente |
-| Uma pessoa faz tudo | Histórico com 90% de commits de um autor | Pareamento; tarefas distribuídas |
-| Deploy deixado para o final | Descobre na véspera que não sobe | Deploy na semana 16, com o backend pronto |
-| Testar só no fim | Bug estrutural descoberto tarde | Teste junto com a funcionalidade |
-| Escopo crescendo | Nada fecha | Escopo declarado; troca 1 por 1 |
-| Nunca mostrar ao parceiro | Sistema não resolve o problema real | Demonstração a cada sprint |
+| Erro | Prevenção |
+| --- | --- |
+| Deploy deixado para o fim | Deploy na semana 16 |
+| Branches enormes que não se juntam | PRs pequenos, merge frequente |
+| Uma pessoa faz tudo | Tarefas distribuídas e pareamento |
+| Testar só no final | Teste junto com cada história |
+| Escopo crescendo | Troca 1 por 1, registrada no quadro |
+| Nunca mostrar à organização | Demonstração a cada sprint |

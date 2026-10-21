@@ -10,6 +10,14 @@ O M06 terminou com um CRUD que funciona e **aceita qualquer coisa**. Este módul
 
 > A teoria vem quando o código pede: as etapas 2, 5, 10, 12, 13, 15 e 17 são de raciocínio.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E3** — ver [📦 Entrega E3](#-entrega-e3--api-crud-documentada) no fim |
+| [Projeto](../../avaliacao/) | Etapa 2 · critérios 2 e 3 · Etapa 3 · blocos B e C. |
+| Etapas ➕ opcionais | 14, 15 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -73,8 +81,8 @@ etapas. As três primeiras partem do `POST` que passou no M06 e não deveria.
 | 11 | [O controller completo](#etapa-11--o-controller-completo) | longa | as cinco rotas |
 | 12 | [**Escolher o status certo**](#etapa-12--escolher-o-status-certo) | média | **201, 204, 400, 404** |
 | 13 | [**Erros no formato do domínio**](#etapa-13--erros-no-formato-do-domínio) | curta | exceções do Nest |
-| 14 | [Upload: receber o arquivo](#etapa-14--upload-receber-o-arquivo) | longa | `multipart`, `FileInterceptor` |
-| 15 | [**Upload: as três decisões**](#etapa-15--upload-as-três-decisões) | longa | **segurança de arquivo** |
+| 14 | [Upload: receber o arquivo](#etapa-14--upload-receber-o-arquivo) ➕ | longa | `multipart`, `FileInterceptor` |
+| 15 | [**Upload: as três decisões**](#etapa-15--upload-as-três-decisões) ➕ | longa | **segurança de arquivo** |
 | 16 | [Regerar o contrato](#etapa-16--regerar-o-contrato) | média | OpenAPI com formatos |
 | 17 | [**As quatro camadas**](#etapa-17--as-quatro-camadas) | média | **fecho do backend** |
 | 18 | [O que vai para o projeto](#etapa-18--o-que-vai-para-o-projeto) | curta | — |
@@ -781,6 +789,8 @@ Cada uma vira o status certo, com corpo JSON padronizado, sem você escrever nú
 
 ## Etapa 14 — Upload: receber o arquivo
 
+> ➕ **Opcional**, exceto se o seu projeto recebe arquivos: aí a Etapa 3 (D4) cobra upload validado por conteúdo.
+
 Toda obra tem capa. Upload é requisito comum em CRUD — e um dos mais mal feitos.
 
 **Faça:**
@@ -838,6 +848,8 @@ curl.exe -s -o NUL -w "%{http_code}`n" -X POST http://localhost:3000/api/obras/1
 ---
 
 ## Etapa 15 — Upload: as três decisões
+
+> ➕ **Opcional**, exceto se o seu projeto recebe arquivos: aí a Etapa 3 (D4) cobra upload validado por conteúdo.
 
 O código da etapa 14 funciona e ainda é inseguro. Três decisões que ninguém toma por você.
 
@@ -1068,6 +1080,22 @@ no controller ou no service?
 - [ ] `/api/docs` completo, com os caminhos de erro documentados
 - [ ] `openapi.json` regerado e versionado
 - [ ] Você sabe explicar *mass assignment* e as duas coisas que o impedem
+
+## 📦 Entrega E3 — API CRUD documentada
+
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
+
+- [ ] CRUD de 2+ recursos
+- [ ] DTOs de entrada (com `whitelist`) e de saída separados
+- [ ] Status corretos: 201, 204, 400, 404 e 409/422
+- [ ] Paginação com teto
+- [ ] `/api/docs` com os erros documentados
+
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- Upload de capa validado por conteúdo (etapas 14 e 15)
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 🧪 Exercícios
 

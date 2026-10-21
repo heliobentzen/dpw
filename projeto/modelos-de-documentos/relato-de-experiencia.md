@@ -1,6 +1,8 @@
 # Relato de Experiência — dimensão extensionista
 
-> Etapa 3 / Extensão (X3) · 2 a 3 páginas · Compõe a seção 11 do relatório técnico.
+> Extensão (X3) · 2 a 3 páginas · Pode compor a seção 11 do relatório técnico.
+>
+> 📌 **Cobrado em:** Extensão, critério 4 — relato concreto, o que a comunidade ensinou e o que a equipe faria diferente. Seções marcadas ➕ não são avaliadas.
 
 O relato de experiência **não** é resumo do que o sistema faz. É a reflexão sobre a
 interação com a comunidade: o que se esperava, o que se encontrou, o que mudou nos dois
@@ -68,7 +70,7 @@ problemas que deixaram de ocorrer.
 O sistema continua funcionando? Quem opera? Quem mantém? Qual o custo? O que acontece se
 a equipe não puder mais dar suporte? A organização tem autonomia sobre os próprios dados?
 
-### 7. Aprendizados individuais
+### 7. Aprendizados individuais · ➕ opcional
 
 Cada integrante escreve 3 a 5 linhas, assinadas, sobre o que aprendeu — técnica e
 humanamente. Não são depoimentos protocolares; são reflexões.
@@ -99,7 +101,7 @@ humanamente. Não são depoimentos protocolares; são reflexões.
 - Fotos com pessoas identificáveis exigem autorização de uso de imagem por escrito.
 - Não reproduza dados de beneficiários da organização em nenhuma hipótese.
 
-## Leitura recomendada
+## Leitura recomendada · ➕ opcional
 
 FREIRE, Paulo. **Extensão ou comunicação?** Rio de Janeiro: Paz e Terra, 1977.
 

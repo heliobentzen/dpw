@@ -1,7 +1,7 @@
 # Windows — referência de comandos
 
 **Este arquivo é de consulta, não de instalação.** Para montar o ambiente, siga
-[`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md), que é um guia
+[`../docs/ambiente-setup.md`](../docs/ambiente-setup.md), que é um guia
 completo e independente, do zero até os dois servidores rodando.
 
 Use **este** arquivo durante o curso, quando um roteiro trouxer um comando em formato
@@ -10,7 +10,7 @@ as armadilhas em detalhe (seções 2 e 4).
 
 | Preciso de… | Vá para |
 | --- | --- |
-| Instalar Node, Git, Docker | [`../docs/ambiente-setup-windows.md`](../docs/ambiente-setup-windows.md) |
+| Instalar Node, Git, Docker | [`../docs/ambiente-setup.md`](../docs/ambiente-setup.md) |
 | Traduzir um comando do roteiro | [seção 3](#3-tabela-de-equivalências) deste arquivo |
 | Entender por que algo quebrou | [seção 2](#2-as-cinco-armadilhas-que-não-são-tradução) deste arquivo |
 | Instalar o WSL2 | [seção 1.1](#instalar-o-wsl2-opcional) deste arquivo |

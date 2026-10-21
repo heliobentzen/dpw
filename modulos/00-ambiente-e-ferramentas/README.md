@@ -5,6 +5,14 @@
 Módulo complementar: a ementa não pede, mas sem ele nada funciona. Pode virar
 pré-atividade assíncrona.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | nenhuma entrega neste módulo |
+| [Projeto](../../avaliacao/) | Etapa 3 · G2 — fluxo Git com branches, PRs e revisão. |
+| Etapas ➕ opcionais | nenhuma: todas sustentam algo que é avaliado |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -155,16 +163,11 @@ Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajust
 Só três coisas hoje: **Node 24 (LTS), Git e VS Code**. Docker e PostgreSQL entram no M04, quando
 passam a servir para alguma coisa. Instalar tudo agora só antecipa problemas.
 
-Siga o guia do **seu** sistema. Eles são independentes: você abre um só.
+Siga o [guia de ambiente](../../docs/ambiente-setup.md), **passos 0 a 6**. Ele serve aos três
+sistemas: onde o comando muda, mostra o bloco 🪟 Windows e o bloco 🐧 Linux e macOS lado a lado.
 
-| Seu sistema | Guia | O que fazer hoje |
-| --- | --- | --- |
-| 🪟 **Windows** | [`docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) | Passos 0 a 5 |
-| 🐧 **Linux** / 🍎 **macOS** | [`docs/ambiente-setup.md`](../../docs/ambiente-setup.md) | Seções 3 a 5 |
-| 🪟→🐧 **WSL2** | instale o WSL2 pelo passo 7.1 do guia Windows, depois siga o guia **Linux** dentro do Ubuntu | — |
-
-> 🪟 **Quem está no Windows não deve seguir o guia Linux "adaptando".** Metade dos problemas
-> da primeira semana vem daí. O guia próprio existe para você não precisar traduzir nada.
+> 🪟 **No Windows, não "adapte" comandos de Linux.** Use sempre o bloco 🪟 do guia: metade
+> dos problemas da primeira semana vem dessa adaptação.
 
 **Deu certo se:** os quatro comandos abaixo respondem uma versão.
 
@@ -481,13 +484,13 @@ dependem de um arquivo que precisa estar no Git. O seu README de hoje já cobre 
 
 🪟 **Erros de Windows** (política de execução bloqueando o `npm`, OneDrive travando o Git,
 `Filename too long` no `node_modules`) estão catalogados em
-[`docs/ambiente-setup-windows.md`, passo 11](../../docs/ambiente-setup-windows.md#passo-11--erros-e-diagnóstico).
+[`docs/ambiente-setup.md`, passo 10](../../docs/ambiente-setup.md#passo-10--erros-e-diagnóstico).
 
 ## ✅ Checklist de saída
 
 - [ ] `node verifica-ambiente.mjs` termina com "Ambiente da etapa M00 pronto"
 - [ ] `npm install` roda sem erro na raiz
-- [ ] `package.json` com `"private": true` e `workspaces` declarando os três projetos
+- [ ] `package.json` com `"private": true` e `workspaces` declarando `backend` e `pacotes/*`
 - [ ] Repositório `bibliocom` no GitHub, com `.gitignore`, `.gitattributes` e `README.md`
 - [ ] 🪟 Windows: terminal escolhido, projeto em `C:\dev` (fora do OneDrive), `core.autocrlf input`
       e `core.longpaths` habilitado
@@ -507,5 +510,5 @@ Ver [`exercicios.md`](exercicios.md).
 - [Conventional Commits](https://www.conventionalcommits.org/pt-br/)
 - [npm — workspaces](https://docs.npmjs.com/cli/using-npm/workspaces)
 - [Node.js — resolução de módulos](https://nodejs.org/api/modules.html#all-together)
-- 🪟 [`../../docs/ambiente-setup-windows.md`](../../docs/ambiente-setup-windows.md) — setup completo do Windows, passo a passo
+- [`../../docs/ambiente-setup.md`](../../docs/ambiente-setup.md) — setup completo, Windows, Linux e macOS
 - 🪟 [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md) — tabela de equivalências, para consulta durante o curso

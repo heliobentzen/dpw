@@ -1,6 +1,9 @@
 # M04 — Exercícios
 
-## E04.1 — Escolher a coluna certa (individual)
+> **O que é cobrado.** Entrega **E1** do [portfólio](../../avaliacao/rubrica-portfolio.md): entidades com 1-N e N-N, diagrama ER, `onDelete` justificado e *seed*. O E04.2 treina a justificativa do `onDelete`.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E04.1 — Escolher a coluna certa (individual) · ➕ opcional
 
 Para cada dado, indique o `@Column` completo e justifique:
 
@@ -23,7 +26,7 @@ base legal na LGPD, discuta antes de modelar.
 
 ---
 
-## E04.2 — `onDelete` como decisão de negócio (individual)
+## E04.2 — `onDelete` como decisão de negócio (individual) · 📌 cobrado
 
 | Relação | `onDelete` | Justificativa **de negócio** (não técnica) |
 |---|---|---|
@@ -38,7 +41,7 @@ Uma justificativa técnica ("para não dar erro de chave estrangeira") **não va
 
 ---
 
-## E04.3 — Modelar reservas (em duplas) ⭐
+## E04.3 — Modelar reservas (em duplas) ⭐ · ➕ opcional
 
 Uma associada reserva uma **obra** (não um exemplar) e entra numa fila. Quando um exemplar
 volta, a primeira da fila é avisada e tem 48h para retirar.
@@ -59,7 +62,7 @@ Depois responda:
 
 ---
 
-## E04.4 — Ler o schema gerado (individual)
+## E04.4 — Ler o schema gerado (individual) · ➕ opcional
 
 Rode a aplicação com `logging: true` e responda **olhando o SQL**:
 
@@ -71,7 +74,7 @@ Rode a aplicação com `logging: true` e responda **olhando o SQL**:
 
 ---
 
-## E04.5 — O limite do `synchronize` (individual)
+## E04.5 — O limite do `synchronize` (individual) · ➕ opcional
 
 Com dados no banco, tente cada mudança e anote o que acontece:
 
@@ -88,7 +91,7 @@ justificativa do M05** — guarde-a.
 
 ---
 
-## E04.6 — Índice sob medida (individual)
+## E04.6 — Índice sob medida (individual) · ➕ opcional
 
 Estas consultas vão existir no M06:
 

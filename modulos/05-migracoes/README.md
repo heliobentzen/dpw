@@ -7,6 +7,14 @@ arquivos versionados — como se altera um banco que tem dado dentro.
 
 > A teoria vem quando o código pede: as etapas 1, 6, 9 e 11 são de leitura e raciocínio.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | nenhuma entrega neste módulo |
+| [Projeto](../../avaliacao/) | Etapa 2 · pré-requisito (migrações sem erro) · Etapa 3 · A4 (migrações). |
+| Etapas ➕ opcionais | 9, 12 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -68,10 +76,10 @@ etapas curtas.
 | 6 | [**Ler a migração gerada**](#etapa-6--ler-a-migração-gerada) | média | **anatomia de uma migração** |
 | 7 | [Uma coluna nova](#etapa-7--uma-coluna-nova) | média | o ciclo completo |
 | 8 | [Reverter](#etapa-8--reverter) | média | `down`, e por que testá-lo |
-| 9 | [**A mesma destruição, agora visível**](#etapa-9--a-mesma-destruição-agora-visível) | média | **o argumento do módulo** |
+| 9 | [**A mesma destruição, agora visível**](#etapa-9--a-mesma-destruição-agora-visível) ➕ | média | **o argumento do módulo** |
 | 10 | [Migração de dados](#etapa-10--migração-de-dados) | média | `create` vs `generate` |
 | 11 | [**Expandir e contrair**](#etapa-11--expandir-e-contrair) | média | **deploy sem downtime** |
-| 12 | [Expandir e contrair na prática](#etapa-12--expandir-e-contrair-na-prática) | média | quatro migrações |
+| 12 | [Expandir e contrair na prática](#etapa-12--expandir-e-contrair-na-prática) ➕ | média | quatro migrações |
 | 13 | [O banco nasce do zero](#etapa-13--o-banco-nasce-do-zero) | curta | `--check`, README |
 
 ---
@@ -422,6 +430,8 @@ plano de retorno — e não se descobre isso com o sistema fora do ar.
 
 ## Etapa 9 — A mesma destruição, agora visível
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 O argumento inteiro do módulo, em poucos minutos.
 
 **Faça:** repita a provocação da etapa 16 do M04 — encurte a `biografia` da `Autor`:
@@ -591,6 +601,8 @@ sem downtime?"* é pergunta clássica de entrevista pleno. A resposta é esta et
 
 ## Etapa 12 — Expandir e contrair na prática
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 Agora é com você. Renomeie `Obra.sinopse` para `Obra.resumo` **sem perder dados e sem janela
 em que o sistema quebre**.
 
@@ -720,6 +732,8 @@ inexistente. Errou? **Crie uma migração nova** que corrige.
 - [ ] Você sabe explicar por que expandir/contrair existe mesmo com o `RENAME` disponível
 
 ## 📦 Entrega do módulo
+
+> ➕ **Opcional.** Este módulo não tem entrega no portfólio; o que ele produz é cobrado no projeto (ver o quadro no início).
 
 O histórico de migrações do BiblioCom no repositório, uma explicação curta das decisões
 destrutivas ou não reversíveis (etapas 9, 10 e 12) e a evidência de que o esquema nasce do

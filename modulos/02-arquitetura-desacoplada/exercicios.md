@@ -1,6 +1,9 @@
 # M02 — Exercícios
 
-## E02.1 — Escolher a arquitetura (individual)
+> **O que é cobrado.** Nenhuma entrega de portfólio. O E02.3 vira o **rascunho do contrato** da Etapa 1 (critério 5).
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E02.1 — Escolher a arquitetura (individual) · ➕ opcional
 
 Para cada sistema, escolha **MPA**, **API + clientes** ou **renderização no servidor com API** (híbrido) e justifique em 3
 linhas, citando os requisitos que pesaram:
@@ -21,7 +24,7 @@ a escolher por hábito; 5 exige pensar em como o buscador enxerga a página.
 
 ---
 
-## E02.2 — Corrigir um contrato ruim (individual)
+## E02.2 — Corrigir um contrato ruim (individual) · ➕ opcional
 
 Este contrato tem **pelo menos 10 problemas**. Aponte cada um e reescreva:
 
@@ -56,7 +59,7 @@ não estruturado e status mentiroso.
 
 ---
 
-## E02.3 — Contrato do projeto da equipe (em equipe) ⭐
+## E02.3 — Contrato do projeto da equipe (em equipe) ⭐ · 📌 cobrado
 
 Escreva o contrato de API do **projeto da sua equipe** (tema definido na Etapa 1), em
 `docs/contrato-api.md`:
@@ -74,7 +77,7 @@ sem fazer nenhuma pergunta a vocês. Testem isso de verdade — troquem os docum
 
 ---
 
-## E02.4 — Desenhar em C4 (individual)
+## E02.4 — Desenhar em C4 (individual) · ➕ opcional
 
 Escolha dois sistemas do E02.1 — um que você classificou como MPA e um como API + clientes —
 e desenhe, em Mermaid, os níveis **1 (Contexto)** e **2 (Contêineres)** de cada um.
@@ -89,7 +92,7 @@ Responda: o que muda no nível 2 entre os dois sistemas? E no nível 1, muda alg
 
 ---
 
-## E02.5 — O contrato quebrado (em duplas)
+## E02.5 — O contrato quebrado (em duplas) · ➕ opcional
 
 Simule o problema que a arquitetura desacoplada cria:
 
@@ -106,9 +109,9 @@ teste de contrato)
 
 ---
 
-## E02.6 — Custo da arquitetura (individual, discursivo)
+## E02.6 — Custo da arquitetura (individual, discursivo) · ➕ opcional
 
-Leia a seção **Escopo** do [projeto integrador](../../projeto/README.md#escopo): a disciplina
+Leia a seção **O que o sistema precisa ter** do [projeto integrador](../../projeto/README.md#o-que-o-sistema-precisa-ter): a disciplina
 entrega **só a API**, sem interface web. Responda:
 
 1. O que fica de fora do curso por causa dessa escolha?

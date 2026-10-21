@@ -1,6 +1,8 @@
 # Backlog e Histórias de Usuário
 
 > Etapa 1 · Mantenha o backlog no GitHub Projects (issues) e este arquivo como espelho
+>
+> 📌 **Cobrado em:** Etapa 1, critério 4 — histórias com critérios de aceite, estimadas e priorizadas (MoSCoW). O histórico de mudanças conta na Etapa 3 (G3). Seções marcadas ➕ não são avaliadas.
 > versionado. Se divergirem, vale o quadro.
 
 ## Visão geral
@@ -97,7 +99,7 @@ H05 (cadastro de moradores)
 
 ---
 
-## Capacidade da equipe
+## Capacidade da equipe · ➕ opcional
 
 | Sprint | Semanas | Capacidade (pontos) | Comprometido | Entregue |
 | --- | --- | ---: | ---: | ---: |

@@ -9,6 +9,14 @@ em segundos, e no GitHub a cada *pull request*.
 > **A teoria não está num bloco separado.** Ela está nas etapas 2, 5, 7 e 11 — em que a
 > gente para de digitar e pensa — mais as explicações dentro de cada etapa.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E6** — ver [📦 Entrega E6](#-entrega-e6--suíte-de-testes-verde-no-ci) no fim |
+| [Projeto](../../avaliacao/) | Etapa 3 · bloco E (qualidade e testes). |
+| Etapas ➕ opcionais | 9 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -70,7 +78,7 @@ Mesmo formato dos anteriores.
 | 6 | [O service sob teste](#etapa-6--o-service-sob-teste) | curta | a versão de referência |
 | 7 | [**Dublês de teste**](#etapa-7--dublês-de-teste) | média | **por que não usar o banco** |
 | 8 | [Testar o service](#etapa-8--testar-o-service) | longa | `vi.fn`, `getRepositoryToken` |
-| 9 | [Uma tabela de casos](#etapa-9--uma-tabela-de-casos) | curta | `it.each` |
+| 9 | [Uma tabela de casos](#etapa-9--uma-tabela-de-casos) ➕ | curta | `it.each` |
 | 10 | [O relógio](#etapa-10--o-relógio) | curta | `vi.setSystemTime` |
 | 11 | [**Da regra à API**](#etapa-11--da-regra-à-api) | média | **a mesma montagem do `main.ts`** |
 | 12 | [Um banco só para testes](#etapa-12--um-banco-só-para-testes) | média | `globalSetup`, migrações |
@@ -456,6 +464,8 @@ describe("EmprestimosService.emprestar", () => {
 ---
 
 ## Etapa 9 — Uma tabela de casos
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
 
 Os limites são onde as regras quebram: 2 empréstimos pode, 3 não pode. Em vez de um `it` por
 número, uma **tabela**.
@@ -1081,11 +1091,20 @@ uma de 100% que testa *getters*.
 - [ ] `npm run lint` sem avisos
 - [ ] CI verde no GitHub, rodando lint, build, migrações, unitários e E2E
 
-## 📦 Entrega E6
+## 📦 Entrega E6 — Suíte de testes verde no CI
 
-A suíte de testes no repositório, com o CI verde no GitHub. No README, um *badge* do CI e uma
-seção **Testes** dizendo como rodar cada nível. Para o *badge*, use o endereço
-`https://github.com/<usuario>/<repositorio>/actions/workflows/ci.yml/badge.svg`.
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
+
+- [ ] Testes e2e (Vitest + Supertest) de regra de negócio, validação e acesso
+- [ ] CI rodando lint e testes
+- [ ] *Badge* do CI no README: `https://github.com/<usuario>/<repositorio>/actions/workflows/ci.yml/badge.svg`
+
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- Testes unitários com dublês e a tabela de casos (etapas 7 a 9)
+- Relatório de cobertura (etapa 16)
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 🧩 Desafio de fixação
 

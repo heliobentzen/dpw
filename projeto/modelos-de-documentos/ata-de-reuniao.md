@@ -1,6 +1,8 @@
 # Ata de Reunião
 
 > Use para **toda** reunião com a organização parceira e para as reuniões de decisão da
+>
+> 📌 **Cobrado em:** Etapa 1, pré-requisito (conversa com a organização) e extensão (diagnóstico e devolutiva registrados). Seções marcadas ➕ não são avaliadas.
 > equipe. Ata curta e imediata vale mais que ata completa escrita três dias depois.
 > Arquive em `docs/atas/AAAA-MM-DD-assunto.md`.
 
@@ -55,7 +57,7 @@
 | 1 | | | | Pendente |
 | 2 | | | | Pendente |
 
-### Pendências da reunião anterior
+### Pendências da reunião anterior · ➕ opcional
 
 | # | O que | Quem | Situação |
 |---|---|---|---|
@@ -75,7 +77,7 @@
 
 ---
 
-## Roteiro: reunião de diagnóstico (Etapa 1 / semana 14)
+## Roteiro: reunião de diagnóstico (Etapa 1 e extensão)
 
 1. Como esse processo funciona hoje, do começo ao fim?
 2. Quem participa? Quantas pessoas? Com que frequência?
@@ -85,7 +87,7 @@
 6. Quem usaria o sistema? Que equipamento e internet existem no local?
 7. Quem manteria o sistema depois da entrega?
 
-## Roteiro: reunião de validação (a cada sprint)
+## Roteiro: reunião de validação (a cada sprint) · ➕ opcional
 
 1. Demonstração do que ficou pronto (sem slides — o sistema)
 2. Isso resolve o que vocês esperavam? O que está diferente do imaginado?

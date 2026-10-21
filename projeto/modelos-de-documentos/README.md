@@ -1,23 +1,24 @@
 # Modelos de documentos
 
-Modelos prontos para as entregas do projeto. Cada um reflete exatamente o que a rubrica
-correspondente avalia — use-os como lista de verificação, não só como formatação.
+Modelos prontos para as entregas do projeto. A coluna **Rubrica** diz onde cada um é avaliado;
+os marcados ➕ são **opcionais** (ferramentas de trabalho que nenhuma rubrica pontua). Dentro
+de cada modelo, as seções ➕ também são opcionais.
 
-| Documento | Quando | Entrega |
+| Documento | Quando | Rubrica |
 | --- | --- | --- |
-| [Canvas do projeto](canvas-do-projeto.md) | Etapa 1 | P1 |
-| [Termo de abertura](termo-de-abertura.md) | Etapa 1 | P1 |
-| [Carta de anuência](carta-de-anuencia.md) | Etapa 1 | P1 |
-| [Ata de reunião](ata-de-reuniao.md) | Todas | P1–P3, X1–X3 |
-| [Contrato de equipe](contrato-de-equipe.md) | Etapa 1 | P1 |
-| [Backlog e histórias](backlog-e-historias.md) | Etapa 1 | P1 |
-| [Matriz de riscos](matriz-de-riscos.md) | Etapa 1 | P1 |
-| [ADR](adr.md) | Etapas 1–2 | P1, P2 |
-| [Plano de teste](plano-de-teste.md) | Etapa 2 | P2 |
-| [Relatório técnico](relatorio-tecnico.md) | Etapa 3 | P3 |
-| [Relato de experiência](relato-de-experiencia.md) | Etapa 3 / Extensão | P3, X3 |
-| [Avaliação por pares](avaliacao-por-pares.md) | Etapa 3 | P3 |
-| [Termo de transferência](termo-de-transferencia.md) | Etapa 3 | P3 |
+| ➕ [Canvas do projeto](canvas-do-projeto.md) | Etapa 1 | — (ferramenta de trabalho) |
+| ➕ [Termo de abertura](termo-de-abertura.md) | Etapa 1 | — |
+| [Carta de anuência](carta-de-anuencia.md) | Etapa 1 | Etapa 1 · pré-requisito |
+| [Ata de reunião](ata-de-reuniao.md) | Todas | Etapa 1 · pré-requisito; extensão |
+| [Contrato de equipe](contrato-de-equipe.md) | Etapa 1 | Etapa 1 · pré-requisito |
+| [Backlog e histórias](backlog-e-historias.md) | Etapa 1 | Etapa 1 · critério 4 |
+| [Matriz de riscos](matriz-de-riscos.md) | Etapa 1 | Etapa 1 · critério 6 |
+| [ADR](adr.md) | Etapas 1 e 3 | Etapa 1 · critério 5; Etapa 4 · critério 1 |
+| [Plano de teste](plano-de-teste.md) | Etapa 3 | Etapa 3 · E1, E2, E4 (seções 2, 3 e 5) |
+| [Relatório técnico](relatorio-tecnico.md) | Etapa 4 | Etapa 4 · critérios 1 a 3 |
+| [Relato de experiência](relato-de-experiencia.md) | Extensão | Extensão · critério 4 |
+| [Avaliação por pares](avaliacao-por-pares.md) | Etapa 4 | Etapa 4 · pré-requisito |
+| [Termo de transferência](termo-de-transferencia.md) | Etapa 4 | Etapa 4 · critério 6 |
 
 ## Onde guardar
 

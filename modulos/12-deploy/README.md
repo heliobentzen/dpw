@@ -10,6 +10,14 @@ projeto vem depois, quando o caminho já não tem surpresa.
 > **A teoria não está num bloco separado.** Ela está nas etapas 1, 5 e 14 — em que a gente
 > para de digitar e pensa — mais as explicações dentro de cada etapa.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E8** — ver [📦 Entrega E8](#-entrega-e8--api-em-produção) no fim |
+| [Projeto](../../avaliacao/) | Etapa 3 · bloco F (implantação) e a eliminatória "backend no ar". |
+| Etapas ➕ opcionais | 6, 8, 14 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -67,15 +75,15 @@ código e ensaiam o deploy. Só a partir da 9 entra a plataforma.
 | 3 | [O que o servidor roda](#etapa-3--o-que-o-servidor-roda) | curta | scripts de produção |
 | 4 | [A porta e o endereço](#etapa-4--a-porta-e-o-endereço) | curta | `PORT`, `0.0.0.0` |
 | 5 | [**Atrás do proxy**](#etapa-5--atrás-do-proxy) | média | **`trust proxy`, cookie `Secure`** |
-| 6 | [Sessões que sobrevivem](#etapa-6--sessões-que-sobrevivem) | média | `connect-pg-simple` |
+| 6 | [Sessões que sobrevivem](#etapa-6--sessões-que-sobrevivem) ➕ | média | `connect-pg-simple` |
 | 7 | [Um endpoint de saúde](#etapa-7--um-endpoint-de-saúde) | curta | `/api/health` |
-| 8 | [Ensaio geral](#etapa-8--ensaio-geral) | média | produção na sua máquina |
+| 8 | [Ensaio geral](#etapa-8--ensaio-geral) ➕ | média | produção na sua máquina |
 | 9 | [O banco gerenciado](#etapa-9--o-banco-gerenciado) | curta | URL interna e externa |
 | 10 | [O serviço da API](#etapa-10--o-serviço-da-api) | média | build, start, variáveis |
 | 11 | [O primeiro usuário](#etapa-11--o-primeiro-usuário) | curta | `seed:admin` remoto |
 | 12 | [Verificar o que está no ar](#etapa-12--verificar-o-que-está-no-ar) | curta | checklist de deploy |
 | 13 | [Deploy contínuo](#etapa-13--deploy-contínuo) | curta | `main` → produção |
-| 14 | [**Mudar o que já está no ar**](#etapa-14--mudar-o-que-já-está-no-ar) | média | **ordem, compatibilidade, reversão** |
+| 14 | [**Mudar o que já está no ar**](#etapa-14--mudar-o-que-já-está-no-ar) ➕ | média | **ordem, compatibilidade, reversão** |
 | 15 | [O roteiro de deploy](#etapa-15--o-roteiro-de-deploy) | curta | `docs/deploy.md` |
 
 ---
@@ -247,6 +255,8 @@ Remove-Item Env:\NODE_ENV
 
 ## Etapa 6 — Sessões que sobrevivem
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 A sessão do M08 mora na memória do processo. Em produção, o processo é **descartável**: a
 plataforma o reinicia a cada deploy, quando ele "dorme" por falta de uso, ou quando decide
 movê-lo de máquina. A cada reinício, todo mundo é deslogado. E com duas instâncias da API,
@@ -380,6 +390,8 @@ E registre-o no `AppModule`: `controllers: [AppController, SaudeController]`.
 ---
 
 ## Etapa 8 — Ensaio geral
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
 
 Antes de subir para a plataforma, suba **como a plataforma vai subir** — banco vazio,
 código compilado, variáveis de produção. Este passo economiza a maior parte da depuração
@@ -599,6 +611,8 @@ descrição nova.
 
 ## Etapa 14 — Mudar o que já está no ar
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 O primeiro deploy é o fácil: não havia nada antes. Os seguintes acontecem com usuários
 usando, e com dados dentro.
 
@@ -704,10 +718,21 @@ cedo, e o do projeto vem depois — quando o caminho já foi percorrido uma vez 
 - [ ] Backup automático ligado
 - [ ] `docs/deploy.md` reproduzível por outra pessoa
 
-## 📦 Entrega E8
+## 📦 Entrega E8 — API em produção
 
-A URL pública da API e o `docs/deploy.md`, com o diagrama, o passo a passo, as variáveis
-(sem os valores secretos), a verificação, o plano de reversão e as decisões tomadas.
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
+
+- [ ] URL pública com HTTPS
+- [ ] `/health` verificando o banco
+- [ ] Migrações aplicadas em produção
+- [ ] `docs/deploy.md` que outra pessoa consegue seguir
+
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- Sessões no banco (etapa 6)
+- Plano de reversão para mudanças incompatíveis (etapa 14)
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 🧩 Desafio de fixação
 

@@ -1,6 +1,9 @@
 # M05 — Exercícios
 
-## E05.1 — Ler antes de aplicar (individual)
+> **O que é cobrado.** Nenhuma entrega de portfólio. As migrações são cobradas no projeto (Etapa 2, pré-requisito; Etapa 3, A4) a partir do roteiro.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E05.1 — Ler antes de aplicar (individual) · ➕ opcional
 
 Gere uma migração para cada mudança, **abra o arquivo** e responda sem aplicar:
 
@@ -17,7 +20,7 @@ os valores repetidos — ou com os vazios?
 
 ---
 
-## E05.2 — Campo obrigatório numa tabela com dados (individual) ⭐
+## E05.2 — Campo obrigatório numa tabela com dados (individual) ⭐ · ➕ opcional
 
 A biblioteca passa a exigir `Associado.telefone`. A tabela já tem associados cadastrados.
 
@@ -35,7 +38,7 @@ A biblioteca passa a exigir `Associado.telefone`. A tabela já tem associados ca
 
 ---
 
-## E05.3 — Migração de dados com `down` honesto (individual)
+## E05.3 — Migração de dados com `down` honesto (individual) · ➕ opcional
 
 Crie uma migração **vazia** (`migration:create`) que:
 
@@ -51,7 +54,7 @@ Crie uma migração **vazia** (`migration:create`) que:
 
 ---
 
-## E05.4 — O que o rollback não desfaz (individual)
+## E05.4 — O que o rollback não desfaz (individual) · ➕ opcional
 
 1. Aplique, num banco descartável, a migração de dados do E05.3.
 2. Reverta-a e aplique de novo.
@@ -60,7 +63,7 @@ Crie uma migração **vazia** (`migration:create`) que:
 
 ---
 
-## E05.5 — Expandir e contrair (em duplas) ⭐⭐
+## E05.5 — Expandir e contrair (em duplas) ⭐⭐ · ➕ opcional
 
 Renomeiem `Autor.nacionalidade` para `Autor.pais` sem perder dados, em quatro passos
 (três migrações e um deploy). Ao final, revertam tudo e confiram os dados.
@@ -74,7 +77,7 @@ Respondam por escrito:
 
 ---
 
-## E05.6 — Conflito de migração (em duplas)
+## E05.6 — Conflito de migração (em duplas) · ➕ opcional
 
 Simulem o que acontece toda semana num time real:
 
@@ -94,7 +97,7 @@ Respondam:
 
 ---
 
-## E05.7 — Recuperar um banco quebrado (individual)
+## E05.7 — Recuperar um banco quebrado (individual) · ➕ opcional
 
 Provoque e resolva:
 
@@ -105,7 +108,7 @@ Provoque e resolva:
 
 ---
 
-## E05.8 — O banco de outra pessoa (em duplas)
+## E05.8 — O banco de outra pessoa (em duplas) · ➕ opcional
 
 Escrevam, no README, o roteiro que leva de **um clone vazio** até a API respondendo: criar o
 banco, aplicar todas as migrações e subir a aplicação. Depois troquem de computador: a outra
@@ -119,7 +122,7 @@ pessoa segue **só** o roteiro, sem perguntar nada.
 
 ---
 
-## E05.9 — O que o ORM não abstrai (individual)
+## E05.9 — O que o ORM não abstrai (individual) · ➕ opcional
 
 Abra a migração `Inicial` e cace, no SQL, tudo que é **específico do PostgreSQL**. Comece
 por estes e procure outros:

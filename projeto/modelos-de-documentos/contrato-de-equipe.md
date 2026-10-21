@@ -1,6 +1,8 @@
 # Contrato de Equipe
 
 > Etapa 1 · Acordo interno, assinado por todos. Revisar ao fim de cada sprint.
+>
+> 📌 **Cobrado em:** Etapa 1, pré-requisito — integrantes, papéis e *Definition of Done*, assinados por todos. Seções marcadas ➕ não são avaliadas.
 > **Regra:** nada de frases genéricas. Cada resposta precisa ser verificável.
 
 **Equipe:** `<nome>` · **Data:** `<AAAA-MM-DD>` · **Revisão nº:** `<1>`
@@ -19,7 +21,7 @@ Seja honesto. Um número inflado aqui vira crise na semana 18.
 | | | | |
 | **Total da equipe** | | | |
 
-## 2. Comunicação
+## 2. Comunicação · ➕ opcional
 
 | Item | Acordo |
 | --- | --- |
@@ -29,7 +31,7 @@ Seja honesto. Um número inflado aqui vira crise na semana 18.
 | Horário em que **não** se cobra resposta | |
 | Onde ficam as decisões registradas | |
 
-## 3. Reuniões
+## 3. Reuniões · ➕ opcional
 
 | Reunião | Quando | Duração | Formato | Quem conduz |
 | --- | --- | --- | --- | --- |
@@ -49,7 +51,7 @@ Seja honesto. Um número inflado aqui vira crise na semana 18.
 | 3 | | | | |
 | 4 | | | | |
 
-## 5. Fluxo de trabalho técnico
+## 5. Fluxo de trabalho técnico · ➕ opcional
 
 | Item | Acordo |
 | --- | --- |
@@ -74,7 +76,7 @@ Uma tarefa só está pronta quando:
 - [ ] Documentação atualizada, se aplicável
 - [ ]
 
-## 7. Decisões
+## 7. Decisões · ➕ opcional
 
 | Situação | Como decidimos |
 | --- | --- |
@@ -85,7 +87,7 @@ Uma tarefa só está pronta quando:
 
 Decisões técnicas relevantes viram **ADR** no repositório.
 
-## 8. Conflitos e não entregas
+## 8. Conflitos e não entregas · ➕ opcional
 
 | Situação | O que fazemos |
 | --- | --- |
@@ -95,7 +97,7 @@ Decisões técnicas relevantes viram **ADR** no repositório.
 | Alguém sumiu por mais de 1 semana | |
 | Quando envolvemos o(a) docente | |
 
-## 9. Qualidade
+## 9. Qualidade · ➕ opcional
 
 Combinamos que **não** entregamos:
 
@@ -119,7 +121,7 @@ ele pode ser revisado ao fim de cada sprint por consenso.
 
 ---
 
-## Histórico de revisões
+## Histórico de revisões · ➕ opcional
 
 | Data | O que mudou | Motivo |
 |---|---|---|

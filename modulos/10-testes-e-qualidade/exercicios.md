@@ -1,6 +1,9 @@
 # M10 — Exercícios
 
-## E10.1 — Testar a busca de obras (individual)
+> **O que é cobrado.** Entrega **E6** do [portfólio](../../avaliacao/rubrica-portfolio.md): testes e2e de regra, validação e acesso; CI com lint e testes; badge no README.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E10.1 — Testar a busca de obras (individual) · ➕ opcional
 
 O `AcervoService.buscar` do M06 (etapa 12) monta a consulta conforme os filtros recebidos.
 
@@ -15,7 +18,7 @@ O `AcervoService.buscar` do M06 (etapa 12) monta a consulta conforme os filtros 
 
 ---
 
-## E10.2 — Matriz completa (individual) ⭐
+## E10.2 — Matriz completa (individual) ⭐ · 📌 cobrado
 
 Acrescente à matriz da etapa 14 **todas** as rotas da sua API — inclusive as de exemplares
 do exercício E08.2 e o `GET /api/usuarios/:id` do M09.
@@ -28,7 +31,7 @@ do exercício E08.2 e o `GET /api/usuarios/:id` do M09.
 
 ---
 
-## E10.3 — Teste de mutação à mão (em duplas)
+## E10.3 — Teste de mutação à mão (em duplas) · ➕ opcional
 
 Uma pessoa faz **uma** mudança pequena no código de produção sem contar qual: troca um `>=`
 por `>`, um `404` por `400`, apaga um `@UseGuards`. A outra roda as suítes.
@@ -42,7 +45,7 @@ escrevam o teste que pegaria.
 
 ---
 
-## E10.4 — Desafio de fixação, implementado (individual) ⭐
+## E10.4 — Desafio de fixação, implementado (individual) ⭐ · ➕ opcional
 
 Implemente a regra do desafio de fixação — associado com empréstimo atrasado não pega mais
 nada — **começando pelos testes**:
@@ -57,7 +60,7 @@ nada — **começando pelos testes**:
 
 ---
 
-## E10.5 — O limite de tentativas (individual)
+## E10.5 — O limite de tentativas (individual) · ➕ opcional
 
 A etapa 13 desligou o *throttler* nos testes. Escreva um arquivo E2E **separado** que:
 
@@ -69,7 +72,7 @@ Por que este teste precisa estar num arquivo próprio, com uma aplicação próp
 
 ---
 
-## E10.6 — CI que falha pelo motivo certo (individual)
+## E10.6 — CI que falha pelo motivo certo (individual) · 📌 cobrado
 
 Provoque, em *branches* separadas, uma falha em cada passo do CI e anote o que o GitHub
 mostra:

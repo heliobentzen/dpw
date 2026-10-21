@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M03 · NestJS: a primeira API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/deck.css">
+</head>
+<body>
+<main class="deck" data-label="M03 · NestJS">
+
+<!-- ================================================================ CAPA -->
+<section class="slide title bare">
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="wm">03</div>
+  <div class="brand in"><b>IFPE</b><span class="dot"></span>Desenvolvimento de Projeto Web</div>
+  <div class="title-body">
+    <div class="eyebrow in">Módulo 03</div>
+    <h1 class="in">NestJS: a primeira API,<br><span class="hl">passo a passo</span></h1>
+    <p class="lead in">Do <code>nest new</code> a uma API com rotas, camadas, configuração e documentação — entendendo cada linha.</p>
+  </div>
+  <div class="meta in">Pré-requisitos: M01, M02 · Node 24 · TypeScript · NestJS 12</div>
+  <aside class="notes">Primeiro código do backend e primeiro TypeScript. O ritmo é: digitar pouco, ler muito, quebrar de propósito. Tecla → revela item a item.</aside>
+</section>
+
+<!-- ================================================================ META -->
+<section class="slide">
+  <div class="eyebrow in">Ao fim da aula</div>
+  <h2 class="in">Isto vai funcionar <span class="hl">na sua máquina</span></h2>
+  <div class="routes">
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras</span><span class="pill g">200</span><span class="what">a lista do acervo</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/1</span><span class="pill g">200</span><span class="what">uma obra</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/abc</span><span class="pill r">400</span><span class="what">"abc" não é número</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/999</span><span class="pill r">404</span><span class="what">obra não encontrada</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/docs</span><span class="pill">UI</span><span class="what">documentação gerada do código</span></div>
+  </div>
+  <p class="f mt muted">Três rotas parecem pouco. O que importa é a <b>estrutura</b> — o M04, o M06 e o M07 vão preenchê-la sem mover nada de lugar.</p>
+</section>
+
+<!-- ================================================================ ROTEIRO -->
+<section class="slide">
+  <div class="eyebrow in">Roteiro</div>
+  <h2 class="in">Quatro movimentos</h2>
+  <div class="grid-4 fill-v" style="display:grid">
+    <div class="card f zoom"><span class="tag">01 · 02</span><h3>Criar e ler</h3><p>Gerar o projeto e entender os quatro arquivos que nascem.</p></div>
+    <div class="card f zoom"><span class="tag">03</span><h3>Seu endpoint</h3><p>Um módulo seu, uma rota sua, JSON de verdade.</p></div>
+    <div class="card f zoom"><span class="tag">04 · 05</span><h3>Camadas e injeção</h3><p>Por que separar — e como o Nest liga as peças.</p></div>
+    <div class="card f zoom"><span class="tag">06 · 07</span><h3>Robustez</h3><p>Parâmetros, erros, configuração e documentação.</p></div>
+  </div>
+  <div class="note info f"><b>Regra</b> Não pule etapas. Várias delas provocam um erro de propósito — o erro é o conteúdo.</div>
+</section>
+
+<!-- ================================================================ 01 -->
+<section class="slide dark section">
+  <div class="num in">01</div>
+  <h1 class="in">Criar o projeto</h1>
+  <p class="lead in">Três comandos e um servidor HTTP no ar — sem escrever uma linha.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · conferir ferramentas</div>
+  <h2 class="in">Antes de tudo: o Node está aí?</h2>
+  <div class="split">
+    <pre class="code term lg in" data-lang="sh" data-title="PowerShell">
+node --version
+> v24.11.0
+npm --version
+> 11.6.2
+cd C:\dev\bibliocom
+</pre>
+    <div class="stack focus-list">
+      <div class="f" data-hl="1-2"><h3><code>node</code></h3><p class="muted">Executa JavaScript fora do navegador. É ele que roda a API.</p></div>
+      <div class="f" data-hl="3-4"><h3><code>npm</code></h3><p class="muted">Instala bibliotecas e roda os atalhos do projeto. Vem junto com o Node.</p></div>
+      <div class="f" data-hl="5"><h3>A pasta do M00</h3><p class="muted">Tem um <code>package.json</code> com <code>workspaces</code>.</p></div>
+    </div>
+  </div>
+  <div class="note ok f" data-hl=""><b>Deu certo se</b> Node 24 ou superior e npm 11 ou superior. Com npm 10, atualize: <code>npm install -g npm@11</code>.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · CLI e projeto</div>
+  <h2 class="in">Uma CLI cria — e <span class="hl">registra</span></h2>
+  <div class="split">
+    <pre class="code term lg in" data-lang="sh">
+npm install -g @nestjs/cli@12
+nest --version
+> 12.x.x
+nest new backend --skip-git
+> ? Which package manager…  npm
+> 🚀 Successfully created project backend
+</pre>
+    <div class="captions" style="align-self:center">
+      <p class="f" data-hl="1"><b>-g</b> instala na máquina, não no projeto: o comando <code>nest</code> funciona em qualquer pasta.</p>
+      <p class="f" data-hl="1"><b>@12</b> fixa a versão. A turma inteira precisa gerar o mesmo projeto.</p>
+      <p class="f" data-hl="4"><b>--skip-git</b> evita um repositório Git dentro do seu.</p>
+      <p class="f" data-hl="5-6">Escolha <b>npm</b> e aguarde um ou dois minutos.</p>
+    </div>
+  </div>
+  <div class="note warn f" data-hl=""><b>Confira</b> Não pode existir <code>backend\.git</code>. Se existir, apague essa pasta.</div>
+  <aside class="notes">CLI = Command Line Interface. Nada que ela faz é obrigatório (o exercício E03.3 faz tudo à mão), mas ela evita esquecer registros.</aside>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Por que fixar <code>@12</code>?</div>
+  <div class="big in">Previsibilidade vale mais que <span class="hl">novidade</span>.</div>
+  <p class="sub f">Sem fixar, quem instala hoje e quem instala daqui a meses recebe arquivos diferentes — e o material deixa de bater com metade da sala. É o mesmo cuidado de produção.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · subir o servidor</div>
+  <h2 class="in">Um servidor HTTP, <span class="hl">zero linhas suas</span></h2>
+  <div class="split">
+    <pre class="code term in" data-lang="sh">
+cd backend
+npm run start:dev
+> [Nest] LOG Nest application
+>   successfully started
+</pre>
+    <div class="stack">
+      <div class="card f"><span class="tag">start:dev</span><p>É <code>nest start --watch</code>: recompila a cada <kbd>Ctrl</kbd>+<kbd>S</kbd>. Ocupa o terminal — abra <b>outro</b>.</p></div>
+      <div class="card r f"><span class="tag">EADDRINUSE :::3000</span><p>Porta ocupada. Feche o servidor esquecido com <kbd>Ctrl</kbd>+<kbd>C</kbd>.</p></div>
+    </div>
+  </div>
+  <div class="note ok f"><b>Deu certo se</b> <code>http://localhost:3000</code> mostra <code>Hello World!</code></div>
+</section>
+
+<!-- ================================================================ 02 -->
+<section class="slide dark section">
+  <div class="num in">02</div>
+  <h1 class="in">Ler antes de escrever</h1>
+  <p class="lead in">Quatro arquivos pequenos. O <code>Hello World!</code> sai deles.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Leitura · src/main.ts</div>
+  <h2 class="in">Toda a aplicação nasce de <span class="hl">um</span> módulo</h2>
+  <pre class="code lg in" data-title="src/main.ts">
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module.js";
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(process.env.PORT ?? 3000);
+}
+await bootstrap();
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="1"><b>Sem <code>./</code></b> → um pacote baixado pelo npm, em <code>node_modules</code>.</p>
+    <p class="f" data-hl="2"><b>Com <code>./</code></b> → um arquivo seu. E termina em <code>.js</code>… (já explicamos)</p>
+    <p class="f" data-hl="5"><b>A linha central:</b> monta a aplicação inteira a partir do <code>AppModule</code>.</p>
+    <p class="f" data-hl="6"><b>listen</b> começa a atender HTTP. <code>?? 3000</code>: se <code>PORT</code> não existir, usa 3000.</p>
+    <p class="f" data-hl="8"><b>await no topo do arquivo</b> — permitido em módulos ESM.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">A pergunta que todo mundo faz</div>
+  <h2 class="in">Por que <code>.js</code> se o arquivo é <code>.ts</code>?</h2>
+  <div class="flow in" style="margin-top:10px">
+    <div class="node mono">src/app.module.ts<small>o que você edita</small></div>
+    <div class="arrow f"><span class="arrow-label">compila</span></div>
+    <div class="node mono gl f">dist/app.module.js<small>o que o Node carrega</small></div>
+    <div class="arrow f"></div>
+    <div class="node mono g f">"./app.module.js"<small>o import aponta para cá</small></div>
+  </div>
+  <p class="f mt">O TypeScript <b>não reescreve</b> caminhos de import: ele só apaga os tipos. O import aponta para o arquivo que <b>vai existir</b>.</p>
+  <div class="grid-2 mt">
+    <div class="card g f"><span class="tag">Arquivo seu</span><h3><code>from "./acervo.service.js"</code></h3><p>com <code>.js</code> no fim</p></div>
+    <div class="card f" data-with><span class="tag">Pacote instalado</span><h3><code>from "@nestjs/common"</code></h3><p>sem extensão</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Se esquecer o <code>.js</code></div>
+  <h2 class="in">O erro já traz a <span class="hl">resposta</span></h2>
+  <pre class="code lg in" data-lang="text">
+error TS2835: Relative import paths need explicit file extensions
+in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'.
+⟪Did you mean './acervo.service.js'?⟫
+</pre>
+  <div class="grid-2 mt">
+    <div class="card f"><span class="tag">Na prática</span><p>A CLI já gera os imports certos. Você só escreve à mão os imports novos.</p></div>
+    <div class="card f"><span class="tag">ESM</span><p><i>ECMAScript Modules</i>: o padrão oficial do JavaScript, o mesmo dos navegadores.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Conceito · decorator</div>
+  <h2 class="in">Uma <span class="hl">etiqueta</span> colada no código</h2>
+  <div class="split">
+    <div>
+      <pre class="code lg in">
+@Get()   // "responde a GET"
+getHello(): string {
+  return "Hello World!";
+}
+</pre>
+      <pre class="code term f mt" data-lang="sh">
+npm run start:dev
+> [RouterExplorer] Mapped {/, GET} route
+</pre>
+    </div>
+    <div class="stack focus-list">
+      <p class="f">Um decorator é uma <b>função que anexa informação</b> a uma classe ou método.</p>
+      <p class="f">Não executa nem altera o método. Só <b>registra</b>.</p>
+      <p class="f">Ao subir, o Nest <b>lê as etiquetas</b> e monta a tabela de rotas — é o que o terminal anuncia.</p>
+      <p class="f">Um mecanismo, vários usos: <code>@Controller</code>, <code>@Entity</code> (M04), <code>@IsString</code> (M07).</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Leitura · controller e service</div>
+  <h2 class="in">O controller <span class="hl">pede</span>; o service <span class="hl">sabe</span></h2>
+  <div class="split code-wide" style="align-items:start">
+    <pre class="code sm in" id="c" data-title="src/app.controller.ts">
+import { Controller, Get } from "@nestjs/common";
+import { AppService } from "./app.service.js";
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+}
+</pre>
+    <pre class="code sm in" id="s" data-title="src/app.service.ts">
+@Injectable()
+export class AppService {
+  getHello(): string {
+    return "Hello World!";
+  }
+}
+</pre>
+  </div>
+  <div class="captions">
+    <p class="f" data-hl="c:4"><b>@Controller()</b> marca a classe e define o prefixo de rota (aqui, a raiz).</p>
+    <p class="f" data-hl="c:6"><b>constructor</b> recebe um <code>AppService</code> já pronto. Guarde esta linha: ela é o assunto da seção 05.</p>
+    <p class="f" data-hl="c:8-9"><b>@Get()</b> responde a GET. <code>: string</code> é o tipo de retorno — errar é apontado antes de rodar.</p>
+    <p class="f" data-hl="c:10 s:3-5">O controller <b>não produz</b> o texto: pede a quem sabe.</p>
+    <p class="f" data-hl="s:1"><b>@Injectable()</b>: o Nest tem permissão de criar e entregar esta classe.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Leitura · src/app.module.ts</div>
+  <h2 class="in">O módulo não faz nada. Ele <span class="hl">declara</span>.</h2>
+  <div class="split">
+    <pre class="code lg in">
+@Module({
+  imports: [],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+</pre>
+    <div class="stack focus-list">
+      <div class="card f" style="padding:18px 24px" data-hl="2"><span class="tag">imports · outros módulos</span><p>De que outros pedaços do sistema eu preciso?</p></div>
+      <div class="card f" style="padding:18px 24px" data-hl="3"><span class="tag">controllers · quem atende HTTP</span><p>Quais rotas nascem aqui?</p></div>
+      <div class="card f" style="padding:18px 24px" data-hl="4"><span class="tag">providers · quem pode ser injetado</span><p>Quem o Nest tem permissão de criar e entregar?</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Visão do todo</div>
+  <h2 class="in">O projeto inteiro, de trás para frente</h2>
+  <div class="flow fill-v" style="flex-direction:row">
+    <div class="node f">main.ts<small>cria a app</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">AppModule<small>declara as peças</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">AppController<small>@Get() na raiz</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">AppService<small>sabe a resposta</small></div>
+    <div class="arrow g f"></div>
+    <div class="node g f zoom">"Hello World!"</div>
+  </div>
+  <div class="note ok f"><b>Resumo</b> Quatro arquivos, uma responsabilidade cada. Todo o resto do curso é mais do mesmo, em maior quantidade.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · a primeira mudança sua</div>
+  <h2 class="in">Editar → salvar → <span class="hl">ver</span></h2>
+  <div class="split">
+    <div class="stack">
+      <pre class="code lg in" data-title="src/app.service.ts">
+return "BiblioCom no ar";
+</pre>
+      <pre class="code term f" data-lang="sh">
+> File change detected.
+> Nest application successfully started
+</pre>
+    </div>
+    <ol class="steps">
+      <li class="f">Troque o texto no service.</li>
+      <li class="f">Salve. O <code>start:dev</code> reinicia sozinho.</li>
+      <li class="f">Atualize o navegador.</li>
+    </ol>
+  </div>
+  <div class="note warn f"><b>Se falhar</b> pare aqui. O problema é de ambiente: quase sempre o <code>start:dev</code> foi fechado sem você perceber.</div>
+</section>
+
+<!-- ================================================================ 03 -->
+<section class="slide dark section">
+  <div class="num in">03</div>
+  <h1 class="in">Seu primeiro endpoint</h1>
+  <p class="lead in">Um módulo por área do domínio. O nosso: <b>acervo</b>.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · nest generate</div>
+  <h2 class="in">O mais valioso da CLI: <span class="hl">os registros</span></h2>
+  <div class="split">
+    <pre class="code term lg in" data-lang="sh">
+nest generate module acervo
+nest generate controller acervo --no-spec
+nest generate service acervo --no-spec
+</pre>
+    <div class="stack focus-list">
+      <div class="f" data-hl="1"><h3>module</h3><p class="muted">Cria <code>acervo.module.ts</code> e o registra em <code>imports</code> do <code>AppModule</code>.</p></div>
+      <div class="f" data-hl="2"><h3>controller</h3><p class="muted">Cria e registra em <code>controllers</code> do <code>AcervoModule</code>.</p></div>
+      <div class="f" data-hl="3"><h3>service</h3><p class="muted">Cria e registra em <code>providers</code>. O <code>--no-spec</code> pula o teste (fica para o M10).</p></div>
+    </div>
+  </div>
+  <div class="note warn f" data-hl=""><b>Ajuste</b> Troque <code>@Controller("acervo")</code> por <code>@Controller("obras")</code>. — o módulo organiza o código; a rota nomeia o recurso.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · acervo.controller.ts</div>
+  <h2 class="in">Devolva um valor. O Nest cuida do <span class="hl">HTTP</span>.</h2>
+  <div class="split code-wide">
+    <pre class="code sm in">
+@Controller("obras")
+export class AcervoController {
+  @Get()
+  listar() {
+    return [
+      { id: 1, titulo: "Dom Casmurro", ano: 1899 },
+      { id: 2, titulo: "Grande Sertão: Veredas", ano: 1956 },
+    ];
+  }
+}
+</pre>
+    <div>
+      <div class="captions" style="margin:0 0 24px">
+        <p class="f" data-hl="1"><b>"obras"</b>: todas as rotas desta classe começam em <code>/obras</code>.</p>
+        <p class="f" data-hl="3-4"><b>listar</b> é um nome seu — quem define a URL são os decorators.</p>
+        <p class="f" data-hl="5-8">Um array comum de objetos JavaScript.</p>
+      </div>
+      <p class="f small muted" data-hl="">Você <b>não</b> escreveu:</p>
+      <div class="stack">
+        <div class="card f left" style="padding:16px 22px"><p><code>res.json(...)</code> → o Nest converteu</p></div>
+        <div class="card f left" style="padding:16px 22px"><p><code>Content-Type: application/json</code> → o Nest pôs</p></div>
+        <div class="card f left" style="padding:16px 22px"><p><code>status(200)</code> → padrão do GET</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ 04 -->
+<section class="slide dark section">
+  <div class="num in">04</div>
+  <h1 class="in">Por que separar em camadas</h1>
+  <p class="lead in">A etapa mais importante do módulo. E é de raciocínio.</p>
+</section>
+
+<section class="slide statement">
+  <div class="big in">O endpoint <span class="hl">funciona</span>.</div>
+  <div class="big f">Então por que os dados não podem ficar no controller?</div>
+  <p class="sub f">Não é "porque é boa prática". São quatro situações concretas — e todas vão acontecer nesta disciplina.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Analogia</div>
+  <h2 class="in">Um restaurante</h2>
+  <div class="vs fill-v" style="display:grid">
+    <div class="card big f left"><span class="tag">Controller</span><h3>O garçom</h3><p>Anota o pedido, entrega o prato, conversa com o cliente. Fala a língua do salão — o <b>HTTP</b>.</p></div>
+    <div class="card big g f right"><span class="tag">Service</span><h3>A cozinha</h3><p>Sabe fazer o prato. Não importa se o pedido veio do salão, do delivery ou do telefone.</p></div>
+  </div>
+  <div class="note warn f"><b>E se</b> o garçom cozinhar na mesa? Funciona — até o restaurante precisar de delivery, de um cozinheiro novo ou de dois garçons ao mesmo tempo.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">As quatro situações</div>
+  <h2 class="in">Onde a lógica no controller <span class="hl-red">cobra a conta</span></h2>
+  <div class="grid-2" style="flex:1">
+    <div class="card f zoom">
+      <span class="tag">1 · Fora do HTTP</span>
+      <h3>Um script de terminal precisa da lista (M08)</h3>
+      <p><span class="hl-red">✕</span> copia-se a lista; uma cópia fica errada em silêncio<br><span style="color:var(--green-d)">✓</span> o script chama o service</p>
+    </div>
+    <div class="card f zoom">
+      <span class="tag">2 · Testar a regra</span>
+      <h3>"No máximo três empréstimos" (M10)</h3>
+      <p><span class="hl-red">✕</span> subir servidor, montar requisição, ler status<br><span style="color:var(--green-d)">✓</span> uma linha, sem servidor</p>
+    </div>
+    <div class="card f zoom">
+      <span class="tag">3 · A fonte muda</span>
+      <h3>O array vira PostgreSQL (M04)</h3>
+      <p><span class="hl-red">✕</span> o arquivo de rotas vai de 10 para 60 linhas<br><span style="color:var(--green-d)">✓</span> só o service muda — você confere no M06</p>
+    </div>
+    <div class="card f zoom">
+      <span class="tag">4 · Duas pessoas</span>
+      <h3>Uma em rotas, outra em regras</h3>
+      <p><span class="hl-red">✕</span> editam as mesmas linhas: conflito<br><span style="color:var(--green-d)">✓</span> arquivos separados, merge limpo</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Situação 2, em detalhe</div>
+  <h2 class="in">Separar é o que torna o teste <span class="hl">barato</span></h2>
+  <div class="flow in" style="margin-top:6px">
+    <div class="node rl">subir a app</div><div class="arrow r short"></div>
+    <div class="node rl">montar requisição</div><div class="arrow r short"></div>
+    <div class="node rl">enviar</div><div class="arrow r short"></div>
+    <div class="node rl">ler resposta</div><div class="arrow r short"></div>
+    <div class="node rl">interpretar status</div>
+  </div>
+  <p class="muted in" style="margin-top:14px">Regra no controller: lento, e quebra por porta ocupada ou rota renomeada.</p>
+  <pre class="code lg f mt">
+expect(() => servico.emprestar(exemplar, associadoComTres)).toThrow();
+</pre>
+  <p class="f muted" style="margin-top:14px">Regra no service: uma linha, sem rede, sem servidor.</p>
+  <div class="note ok f mt-auto"><b>Moral</b> Teste caro é teste que ninguém escreve.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">A divisão que o Nest impõe</div>
+  <h2 class="in">Cada peça, uma responsabilidade</h2>
+  <table class="tbl">
+    <tr class="in"><th>Peça</th><th>Responsabilidade</th><th>O que não deve fazer</th></tr>
+    <tr class="f"><td>Module</td><td>Agrupar um domínio e declarar o que expõe</td><td class="muted">Conter lógica</td></tr>
+    <tr class="f"><td>Controller</td><td>Traduzir HTTP ↔ chamada de método</td><td class="muted">Falar com o banco, conter regra de negócio</td></tr>
+    <tr class="f"><td>Service</td><td>Regra de negócio e acesso a dados</td><td class="muted">Saber que HTTP existe</td></tr>
+  </table>
+  <div class="note info f mt"><b>Sem separar</b> Um <code>app.get("/obras", …)</code> no Express funciona no primeiro mês. Com 40 rotas, é um arquivo de 800 linhas onde ninguém acha nada.</div>
+</section>
+
+<section class="slide dark statement">
+  <div class="eyebrow in">A pergunta que resolve 90% das dúvidas</div>
+  <div class="big in">Se este código rodasse a partir de um <span class="hl">comando de terminal</span>, ele mudaria?</div>
+  <div class="grid-2 mt" style="max-width:900px">
+    <div class="card f zoom"><span class="tag">Não muda</span><h3 class="hl" style="font-size:40px">Service</h3></div>
+    <div class="card f zoom"><span class="tag">Muda</span><h3 style="font-size:40px">Controller</h3></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Exercite · aplique o critério</div>
+  <h2 class="in">Onde fica cada código?</h2>
+  <table class="tbl">
+    <tr class="in"><th>Código</th><th>Muda sem HTTP?</th><th>Camada</th></tr>
+    <tr class="in"><td>A lista de obras</td><td class="f fade muted">Não — é a mesma de qualquer origem</td><td class="f zoom ans" data-with>Service</td></tr>
+    <tr class="in"><td>Converter <code>:id</code> da URL em número</td><td class="f fade muted">Sim — sem URL não há <code>:id</code></td><td class="f zoom ans" data-with>Controller</td></tr>
+    <tr class="in"><td>Obra sem exemplar não empresta</td><td class="f fade muted">Não — é regra da biblioteca</td><td class="f zoom ans" data-with>Service</td></tr>
+    <tr class="in"><td>A resposta do POST é 201</td><td class="f fade muted">Sim — status é conceito HTTP</td><td class="f zoom ans" data-with>Controller</td></tr>
+  </table>
+  <aside class="notes">Deixe a turma responder antes de revelar cada linha.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Checkpoint</div>
+  <div class="quiz fill-v">
+    <div class="quiz-q in">"Um associado não pode ter mais de três empréstimos em aberto." Onde mora essa regra?</div>
+    <div class="choices two in">
+      <button>No controller, junto da rota</button>
+      <button data-ok>No service</button>
+      <button>No módulo</button>
+      <button>No <code>main.ts</code></button>
+    </div>
+    <div class="why note ok"><b>Isso</b> Ela não muda se o pedido vier de um script, de um teste ou do HTTP. Logo, é service.</div>
+  </div>
+</section>
+
+<!-- ================================================================ 05 -->
+<section class="slide dark section">
+  <div class="num in">05</div>
+  <h1 class="in">Injeção de dependência</h1>
+  <p class="lead in">Como o controller recebe o service — sem fabricá-lo.</p>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Analogia</div>
+  <div class="big in">A geladeira não constrói a <span class="hl">usina</span>.</div>
+  <p class="sub f">Ela recebe energia pela tomada e não sabe se vem de uma hidrelétrica ou de painéis solares. Trocar a fonte não exige abrir a geladeira.</p>
+  <p class="sub f" style="color:var(--ink)"><b>Injeção de dependência:</b> a classe <b>recebe</b> o que precisa, pronto, pelo construtor. Quem liga os fios é o Nest.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Duas formas</div>
+  <h2 class="in">Fabricar <span class="muted">×</span> <span class="hl">receber</span></h2>
+  <div class="vs">
+    <div class="stack">
+      <pre class="code sm red in" id="bad" data-title="❌ fabricar">
+export class AcervoController {
+  private acervo = new AcervoService();
+}
+</pre>
+      <div class="card tight r f"><span class="tag">Soldado</span><p>No teste (M10), não há como trocar o service por um dublê — o <code>new</code> está lá dentro.</p></div>
+      <div class="card tight r f"><span class="tag">A ignorância se espalha</span><p>Quando o service precisar do banco, o controller terá de saber montar o banco.</p></div>
+    </div>
+    <div class="stack">
+      <pre class="code sm in" id="good" data-title="✅ receber">
+export class AcervoController {
+  constructor(
+    private readonly acervo: AcervoService,
+  ) {}
+}
+</pre>
+      <div class="card tight g f"><span class="tag">Declara o que precisa</span><p>Não diz <b>como</b> conseguir. Em nenhum lugar existe <code>new AcervoService()</code>.</p></div>
+      <div class="card tight g f"><span class="tag">Quem cria é o Nest</span><p>Lê o tipo do parâmetro, procura em <code>providers</code> e entrega uma instância pronta.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Por dentro</div>
+  <h2 class="in">Como o Nest resolve o construtor</h2>
+  <div class="flow fill-v" style="flex-direction:row">
+    <div class="node mono f">acervo: AcervoService<small>o tipo do parâmetro</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">procura em<br>providers<small>do módulo</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">cria uma vez<small>singleton</small></div>
+    <div class="arrow g f"></div>
+    <div class="node g f zoom">entrega pronto<small>no construtor</small></div>
+  </div>
+  <div class="note info f"><b>Por isso</b> o <code>@Injectable()</code> no service é necessário: sem ele, o Nest não guarda os metadados para criar a classe.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · quebre de propósito</div>
+  <h2 class="in">A prova de que a injeção é <span class="hl">real</span></h2>
+  <pre class="code lg in" id="mod" data-title="src/acervo/acervo.module.ts">
+@Module({
+  controllers: [AcervoController],
+  providers: [⟦/* AcervoService */⟧],
+})
+</pre>
+  <pre class="code term f" style="margin-top:14px" id="err" data-lang="sh">
+> Nest can't resolve dependencies of the AcervoController ⟦(?)⟧.
+> Please make sure that the argument AcervoService at ⟦index [0]⟧ is available
+> in the ⟦AcervoModule⟧ module.
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="err:1"><b>(?)</b> é a posição do parâmetro que não resolveu.</p>
+    <p class="f" data-hl="err:2"><b>index [0]</b>: o primeiro parâmetro do construtor.</p>
+    <p class="f" data-hl="err:3 mod:3"><b>Onde procurar:</b> a lista <code>providers</code> do <code>AcervoModule</code>. Descomente e o servidor volta.</p>
+  </div>
+  <aside class="notes">É o erro mais comum deste módulo e do M04: classe criada e esquecida fora de providers.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O que a injeção traz</div>
+  <h2 class="in">Três ganhos práticos</h2>
+  <div class="grid-3 fill-v" style="display:grid">
+    <div class="card big f zoom"><span class="icon">⚡</span><h3>Teste barato</h3><p>O teste passa um dublê no lugar do service. Situação 2, resolvida.</p></div>
+    <div class="card big f zoom"><span class="icon">①</span><h3>Uma instância</h3><p>Criada uma vez e reaproveitada na aplicação inteira.</p></div>
+    <div class="card big f zoom"><span class="icon">⇄</span><h3>Troca sem atrito</h3><p>Mudar a implementação não toca quem usa. Situação 3 — você comprova no M06.</p></div>
+  </div>
+</section>
+
+<!-- ================================================================ 06 -->
+<section class="slide dark section">
+  <div class="num in">06</div>
+  <h1 class="in">Parâmetros, pipes e erros</h1>
+  <p class="lead in">Buscar uma obra exige ler um pedaço da URL.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Conceito · pipe</div>
+  <h2 class="in">O <span class="hl">porteiro</span> entre a requisição e o seu método</h2>
+  <div class="stack fill-v">
+    <div class="flow">
+      <div class="node mono f">GET /obras/1</div><div class="arrow f"></div>
+      <div class="node gl f">ParseIntPipe<small>"1" → 1</small></div><div class="arrow g f"></div>
+      <div class="node g f">buscarUm(1)<small>seu método roda</small></div>
+    </div>
+    <div class="flow" style="margin-top:34px">
+      <div class="node mono f">GET /obras/abc</div><div class="arrow f"></div>
+      <div class="node rl f">ParseIntPipe<small>"abc" → ?</small></div><div class="arrow r f"></div>
+      <div class="node r f">400 Bad Request<small>seu método nem é chamado</small></div>
+    </div>
+  </div>
+  <div class="note info f"><b>Pipe</b> converte, valida, ou as duas coisas — antes do seu código. Você não escreve nenhum <code>if</code>.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · rota com parâmetro</div>
+  <h2 class="in">Do service à rota</h2>
+  <div class="grid-2" style="align-items:start">
+    <pre class="code in" id="svc" data-title="acervo.service.ts">
+buscarUm(id: number): Obra | undefined {
+  return this.obras.find((o) => o.id === id);
+}
+</pre>
+    <pre class="code in" id="ctl" data-title="acervo.controller.ts">
+@Get(":id")
+buscarUm(@Param("id", ParseIntPipe) id: number) {
+  return this.acervo.buscarUm(id);
+}
+</pre>
+  </div>
+  <div class="captions">
+    <p class="f" data-hl="svc:1"><b>Obra | undefined</b> — tipo de união: "ou uma obra, ou nada". O tipo diz em voz alta o que o <code>find</code> faz.</p>
+    <p class="f" data-hl="ctl:1"><b>":id"</b> — os dois-pontos marcam um trecho variável: <code>/obras/1</code>, <code>/obras/42</code>…</p>
+    <p class="f" data-hl="ctl:2"><b>@Param("id")</b> extrai o pedaço da URL. O nome tem de bater com o do <code>@Get</code>.</p>
+    <p class="f" data-hl="ctl:2"><b>ParseIntPipe</b> converte em número <b>antes</b> de o método ser chamado.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Rode · o navegador só mostra o corpo</div>
+  <h2 class="in">Veja o <span class="hl">status</span> com <code>curl -i</code></h2>
+  <pre class="code term lg in" data-lang="sh">
+curl.exe -i http://localhost:3000/obras/1
+> HTTP/1.1 ⟪200 OK⟫
+curl.exe -i http://localhost:3000/obras/abc
+> HTTP/1.1 ⟦400 Bad Request⟧
+> {"message":"Validation failed (numeric string is expected)","statusCode":400}
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="1-2"><b>-i</b> mostra os cabeçalhos — o status está na primeira linha.</p>
+    <p class="f" data-hl="3-5">Esse 400 veio do pipe. Nenhum <code>if</code>, nenhum <code>isNaN</code>, nenhum <code>try</code>.</p>
+    <p class="f" data-hl=""><span class="muted">No macOS e no Linux, escreva <code>curl</code> sem o <code>.exe</code>.</span></p>
+  </div>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Experimento · tire o pipe</div>
+  <div class="big in" style="font-size:52px"><code style="font-size:.8em">@Param("id") id: number</code><br>e chame <code style="font-size:.8em">/obras/1</code>. O que acontece?</div>
+  <p class="sub f"><b style="color:var(--red)">404 numa obra que existe.</b> O <code>id</code> chega como <code>"1"</code> — texto. E <code>"1" === 1</code> é <code>false</code>.</p>
+  <p class="sub f">O <code>: number</code> é TypeScript, e o TypeScript <b>some</b> ao virar JavaScript. Ninguém confere tipos em execução — exceto quem você mandar.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Responder 404</div>
+  <h2 class="in">Um <code>200</code> vazio é uma <span class="hl-red">mentira</span></h2>
+  <div class="split">
+    <pre class="code sm in">
+buscarUm(id: number): Obra {
+  const obra = this.obras.find((o) => o.id === id);
+  if (!obra) {
+    throw new NotFoundException(
+      `Obra ${id} não encontrada`);
+  }
+  return obra;
+}
+</pre>
+    <table class="tbl">
+      <tr class="in"><th>O service não…</th><th>e ainda assim…</th></tr>
+      <tr class="f"><td>importou <code>Response</code></td><td>a resposta saiu certa</td></tr>
+      <tr class="f"><td>escreveu <code>404</code></td><td>o status é 404</td></tr>
+      <tr class="f"><td>montou o JSON</td><td>o corpo veio padronizado</td></tr>
+    </table>
+  </div>
+  <div class="note ok f" data-hl="4-5"><b>Ideia</b> Lance em <b>linguagem de domínio</b> ("não encontrada"); o framework traduz para HTTP. O service continua sem saber que HTTP existe.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Armadilha · ordem das rotas</div>
+  <h2 class="in">O Nest casa com a <span class="hl">primeira</span> que serve</h2>
+  <div class="vs">
+    <div class="stack">
+      <pre class="code red in" id="o1">
+@Get(":id")      // casa com /obras/nome
+buscarUm(...) {}
+
+@Get("nome")     // nunca alcançada
+nome() {}
+</pre>
+      <div class="card r f"><span class="tag">Resultado</span><p><code>ParseIntPipe("nome")</code> → <b>400 numa rota que existe</b>.</p></div>
+    </div>
+    <div class="stack">
+      <pre class="code in" id="o2">
+@Get("nome")     // literal primeiro
+nome() {}
+
+@Get(":id")      // parâmetro depois
+buscarUm(...) {}
+</pre>
+      <div class="card g f"><span class="tag">Regra</span><p>Rota <b>literal</b> vem sempre antes de rota com <b>parâmetro</b>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ 07 -->
+<section class="slide dark section">
+  <div class="num in">07</div>
+  <h1 class="in">Configuração e documentação</h1>
+  <p class="lead in">O que muda por instalação fica fora do código. O contrato sai do código.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Configuração fora do código</div>
+  <h2 class="in">Dois arquivos, dois papéis</h2>
+  <div class="vs">
+    <div class="stack">
+      <pre class="code sm in" data-lang="ini" data-title=".env  ·  fora do Git">
+PORT=3000
+NOME_BIBLIOTECA=Biblioteca Comunitária do Bairro
+</pre>
+      <p class="f muted">Os <b>seus</b> valores. Secreto.</p>
+    </div>
+    <div class="stack">
+      <pre class="code sm in" data-lang="ini" data-title=".env.example  ·  no Git">
+PORT=
+NOME_BIBLIOTECA=
+</pre>
+      <p class="f muted"><b>Quais</b> variáveis existem. Público — é por ele que alguém novo sabe o que configurar.</p>
+    </div>
+  </div>
+  <div class="note warn f"><b>Bug clássico</b> Variável nova no <code>.env</code> sem entrada no <code>.env.example</code>. Só aparece quando alguém clona o projeto.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · ConfigModule</div>
+  <h2 class="in">Ler o <code>.env</code> e <span class="hl">injetar</span> o valor</h2>
+  <div class="grid-2" style="align-items:start">
+    <pre class="code in" id="am" data-title="app.module.ts">
+imports: [
+  ConfigModule.forRoot({ isGlobal: true }),
+  AcervoModule,
+],
+</pre>
+    <pre class="code sm in" id="as" data-title="acervo.service.ts">
+constructor(private readonly config: ConfigService) {}
+
+nomeDaBiblioteca(): string {
+  return this.config.get&lt;string>("NOME_BIBLIOTECA")
+    ?? "sem nome";
+}
+</pre>
+  </div>
+  <div class="captions">
+    <p class="f" data-hl="am:2"><b>forRoot</b>: "configure aqui, uma vez só". Lê o <code>.env</code> na inicialização.</p>
+    <p class="f" data-hl="am:2"><b>isGlobal</b>: o <code>ConfigService</code> fica disponível em toda a aplicação, sem reimportar.</p>
+    <p class="f" data-hl="as:1">A mesma injeção da seção 05 — agora com uma classe do próprio framework.</p>
+    <p class="f" data-hl="as:4-5"><b>&lt;string></b> é um genérico: diz ao TypeScript o tipo esperado.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · não subir quebrado</div>
+  <h2 class="in">1. Descrever o <span class="hl">formato esperado</span></h2>
+  <pre class="code lg in" data-title="src/config/esquema-env.ts">
+import { z } from "zod";
+
+export const esquemaEnv = z.object({
+  PORT: z.coerce.number().default(3000),
+  NOME_BIBLIOTECA: z
+    .string("NOME_BIBLIOTECA é obrigatória")
+    .min(1, "NOME_BIBLIOTECA não pode ficar vazia"),
+});
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="1"><b>zod</b> descreve formatos e valida dados em execução: <code>npm install zod</code>.</p>
+    <p class="f" data-hl="4"><b>coerce</b>: variável de ambiente é sempre texto. Converte antes de validar.</p>
+    <p class="f" data-hl="6-7">Duas mensagens: chave <b>ausente</b> e chave <b>vazia</b> são problemas diferentes.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · não subir quebrado</div>
+  <h2 class="in">2. Falhar com uma mensagem <span class="hl">legível</span></h2>
+  <pre class="code sm in" data-title="src/config/esquema-env.ts (continuação)">
+export function validarEnv(bruto: Record&lt;string, unknown>) {
+  const resultado = esquemaEnv.safeParse(bruto);
+  if (!resultado.success) {
+    const problemas = resultado.error.issues.map((i) => `  - ${i.message}`);
+    throw new Error(`Variáveis de ambiente inválidas:\n${problemas.join("\n")}`);
+  }
+  return resultado.data;
+}
+</pre>
+  <pre class="code f" style="margin-top:14px" data-lang="text">
+Error: Variáveis de ambiente inválidas:
+  - ⟦NOME_BIBLIOTECA é obrigatória⟧
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="2"><b>safeParse</b> devolve sucesso ou erro em vez de lançar. <b>Você</b> decide o que fazer.</p>
+    <p class="f" data-hl="4-5">Uma mensagem legível, com <b>todos</b> os problemas — não o objeto cru do Zod.</p>
+    <p class="f" data-hl="">Ligue com <code>validate: validarEnv</code> no <code>forRoot</code>. Comente a variável e veja a app <b>não subir</b>.</p>
+  </div>
+</section>
+
+<section class="slide dark statement">
+  <div class="eyebrow in">Por que isso vale uma etapa</div>
+  <div class="big in">Melhor <span class="hl">não subir</span> do que subir pela metade.</div>
+  <p class="sub f">Serviço que não sobe se resolve em dois minutos lendo a mensagem. Serviço que sobe pela metade falha na frente do usuário — e leva horas para ser rastreado até uma variável faltando.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Prefixo e documentação</div>
+  <h2 class="in">O contrato do M02 <span class="hl">sai do código</span></h2>
+  <pre class="code lg in" data-title="src/main.ts">
+const app = await NestFactory.create(AppModule);
+app.setGlobalPrefix("api");
+SwaggerModule.setup("api/docs", app, montarDocumento(app));
+await app.listen(process.env.PORT ?? 3000);
+</pre>
+  <div class="flow mt">
+    <div class="node f">@Controller · @Get<small>o que você já escreveu</small></div>
+    <div class="arrow f"></div>
+    <div class="node f">Swagger lê<small>createDocument</small></div>
+    <div class="arrow f"></div>
+    <div class="node g f">/api/docs<small>para pessoas</small></div>
+    <div class="arrow f"></div>
+    <div class="node g f">openapi.json<small>para clientes e CI</small></div>
+  </div>
+  <div class="captions">
+    <p class="f" data-hl="2"><b>/api</b> agora custa uma linha. Depois do deploy, custaria avisar todo cliente.</p>
+    <p class="f" data-hl="3">Ninguém escreveu documentação: os mesmos decorators, lidos por outra ferramenta.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O mapa que você percorreu</div>
+  <h2 class="in">Caminho de <code>GET /api/obras/42</code></h2>
+  <div class="stack fill-v">
+    <div class="flow">
+      <div class="node mono f">GET /api/obras/42</div><div class="arrow f"></div>
+      <div class="node ghost f">Middleware<small>M08 · M09</small></div><div class="arrow f"></div>
+      <div class="node ghost f">Guard<small>M08</small></div><div class="arrow f"></div>
+      <div class="node g f">Pipe<small>ParseIntPipe</small></div>
+    </div>
+    <div class="flow" style="margin-top:30px">
+      <div class="node g f">Controller<small>buscarUm(42)</small></div><div class="arrow f"></div>
+      <div class="node g f">Service<small>regra, lança 404</small></div><div class="arrow f"></div>
+      <div class="node ghost f">Repository<small>M06</small></div><div class="arrow f"></div>
+      <div class="node ghost f">DTO de saída<small>M07</small></div>
+    </div>
+  </div>
+  <div class="note ok f"><b>Separação</b> As caixas tracejadas se encaixam em volta das verdes — sem mudar nada do que você construiu.</div>
+</section>
+
+<!-- ================================================================ FECHO -->
+<section class="slide">
+  <div class="eyebrow in" style="color:var(--red)">Pegadinha de mercado</div>
+  <h2 class="in"><code>new</code> dentro da classe</h2>
+  <pre class="code lg red in">
+private acervo = new AcervoService();
+</pre>
+  <ul class="clean mt focus-list">
+    <li class="f" data-hl="1">Funciona hoje — e amarra o controller àquela implementação.</li>
+    <li class="f">Sem dublê no teste (M10).</li>
+    <li class="f">Quando o service precisar do banco, o controller terá de saber montá-lo.</li>
+    <li class="f">Em revisão de código, é devolvido quase sempre.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">IA no fluxo</div>
+  <h2 class="in">A IA digita rápido. <span class="hl">Quem decide é você.</span></h2>
+  <div class="grid-3 fill-v" style="display:grid">
+    <div class="card f zoom"><span class="tag">Cuidado</span><h3>Formato antigo</h3><p>CommonJS, imports sem <code>.js</code>, Jest no lugar do Vitest. O <code>TS2835</code> é o primeiro sinal.</p></div>
+    <div class="card g f zoom"><span class="tag">Use para</span><h3>Explicar</h3><p>Cole uma linha que você não entendeu e peça o porquê.</p></div>
+    <div class="card f zoom"><span class="tag">Revise sempre</span><h3>Critério da camada</h3><p>A regra de negócio está no service? A versão bate com a do projeto?</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Desafio de fixação</div>
+  <h2 class="in"><code>GET /api/obras/sorteio</code></h2>
+  <p class="lead in">Uma obra aleatória para a vitrine "leia isto hoje". <b>Antes de escrever código</b>, responda:</p>
+  <ol class="steps mt">
+    <li class="f">O sorteio fica no controller ou no service? Por quê?</li>
+    <li class="f">Em que <b>posição</b> do controller a rota precisa ser declarada?</li>
+    <li class="f">Que status ela devolve se o acervo estiver vazio?</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Checklist de saída</div>
+  <h2 class="in">Você terminou o M03 se…</h2>
+  <ul class="checks two">
+    <li class="f fade"><code>GET /api/obras</code> responde 200</li>
+    <li class="f fade"><code>/api/obras/abc</code> responde 400 do pipe</li>
+    <li class="f fade"><code>/api/obras/999</code> responde 404 sem você escrever 404</li>
+    <li class="f fade">O controller não tem dados nem regra</li>
+    <li class="f fade"><code>.env</code> fora do Git, <code>.env.example</code> dentro</li>
+    <li class="f fade">A app não sobe sem variável obrigatória</li>
+    <li class="f fade"><code>/api/docs</code> lista os endpoints</li>
+    <li class="f fade"><code>npm run gerar:schema</code> grava o <code>openapi.json</code></li>
+    <li class="f fade">Você viu <code>can't resolve dependencies</code> de propósito</li>
+    <li class="f fade">Você explica um problema concreto que as camadas evitam</li>
+  </ul>
+</section>
+
+<section class="slide title bare">
+  <div class="glow g1"></div>
+  <div class="brand in"><b>IFPE</b><span class="dot"></span>Desenvolvimento de Projeto Web</div>
+  <div class="title-body">
+    <div class="eyebrow in">Próximo</div>
+    <h1 class="in">M04 · Entidades:<br><span class="hl">classes que geram o banco</span></h1>
+    <p class="lead in">Roteiro completo e exercícios em <code>modulos/03-nestjs-primeiros-passos/</code>.</p>
+  </div>
+  <div class="meta in">Instale o Docker antes da próxima aula.</div>
+</section>
+
+</main>
+<script src="assets/deck.js"></script>
+</body>
+</html>

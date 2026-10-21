@@ -1,6 +1,9 @@
 # M07 — Exercícios
 
-## E07.1 — Corrigir o desenho da API (individual)
+> **O que é cobrado.** Entrega **E3** do [portfólio](../../avaliacao/rubrica-portfolio.md): CRUD de 2+ recursos, DTOs de entrada e saída, status corretos, paginação com teto e `/api/docs` com erros.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E07.1 — Corrigir o desenho da API (individual) · ➕ opcional
 
 | # | Rota errada | Correta | Por quê |
 | --- | --- | --- | --- |
@@ -17,7 +20,7 @@ um *crawler* ou o *prefetch* do navegador percorre essa URL.
 
 ---
 
-## E07.2 — Status corretos (individual)
+## E07.2 — Status corretos (individual) · 📌 cobrado
 
 | Situação | Status |
 | --- | --- |
@@ -39,7 +42,7 @@ Os dois últimos merecem discussão: 422 ou 400? 500 vaza informação?
 
 ---
 
-## E07.3 — DTOs completos (individual) ⭐
+## E07.3 — DTOs completos (individual) ⭐ · 📌 cobrado
 
 Escreva `CriarExemplarDto`, `AtualizarExemplarDto` e `ExemplarResposta`:
 
@@ -58,7 +61,7 @@ Escreva `CriarExemplarDto`, `AtualizarExemplarDto` e `ExemplarResposta`:
 
 ---
 
-## E07.4 — Mass assignment (individual) ⚠️
+## E07.4 — Mass assignment (individual) ⚠️ · ➕ opcional
 
 1. Desligue `whitelist` do `ValidationPipe`.
 2. Envie `{"titulo":"X","autorId":1,"criadoEm":"1999-01-01","destaque":true}`.
@@ -76,7 +79,7 @@ Responda: por que **recusar** é melhor que **ignorar em silêncio**?
 
 ---
 
-## E07.5 — Vazamento na resposta (individual) ⚠️
+## E07.5 — Vazamento na resposta (individual) ⚠️ · ➕ opcional
 
 1. Faça um endpoint que devolva a entidade `Associado` **direto**, sem DTO.
 2. Liste os campos que apareceram e que **não** deveriam ser públicos.
@@ -89,7 +92,7 @@ automaticamente**, sem ninguém decidir.
 
 ---
 
-## E07.6 — Ordem de rotas (individual)
+## E07.6 — Ordem de rotas (individual) · ➕ opcional
 
 1. Acrescente `@Get("destaques")` **depois** de `@Get(":id")`.
 2. Chame `/api/obras/destaques`. Anote o status e a mensagem.
@@ -98,7 +101,7 @@ automaticamente**, sem ninguém decidir.
 
 ---
 
-## E07.7 — Paginação sem teto (em duplas)
+## E07.7 — Paginação sem teto (em duplas) · 📌 cobrado
 
 1. Remova o `@Max(100)` do `tamanho`.
 2. Chame `?tamanho=100000`. Meça o tempo e a memória.
@@ -108,7 +111,7 @@ automaticamente**, sem ninguém decidir.
 
 ---
 
-## E07.8 — O contrato como verificação (individual) ⭐
+## E07.8 — O contrato como verificação (individual) ⭐ · 📌 cobrado
 
 1. Gere e commite o `openapi.json`.
 2. Mude o tipo de um campo num DTO.

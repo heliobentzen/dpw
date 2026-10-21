@@ -1,12 +1,14 @@
 # Plano de Teste
 
-> Etapa 2 · Salve em `docs/plano-de-teste.md`.
+> Etapa 3 · Salve em `docs/plano-de-teste.md`.
+>
+> 📌 **Cobrado em:** Etapa 3 — testes automatizados (E1), matriz de acesso (E2) e teste com usuário real (E4). Seções marcadas ➕ não são avaliadas.
 
 **Projeto:** `<nome>` · **Versão testada:** `<commit/tag>` · **Data:** `<AAAA-MM-DD>`
 
 ---
 
-## 1. Estratégia
+## 1. Estratégia · ➕ opcional
 
 | Nível | O que cobre | Ferramenta | Quantidade |
 |---|---|---|---|
@@ -38,7 +40,7 @@
 
 Todas as células cobertas por teste automatizado? `<sim/não>` · Arquivo: `<...>`
 
-## 4. Testes manuais de fluxo
+## 4. Testes manuais de fluxo · ➕ opcional
 
 ### F01 — `<nome do fluxo>`
 
@@ -85,7 +87,7 @@ Todas as células cobertas por teste automatizado? `<sim/não>` · Arquivo: `<..
 
 **Segunda rodada** (após as correções): `<repetir a tabela acima com outra pessoa>`
 
-## 6. Desempenho
+## 6. Desempenho · ➕ opcional
 
 Com `<N>` registros no banco:
 
@@ -97,7 +99,7 @@ Com `<N>` registros no banco:
 
 Meta: nenhuma rota acima de 2s; nenhuma consulta N+1.
 
-## 7. Segurança
+## 7. Segurança · ➕ opcional
 
 | Verificação | Resultado |
 |---|---|
@@ -109,7 +111,7 @@ Meta: nenhuma rota acima de 2s; nenhuma consulta N+1.
 | Rota administrativa como usuário comum | |
 | `npm audit --audit-level=high` | |
 
-## 8. Bugs encontrados
+## 8. Bugs encontrados · ➕ opcional
 
 | # | Descrição | Gravidade | Como reproduzir | Situação | Teste de regressão |
 |---|---|---|---|---|---|
@@ -118,7 +120,7 @@ Meta: nenhuma rota acima de 2s; nenhuma consulta N+1.
 **Gravidade:** Crítica (perda de dados, falha de segurança, impede o uso) · Alta (impede
 uma funcionalidade) · Média (contorna-se) · Baixa (cosmético).
 
-## 9. Conclusão
+## 9. Conclusão · ➕ opcional
 
 | Critério | Resultado |
 |---|---|

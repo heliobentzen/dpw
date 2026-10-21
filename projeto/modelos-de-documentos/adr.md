@@ -1,6 +1,8 @@
 # ADR — Architecture Decision Record
 
-> Etapas 2 e 3 · Um arquivo por decisão, em `docs/adr/NNNN-titulo-curto.md`.
+> Etapas 1 e 3 · Um arquivo por decisão, em `docs/adr/NNNN-titulo-curto.md`.
+>
+> 📌 **Cobrado em:** Etapa 1, critério 5 (1+ ADR; 2+ para nota máxima) e Etapa 4, critério 1 (decisões comparadas com alternativas). Seções marcadas ➕ não são avaliadas.
 > ADR registra **por que** algo foi decidido — a informação que se perde primeiro e faz
 > mais falta seis meses depois.
 
@@ -62,7 +64,7 @@ autenticação por token (o Passport suporta as duas estratégias lado a lado �
 
 ---
 
-## Índice de ADRs do projeto
+## Índice de ADRs do projeto · ➕ opcional
 
 Mantenha em `docs/adr/README.md`:
 
@@ -78,11 +80,13 @@ Mantenha em `docs/adr/README.md`:
 > substituído. O valor do registro está justamente na trilha de raciocínio ao longo do
 > tempo.
 
-## ADRs mínimos exigidos na Etapa 2
+## ADRs mínimos exigidos
+
+**Na Etapa 1:** pelo menos 1 (2+ para nota máxima), por exemplo:
 
 1. Escolha da stack (linguagem, framework, banco) e justificativa
 2. Estratégia de autenticação e modelo de papéis
 3. Uma decisão de escopo técnico relevante (o que **não** será feito e por quê)
 
-Na Etapa 3, acrescente ao menos mais um ADR sobre uma decisão tomada durante o
+**Na Etapa 3:** acrescente ao menos mais um ADR sobre uma decisão tomada durante o
 desenvolvimento.

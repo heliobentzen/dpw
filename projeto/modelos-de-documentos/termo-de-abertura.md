@@ -1,6 +1,8 @@
 # Termo de Abertura do Projeto
 
 > Etapa 1 · Documento curto que formaliza o início e alinha expectativas com a organização
+>
+> ➕ **Opcional.** Nenhuma rubrica exige este termo; o aceite da organização vem da [carta de anuência](carta-de-anuencia.md).
 > parceira. Máximo 3 páginas.
 
 ## 1. Identificação

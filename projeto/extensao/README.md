@@ -1,226 +1,145 @@
 # Atividades extensionistas
 
-> **Entregas:** X1, X2 e X3 · **Peso:** 10% · Datas no [cronograma](../../docs/cronograma.md)
+> **Entregas:** X1, X2, X3 · **Semanas:** 15–20 · **Peso:** 10% · **Eliminatória** ·
+> **Rubrica:** [`rubrica-extensao.md`](../../avaliacao/rubrica-extensao.md)
 > **Ementa:** *Desenvolvimento de atividades extensionistas.*
 
-## O que é (e o que não é) extensão
+## 🎯 O que é extensão
 
-A extensão é, segundo a **Resolução CNE/CES nº 7/2018**, atividade que integra ensino e
-pesquisa em articulação com a sociedade, por meio de **interação dialógica** que promove
-troca de saberes e transformação social — nos dois sentidos.
+Extensão é **troca com a comunidade**, nos dois sentidos (Resolução CNE/CES nº 7/2018). A
+organização traz a demanda, a equipe constrói junto, algo fica e é usado, e os dois lados
+aprendem.
 
 | ✅ É extensão | ❌ Não é extensão |
 | --- | --- |
-| A comunidade traz a demanda | A equipe decide o que a comunidade precisa |
-| Interação continuada, dialógica | Uma visita para coletar requisitos |
-| Entrega algo que fica e é usado | Apresentação de slides e ida embora |
-| Estudante aprende com a comunidade | Comunidade como objeto de estudo |
-| Impacto verificável | "Levamos conhecimento à população" |
+| A organização traz a demanda | A equipe decide o que a comunidade precisa |
+| Encontros ao longo do semestre | Uma visita para coletar requisitos |
+| Algo fica e é usado | Apresentação de slides e ida embora |
 | Devolutiva registrada | Sem retorno |
 
-Também **não** é: estágio, visita técnica, palestra, prestação de serviço gratuita a
-empresa, nem projeto interno da própria instituição sem demanda externa.
-
-> Critério prático desta disciplina: **se a organização parceira não puder dizer, com
-> palavras dela, o que ganhou com o projeto, não houve extensão.**
+> **Teste prático:** se a organização não consegue dizer, com as palavras dela, o que ganhou,
+> não houve extensão.
 
 ---
 
-## Sequência
+## Pré-requisito: é extensão?
 
-| Momento | Atividade | Entrega |
-| --- | --- | --- |
-| 1 | Diagnóstico participativo com a organização | Ata + diagnóstico |
-| 2 | Planejamento da ação e pactuação com a organização | **X1** — Plano de ação |
-| 3 | Execução: capacitação, implantação assistida, acompanhamento | **X2** — Evidências |
-| 4 | Devolutiva e sistematização | **X3** — Relato de experiência |
+Qualquer "não" significa que a atividade **não é extensão**, o que é diferente de nota baixa.
 
-> Estes são os encontros **formais**. Reuniões de acompanhamento com a organização ocorrem
-> ao longo de todo o semestre, integradas às sprints do desenvolvimento.
+- [ ] Organização externa à instituição, com demanda vinda dela
+- [ ] **3+ encontros** com a organização ao longo do semestre
+- [ ] Algo concreto permanece com a comunidade
+- [ ] Houve devolutiva à organização
 
 ---
 
-## 1. Diagnóstico participativo
+## O que entregar, critério por critério
 
-Retome e aprofunde o diagnóstico da Etapa 1, agora com o sistema em construção.
+### 1. Diagnóstico e plano — X1 · semana 15 · peso 2,0
 
-**Roteiro da conversa:**
+**Vá ao local.** Veja o processo acontecendo, o equipamento e a conexão. Respostas otimistas
+por telefone são comuns; descobrir na semana 15 que não há internet ainda permite adaptar.
 
-1. Como está funcionando o processo hoje? Algo mudou desde nossa primeira conversa?
-2. Quem exatamente vai usar o sistema? Podemos conversar com essas pessoas?
-3. Que equipamento e conexão existem no local? (Verifique **presencialmente** — respostas
-   otimistas são comuns)
-4. Que receios vocês têm em relação a essa mudança?
-5. O que precisa acontecer para vocês considerarem isso um sucesso?
-6. Quem, na organização, será a pessoa de referência para o sistema?
-
-A pergunta 3 já salvou muitos projetos: descobrir na semana 14 que o galpão não tem
-internet permite adaptar; descobrir na semana 20, não.
-
----
-
-## 2. Plano de ação — Entrega X1
+O **plano de ação** responde:
 
 | Campo | Conteúdo |
 | --- | --- |
-| **Organização parceira** | Nome, natureza jurídica, endereço, pessoa de contato |
-| **Público atingido** | Quem, quantas pessoas, perfil |
-| **Demanda identificada** | Nas palavras da organização |
-| **Objetivo da ação** | O que será feito, com verbo de ação |
-| **Atividades** | Lista com data, local, duração e responsável |
-| **Recursos necessários** | Equipamento, deslocamento, material, custo |
-| **Cronograma** | Datas pactuadas **por escrito** com a organização |
-| **Indicadores de impacto** | Como saberemos que funcionou |
-| **Riscos e plano B** | O que pode dar errado e o que faremos |
-| **Responsáveis** | Quem faz o quê |
+| Demanda | Nas palavras da organização |
+| Público | Quem e quantas pessoas |
+| Atividades | O quê, quando, onde e quem da equipe |
+| Datas | Combinadas **por escrito** com a organização |
+| Indicadores | Como medir o impacto, com valor de antes |
+| Riscos | O que pode dar errado e o plano B |
 
-### Indicadores de impacto: quantitativos e qualitativos
+Indicadores precisam ser **medidos**, não estimados: tempo de uma operação antes × depois,
+registros no sistema após 30 dias, pessoas que operam sem ajuda.
 
-| Tipo | Exemplos |
-| --- | --- |
-| Quantitativo | Nº de pessoas capacitadas; nº de registros no sistema após 30 dias; tempo médio de uma operação antes × depois; % do processo que migrou do papel |
-| Qualitativo | Depoimentos da equipe da organização; observação de uso autônomo; problemas relatados que deixaram de ocorrer |
+### 2. Implantação e capacitação — X2 · semana 19 · peso 3,0
 
-Indicador precisa ser **medido**, não estimado. Defina agora como será coletado.
+O sistema **em uso**, no equipamento da organização, com dados reais.
 
----
+- [ ] Acessível do local, no equipamento e na conexão **da organização**
+- [ ] Contas criadas e dados iniciais carregados
+- [ ] Guia rápido de **uma página** entregue
 
-## 3. Execução — Entrega X2
+**Capacitação é mão na massa, não palestra:**
 
-A ação principal. Componentes obrigatórios:
+1. Demonstre o fluxo uma vez.
+2. Cada pessoa executa sozinha, enquanto você observa **sem intervir**.
+3. Tire as dúvidas que aparecerem.
+4. Cada pessoa executa de novo, sozinha.
 
-### 3.1 Implantação assistida
+### 3. Uso e autonomia · peso 2,5
 
-Colocar o sistema em uso real, no ambiente da organização, com dados reais. Não é
-demonstração — é operação acompanhada.
+Uma semana depois, volte ou ligue: o sistema está sendo usado? Quantos registros? O que
+travou? Corrija o que aparecer.
 
-Checklist:
+Para nota máxima: uso contínuo com registros reais crescendo, 2+ pessoas operando sem a
+equipe, responsável e custo de continuidade combinados, indicadores medidos antes e depois.
 
-- [ ] Sistema no ar e acessível do local
-- [ ] Contas criadas para as pessoas que vão usar
-- [ ] Dados iniciais carregados (cadastros existentes migrados, se houver)
-- [ ] Testado no equipamento e na conexão **da organização**
-- [ ] Impresso um guia rápido de uma página, deixado no local
+### 4. Devolutiva e relato — X3 · semana 20 · peso 2,5
 
-### 3.2 Capacitação
+**Devolutiva:** reunião **presencial** na organização, na linguagem dela:
 
-Formato: **mão na massa**, não palestra.
+1. O que combinamos e o que fizemos
+2. O que mudou, com os números
+3. O que fica: sistema, acessos, guia, custo
+4. **Escuta:** o que funcionou, o que atrapalhou
 
-1. Demonstre uma vez o fluxo completo (10 min).
-2. Cada pessoa executa o fluxo, com você observando **sem intervir** (20 min).
-3. Tire as dúvidas que surgirem naturalmente (20 min).
-4. Cada pessoa executa de novo, sozinha (15 min).
-5. Entregue o guia rápido e o manual (5 min).
+Anote a fala da organização literalmente — é a avaliação mais valiosa do projeto.
 
-Registre: lista de presença, fotos (com autorização de uso de imagem), dificuldades
-observadas e ajustes feitos no sistema em resposta.
+**Relato de experiência** ([modelo](../modelos-de-documentos/relato-de-experiencia.md)), com
+cenas concretas, respondendo:
 
-### 3.3 Acompanhamento
+- O que esperavam encontrar e o que encontraram?
+- O que a comunidade ensinou à equipe?
+- Que decisão do projeto mudou por causa desse contato?
+- O que fica depois que a equipe sai?
+- O que fariam diferente?
 
-Uma semana depois, volte ou ligue:
-
-- O sistema está sendo usado? Quantos registros?
-- O que travou?
-- Alguma coisa deixou de funcionar?
-- Alguém precisa de ajuda?
-
-Corrija o que aparecer. **Este retorno é o que separa entrega de abandono.**
-
-### Evidências a coletar
-
-| Evidência | Formato |
-| --- | --- |
-| Lista de presença da capacitação | Assinada |
-| Registro fotográfico | Com autorização de imagem |
-| Prints do sistema em uso real | Dados anonimizados |
-| Indicadores medidos | Antes × depois |
-| Depoimentos | Texto, áudio ou vídeo, com autorização |
-| Atas das reuniões | Assinadas |
-
-> **Cuidado com dados pessoais nas evidências.** Prints com nome, telefone ou endereço de
-> terceiros precisam ser anonimizados. Autorização de imagem por escrito para toda foto
-> com pessoas identificáveis. É aplicação direta do M09.
+> *"Na terceira visita, percebemos que Dona Marli não usava a busca porque o teclado do
+> celular cobria o resultado"* vale mais que um parágrafo sobre "a importância da extensão".
 
 ---
 
-## 4. Devolutiva e sistematização — Entrega X3
+## Evidências
 
-### Devolutiva
+Lista de presença, fotos **com autorização de imagem**, prints **anonimizados** e
+indicadores medidos.
 
-Reunião final **na organização**, apresentando resultados na linguagem dela:
-
-1. O que combinamos fazer
-2. O que fizemos
-3. O que mudou (com os números)
-4. O que fica: sistema, acessos, manual, custo, suporte
-5. **Escuta:** o que funcionou, o que atrapalhou, o que poderia ser melhor
-
-Registre a fala da organização — literalmente. É a avaliação mais valiosa do projeto.
-
-### Relato de experiência
-
-Sistematize a experiência conforme a seção 11 do
-[relatório técnico](../etapa-4-relatorio-e-encerramento/README.md#2-relato-de-experiência-dimensão-extensionista).
-Modelo em
-[`../modelos-de-documentos/relato-de-experiencia.md`](../modelos-de-documentos/relato-de-experiencia.md).
-
----
+> ⚠️ **Dado pessoal exposto nas evidências rebaixa o critério 2 em um nível.** Anonimize
+> nomes, telefones e endereços de terceiros (M09).
 
 ## Como encontrar uma organização parceira
 
-Se a equipe não tem contato, procure — nesta ordem de facilidade:
+| Tipo | Demanda típica |
+| --- | --- |
+| Associação de moradores | Associados, reserva de espaço, empréstimo de equipamentos |
+| Biblioteca comunitária | Acervo, empréstimos |
+| Cursinho popular | Matrícula, frequência |
+| Horta comunitária | Canteiros, escala de voluntários |
+| ONG de assistência | Atendimentos, doações, estoque |
+| Cooperativa de reciclagem | Pesagem, repasses |
+| Abrigo de animais | Cadastro, adoção, vacinas |
 
-| Tipo | Onde procurar | Demanda típica |
-| --- | --- | --- |
-| Associação de moradores | Prefeitura, subprefeitura, redes de bairro | Cadastro de associados, reserva de espaço, empréstimo de equipamentos |
-| Biblioteca ou sala de leitura comunitária | Secretaria de Cultura, coletivos | Acervo, empréstimo |
-| Cursinho popular / reforço escolar | Coletivos estudantis, igrejas | Matrícula, frequência, notas |
-| Horta comunitária / agricultura familiar | Secretaria de Meio Ambiente, feiras | Canteiros, produção, escala de voluntários |
-| ONG de assistência | CRAS, conselhos municipais | Atendimentos, doações, estoque |
-| Coletivo cultural | Pontos de cultura, editais | Agenda, inscrições, acervo |
-| Cooperativa de reciclagem | Secretaria de Meio Ambiente | Pesagem, repasses, cooperados |
-| Abrigo de animais | Redes sociais locais | Cadastro, adoção, vacinas |
-| Pastoral / grupo de igreja | Paróquias | Cestas básicas, agenda de voluntários |
-| Escola pública | Diretoria de ensino | Biblioteca, laboratório, empréstimo de equipamentos |
-
-**Como abordar:** vá presencialmente, apresente-se, explique que é um trabalho de
-disciplina **sem custo** para a organização, que dura um semestre, e que a equipe quer
-entender um problema antes de propor qualquer coisa. Leve a carta de apresentação da
-instituição.
-
-**Como não abordar:** e-mail genérico; chegar com a solução pronta; prometer o que não
-cabe no semestre.
-
----
-
-## 📦 Entregas
-
-| Código | Entrega | Semana |
-| --- | --- | ---: |
-| **X1** | Plano de ação extensionista | 15 |
-| **X2** | Pasta de evidências da execução | 19 |
-| **X3** | Relato de experiência (na seção 11 do relatório) | 20 |
-
-Rubrica em [`../../avaliacao/rubrica-extensao.md`](../../avaliacao/rubrica-extensao.md).
+**Aborde pessoalmente**, explique que é um trabalho de disciplina sem custo, que dura um
+semestre, e que a equipe quer **entender o problema antes** de propor algo. Leve a carta de
+apresentação da instituição. Não chegue com a solução pronta, nem prometa o que não cabe no
+semestre.
 
 ## ⚠️ Erros comuns
 
 | Erro | Por que é problema |
 | --- | --- |
-| Deixar para procurar parceiro na semana 14 | Não dá tempo de construir relação |
-| Tratar a organização como cliente que "passa requisito" | Extensão é diálogo, não encomenda |
-| Entregar o sistema sem capacitar | Ninguém usa |
+| Procurar parceiro na semana 14 | Não dá tempo de construir a relação |
+| Tratar a organização como cliente que passa requisitos | Extensão é diálogo |
+| Entregar sem capacitar | Ninguém usa |
 | Não voltar depois da entrega | Não se sabe se funcionou |
-| Evidências só de foto de grupo | Foto não demonstra impacto |
-| Publicar dados pessoais nas evidências | Violação da LGPD |
-| Relato que fala de extensão em abstrato | Não demonstra a experiência vivida |
+| Só foto de grupo como evidência | Foto não demonstra impacto |
 
 ## 📚 Referências
 
 - BRASIL. **Resolução CNE/CES nº 7, de 18 de dezembro de 2018** — Diretrizes para a Extensão
   na Educação Superior Brasileira.
-- BRASIL. **Lei nº 13.005/2014** — Plano Nacional de Educação, Meta 12.7 (10% da carga
-  horária em extensão).
 - FORPROEX. **Política Nacional de Extensão Universitária**. Manaus, 2012.
 - FREIRE, Paulo. **Extensão ou comunicação?** Rio de Janeiro: Paz e Terra, 1977.
-  (leitura curta e ainda a melhor crítica ao "levar conhecimento" de mão única)

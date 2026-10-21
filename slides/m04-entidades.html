@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M04 · Entidades: classes que geram o banco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/deck.css">
+</head>
+<body>
+<main class="deck" data-label="M04 · Entidades">
+
+<!-- ================================================================ ABERTURA -->
+<section class="slide title bare">
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="wm">04</div>
+  <div class="brand in"><b>IFPE</b><span class="dot"></span>Desenvolvimento de Projeto Web</div>
+  <div class="title-body">
+    <div class="eyebrow in">Módulo 04</div>
+    <h1 class="in">Entidades:<br><span class="hl">classes que geram o banco</span></h1>
+    <p class="lead in">Você escreve uma classe. O banco cria a tabela.</p>
+  </div>
+  <div class="meta in">Pré-requisito: M03 · TypeORM · PostgreSQL · Docker</div>
+  <aside class="notes">Item central da ementa: "classes para geração automática do banco de dados". Ritmo: uma ideia por slide. Confirme antes que todos têm Docker funcionando.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">A ideia do módulo</div>
+  <h2 class="in">Uma classe vira uma <span class="hl">tabela</span></h2>
+  <div class="pair fill-v">
+    <div class="in">
+      <div class="side-lbl">Você escreve</div>
+      <pre class="code lg">
+@Entity()
+export class Autor {
+  @Column()
+  nome: string;
+}
+</pre>
+    </div>
+    <div class="to f">→</div>
+    <div class="f right">
+      <div class="side-lbl">O banco recebe</div>
+      <pre class="code lg" data-lang="sql">
+CREATE TABLE "autor" (
+  "nome" varchar NOT NULL
+)
+</pre>
+    </div>
+  </div>
+  <p class="f muted center" style="text-align:center">Quem faz essa tradução é o <b>TypeORM</b>.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Ao fim da aula</div>
+  <h2 class="in">O banco do BiblioCom, inteiro</h2>
+  <div class="stack fill-v">
+    <div class="flow">
+      <div class="node f">AUTOR</div>
+      <div class="arrow f"><span class="arrow-label">escreve</span></div>
+      <div class="node g f">OBRA</div>
+      <div class="arrow f"><span class="arrow-label">classificada em</span></div>
+      <div class="node f">CATEGORIA</div>
+    </div>
+    <div class="flow" style="margin-top:56px">
+      <div class="node g f">OBRA</div>
+      <div class="arrow f"><span class="arrow-label">tem cópias</span></div>
+      <div class="node f">EXEMPLAR</div>
+      <div class="arrow f"><span class="arrow-label">sai em</span></div>
+      <div class="node f">EMPRESTIMO</div>
+      <div class="arrow rev f"><span class="arrow-label">faz</span></div>
+      <div class="node f">ASSOCIADO</div>
+    </div>
+  </div>
+  <div class="note ok f"><b>Meta</b> Seis tabelas. Nenhuma linha de SQL escrita por você.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Roteiro</div>
+  <h2 class="in">Seis passos</h2>
+  <div class="split" style="align-items:start">
+    <ol class="steps">
+      <li class="f">Subir o banco</li>
+      <li class="f">Entender o que é um ORM</li>
+      <li class="f">Transformar uma classe em tabela</li>
+    </ol>
+    <ol class="steps" style="counter-reset:s 3">
+      <li class="f">Decidir cada opção de coluna</li>
+      <li class="f">Ligar tabelas com relações</li>
+      <li class="f">Ver onde o atalho quebra</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================================================================ 01 -->
+<section class="slide dark section">
+  <div class="num in">01</div>
+  <h1 class="in">Subir o banco</h1>
+  <p class="lead in">PostgreSQL dentro de um contêiner Docker.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa</div>
+  <h2 class="in">Ligue o banco</h2>
+  <pre class="code term lg in" data-lang="sh">
+cd C:\dev\bibliocom
+docker compose up -d
+docker compose ps
+> db   postgres:16   running
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="2"><b>up -d</b> liga o banco e devolve o terminal para você.</p>
+    <p class="f" data-hl="3-4"><b>ps</b> confere: o serviço <code>db</code> está <code>running</code>.</p>
+  </div>
+  <aside class="notes">Na primeira vez o Docker baixa a imagem (~80 MB).</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa</div>
+  <h2 class="in">Confira: o banco está <span class="hl">vazio</span></h2>
+  <pre class="code term lg in" data-lang="sh">
+docker compose exec db psql -U bibliocom -d bibliocom -c "\dt"
+> Did not find any relations.
+</pre>
+  <div class="note ok f mt"><b>Ótimo</b> Vazio é o ponto de partida. As tabelas vão nascer das <b>suas classes</b>.</div>
+  <aside class="notes">psql roda dentro do contêiner; \dt lista as tabelas. Não é preciso instalar cliente de PostgreSQL.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa</div>
+  <h2 class="in">Três pacotes, <span class="hl">três papéis</span></h2>
+  <pre class="code term in" data-lang="sh">
+npm install @nestjs/typeorm typeorm pg
+</pre>
+  <div class="grid-3 fill-v">
+    <div class="card big f zoom"><span class="tag">typeorm</span><h3>O tradutor</h3><p>Classe → tabela.</p></div>
+    <div class="card big f zoom"><span class="tag">@nestjs/typeorm</span><h3>A ponte</h3><p>Liga o TypeORM ao Nest.</p></div>
+    <div class="card big f zoom"><span class="tag">pg</span><h3>O telefone</h3><p>Fala com o PostgreSQL.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O endereço do banco</div>
+  <h2 class="in">Lendo uma <span class="hl">DATABASE_URL</span></h2>
+  <div class="anat in">
+    <span class="seg f dimmed" data-order="1">postgres://</span>
+    <span class="seg f dimmed" data-order="2">bibliocom:devpassword</span>
+    <span class="seg f dimmed" data-order="3">@localhost</span>
+    <span class="seg f dimmed" data-order="4">:5432</span>
+    <span class="seg f dimmed" data-order="5">/bibliocom</span>
+  </div>
+  <div class="captions" style="text-align:center">
+    <p class="f" data-order="1">qual banco → <b>PostgreSQL</b></p>
+    <p class="f" data-order="2">usuário e senha → definidos no <b>docker-compose.yml</b></p>
+    <p class="f" data-order="3">onde → <b>sua máquina</b></p>
+    <p class="f" data-order="4">porta → a padrão do PostgreSQL</p>
+    <p class="f" data-order="5">qual banco dentro do servidor → <b>bibliocom</b></p>
+  </div>
+  <div class="note info f mt-auto" data-order="6"><b>Onde fica</b> No <code>.env</code>. E a chave vazia no <code>.env.example</code>, como no M03.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa</div>
+  <h2 class="in">Declare a variável no <span class="hl">esquema</span></h2>
+  <pre class="code lg in" data-title="src/config/esquema-env.ts">
+DATABASE_URL: z
+  .string("DATABASE_URL é obrigatória")
+  .startsWith("postgres"),
+</pre>
+  <p class="f lead mt">Por quê? O <code>validate</code> do M03 <b>só deixa passar</b> o que está no esquema.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in" style="color:var(--red)">Se esquecer essa linha</div>
+  <h2 class="in">A variável <span class="hl-red">some</span> sem aviso</h2>
+  <div class="flow fill-v">
+    <div class="node f">.env tem a URL</div><div class="arrow f"></div>
+    <div class="node rl f">validate descarta</div><div class="arrow r f"></div>
+    <div class="node r f">TypeORM recebe nada</div>
+  </div>
+  <div class="note warn f"><b>Sintoma</b> <code>no PostgreSQL user name specified</code> — a mensagem não fala em <code>.env</code>. Guarde.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · app.module.ts</div>
+  <h2 class="in">Conecte o TypeORM</h2>
+  <pre class="code lg in">
+TypeOrmModule.forRoot({
+  type: "postgres",
+  url: process.env.DATABASE_URL,
+  autoLoadEntities: true,
+}),
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="2"><b>type</b>: qual banco.</p>
+    <p class="f" data-hl="3"><b>url</b>: o endereço que acabamos de ler.</p>
+    <p class="f" data-hl="4"><b>autoLoadEntities</b>: encontra suas classes sozinho.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mais duas opções</div>
+  <h2 class="in">Dois interruptores</h2>
+  <div class="vs fill-v">
+    <div class="card big r f left"><span class="tag">synchronize: true</span><h3>Cria e altera tabelas a cada boot</h3><p>Só neste módulo. <b>Em produção, apaga dados.</b></p></div>
+    <div class="card big g f right"><span class="tag">logging: true</span><h3>Mostra o SQL no terminal</h3><p>A única forma de ver o que o ORM faz. Deixe ligado.</p></div>
+  </div>
+  <div class="note ok f"><b>Deu certo se</b> a app sobe e o terminal mostra <code>query: SELECT version()</code>.</div>
+</section>
+
+<!-- ================================================================ 02 -->
+<section class="slide dark section">
+  <div class="num in">02</div>
+  <h1 class="in">O que é um ORM</h1>
+  <p class="lead in">E por que usar um.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Sem ORM</div>
+  <h2 class="in">SQL escrito à mão</h2>
+  <pre class="code lg in">
+const { rows } = await pool.query(
+  "SELECT id, titulo FROM obra WHERE id = $1", [id]
+);
+const obra = rows[0];   // tipo: any
+</pre>
+  <p class="f lead mt">Funciona. Mas o TypeScript <b>não sabe nada</b> sobre <code>obra</code>.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Sem ORM</div>
+  <h2 class="in">Três problemas que crescem com o projeto</h2>
+  <div class="grid-3 fill-v">
+    <div class="card big r f zoom"><span class="tag">1</span><h3>Sem tipo</h3><p>Erro de digitação compila e quebra em produção.</p></div>
+    <div class="card big r f zoom"><span class="tag">2</span><h3>SQL espalhado</h3><p>A mesma consulta em cinco arquivos.</p></div>
+    <div class="card big r f zoom"><span class="tag">3</span><h3>Dois lugares</h3><p>Tabela no banco, expectativa no código. Podem divergir.</p></div>
+  </div>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Analogia</div>
+  <div class="big in">O ORM é um <span class="hl">intérprete</span>.</div>
+  <p class="sub f">Você fala TypeScript. O banco fala SQL. O ORM (<i>Object-Relational Mapper</i>) traduz nos dois sentidos.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Com ORM</div>
+  <h2 class="in">A classe vira a <span class="hl">única fonte de verdade</span></h2>
+  <div class="flow fill-v">
+    <div class="node g f zoom" style="font-size:24px;padding:22px 28px">class Obra</div>
+    <div class="arrow f"></div>
+    <div class="stack" style="flex:0 0 340px">
+      <div class="node f right">o tipo do TypeScript</div>
+      <div class="node f right">a tabela do banco</div>
+      <div class="node f right">a consulta SQL</div>
+    </div>
+  </div>
+  <p class="f muted">Os três problemas somem de uma vez.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Como o banco é atualizado</div>
+  <h2 class="in">Dois jeitos, um por módulo</h2>
+  <div class="vs fill-v">
+    <div class="card big f left"><span class="tag">Agora · M04</span><h3>synchronize</h3><p>Automático. Banco descartável.</p></div>
+    <div class="card big g f right"><span class="tag">Depois · M05</span><h3>Migrações</h3><p>Um arquivo que você lê antes de aplicar.</p></div>
+  </div>
+</section>
+
+<!-- ================================================================ 03 -->
+<section class="slide dark section">
+  <div class="num in">03</div>
+  <h1 class="in">A classe vira tabela</h1>
+  <p class="lead in">Uma linha de cada vez.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Passo 1 · a tabela</div>
+  <h2 class="in"><code>@Entity()</code> transforma a classe em tabela</h2>
+  <div class="pair fill-v">
+    <pre class="code lg in">
+@Entity()
+export class Autor {
+}
+</pre>
+    <div class="to f">→</div>
+    <pre class="code lg f right" data-lang="sql">
+CREATE TABLE "autor" (
+)
+</pre>
+  </div>
+  <p class="f lead">Sem <code>@Entity()</code>, é só uma classe comum.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Passo 2 · a chave</div>
+  <h2 class="in">Todo registro precisa de um <span class="hl">número único</span></h2>
+  <div class="pair fill-v">
+    <pre class="code lg in">
+@PrimaryGeneratedColumn()
+id: number;
+</pre>
+    <div class="to f">→</div>
+    <pre class="code lg f right" data-lang="sql">
+"id" SERIAL NOT NULL,
+PRIMARY KEY ("id")
+</pre>
+  </div>
+  <p class="f lead">O banco gera o número sozinho, a cada inserção.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Passo 3 · coluna obrigatória</div>
+  <h2 class="in">Por padrão, toda coluna é <span class="hl">obrigatória</span></h2>
+  <div class="pair fill-v">
+    <pre class="code lg in">
+@Column({ length: 150 })
+nome: string;
+</pre>
+    <div class="to f">→</div>
+    <pre class="code lg f right" data-lang="sql">
+"nome" varchar(150)
+  ⟪NOT NULL⟫
+</pre>
+  </div>
+  <p class="f lead"><code>length: 150</code> vira o limite. O <code>NOT NULL</code> você nem pediu — é o padrão.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Passo 4 · coluna opcional</div>
+  <h2 class="in">Para aceitar vazio: <code>nullable</code></h2>
+  <div class="pair fill-v">
+    <pre class="code lg in">
+@Column({ type: "date",
+          nullable: true })
+nascimento: string | null;
+</pre>
+    <div class="to f">→</div>
+    <pre class="code lg f right" data-lang="sql">
+"nascimento" date
+</pre>
+  </div>
+  <p class="f lead">Repare: o tipo TypeScript acompanha — <code>string | null</code>.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Passo 5 · valor padrão</div>
+  <h2 class="in">Quando ninguém informa: <code>default</code></h2>
+  <div class="pair fill-v">
+    <pre class="code lg in">
+@Column({ type: "text",
+          default: "" })
+biografia: string;
+</pre>
+    <div class="to f">→</div>
+    <pre class="code lg f right" data-lang="sql">
+"biografia" text
+  NOT NULL ⟪DEFAULT ''⟫
+</pre>
+  </div>
+  <p class="f lead"><code>text</code> não tem limite de tamanho; <code>varchar(n)</code> tem.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · acervo.module.ts</div>
+  <h2 class="in">Avise o módulo que a entidade existe</h2>
+  <pre class="code lg in">
+@Module({
+  imports: [TypeOrmModule.forFeature([Autor])],
+  ...
+})
+</pre>
+  <div class="note warn f mt"><b>Atenção</b> Entidade fora do <code>forFeature</code> não existe para o TypeORM.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Rode · olhe o terminal</div>
+  <h2 class="in">A tabela <span class="hl">nasceu</span></h2>
+  <pre class="code term in" data-lang="sh">
+npm run start:dev
+> query: CREATE TABLE "autor" ("id" SERIAL NOT NULL, "nome" varchar(150) ...
+docker compose exec db psql -U bibliocom -d bibliocom -c "\d autor"
+</pre>
+  <div class="note ok f mt"><b>Deu certo se</b> o <code>\d autor</code> mostra as quatro colunas.</div>
+  <p class="f muted mt">O <code>CREATE TABLE</code> aparece só na primeira vez. Depois a tabela já existe.</p>
+</section>
+
+<!-- ================================================================ 04 -->
+<section class="slide dark section">
+  <div class="num in">04</div>
+  <h1 class="in">Cada opção é uma decisão</h1>
+  <p class="lead in">Modelar é decidir. Digitar é outra coisa.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Antes de escrever um <code>@Column</code></div>
+  <h2 class="in">Cinco perguntas</h2>
+  <ul class="clean focus-list">
+    <li class="f"><code>type</code> — que tipo de dado é?</li>
+    <li class="f"><code>length</code> — qual o tamanho máximo?</li>
+    <li class="f"><code>nullable</code> — pode não existir?</li>
+    <li class="f"><code>unique</code> — pode repetir?</li>
+    <li class="f"><code>default</code> — o que vale se ninguém informar?</li>
+  </ul>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">A decisão mais cara</div>
+  <div class="big in">Toda coluna <code style="font-size:.8em">nullable</code> obriga o código a perguntar <span class="hl-red">"e se for nulo?"</span></div>
+  <p class="sub f">Em todo lugar que lê essa coluna. Para sempre.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Compare</div>
+  <h2 class="in">Quando o nulo faz sentido?</h2>
+  <div class="vs fill-v">
+    <div class="card big g f left"><span class="tag">nascimento</span><h3>nullable ✓</h3><p>Nulo quer dizer "não sabemos a data". Faz sentido.</p></div>
+    <div class="card big f right"><span class="tag">biografia</span><h3>default: "" ✓</h3><p>Texto vazio já quer dizer "sem biografia". Nulo seria repetir.</p></div>
+  </div>
+</section>
+
+<section class="slide dark statement">
+  <div class="eyebrow in">A regra</div>
+  <div class="big in">Nulo só quando ele <span class="hl">significa algo</span>.</div>
+  <p class="sub f">Texto opcional? Use <code>default: ""</code>.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Exercite · 1 de 2</div>
+  <h2 class="in">Qual <code>@Column</code>?</h2>
+  <div class="vs fill-v">
+    <div class="card big">
+      <span class="tag">CPF do associado</span>
+      <h3 class="f zoom" style="color:var(--green-d)"><code>length: 11, unique: true</code></h3>
+      <p class="f fade">Obrigatório e não pode repetir.</p>
+    </div>
+    <div class="card big">
+      <span class="tag">Valor da multa</span>
+      <h3 class="f zoom" style="color:var(--green-d)"><code>type: "decimal"</code></h3>
+      <p class="f fade"><b class="hl-red">Nunca float</b> para dinheiro: ele perde centavos.</p>
+    </div>
+  </div>
+  <aside class="notes">Deixe a turma responder antes de revelar.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Exercite · 2 de 2</div>
+  <h2 class="in">Qual <code>@Column</code>?</h2>
+  <div class="vs fill-v">
+    <div class="card big">
+      <span class="tag">Data da devolução</span>
+      <h3 class="f zoom" style="color:var(--green-d)"><code>type: "date", nullable: true</code></h3>
+      <p class="f fade">Aqui o nulo significa algo: "ainda não devolveu".</p>
+    </div>
+    <div class="card big">
+      <span class="tag">Aceita avisos por e-mail</span>
+      <h3 class="f zoom" style="color:var(--green-d)"><code>type: "boolean", default: true</code></h3>
+      <p class="f fade">Sempre tem valor. O padrão é decisão da biblioteca.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O ciclo do módulo</div>
+  <h2 class="in">Três movimentos, sempre</h2>
+  <div class="flow fill-v">
+    <div class="node g f zoom" style="font-size:24px;padding:24px">1. Muda a classe</div>
+    <div class="arrow f"></div>
+    <div class="node g f zoom" style="font-size:24px;padding:24px">2. Olha o SQL</div>
+    <div class="arrow f"></div>
+    <div class="node g f zoom" style="font-size:24px;padding:24px">3. Confere o banco</div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Experimente</div>
+  <h2 class="in">Uma coluna nova, <span class="hl">sem SQL</span></h2>
+  <div class="pair fill-v">
+    <pre class="code lg in">
+@Column({ length: 60,
+          default: "" })
+nacionalidade: string;
+</pre>
+    <div class="to f">→</div>
+    <pre class="code lg f right" data-lang="sql">
+ALTER TABLE "autor"
+  ADD "nacionalidade"
+  varchar(60)
+</pre>
+  </div>
+  <p class="f lead">Salvou, o banco mudou. É o outro item da ementa: atualizar o banco a partir das classes.</p>
+</section>
+
+<!-- ================================================================ 05 -->
+<section class="slide dark section">
+  <div class="num in">05</div>
+  <h1 class="in">Relações</h1>
+  <p class="lead in">Como uma tabela aponta para outra.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Relação 1:N</div>
+  <h2 class="in">Uma autora, <span class="hl">muitas obras</span></h2>
+  <div class="split even fill-v" style="align-items:center">
+    <table class="dbt in">
+      <caption>autor</caption>
+      <tr><th>id</th><th>nome</th></tr>
+      <tr><td class="key">1</td><td>Machado de Assis</td></tr>
+      <tr><td>2</td><td>Clarice Lispector</td></tr>
+    </table>
+    <table class="dbt f right">
+      <caption>obra</caption>
+      <tr><th>id</th><th>titulo</th><th>autorId</th></tr>
+      <tr><td>10</td><td>Dom Casmurro</td><td class="key">1</td></tr>
+      <tr><td>11</td><td>Quincas Borba</td><td class="key">1</td></tr>
+      <tr><td>12</td><td>A hora da estrela</td><td>2</td></tr>
+    </table>
+  </div>
+  <div class="note ok f"><b>Regra</b> A coluna que aponta (<code>autorId</code>) fica do lado <b>"muitos"</b> — na obra.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Em código · obra.entity.ts</div>
+  <h2 class="in">"Muitas obras para uma autora"</h2>
+  <pre class="code lg in">
+@ManyToOne(() => Autor, (autor) => autor.obras)
+autor: Relation&lt;Autor>;
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="1"><b>@ManyToOne</b> cria a coluna <code>autorId</code> e a chave estrangeira.</p>
+    <p class="f" data-hl="2"><b>Relation&lt;Autor></b>: a obra "conhece" sua autora. O <code>Relation</code> é explicado já, já.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Em código · obra.entity.ts</div>
+  <h2 class="in">Declare também o <code>autorId</code></h2>
+  <pre class="code lg in">
+@Column()
+autorId: number;
+</pre>
+  <p class="f lead mt">A coluna já existia no banco. Declarar dá <b>tipo</b> a ela no TypeScript — e o M06 vai usá-la.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Em código · autor.entity.ts</div>
+  <h2 class="in">O outro lado: <code>@OneToMany</code></h2>
+  <pre class="code lg in">
+@OneToMany(() => Obra, (obra) => obra.autor)
+obras: Relation&lt;Obra[]>;
+</pre>
+  <div class="note info f mt"><b>Detalhe</b> Este lado <b>não cria coluna</b>. Só permite navegar da autora até as obras.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Por que <code>Relation&lt;&gt;</code>?</div>
+  <h2 class="in">O problema do <span class="hl">ovo e da galinha</span></h2>
+  <div class="flow fill-v">
+    <div class="node mono f">obra.entity.ts</div>
+    <div class="arrow f"><span class="arrow-label">precisa de Autor</span></div>
+    <div class="node mono f">autor.entity.ts</div>
+    <div class="arrow f"><span class="arrow-label">precisa de Obra</span></div>
+    <div class="node mono ghost f">obra.entity.ts<small>ainda carregando…</small></div>
+  </div>
+  <div class="note warn f"><b>Sem Relation</b> A API nem sobe: <code>Cannot access 'Autor' before initialization</code></div>
+</section>
+
+<section class="slide dark statement">
+  <div class="eyebrow in">A regra prática</div>
+  <div class="big in">Propriedade de relação? Use <span class="hl">Relation&lt;&gt;</span>.</div>
+  <p class="sub f"><code>@ManyToOne</code>, <code>@OneToMany</code>, <code>@ManyToMany</code>. Coluna comum não precisa.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Exercite</div>
+  <h2 class="in">Responda antes de revelar</h2>
+  <table class="tbl">
+    <tr class="in"><td>A coluna se chama <code>autorId</code>. Por quê?</td><td class="f fade ans">Nome da relação + Id</td></tr>
+    <tr class="in"><td><code>@OneToMany</code> criou coluna em <code>autor</code>?</td><td class="f fade ans">Não, só navega</td></tr>
+    <tr class="in"><td>Se apagar <code>@Column() autorId</code>, a coluna some?</td><td class="f fade ans">Não, o @ManyToOne a cria</td></tr>
+  </table>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Uma pergunta de negócio</div>
+  <div class="big in">Alguém apaga a autora.<br><span class="hl-red">E as obras dela?</span></div>
+  <p class="sub f">Quem responde é a opção <code>onDelete</code>.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in"><code>onDelete</code></div>
+  <h2 class="in">Três respostas possíveis</h2>
+  <div class="grid-3 fill-v">
+    <div class="card big g f zoom"><span class="tag">RESTRICT</span><h3>Impede</h3><p>Não deixa apagar enquanto houver obras.</p></div>
+    <div class="card big f zoom"><span class="tag">CASCADE</span><h3>Apaga junto</h3><p>Some a autora, somem as obras.</p></div>
+    <div class="card big f zoom"><span class="tag">SET NULL</span><h3>Desvincula</h3><p>A obra fica, sem autora.</p></div>
+  </div>
+</section>
+
+<section class="slide dark statement">
+  <div class="eyebrow in">Como decidir</div>
+  <div class="big in">"Este registro faz sentido <span class="hl">sozinho</span>?"</div>
+  <div class="grid-2 mt" style="max-width:1000px">
+    <div class="card f zoom"><span class="tag">Obra sem autora?</span><h3>Faz sentido.</h3><p><b style="color:#f5f5f7">→ RESTRICT</b></p></div>
+    <div class="card f zoom"><span class="tag">Exemplar sem obra?</span><h3>Não faz.</h3><p><b style="color:#f5f5f7">→ CASCADE</b></p></div>
+  </div>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in" style="color:var(--red)">Cuidado</div>
+  <div class="big in">"Usei CASCADE para o erro sumir" <span class="hl-red">não é justificativa</span>.</div>
+  <p class="sub f">O erro estava lá para avisar que você ia apagar algo importante.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Relação N:N</div>
+  <h2 class="in">Muitas obras, <span class="hl">muitas categorias</span></h2>
+  <div class="flow fill-v">
+    <div class="node f">obra</div>
+    <div class="arrow f"></div>
+    <div class="node g f zoom" style="padding:18px 30px">obra_categoria<small>obraId · categoriaId</small></div>
+    <div class="arrow rev f"></div>
+    <div class="node f">categoria</div>
+  </div>
+  <p class="f lead">Nenhum dos lados consegue guardar a ligação. Nasce uma <b>terceira tabela</b>.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Em código · obra.entity.ts</div>
+  <h2 class="in"><code>@ManyToMany</code> + <code>@JoinTable</code></h2>
+  <pre class="code lg in">
+@ManyToMany(() => Categoria, (c) => c.obras)
+@JoinTable({ name: "obra_categoria" })
+categorias: Relation&lt;Categoria[]>;
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="1"><b>@ManyToMany</b> vai nos dois lados.</p>
+    <p class="f" data-hl="2"><b>@JoinTable</b> vai em <b>um lado só</b> — é ele que cria a tabela do meio.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Obra × exemplar</div>
+  <h2 class="in">Um livro no catálogo, <span class="hl">três na estante</span></h2>
+  <div class="flow fill-v">
+    <div class="node g f zoom" style="padding:26px 32px;font-size:24px">Dom Casmurro<small>obra · o catálogo</small></div>
+    <div class="arrow f"></div>
+    <div class="stack" style="flex:0 0 320px">
+      <div class="node f right">Volume 1<small>exemplar · tombo 0001</small></div>
+      <div class="node f right">Volume 2<small>exemplar · tombo 0002</small></div>
+      <div class="node f right">Volume 3<small>exemplar · tombo 0003</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Em código · exemplar.entity.ts</div>
+  <h2 class="in">Duas decisões do exemplar</h2>
+  <pre class="code lg in">
+@Column({ length: 20, unique: true })
+tombo: string;
+
+@Column({ type: "enum", enum: EstadoExemplar })
+estado: EstadoExemplar;
+</pre>
+  <div class="captions">
+    <p class="f" data-hl="1-2"><b>unique</b>: dois volumes com o mesmo tombo é erro de cadastro.</p>
+    <p class="f" data-hl="4-5"><b>enum</b>: só valores da lista (novo, bom, desgastado, descartado). Nada de "Bom" e "bom".</p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Em código · exemplar.entity.ts</div>
+  <h2 class="in">Exemplar não existe sem obra</h2>
+  <pre class="code lg in">
+@ManyToOne(() => Obra, (o) => o.exemplares,
+           { onDelete: "CASCADE" })
+obra: Relation&lt;Obra>;
+</pre>
+  <p class="f lead mt">Aqui o <code>CASCADE</code> é legítimo: apagou a obra, os volumes dela não fazem sentido.</p>
+</section>
+
+<section class="slide statement">
+  <div class="eyebrow in">Índices</div>
+  <div class="big in">Sem índice, o banco lê a tabela <span class="hl">inteira</span>.</div>
+  <p class="sub f">Como procurar um assunto num livro sem índice remissivo: página por página.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Em código · obra.entity.ts</div>
+  <h2 class="in">Um <code>@Index</code> no que é muito buscado</h2>
+  <pre class="code lg in">
+@Index()
+@Column({ length: 13, default: "" })
+isbn: string;
+</pre>
+  <div class="note ok f mt"><b>Regra</b> Indexe o que é buscado <b>com frequência</b>. O balcão busca ISBN o dia inteiro.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Índice tem preço</div>
+  <h2 class="in">Não indexe tudo</h2>
+  <div class="grid-3 fill-v">
+    <div class="card big f zoom"><span class="tag">Espaço</span><p>Cada índice ocupa disco.</p></div>
+    <div class="card big f zoom"><span class="tag">Escrita</span><p>Cada INSERT atualiza todos os índices.</p></div>
+    <div class="card big f zoom"><span class="tag">Já existe</span><p>Chaves primária e estrangeira já vêm indexadas.</p></div>
+  </div>
+</section>
+
+<!-- ================================================================ 06 -->
+<section class="slide dark section">
+  <div class="num in">06</div>
+  <h1 class="in">Onde o atalho quebra</h1>
+  <p class="lead in">O <code style="background:none">synchronize</code> com dados de verdade no banco.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Experimento 1</div>
+  <h2 class="in">Encurtar uma coluna com texto dentro</h2>
+  <pre class="code term red lg in" data-lang="sh">
+> ALTER TABLE "autor" ⟦DROP COLUMN "biografia"⟧
+> ALTER TABLE "autor" ADD "biografia" varchar(10)
+</pre>
+  <div class="card r big f mt"><span class="tag">Resultado</span><h3>O texto sumiu.</h3><p>Sem erro. Sem aviso. A aplicação subiu normalmente.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Experimento 2</div>
+  <h2 class="in">Renomear uma coluna</h2>
+  <pre class="code term lg in" data-lang="sh">
+> ALTER TABLE "obra"
+>   ⟪RENAME COLUMN "sinopse" TO "resumo"⟫
+</pre>
+  <div class="card g big f mt"><span class="tag">Resultado</span><h3>O dado sobreviveu.</h3><p>Ele adivinhou certo — desta vez.</p></div>
+  <aside class="notes">Desfaça os dois experimentos antes de seguir.</aside>
+</section>
+
+<section class="slide dark statement">
+  <div class="eyebrow in">A lição</div>
+  <div class="big in">O problema é não saber <span class="hl">qual dos dois</span> vai acontecer.</div>
+  <p class="sub f">No M05, você vai ler cada mudança <b style="color:#f5f5f7">antes</b> de ela rodar.</p>
+</section>
+
+<!-- ================================================================ FECHO -->
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · por sua conta</div>
+  <h2 class="in">Modele o <span class="hl">empréstimo</span></h2>
+  <ul class="clean focus-list">
+    <li class="f">Associado: nome, e-mail único, data de inscrição.</li>
+    <li class="f">Empréstimo: um exemplar + um associado + três datas.</li>
+    <li class="f">Apagar associado com empréstimo aberto: <b>não pode</b>.</li>
+    <li class="f">Apagar exemplar emprestado: <b>não pode</b>.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Mão na massa · o que entregar</div>
+  <h2 class="in">Código <span class="hl">e justificativa</span></h2>
+  <ol class="steps">
+    <li class="f">As entidades <code>Associado</code> e <code>Emprestimo</code>.</li>
+    <li class="f">O registro no <code>forFeature</code>.</li>
+    <li class="f">A conferência com <code>\d emprestimo</code>.</li>
+    <li class="f"><b>Uma frase</b> justificando cada <code>nullable</code>, <code>unique</code> e <code>onDelete</code>.</li>
+  </ol>
+  <div class="note info f mt"><b>Dica</b> Empréstimo tem dois <code>@ManyToOne</code>.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">O outro lado da moeda</div>
+  <h2 class="in">O que o ORM <span class="hl-red">cobra</span></h2>
+  <ul class="clean focus-list">
+    <li class="f">Você escreve menos SQL — e pode entender menos SQL.</li>
+    <li class="f">Consultas ingênuas ficam lentas sem avisar (M06).</li>
+    <li class="f">Casos difíceis ainda pedem SQL (M06).</li>
+  </ul>
+  <div class="note ok f mt"><b>Por isso</b> o <code>logging: true</code> fica ligado: leia o SQL que ele gera.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in" style="color:var(--red)">Pegadinha de mercado</div>
+  <h2 class="in"><code>nullable: true</code> "por precaução"</h2>
+  <p class="lead in">Parece prudente. Na prática, espalha <code>if (x === null)</code> pelo sistema inteiro.</p>
+  <div class="note ok f mt"><b>Padrão</b> Obrigatório. Nulo é exceção, com motivo.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">IA no fluxo</div>
+  <h2 class="in">A IA escreve a sintaxe. <span class="hl">A decisão é sua.</span></h2>
+  <div class="grid-3 fill-v">
+    <div class="card r f zoom"><span class="tag">Erro comum</span><p><code>nullable</code> em tudo</p></div>
+    <div class="card r f zoom"><span class="tag">Erro comum</span><p><code>CASCADE</code> em tudo</p></div>
+    <div class="card r f zoom"><span class="tag">Erro comum</span><p><code>float</code> para dinheiro</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Resumo</div>
+  <h2 class="in">Cinco ideias para levar</h2>
+  <ul class="checks">
+    <li class="f fade">Uma classe com <code>@Entity</code> vira uma tabela.</li>
+    <li class="f fade">Toda coluna é obrigatória, a menos que você diga o contrário.</li>
+    <li class="f fade">Nulo só quando significa algo.</li>
+    <li class="f fade">A chave estrangeira fica do lado "muitos".</li>
+    <li class="f fade"><code>onDelete</code> é decisão de negócio.</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Desafio de fixação</div>
+  <h2 class="in">Multa por atraso</h2>
+  <p class="lead in">R$ 0,50 por dia, até R$ 10,00. Uma coluna em <code>Emprestimo</code> ou uma entidade própria?</p>
+  <ol class="steps mt">
+    <li class="f">Dá para pagar em parcelas?</li>
+    <li class="f">A coordenação pode perdoar?</li>
+    <li class="f">O valor da diária pode mudar no futuro?</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <div class="eyebrow in">Checklist de saída</div>
+  <h2 class="in">Você terminou o M04 se…</h2>
+  <ul class="checks">
+    <li class="f fade">O banco nasceu das classes, sem SQL à mão</li>
+    <li class="f fade">Você viu um <code>ALTER TABLE</code> ao mudar uma classe</li>
+    <li class="f fade">As relações 1:N e N:N estão no banco</li>
+    <li class="f fade">Cada decisão de coluna tem uma frase de justificativa</li>
+    <li class="f fade">Você fez os dois experimentos do <code>synchronize</code></li>
+  </ul>
+</section>
+
+<section class="slide title bare">
+  <div class="glow g1"></div>
+  <div class="brand in"><b>IFPE</b><span class="dot"></span>Desenvolvimento de Projeto Web</div>
+  <div class="title-body">
+    <div class="eyebrow in">Próximo</div>
+    <h1 class="in">M05 · Migrações:<br><span class="hl">evoluir o banco com segurança</span></h1>
+    <p class="lead in">Roteiro completo e exercícios em <code>modulos/04-entidades-typeorm/</code>.</p>
+  </div>
+  <div class="meta in">O <code>synchronize</code> foi um andaime. No M05, ele cai.</div>
+</section>
+
+</main>
+<script src="assets/deck.js"></script>
+</body>
+</html>

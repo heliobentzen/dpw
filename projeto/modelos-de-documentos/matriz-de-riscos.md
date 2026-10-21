@@ -1,6 +1,8 @@
 # Matriz de Riscos
 
 > Etapa 1 · Revisar em toda retrospectiva de sprint.
+>
+> 📌 **Cobrado em:** Etapa 1, critério 6 — 3 a 5 riscos específicos, cada um com plano B. Seções marcadas ➕ não são avaliadas.
 
 ## Como usar
 
@@ -57,7 +59,7 @@ Use como ponto de partida — adapte ao seu contexto, não copie.
 
 ---
 
-## Registro de riscos materializados
+## Registro de riscos materializados · ➕ opcional
 
 Quando um risco vira problema, registre — isso alimenta o relatório e a retrospectiva.
 

@@ -65,7 +65,7 @@ if (!EXIGE_BACKEND) {
   info("Backend e Docker ainda nao sao exigidos — use --etapa m03 / m04 depois");
 }
 if (WINDOWS) {
-  info("Guia de setup do Windows: docs/ambiente-setup-windows.md");
+  info("Guia de setup: docs/ambiente-setup.md");
   info("Tabela de equivalencias:  recursos/comandos-windows.md");
 }
 
@@ -119,7 +119,7 @@ if (raiz) {
     ".gitattributes presente",
     existsSync(join(raiz, ".gitattributes")),
     "Crie o .gitattributes com '*.sh text eol=lf' — sem ele o deploy do M12 falha " +
-    "com 'bad interpreter' (ver ambiente-setup.md, secao 10)",
+    "com 'bad interpreter' (ver docs/ambiente-setup.md, passo 8)",
   );
 } else {
   info("Fora de um repositorio Git — verificacoes do repositorio puladas");
@@ -170,7 +170,7 @@ if (EXIGE_DOCKER) {
       "Docker instalado",
       false,
       WINDOWS
-        ? "No Windows exige o WSL2 antes — ver ambiente-setup-windows.md, passo 7"
+        ? "No Windows exige o WSL2 antes — ver docs/ambiente-setup.md, passo 7"
         : "https://docs.docker.com/engine/install/",
     );
   }

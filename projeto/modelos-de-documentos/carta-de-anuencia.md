@@ -1,6 +1,8 @@
 # Carta de Anuência
 
 > Etapa 1 · Documento em papel timbrado da organização parceira, assinado por representante
+>
+> 📌 **Cobrado em:** Etapa 1, pré-requisito — aceite da organização por escrito (este modelo ou e-mail). Seções marcadas ➕ não são avaliadas.
 > legal. Adapte ao padrão exigido pela sua instituição — este é um modelo de referência.
 
 ---

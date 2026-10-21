@@ -1,6 +1,8 @@
 # Relatório Técnico — estrutura e orientações
 
-> Etapa 4 · 12 a 20 páginas + apêndices · ABNT (ou norma da instituição) · PDF
+> Etapa 4 · 8 a 15 páginas (só as seções obrigatórias) + apêndices · ABNT (ou norma da instituição) · PDF
+>
+> 📌 **Cobrado em:** Etapa 4 — decisões técnicas (seção 5), resultados e limitações (seções 10 e 12), escrita (todo o texto). O relato é avaliado na extensão. Seções marcadas ➕ não são avaliadas.
 
 ---
 
@@ -28,12 +30,12 @@ Escreva por último.
 - Justificativa: relevância social e técnica
 - Como o documento está organizado
 
-## 2. A organização parceira (1 página)
+## 2. A organização parceira (1 página) · ➕ opcional
 
 Quem é, quando surgiu, o que faz, quantas pessoas atende, como se sustenta. Como se deu o
 primeiro contato e como a relação evoluiu ao longo do semestre.
 
-## 3. Diagnóstico (1–2 páginas)
+## 3. Diagnóstico (1–2 páginas) · ➕ opcional
 
 **Como o processo funcionava antes.** Descreva o fluxo real, com evidências: falas
 registradas em ata, fotos do processo em papel, números levantados.
@@ -63,7 +65,7 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 > do commitado porque, com 5 meses e uma equipe pequena, a classe de erro que mais nos
 > custou tempo na primeira sprint foi campo renomeado na API sem o parceiro saber."
 
-## 6. Desenvolvimento (2–3 páginas)
+## 6. Desenvolvimento (2–3 páginas) · ➕ opcional
 
 - Organização do trabalho: sprints, papéis, rituais
 - Fluxo técnico: branches, PRs, revisão, CI
@@ -71,7 +73,7 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 - Três desafios técnicos concretos e como foram resolvidos
 - Métricas: nº de commits, PRs, issues fechadas, linhas de código, distribuição por autor
 
-## 7. Testes (1–2 páginas)
+## 7. Testes (1–2 páginas) · ➕ opcional
 
 - Estratégia e níveis
 - Cobertura e o que ela cobre de fato
@@ -79,7 +81,7 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 - **Teste com usuário real:** o que foi observado e o que mudou no sistema por causa disso
 - Bugs conhecidos remanescentes
 
-## 8. Implantação (1 página)
+## 8. Implantação (1 página) · ➕ opcional
 
 - Onde está no ar, com a URL
 - Arquitetura de produção
@@ -87,7 +89,7 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 - Backup e monitoramento
 - **Custo mensal de manutenção** e quem arca
 
-## 9. Segurança e proteção de dados (1 página)
+## 9. Segurança e proteção de dados (1 página) · ➕ opcional
 
 - Medidas adotadas (autenticação, autorização, cabeçalhos, validação)
 - Resultado do `check --deploy` e das verificações do M09
@@ -108,7 +110,7 @@ comparação antes × depois.
 
 **Meta não alcançada não reprova — omiti-la, sim.** Analise honestamente por quê.
 
-## 11. Relato de experiência (2–3 páginas) ⭐
+## 11. Relato de experiência (2–3 páginas) ⭐ · ➕ opcional
 
 A dimensão extensionista. Ver
 [`relato-de-experiencia.md`](relato-de-experiencia.md) para a estrutura detalhada.

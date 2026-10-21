@@ -7,6 +7,14 @@ framework"*. A entidade deixa de ser esquema e passa a ser dado consultado.
 
 > A teoria vem quando o código pede: as etapas 3, 8, 10, 11, 13 e 14 são de raciocínio.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E2** — ver [📦 Entrega E2](#-entrega-e2--caderno-de-consultas) no fim |
+| [Projeto](../../avaliacao/) | Etapa 2 · critérios 2 e 3 · Etapa 3 · B4 (filtros, paginação, sem N+1) e D4 (SQL parametrizado). |
+| Etapas ➕ opcionais | 14, 15 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -51,8 +59,8 @@ etapas **do mais simples ao mais caro**: leitura, depois volume e medição, por
 | 11 | [**As duas APIs do TypeORM**](#etapa-11--as-duas-apis-do-typeorm) | média | **Repository × QueryBuilder** |
 | 12 | [QueryBuilder e busca](#etapa-12--querybuilder-e-busca) | longa | filtros opcionais |
 | 13 | [**Parâmetro não é concatenação**](#etapa-13--parâmetro-não-é-concatenação) | média | **injeção de SQL** |
-| 14 | [**Por que transações existem**](#etapa-14--por-que-transações-existem) | média | **atomicidade** |
-| 15 | [Transação na prática](#etapa-15--transação-na-prática) | longa | por sua conta |
+| 14 | [**Por que transações existem**](#etapa-14--por-que-transações-existem) ➕ | média | **atomicidade** |
+| 15 | [Transação na prática](#etapa-15--transação-na-prática) ➕ | longa | por sua conta |
 
 ---
 
@@ -683,6 +691,8 @@ restante do OWASP.
 
 ## Etapa 14 — Por que transações existem
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 Última parada de raciocínio. Emprestar um exemplar é **duas escritas**:
 
 1. criar o registro de empréstimo;
@@ -744,6 +754,8 @@ da obrigação de sincronia.
 ---
 
 ## Etapa 15 — Transação na prática
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
 
 Agora é com você.
 
@@ -831,6 +843,19 @@ consultas SQL ela deve gerar? Confira no log. Onde fica o código: controller ou
 - [ ] Você viu a diferença entre usar o `manager` e usar o repositório dentro da transação
 - [ ] Endpoints temporários (`nome`, `ruim`, `bom`) apagados
 - [ ] Você sabe dizer o que está errado no `@Body() dados: Partial<Obra>` da etapa 10
+
+## 📦 Entrega E2 — Caderno de consultas
+
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
+
+- [ ] Consultas com `Repository` e `QueryBuilder`, cada uma com o SQL gerado ao lado
+- [ ] Um caso de N+1 corrigido, com a medição antes e depois (etapas 5 a 8)
+
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- A transação do empréstimo testada com falha proposital (etapas 14 e 15)
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 🧪 Exercícios
 

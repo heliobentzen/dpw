@@ -1,6 +1,9 @@
 # M11 — Exercícios
 
-## E11.1 — Revisão de contrato (individual) ⭐
+> **O que é cobrado.** Entrega **E7** do [portfólio](../../avaliacao/rubrica-portfolio.md): `openapi.json` versionado, CI que falha se o schema divergir e um cliente consumindo só pelo contrato.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E11.1 — Revisão de contrato (individual) ⭐ · ➕ opcional
 
 Faça as quatro mudanças abaixo, **uma de cada vez**, regerando o contrato e lendo o *diff*
 depois de cada uma. Desfaça antes da próxima.
@@ -17,7 +20,7 @@ receber `400`. Mudança de **regra** também é mudança de contrato.
 
 ---
 
-## E11.2 — Consumidor só pelo contrato (individual)
+## E11.2 — Consumidor só pelo contrato (individual) · 📌 cobrado
 
 Escolha uma rota de escrita (por exemplo, `POST /api/obras`). Usando **só** o Swagger UI ou o
 `openapi.json`, sem abrir o código do backend:
@@ -28,7 +31,7 @@ Escolha uma rota de escrita (por exemplo, `POST /api/obras`). Usando **só** o S
 
 ---
 
-## E11.3 — Um segundo cliente tipado (individual)
+## E11.3 — Um segundo cliente tipado (individual) · ➕ opcional
 
 Em `pacotes\tipos\exemplos\`, escreva `criar-obra.ts`, que faz login e cria uma obra com o
 `openapi-fetch`.
@@ -42,7 +45,7 @@ Em `pacotes\tipos\exemplos\`, escreva `criar-obra.ts`, que faz login e cria uma 
 
 ---
 
-## E11.4 — Obsoleto com prazo (em duplas)
+## E11.4 — Obsoleto com prazo (em duplas) · ➕ opcional
 
 Implementem a troca de `autor` por `nomeAutor` no `ObraResumo` pelo caminho
 **expandir → contrair**:

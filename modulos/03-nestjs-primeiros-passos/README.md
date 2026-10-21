@@ -7,6 +7,14 @@ responde de verdade, e você entende cada linha dela.
 
 > A teoria vem quando o código pede: as etapas 5, 6, 7, 11 e 20 são de leitura e raciocínio.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | nenhuma entrega neste módulo |
+| [Projeto](../../avaliacao/) | Etapas 2 e 3 — a estrutura da API: regra no *service* (B5) e `/api/docs` (B6). |
+| Etapas ➕ opcionais | nenhuma: todas sustentam algo que é avaliado |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -105,7 +113,7 @@ npm --version
 
 > Se algum dos dois responder "não é reconhecido como um comando", o Node não está instalado
 > ou o terminal foi aberto antes da instalação. Feche e reabra o terminal primeiro; se
-> continuar, volte ao [guia de setup](../../docs/ambiente-setup-windows.md#passo-4--nodejs-e-npm).
+> continuar, volte ao [guia de setup](../../docs/ambiente-setup.md#passo-4--nodejs-e-npm).
 
 Agora vá para a pasta do projeto, criada no M00:
 

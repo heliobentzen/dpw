@@ -2,6 +2,8 @@
 
 > Preencha em **uma página**. Se não couber, o escopo está grande demais.
 > Etapa 1 · Substitua os textos entre `<>`.
+>
+> ➕ **Opcional.** Nenhuma rubrica pontua o canvas: use-o se ajudar a equipe a fechar o escopo da Etapa 1.
 
 **Projeto:** `<nome>` · **Equipe:** `<integrantes>` · **Data:** `<AAAA-MM-DD>`
 **Organização parceira:** `<nome da organização>`

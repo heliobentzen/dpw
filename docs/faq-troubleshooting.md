@@ -40,7 +40,7 @@ npm ls X                         # confirma se está lá
 Se o módulo é `@bibliocom/tipos`, o workspace não foi resolvido: confira o
 campo `workspaces` do `package.json` da raiz e rode `npm install` lá de novo.
 
-**`ERR_PNPM_OUTDATED_LOCKFILE` no CI**
+**`npm ci` falha no CI: `package.json` e `package-lock.json` fora de sincronia**
 Alguém mudou o `package.json` sem commitar o `package-lock.json` atualizado. Rode `npm install`
 localmente e commite o lock.
 

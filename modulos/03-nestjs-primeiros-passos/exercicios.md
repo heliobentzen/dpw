@@ -1,6 +1,9 @@
 # M03 — Exercícios
 
-## E03.1 — Onde mora cada código (individual)
+> **O que é cobrado.** Nenhuma rubrica cobra estes exercícios. São prática da base que todos os módulos seguintes usam.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E03.1 — Onde mora cada código (individual) · ➕ opcional
 
 Para cada trecho, diga se pertence ao **Controller**, ao **Service** ou a **nenhum dos dois**,
 e justifique com o critério da etapa 10a (*"mudaria se rodasse por linha de comando?"*).
@@ -21,7 +24,7 @@ traduz para 404. Ninguém escreve o número.
 
 ---
 
-## E03.2 — Injeção de dependência na marra (individual)
+## E03.2 — Injeção de dependência na marra (individual) · ➕ opcional
 
 Escreva `NotificacaoService` com um método `avisar(mensagem: string)` que só faz
 `console.log`. Injete-o no `AcervoService` e chame-o dentro de `listar()`.
@@ -37,7 +40,7 @@ Para (2) e (3), a mensagem de erro é diferente em cada caso — anote as duas.
 
 ---
 
-## E03.3 — Um módulo do zero, sem CLI (individual) ⭐
+## E03.3 — Um módulo do zero, sem CLI (individual) ⭐ · ➕ opcional
 
 Crie o módulo `associados` **à mão**, sem `nest generate`: os três arquivos e os registros.
 Endpoints: `GET /api/associados` e `GET /api/associados/:id`, com dados em memória.
@@ -53,7 +56,7 @@ Endpoints: `GET /api/associados` e `GET /api/associados/:id`, com dados em memó
 
 ---
 
-## E03.4 — Quebrar de propósito (individual)
+## E03.4 — Quebrar de propósito (individual) · ➕ opcional
 
 Provoque cada erro, anote a **mensagem exata** e o que a causou:
 
@@ -69,7 +72,7 @@ O caso 3 volta no M07 como erro comum de ordenação de rotas. Guarde a anotaç�
 
 ---
 
-## E03.5 — Variável de ambiente (individual)
+## E03.5 — Variável de ambiente (individual) · ➕ opcional
 
 Acrescente `NOME_BIBLIOTECA` ao `.env` e exponha `GET /api/info` devolvendo
 `{ nome, ambiente }`, lendo do `ConfigService`.
@@ -82,7 +85,7 @@ Acrescente `NOME_BIBLIOTECA` ao `.env` e exponha `GET /api/info` devolvendo
 
 ---
 
-## E03.6 — Ler o contrato (individual)
+## E03.6 — Ler o contrato (individual) · ➕ opcional
 
 Abra `/api/docs` e responda:
 

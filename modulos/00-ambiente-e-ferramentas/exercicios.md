@@ -1,10 +1,10 @@
 # M00 — Exercícios
 
-> **Trabalho individual.** Todos os exercícios são feitos e entregues por você, sozinho.
->
-> **Entrega:** um único link — a URL do seu repositório `dpw-exercicios` no GitHub. Tudo
-> que comprova os cinco exercícios está lá dentro, e o `README.md` é o índice que leva a
-> cada evidência.
+> **O que é cobrado.** Nenhuma rubrica cobra estes exercícios: o portfólio começa no E0, no M01. São prática para chegar seguro ao fluxo Git que a Etapa 3 avalia (bloco G).
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+> **Trabalho individual.** Se o docente pedir para ver, reúna as evidências num repositório
+> `dpw-exercicios` no GitHub, com o `README.md` como índice.
 
 ---
 
@@ -66,7 +66,7 @@ professor abrir, vai encontrar outra coisa.
 **Ambiente:** Windows 11 + PowerShell 7 (ou Ubuntu 24.04, macOS 15…)
 
 | # | Exercício | Evidência |
-|---|---|---|
+|---|---|
 | 1 | Ambiente reprodutível | [evidencias/e1-ambiente.md](evidencias/e1-ambiente.md) · [commit inicial](https://github.com/USUARIO/dpw-exercicios/commit/HASH) |
 | 2 | Arqueologia de histórico | [evidencias/e2-arqueologia.md](evidencias/e2-arqueologia.md) |
 | 3 | Conflito de merge | [evidencias/e3-conflito.md](evidencias/e3-conflito.md) · [commit de merge](…/commit/HASH) · [grafo](…/network) |
@@ -83,7 +83,7 @@ npm run verificar
 
 ---
 
-## E00.1 — Ambiente reprodutível
+## E00.1 — Ambiente reprodutível · ➕ opcional
 
 Monte o repositório de forma que **outra pessoa consiga reproduzi-lo**.
 
@@ -123,7 +123,7 @@ git status --short
 
 ---
 
-## E00.2 — Arqueologia de histórico
+## E00.2 — Arqueologia de histórico · ➕ opcional
 
 Clone um repositório público real — use `nestjs/nest`, a stack da disciplina:
 
@@ -155,7 +155,7 @@ código e a saída (pode recortar as linhas relevantes).
 
 ---
 
-## E00.3 — Conflito de merge, provocado sozinho ⭐
+## E00.3 — Conflito de merge, provocado sozinho ⭐ · ➕ opcional
 
 Você **vai** viver isso na Etapa 3. Melhor descobrir agora, sem a nota do projeto em jogo e
 sem ser às 23h da véspera. E dá para provocar sozinho: duas branches suas, saindo do mesmo
@@ -202,14 +202,14 @@ versão da sua branch
 
 ---
 
-## E00.4 — Desfazer sem pânico
+## E00.4 — Desfazer sem pânico · ➕ opcional
 
 Cinco situações que acontecem toda semana, e que separam quem resolve em 10 segundos de quem
 apaga a pasta e clona de novo. Execute cada uma **de verdade** no `dpw-exercicios` e registre
 o comando e o efeito.
 
 | # | Cenário | Comando |
-|---|---|---|
+|---|---|
 | 1 | Editei um arquivo e quero descartar a alteração (ainda não fiz `add`) | |
 | 2 | Fiz `git add` do arquivo errado e quero tirá-lo do stage | |
 | 3 | A mensagem do último commit está errada (ainda não fiz push) | |
@@ -240,7 +240,7 @@ o comando e o efeito.
 
 ---
 
-## E00.5 — Roteiro de diagnóstico
+## E00.5 — Roteiro de diagnóstico · ➕ opcional
 
 Um colega diz: *"Instalei o pacote, mas o `import` fala que não existe."*
 
@@ -269,7 +269,7 @@ provocada.
 
 ---
 
-## Entrega
+## Se for mostrar ao docente
 
 **Envie apenas a URL do repositório:** `https://github.com/SEU-USUARIO/dpw-exercicios`
 
@@ -284,15 +284,15 @@ Antes de enviar, abra esse link numa **janela anônima** e confira:
 
 > Link quebrado é evidência ausente. O que o professor não conseguir abrir, não existiu.
 
-## Critérios de correção
+## Autoavaliação
 
-| Exercício | O que é verificado | Peso |
-|---|---|---|
-| E00.1 | Reprodutibilidade comprovada; `.gitignore` correto; sem segredo versionado | 20% |
-| E00.2 | 5 comandos reais com saída colada | 15% |
-| E00.3 | Commit de merge com dois pais; explicação correta da causa | 25% |
-| E00.4 | `reflog` com as 5 operações; commit de revert público | 25% |
-| E00.5 | Roteiro que elimina hipóteses, com demonstração | 15% |
+| Exercício | Pronto quando |
+|---|---|
+| E00.1 | Reprodutibilidade comprovada; `.gitignore` correto; sem segredo versionado |
+| E00.2 | 5 comandos reais com saída colada |
+| E00.3 | Commit de merge com dois pais; explicação correta da causa |
+| E00.4 | `reflog` com as 5 operações; commit de revert público |
+| E00.5 | Roteiro que elimina hipóteses, com demonstração |
 
 **Autoria individual.** Cada repositório tem seus próprios hashes, datas e autor. Trabalhos
 com histórico idêntico ao de outra pessoa são tratados pela política de integridade do

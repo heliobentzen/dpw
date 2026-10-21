@@ -10,6 +10,14 @@ API, encontra falhas reais no código que escreveu nos módulos anteriores — s
 > **A teoria não está num bloco separado.** Ela está nas etapas 1, 2, 9 e 10 — em que a
 > gente para de digitar e pensa — mais as explicações dentro de cada etapa.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E5** — ver [📦 Entrega E5](#-entrega-e5--checklist-owasp-aplicado-à-api) no fim |
+| [Projeto](../../avaliacao/) | Etapa 3 · bloco D (segurança e acesso). |
+| Etapas ➕ opcionais | 10 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -68,7 +76,7 @@ reproduz o problema primeiro, e só então corrige — correção sem reproduç�
 | 7 | [Injeção](#etapa-7--injeção) | curta | auditoria de SQL |
 | 8 | [Cabeçalhos de segurança](#etapa-8--cabeçalhos-de-segurança) | curta | `helmet` |
 | 9 | [**CORS**](#etapa-9--cors) | média | **quem o navegador deixa ler** |
-| 10 | [**CSRF**](#etapa-10--csrf) | média | **cookie que viaja sozinho** |
+| 10 | [**CSRF**](#etapa-10--csrf) ➕ | média | **cookie que viaja sozinho** |
 | 11 | [Erros e logs que não vazam](#etapa-11--erros-e-logs-que-não-vazam) | média | `500` genérico, log do TypeORM |
 | 12 | [Dependências e segredos](#etapa-12--dependências-e-segredos) | curta | `npm audit`, `secretlint` |
 | 13 | [O relatório](#etapa-13--o-relatório) | média | checklist OWASP e matriz de ameaças |
@@ -532,6 +540,8 @@ esconde a resposta do site malicioso.
 
 ## Etapa 10 — CSRF
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 O cookie de sessão tem uma propriedade perigosa: o navegador o envia **sozinho**, para
 qualquer requisição ao seu domínio — inclusive as disparadas por outro site. Um formulário
 escondido em `https://malicioso.example` que faz `POST` para a sua API chegaria com o cookie
@@ -718,10 +728,20 @@ número na URL.
 - [ ] Erro `500` genérico na resposta; log de SQL restrito em produção
 - [ ] `npm audit` sem vulnerabilidade alta; `secretlint` limpo; `.env` fora do histórico
 
-## 📦 Entrega E5
+## 📦 Entrega E5 — Checklist OWASP aplicado à API
 
-O checklist OWASP aplicado à API, com evidência item a item; a matriz de ameaças da etapa 13;
-e o histórico de commits mostrando cada correção separada da anterior.
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
+
+- [ ] IDOR, entrada hostil e segredos testados e corrigidos
+- [ ] Helmet, CORS e *rate limit* configurados
+- [ ] Antes e depois de cada correção registrado (um commit por correção)
+
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- A matriz de ameaças completa (etapa 13)
+- CSRF (etapa 10)
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 🧩 Desafio de fixação
 

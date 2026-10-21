@@ -1,151 +1,189 @@
-# Setup do ambiente — Linux e macOS
+# Setup do ambiente
 
-> ## 🪟 Está no Windows?
->
-> **Use o guia próprio: [`ambiente-setup-windows.md`](ambiente-setup-windows.md).**
->
-> Ele é completo e independente. Não é tradução deste arquivo, e você **não** precisa
-> alternar entre os dois. Vale também se você optou por **Git Bash**; se optou por **WSL2**,
-> instale-o pelo guia do Windows e siga **este** arquivo lá dentro, porque o WSL2 é Linux.
+Um guia só, para **Windows, Linux e macOS**. Quando o comando muda de sistema, aparecem os
+dois blocos lado a lado: 🪟 **Windows (PowerShell)** e 🐧 **Linux e macOS**.
 
-## Um runtime só
-
-A stack principal do curso é **backend em TypeScript**. Você instala **o Node** (que já traz o npm),
-e nada além disso do lado de linguagem: um único ecossistema de pacotes para manter.
+> **Você digita tudo.** Configurar projeto, instalar dependência e versionar código são
+> conteúdo da disciplina. O único script do material **confere** o resultado (passo 6): ele
+> diagnostica, não instala.
 
 ## O que entra em cada momento
 
-| Momento | O que entra | Seções |
+| Momento | O que instalar | Passos |
 | --- | --- | --- |
-| **Semana 1** (M00) | Git, Node 24, VS Code, monorepo, primeiro commit | 1 a 5, 8 |
-| **Antes do M03** | Dependências do backend (NestJS CLI, TypeORM) | 6 |
-| **Antes do M04** | Docker + PostgreSQL | 7, 9 |
+| **Semana 1** (M00) | Terminal, Git, Node 24, VS Code, primeiro commit | 0 a 6, 8 |
+| **Antes do M03** | Nada: o M03 cria o projeto NestJS com você | — |
+| **Antes do M04** | Docker + PostgreSQL. 🪟 Exige WSL2: **não deixe para a véspera** | 7 |
 
-**Tempo da semana 1:** 20–30 min.
+Um runtime só: o **Node**, que já traz o npm. O banco roda no Docker, então não há
+PostgreSQL para instalar na máquina.
 
-## Como trabalhar no dia a dia
-
-```bash
-cd ~/dev/bibliocom
-npm run dev:api      # backend → http://localhost:3000
-```
-
-Sem ativar ambiente virtual, sem `source` nenhum: as dependências vivem em `node_modules/`
-dentro do projeto, e o `npm` as encontra pela pasta em que você está.
+| Ferramenta | Versão mínima |
+| --- | --- |
+| Node.js | 24 LTS (traz o npm 11) |
+| Git | 2.40 |
+| VS Code | atual |
+| Docker | atual (a partir do M04) |
 
 ---
 
-## 1. O que será instalado
+## Passo 0 — Duas decisões antes de digitar
 
-| Ferramenta | Versão mínima | Camada | Para quê |
-| --- | --- | --- | --- |
-| Node.js | **24 LTS** | principal | Runtime do backend |
-| Git | 2.40 | ambas | Versionamento |
-| VS Code (ou WebStorm) | atual | ambas | Editor |
-| Docker | atual | 🔵 | PostgreSQL local (a partir do M04) |
-| PostgreSQL | 16 | 🔵 | Banco de produção-like |
+### Terminal 🪟
 
-> O banco entra só no M04, quando há entidade para gerar tabela. Usamos **PostgreSQL desde
-> o primeiro dia de banco**: é o mesmo que roda em produção (M12), então nada do que você
-> escrever precisa ser refeito depois por diferença de dialeto.
+| Opção | Quando usar |
+| --- | --- |
+| **PowerShell** | ✅ Padrão deste guia no Windows |
+| **Git Bash** | Vem com o Git; os comandos 🐧 funcionam colados |
+| **WSL2** | Um Linux dentro do Windows; útil a partir do deploy (M12) |
 
-## 2. Estrutura do repositório
+Escolha um e fique com ele. Sem preferência? PowerShell.
 
-```
-bibliocom/                    monorepo (workspaces do npm)
-├── package.json              scripts da raiz
-├── backend/                  NestJS + TypeORM
-│   ├── src/
-│   ├── openapi.json          contrato gerado (M07)
-│   └── .env
-├── pacotes/tipos/            @bibliocom/tipos — DTOs e enums (M11)
-├── docker-compose.yml
-├── .gitignore
-└── README.md
-```
+### Pasta
 
-**O repositório é backend-first:** não há pasta de frontend. Qualquer cliente (navegador,
-aplicativo, outro sistema) fala com a API pelo contrato OpenAPI.
+| Sistema | Use | Evite |
+| --- | --- | --- |
+| 🪟 | `C:\dev` | Qualquer pasta dentro de `Documents` (sincronizada pelo **OneDrive**), com **espaço** ou **acento** |
+| 🐧 | `~/dev` | Caminhos com espaço ou acento |
+
+> ⚠️ **OneDrive é a origem da maioria dos problemas "inexplicáveis" no Windows:** ele tenta
+> sincronizar os milhares de arquivos de `node_modules`, o `npm install` trava e o Git acusa
+> mudanças fantasmas. Não negocie a pasta.
 
 ---
 
-## 3. Git e GitHub
+## Passo 1 — Preparar o terminal 🪟
+
+*Só no Windows. No Linux e no macOS, pule para o passo 2.*
+
+```powershell
+$PSVersionTable.PSVersion
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+| Linha | O que faz |
+| --- | --- |
+| `$PSVersionTable` | Mostra a versão. `Major` **5** = PowerShell 5.1, sem `&&` e com `>` gravando em UTF-16. `Major` **7** não tem essas pegadinhas |
+| `Set-ExecutionPolicy … RemoteSigned` | Libera scripts locais, como o próprio `npm`. Só para o seu usuário |
+
+**Deu certo se:** `Get-ExecutionPolicy -Scope CurrentUser` responde `RemoteSigned`.
+
+> Prefira o **Windows Terminal** (padrão no Windows 11): lida melhor com acentos e tem abas.
+
+---
+
+## Passo 2 — Pasta de trabalho
+
+| 🪟 Windows | 🐧 Linux e macOS |
+| --- | --- |
+| `New-Item -ItemType Directory -Force C:\dev`<br>`Set-Location C:\dev` | `mkdir -p ~/dev`<br>`cd ~/dev` |
+
+---
+
+## Passo 3 — Git
+
+**Instalar:**
+
+| 🪟 Windows | 🐧 Linux e macOS |
+| --- | --- |
+| `winget install --id Git.Git --scope user`<br>e **feche e reabra o terminal** | Linux: gerenciador da distribuição (`sudo apt install git`)<br>macOS: `xcode-select --install` |
+
+**Configurar** (igual nos três sistemas):
 
 ```bash
-git --version
-git config --global user.name "Seu Nome"
+git config --global user.name "Seu Nome Completo"
 git config --global user.email "seu-email@exemplo.com"
 git config --global init.defaultBranch main
 git config --global pull.rebase false
 ```
 
-Use no `user.email` **o mesmo e-mail da conta do GitHub**, senão os commits não são
-atribuídos a você.
+| Linha | Por que importa |
+| --- | --- |
+| `user.email` | **Use o mesmo e-mail do GitHub**, senão os commits não são atribuídos a você |
+| `pull.rebase false` | `git pull` faz *merge*, sem cair num rebase interativo |
 
-Chave SSH (evita digitar token a cada push):
+🪟 **Mais duas linhas no Windows:**
+
+```powershell
+git config --global core.autocrlf input
+git config --system core.longpaths true    # este, num PowerShell como administrador
+```
+
+`autocrlf` evita enviar finais de linha do Windows (CRLF) para o servidor Linux do deploy.
+`longpaths` evita o erro `Filename too long` nas pastas profundas do `node_modules`.
+
+**Chave SSH** (para não digitar senha a cada `push`):
 
 ```bash
 ssh-keygen -t ed25519 -C "seu-email@exemplo.com"
-cat ~/.ssh/id_ed25519.pub   # cole em github.com > Settings > SSH and GPG keys
-ssh -T git@github.com       # deve responder "Hi <usuario>!"
 ```
 
-## 4. Node.js e npm
+`Enter` nas três perguntas. Copie a chave **pública** (`.pub`, nunca a outra):
 
-### Instalação recomendada: via `fnm` (gerencia versões)
+| 🪟 Windows | 🐧 Linux e macOS |
+| --- | --- |
+| `Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub \| Set-Clipboard` | `cat ~/.ssh/id_ed25519.pub` e copie a saída |
+
+Cole em **github.com → Settings → SSH and GPG keys → New SSH key** e teste:
 
 ```bash
-curl -fsSL https://fnm.vercel.app/install | bash
-exec $SHELL
-fnm install 24 && fnm use 24
+ssh -T git@github.com
 ```
 
-Alternativa simples: instalador oficial em <https://nodejs.org> (escolha **LTS**), ou o
-gerenciador de pacotes da sua distribuição.
+**Deu certo se:** responde `Hi <seu-usuario>! You've successfully authenticated…`. O "but
+GitHub does not provide shell access" no fim **não é erro**.
+
+---
+
+## Passo 4 — Node.js e npm
+
+| 🪟 Windows | 🐧 Linux e macOS |
+| --- | --- |
+| `winget install --id OpenJS.NodeJS.LTS`<br>e **feche e reabra o terminal** | Recomendado, com o gerenciador de versões `fnm`:<br>`curl -fsSL https://fnm.vercel.app/install \| bash`<br>`exec $SHELL`<br>`fnm install 24 && fnm use 24` |
+
+Alternativa nos três sistemas: o instalador **LTS** em <https://nodejs.org>.
 
 ```bash
 node --version    # v24.x ou superior
+npm --version     # 11.x ou superior
 ```
 
-### npm
+O **npm vem junto com o Node**: não há nada mais a instalar.
 
-Não há nada a instalar: o npm vem junto com o Node.
+> ⚠️ **npm 10 não serve.** Ele falha ao instalar o projeto do NestJS 12 com
+> `Cannot read properties of null (reading 'edgesOut')`. Atualize o Node ou só o npm:
+> `npm install -g npm@11`.
 
-```bash
-npm --version    # 11.x ou superior
-```
+> **Por que npm, e não pnpm ou yarn?** Já vem instalado, todo tutorial usa e, no Windows, não
+> depende de links simbólicos. Ver [ADR-15](decisoes-tecnicas.md#adr-15--npm-como-gerenciador-de-pacotes).
 
-> **Por que npm?** Ele já está instalado — zero passo extra — e é o que aparece em todo
-> tutorial, resposta de fórum e documentação, sem precisar traduzir comando. Os *workspaces*
-> que o monorepo usa funcionam nele desde a versão 7. Alternativas como pnpm e yarn são
-> comuns no mercado e valem conhecer depois; numa turma iniciante elas cobram uma instalação
-> a mais e, no Windows, atrito com links simbólicos — custo sem retorno pedagógico.
+🪟 **Exclua `C:\dev` do antivírus.** O Windows Defender inspeciona cada arquivo do
+`npm install`, e a instalação leva minutos em vez de segundos: *Segurança do Windows →
+Proteção contra vírus e ameaças → Gerenciar configurações → Exclusões → Adicionar → Pasta →
+`C:\dev`*.
 
-## 5. VS Code
+---
 
-**Agora, duas extensões:**
+## Passo 5 — VS Code
+
+🪟 `winget install --id Microsoft.VisualStudioCode --scope user` · 🐧 instalador em
+<https://code.visualstudio.com>.
+
+**Agora, só duas extensões:**
 
 ```bash
 code --install-extension dbaeumer.vscode-eslint
 code --install-extension esbenp.prettier-vscode
 ```
 
-| Extensão | Para quê |
-| --- | --- |
-| **ESLint** | Lint de TypeScript nas duas camadas |
-| **Prettier** | Formatação |
+**Antes do M04:** a extensão **PostgreSQL** (`ms-ossdata.vscode-pgsql`), para ver as tabelas
+sem sair do editor.
 
-**Depois, quando o módulo pedir:**
-
-| Extensão | Antes do | Para quê |
-| --- | --- | --- |
-| **PostgreSQL** (ms-ossdata.vscode-pgsql) | M04 | Ver as tabelas que as entidades geraram, sem sair do editor |
-| **GitLens** | quando quiser | Histórico e autoria linha a linha |
-
-`.vscode/settings.json` sugerido:
+Crie `.vscode/settings.json` na pasta do projeto:
 
 ```json
 {
+  "files.eol": "\n",
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
@@ -154,31 +192,55 @@ code --install-extension esbenp.prettier-vscode
 }
 ```
 
-`typescript.tsdk` faz o editor usar o TypeScript **do projeto**, não o embutido. Sem isto,
-o editor pode acusar erros que o `tsc` não acusa — e vice-versa.
+| Chave | O que faz |
+| --- | --- |
+| `files.eol` | Salva com fim de linha Unix (LF), igual ao servidor |
+| `typescript.tsdk` | Usa o TypeScript **do projeto**, não o do editor. Sem isto, o editor e o `tsc` discordam |
 
 ---
 
-## 6. Dependências do backend
+## Passo 6 — Verificação
 
-> ⏭️ **Só a partir do M03.** Na semana 1, pule para a seção 8.
-
-O M03 conduz a criação do projeto NestJS e do monorepo:
+Rode a partir da pasta onde está este material:
 
 ```bash
-nest new backend --skip-git
+node recursos/codigo/verifica-ambiente.mjs
 ```
 
-`npx` executa um pacote sem instalá-lo no projeto — vem junto com o npm. O `--skip-git` é
-importante: sem ele, a CLI cria um segundo repositório dentro do seu.
+O script confere Node, npm, Git e, no Windows, `curl.exe`, `core.autocrlf`, OneDrive e acentos
+no caminho. Use `--etapa m03` antes do M03 e `--etapa m04` antes do M04: ele cobra só o que
+já deveria existir. Para cada falha, mostra o comando que corrige.
 
-Siga o roteiro do [M03](../modulos/03-nestjs-primeiros-passos/).
+**Só avance com todos os itens em `OK`.**
 
-## 7. PostgreSQL via Docker (a partir do M04)
+> 🪟 Nos roteiros, todo `curl` vira **`curl.exe`**: no PowerShell, `curl` sozinho é outro
+> comando (`Invoke-WebRequest`).
 
-> ⏭️ Só é preciso antes do M04 — até lá não há entidade nem tabela.
+---
 
-`docker-compose.yml` na raiz:
+## Passo 7 — Docker e PostgreSQL (antes do M04)
+
+### 🪟 Pré-requisito no Windows: WSL2
+
+O Docker Desktop roda sobre o WSL2. Num PowerShell **como administrador**:
+
+```powershell
+wsl --install
+```
+
+**Reinicie o computador.** Se aparecer "virtualização desabilitada", é preciso ativar
+*Intel VT-x* ou *AMD-V* na BIOS. Em máquina institucional, isso pode depender da TI — **avise
+o docente com antecedência**.
+
+### Docker Desktop
+
+| 🪟 Windows | 🐧 Linux e macOS |
+| --- | --- |
+| `winget install --id Docker.DockerDesktop`<br>e **abra o Docker Desktop** pelo menu Iniciar | macOS: Docker Desktop em <https://docker.com><br>Linux: Docker Engine pelo gerenciador da distribuição |
+
+### Subir o PostgreSQL
+
+Crie `docker-compose.yml` na raiz do projeto:
 
 ```yaml
 services:
@@ -203,101 +265,110 @@ volumes:
 
 ```bash
 docker compose up -d
-docker compose ps          # deve estar "healthy"
-npm install -w backend pg
+docker compose ps
 ```
 
-## 8. Verificação do ambiente
+**Deu certo se:** o status mostra `healthy` (até ~15 s na primeira vez). Porta 5432 ocupada?
+Troque para `"5433:5432"` e ajuste a `DATABASE_URL`.
 
-```bash
-node recursos/codigo/verifica-ambiente.mjs
-```
+---
 
-Confere Node, npm, Git configurado e Docker. Aceita `--etapa m00|m03|m04` e cobra só o que
-já deveria existir naquele ponto do curso. Ele **diagnostica e não instala**: para cada
-falha, imprime o comando exato que corrige.
+## Passo 8 — `.gitignore` e `.gitattributes`
 
-**Só avance com todos os itens da etapa em `OK`.**
+Os dois na **raiz do repositório**, no **primeiro commit**.
 
-## 9. Rodar a API no dia a dia
+> 🪟 **Não crie pelo Bloco de Notas:** ele grava `.gitignore.txt` e esconde a extensão. Crie
+> pelo terminal (`New-Item -ItemType File .gitignore, .gitattributes`) e edite no VS Code.
+> E nunca gere esses arquivos com `echo … >` no PowerShell 5.1: o `>` grava em UTF-16.
 
-> ⏭️ A partir do **M04**, quando o PostgreSQL entra no projeto.
-
-```bash
-cd ~/dev/bibliocom
-docker compose up -d         # PostgreSQL em segundo plano
-cd backend
-npm run start:dev            # http://localhost:3000/api/docs
-```
-
-O `docker compose up -d` não faz nada se o banco já estiver de pé, então pode rodá-lo sempre.
-
-## 10. `.gitignore` do repositório
+**`.gitignore`:**
 
 ```gitignore
-# Node
 node_modules/
 dist/
 *.tsbuildinfo
 coverage/
 
-# Banco local
-
-# Ambiente
 .env
 .env.*
 !.env.example
 
-# Editores
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
 ```
 
-> **Nunca** comite `.env`, `node_modules/` ou o `SESSION_SECRET`. Segredo que entra no
-> histórico do Git é segredo vazado — mesmo removido, continua nos commits anteriores.
+> **Nunca** commite `.env` nem segredos. Segredo que entra no histórico do Git está vazado,
+> mesmo que seja apagado depois.
 
-### `.gitattributes` — obrigatório se alguém da equipe usa Windows 🪟
+**`.gitattributes`** — obrigatório se alguém da equipe usa Windows:
 
 ```gitattributes
 * text=auto eol=lf
-
-*.sh   text eol=lf
-*.ts   text eol=lf
-*.tsx  text eol=lf
-*.json text eol=lf
-*.yml  text eol=lf
-
-*.bat text eol=crlf
 *.ps1 text eol=crlf
-
+*.bat text eol=crlf
 *.png binary
 *.jpg binary
 *.pdf binary
 ```
 
-Sem isso, um `.sh` salvo no Windows chega ao servidor com `\r\n` e o deploy falha com
-`bad interpreter: No such file or directory` — mensagem que não diz nada sobre a causa real.
-**Crie o arquivo no primeiro commit**, junto com o `.gitignore`.
-
-> Este arquivo é responsabilidade de **quem cria o repositório**, mesmo que essa pessoa use
-> Linux: ele protege a equipe inteira, inclusive quem entra depois sem configurar nada.
+Sem ele, um script salvo no Windows chega ao servidor com CRLF e o deploy falha com
+`bad interpreter: No such file or directory` — mensagem que não aponta a causa. Quem cria o
+repositório cria este arquivo, mesmo que use Linux: ele protege a equipe inteira.
 
 ---
 
-## 11. Problemas frequentes
+## Passo 9 — Rodar a API no dia a dia
 
-| Sintoma | Causa provável | Solução |
+A partir do M04:
+
+| 🪟 Windows | 🐧 Linux e macOS |
+| --- | --- |
+| `Set-Location C:\dev\bibliocom`<br>`docker compose up -d`<br>`Set-Location backend`<br>`npm run start:dev` | `cd ~/dev/bibliocom`<br>`docker compose up -d`<br>`cd backend`<br>`npm run start:dev` |
+
+**Deu certo se:** <http://localhost:3000/api/docs> abre o Swagger. O `docker compose up -d`
+não faz nada se o banco já estiver no ar, então pode rodá-lo sempre.
+
+---
+
+## Passo 10 — Erros e diagnóstico
+
+### Em qualquer sistema
+
+| Sintoma | Causa | Solução |
 | --- | --- | --- |
 | `Cannot find module` após clonar | Faltou instalar | `npm install` **na raiz** |
-| `Cannot find module '@bibliocom/tipos'` | Workspace não resolvido | `npm install` na raiz; confira o campo `workspaces` do `package.json` |
-| `EACCES` ao instalar pacote global | Permissão | Use `fnm` ou mude o prefixo do npm, nunca `sudo npm -g` |
-| `npm ERR! network` no laboratório | Proxy/firewall | Libere `registry.npmjs.org` |
-| `port 3000 already in use` | Outro Nest rodando | `PORT=3001 npm run start:dev` |
-| `port 5432 already in use` | PostgreSQL local ativo | Pare o serviço ou use `5433:5432` |
-| Editor acusa erro que o `tsc` não acusa | Versões diferentes de TypeScript | `"typescript.tsdk"` no `settings.json` |
+| `npm ERR! network` no laboratório | Proxy ou firewall | Libere `registry.npmjs.org` |
+| `EADDRINUSE` / porta 3000 em uso | Outro servidor aberto | Feche-o com `Ctrl+C` |
+| Porta 5432 em uso | PostgreSQL local ativo | Pare o serviço ou use `"5433:5432"` |
+| Editor acusa erro que o `tsc` não acusa | TypeScript do editor ≠ do projeto | `typescript.tsdk` no `settings.json` |
+| 🐧 `EACCES` ao instalar pacote global | Permissão | Use o `fnm`; nunca `sudo npm -g` |
 
-🪟 **Erros de Windows** têm tabela própria:
-[`ambiente-setup-windows.md`, passo 11](ambiente-setup-windows.md#passo-11--erros-e-diagnóstico).
+### 🪟 No Windows
 
-Mais casos em [`faq-troubleshooting.md`](faq-troubleshooting.md).
+| Sintoma | Causa | Solução |
+| --- | --- | --- |
+| `npm : não pode ser carregado… execução de scripts desabilitada` | Política de execução | Passo 1 |
+| `O termo 'node' não é reconhecido` | Terminal aberto antes da instalação | Feche e reabra |
+| `Filename too long` | Limite de 260 caracteres | `core.longpaths` (passo 3) |
+| `npm install` demora minutos | Antivírus | Exclusão de `C:\dev` (passo 4) |
+| Git acusa mudanças que você não fez | Projeto no OneDrive | Mova para `C:\dev` |
+| Docker não responde | Docker Desktop fechado | Abra pelo menu Iniciar |
+| Acentos quebrados no terminal | Página de código | `chcp 65001`, ou use o Windows Terminal |
+
+### 🪟 Comandos que mudam no PowerShell
+
+| Nos roteiros | No PowerShell |
+| --- | --- |
+| `curl -i http://…` | `curl.exe -i http://…` |
+| `NODE_ENV=production node dist/main.js` | `$env:NODE_ENV="production"` e, na linha seguinte, `node dist/main.js` |
+| `cd backend && npm run start:dev` | Duas linhas separadas (`&&` não existe no 5.1) |
+| `comando > arquivo.json` | `comando \| Out-File arquivo.json -Encoding utf8` |
+| Continuação de linha com `\` | Crase `` ` ``, **sem espaço depois** |
+
+Tabela completa em [`../recursos/comandos-windows.md`](../recursos/comandos-windows.md).
+
+**Travou?** Tente o mesmo comando no **Git Bash**. Se um roteiro tem comando sem alternativa
+para o seu sistema, **é falha do material**: avise o docente. Mais casos em
+[`faq-troubleshooting.md`](faq-troubleshooting.md).

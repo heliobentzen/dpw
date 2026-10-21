@@ -18,7 +18,7 @@ cheatsheet.md      Referência rápida (quando o volume de sintaxe justifica)
 
 A **Duração** de cada módulo é relativa — curta, média ou longa — e serve para calibrar o
 fôlego. A carga horária oficial está no [plano de ensino](../docs/plano-de-ensino.md) e no
-[cronograma](../docs/cronograma.md).
+[plano de ensino](../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## Trilha
 

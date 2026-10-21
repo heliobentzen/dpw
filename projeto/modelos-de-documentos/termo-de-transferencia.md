@@ -1,6 +1,8 @@
 # Termo de Transferência do Sistema
 
 > Etapa 4 · Documento assinado na devolutiva final. É o que impede que o projeto morra
+>
+> 📌 **Cobrado em:** Etapa 4, critério 6 — acessos transferidos, senhas trocadas, custos, backup e 2 administradores. Seções marcadas ➕ não são avaliadas.
 > junto com o semestre.
 
 ---
@@ -76,7 +78,7 @@ Desenvolvimento de Projeto Web, nas condições aqui descritas.
 | Última restauração testada em | |
 | Responsável por verificar | |
 
-## 6. Suporte
+## 6. Suporte · ➕ opcional
 
 | Item | Acordo |
 |---|---|
@@ -90,7 +92,7 @@ Desenvolvimento de Projeto Web, nas condições aqui descritas.
 Seja realista aqui. Um compromisso de "suporte vitalício" não será cumprido e cria
 frustração; um prazo curto e honesto é mais útil para todos.
 
-## 7. Licença do código
+## 7. Licença do código · ➕ opcional
 
 O código-fonte é disponibilizado sob a licença **`<MIT / CC0 / GPL / outra>`**, o que
 significa que a organização pode: `<usar, modificar, contratar terceiros para evoluir,
@@ -99,7 +101,7 @@ etc.>`.
 Recomendação do material: licença aberta, de modo que outra turma ou outro voluntário
 possa continuar o trabalho sem depender da equipe original.
 
-## 8. Dados pessoais
+## 8. Dados pessoais · ➕ opcional
 
 - Os dados inseridos no sistema pertencem à **organização**, que é a controladora para
   fins da Lei nº 13.709/2018 (LGPD).
@@ -108,7 +110,7 @@ possa continuar o trabalho sem depender da equipe original.
 - [ ] O aviso de privacidade está publicado no sistema
 - [ ] A organização foi orientada sobre suas obrigações como controladora
 
-## 9. Situação conhecida do sistema
+## 9. Situação conhecida do sistema · ➕ opcional
 
 **Funcionalidades entregues e funcionando:**
 

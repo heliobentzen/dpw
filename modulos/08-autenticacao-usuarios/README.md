@@ -10,6 +10,14 @@ sem confiar em nenhum cliente para decidir isso.
 > **A teoria não está num bloco separado.** Ela está nas etapas 1, 3, 6 e 13 — em que a
 > gente para de digitar e pensa — mais as explicações dentro de cada etapa.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E4** — ver [📦 Entrega E4](#-entrega-e4--login-papéis-e-rotas-protegidas) no fim |
+| [Projeto](../../avaliacao/) | Etapa 3 · D1 (autenticação), D2 (autorização) e E2 (matriz de acesso). |
+| Etapas ➕ opcionais | 14 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -94,7 +102,7 @@ Mesmo formato dos anteriores.
 | 11 | [Papéis](#etapa-11--papéis) | média | `SetMetadata`, `Reflector`, `403` |
 | 12 | [Cadastro administrativo](#etapa-12--cadastro-administrativo) | média | rota só da coordenação |
 | 13 | [**`401` ou `403`**](#etapa-13--401-ou-403) | curta | **a matriz na prática** |
-| 14 | [O Swagger com login](#etapa-14--o-swagger-com-login) | curta | `addCookieAuth` |
+| 14 | [O Swagger com login](#etapa-14--o-swagger-com-login) ➕ | curta | `addCookieAuth` |
 | 15 | [Registrar a decisão](#etapa-15--registrar-a-decisão) | curta | ADR |
 
 ---
@@ -991,6 +999,8 @@ curl.exe -s -o NUL -w "%{http_code}`n" -b caio.txt -X DELETE http://localhost:30
 
 ## Etapa 14 — O Swagger com login
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 **Faça:** em `src\swagger.ts`, avise o documento de que existe login por cookie:
 
 ```ts
@@ -1093,10 +1103,21 @@ guard que devolve 403 é segurança.
 - [ ] A matriz de acesso da etapa 13 preenchida com o que a sua API responde
 - [ ] ADR da escolha entre sessão e token escrito
 
-## 📦 Entrega E4
+## 📦 Entrega E4 — Login, papéis e rotas protegidas
 
-Login, dois papéis, rotas protegidas, a migração do `Usuario`, a matriz de acesso preenchida
-e o ADR da escolha entre sessão e token.
+**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
+
+- [ ] Senha guardada com hash (Argon2)
+- [ ] Login emitindo sessão com expiração
+- [ ] 2 papéis
+- [ ] `curl` mostrando 401 e 403
+- [ ] ADR da escolha entre sessão e token (etapa 15)
+
+**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
+
+- Swagger com login (etapa 14)
+
+**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
 
 ## 🧩 Desafio de fixação
 

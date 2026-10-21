@@ -7,6 +7,14 @@ Módulo curto e inteiramente conceitual — e um dos mais importantes. Ele respo
 pergunta que o resto do curso executa: **quem monta a tela, quem guarda a verdade, e como
 os dois combinam o que vão trocar?**
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | nenhuma entrega neste módulo |
+| [Projeto](../../avaliacao/) | Etapa 1 · critério 5 (rascunho do contrato) · Etapa 4 · critério 1 (arquitetura com diagramas). |
+| Etapas ➕ opcionais | nenhuma: todas sustentam algo que é avaliado |
+
 ## 🎯 Objetivos
 
 1. Comparar renderização no servidor (MPA) e aplicações que consomem uma API.
@@ -100,7 +108,7 @@ flowchart TD
 > **O BiblioCom cabe nos dois modelos.** O curso adota **API + clientes** porque a
 > organização parceira típica de um projeto extensionista precisa integrar sistemas, e
 > porque é o que o mercado de backend pede. A decisão e o custo estão registrados em
-> [`decisoes-tecnicas.md`](../../docs/decisoes-tecnicas.md#adr-10--backend-em-typescript-com-frontend-opcional-nestjs--typeorm).
+> [`decisoes-tecnicas.md`](../../docs/decisoes-tecnicas.md#adr-10--backend-em-typescript-nestjs--typeorm).
 > Reconhecer que a alternativa era viável é parte de decidir bem.
 
 💼 **No mercado:** essa é uma pergunta real de entrevista e de reunião de arquitetura.

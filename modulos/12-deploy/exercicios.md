@@ -1,6 +1,9 @@
 # M12 — Exercícios
 
-## E12.1 — Deploy de outra pessoa (em duplas) ⭐
+> **O que é cobrado.** Entrega **E8** do [portfólio](../../avaliacao/rubrica-portfolio.md): URL com HTTPS, `/health` verificando o banco, migrações em produção e um `docs/deploy.md` que outra pessoa consegue seguir.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E12.1 — Deploy de outra pessoa (em duplas) ⭐ · 📌 cobrado
 
 Troquem os `docs/deploy.md`. Cada pessoa faz o deploy do BiblioCom **da outra**, numa conta
 própria, seguindo **só** o documento — sem perguntar nada.
@@ -13,7 +16,7 @@ própria, seguindo **só** o documento — sem perguntar nada.
 
 ---
 
-## E12.2 — Cinco falhas de propósito (individual)
+## E12.2 — Cinco falhas de propósito (individual) · ➕ opcional
 
 Provoque cada falha **no ensaio geral da sua máquina** (etapa 8) — não em produção — e
 registre o sintoma antes de corrigir:
@@ -31,7 +34,7 @@ associação vale horas.
 
 ---
 
-## E12.3 — Mudança incompatível em produção (individual) ⭐⭐
+## E12.3 — Mudança incompatível em produção (individual) ⭐⭐ · ➕ opcional
 
 Com dados cadastrados em produção, acrescente `Obra.idioma`, **obrigatório**, pelo caminho
 expandir → migrar → contrair:
@@ -48,7 +51,7 @@ seria seguro? E se o bug estivesse no deploy 3?
 
 ---
 
-## E12.4 — A sessão no banco (individual)
+## E12.4 — A sessão no banco (individual) · ➕ opcional
 
 1. Faça login em produção e guarde o cookie.
 2. Dispare um novo deploy (um commit qualquer).
@@ -58,7 +61,7 @@ seria seguro? E se o bug estivesse no deploy 3?
 
 ---
 
-## E12.5 — Homologação antes da produção (em equipe)
+## E12.5 — Homologação antes da produção (em equipe) · ➕ opcional
 
 Montem o caminho completo do projeto da equipe:
 

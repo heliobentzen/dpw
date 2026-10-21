@@ -10,6 +10,14 @@ depois. Este módulo fecha a trilha com uma ideia simples: **entregar não é ab
 > **A teoria não está num bloco separado.** Ela está nas etapas 1, 6 e 9 — em que a gente
 > para de digitar e pensa — mais as explicações dentro de cada etapa.
 
+## 📌 O que a avaliação cobra
+
+| Onde | O quê |
+| --- | --- |
+| [Portfólio](../../avaliacao/rubrica-portfolio.md) | nenhuma entrega neste módulo |
+| [Projeto](../../avaliacao/) | Etapa 3 · F2 (backup e `/health`) · Etapa 4 · critério 6 (rotina de backup documentada). |
+| Etapas ➕ opcionais | 1, 2, 3, 4, 5, 6, 9 — nenhuma rubrica as cobra |
+
 ## 🎯 Objetivos
 
 Ao final você será capaz de:
@@ -60,20 +68,22 @@ Mesmo formato dos anteriores.
 
 | # | Etapa | Duração | O que entra |
 |---|---|---|---|
-| 1 | [**Log é para depois**](#etapa-1--log-é-para-depois) | curta | **o que um log precisa responder** |
-| 2 | [Logs estruturados](#etapa-2--logs-estruturados) | média | `nestjs-pino`, JSON |
-| 3 | [O que não vai para o log](#etapa-3--o-que-não-vai-para-o-log) | curta | `redact` |
-| 4 | [Eventos de negócio](#etapa-4--eventos-de-negócio) | curta | `Logger` com contexto |
-| 5 | [Pesquisar o log](#etapa-5--pesquisar-o-log) | curta | filtrar por campo |
-| 6 | [**Alguém de fora olhando**](#etapa-6--alguém-de-fora-olhando) | média | **monitor e alerta testado** |
+| 1 | [**Log é para depois**](#etapa-1--log-é-para-depois) ➕ | curta | **o que um log precisa responder** |
+| 2 | [Logs estruturados](#etapa-2--logs-estruturados) ➕ | média | `nestjs-pino`, JSON |
+| 3 | [O que não vai para o log](#etapa-3--o-que-não-vai-para-o-log) ➕ | curta | `redact` |
+| 4 | [Eventos de negócio](#etapa-4--eventos-de-negócio) ➕ | curta | `Logger` com contexto |
+| 5 | [Pesquisar o log](#etapa-5--pesquisar-o-log) ➕ | curta | filtrar por campo |
+| 6 | [**Alguém de fora olhando**](#etapa-6--alguém-de-fora-olhando) ➕ | média | **monitor e alerta testado** |
 | 7 | [Backup](#etapa-7--backup) | curta | `pg_dump` |
 | 8 | [A restauração que prova o backup](#etapa-8--a-restauração-que-prova-o-backup) | média | `pg_restore` |
-| 9 | [**Dependências envelhecem**](#etapa-9--dependências-envelhecem) | curta | **Dependabot** |
+| 9 | [**Dependências envelhecem**](#etapa-9--dependências-envelhecem) ➕ | curta | **Dependabot** |
 | 10 | [O plano de manutenção](#etapa-10--o-plano-de-manutenção) | média | `docs/manutencao.md`, *runbook* |
 
 ---
 
 ## Etapa 1 — Log é para depois
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
 
 Log existe para responder perguntas **depois** que o problema aconteceu, quando ninguém mais
 lembra de nada. Imagine a mensagem da organização parceira: *"o empréstimo da Dona Ana sumiu
@@ -94,6 +104,8 @@ campo com nome. É a diferença entre um caderno de anotações e uma planilha.
 ---
 
 ## Etapa 2 — Logs estruturados
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
 
 **Faça:**
 
@@ -159,6 +171,8 @@ URL, status e `responseTime` em milissegundos.
 
 ## Etapa 3 — O que não vai para o log
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 Log é lido por muito mais gente que o banco: quem dá suporte, a plataforma de hospedagem,
 qualquer pessoa com acesso ao painel. E fica guardado por meses.
 
@@ -211,6 +225,8 @@ assume a sessão** da coordenação. Remova `Env:\NODE_ENV` ao terminar.
 ---
 
 ## Etapa 4 — Eventos de negócio
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
 
 O `pino-http` registra **requisições**. Mas "login aceito", "empréstimo registrado" e
 "acesso negado" são **eventos de negócio** — e é por eles que se reconstrói uma história.
@@ -267,6 +283,8 @@ O log vem **depois** da transação de propósito: só se registra o que de fato
 
 ## Etapa 5 — Pesquisar o log
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 **Rode** — repita o ensaio da etapa 3, agora com um login certo e um errado, encerre a API
 e procure:
 
@@ -293,6 +311,8 @@ busca se faz pelo campo de pesquisa do painel de logs — e é o JSON que torna 
 ---
 
 ## Etapa 6 — Alguém de fora olhando
+
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
 
 O log conta o que aconteceu **dentro**. Mas se a API inteira cair, não há quem escreva log.
 É preciso alguém **de fora**, perguntando de tempos em tempos: *"você está aí?"*
@@ -405,6 +425,8 @@ conferidas, tempo total. E ponha a próxima restauração **no calendário** —
 
 ## Etapa 9 — Dependências envelhecem
 
+> ➕ **Opcional.** Nenhuma rubrica cobra esta etapa — faça se houver tempo.
+
 Um sistema parado não fica estável: ele **apodrece**. As bibliotecas recebem correções de
 segurança, a plataforma muda a versão do Node, um certificado expira. Software sem manutenção
 para de funcionar em meses, mesmo sem ninguém mexer nele.
@@ -512,6 +534,8 @@ dia em que a restauração funcionou — por isso a etapa 8 vale mais que a 7.
 - [ ] `docs/manutencao.md` com plano, custos, credenciais (o lugar) e *runbook*
 
 ## 📦 Entrega do módulo
+
+> ➕ **Opcional.** Este módulo não tem entrega no portfólio; o que ele produz é cobrado no projeto (ver o quadro no início).
 
 O `docs/manutencao.md` completo, a evidência do alerta testado (o e-mail recebido) e o
 registro da restauração do backup.

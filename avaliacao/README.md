@@ -2,14 +2,16 @@
 
 ## 1. Composição da nota
 
-| Instrumento | Peso | Tipo |
-| --- | ---: | --- |
-| Projeto — Etapa 1 (definição e planejamento) | 30% | Equipe |
-| Projeto — Etapa 2 (sistema preliminar) | 20% | Equipe × fator individual |
-| Projeto — Etapa 3 (sistema final) | 20% | Equipe × fator individual |
-| Projeto — Etapa 4 (relatório e apresentação) | 10% | Equipe × fator individual |
-| Atividades extensionistas | 10% | Equipe |
-| **Total** | **100%** | |
+| Instrumento | Peso | Tipo | Semana |
+| --- | ---: | --- | ---: |
+| Portfólio de atividades práticas (E0–E8) | 20% | Individual | 2–16 |
+| Avaliação teórica | 15% | Individual | 10 |
+| Projeto — Etapa 1 (definição e planejamento) | 15% | Equipe | 10 |
+| Projeto — Etapa 2 (sistema preliminar) | 10% | Equipe × fator individual | 12 |
+| Projeto — Etapa 3 (sistema final) | 20% | Equipe × fator individual | 18 |
+| Projeto — Etapa 4 (relatório e apresentação) | 10% | Equipe × fator individual | 19–20 |
+| Atividades extensionistas | 10% | Equipe | 15–20 |
+| **Total** | **100%** | | |
 
 ## 2. Aprovação
 
@@ -49,6 +51,7 @@ decisão. O fator nunca é aplicado sem que o estudante saiba o motivo.
 
 | Instrumento | Rubrica |
 | --- | --- |
+| Portfólio E0–E8 | [`rubrica-portfolio.md`](rubrica-portfolio.md) |
 | Etapa 1 — definição e planejamento | [`rubrica-etapa-1.md`](rubrica-etapa-1.md) |
 | Etapa 2 — sistema preliminar | [`rubrica-etapa-2.md`](rubrica-etapa-2.md) |
 | Etapa 3 — sistema final | [`rubrica-etapa-3.md`](rubrica-etapa-3.md) |
@@ -70,7 +73,8 @@ Todas as rubricas usam a mesma escala por critério:
 | **Insuficiente** | 0–1 | Não cumpre ou não foi entregue |
 
 Os pesos de cada rubrica somam 10, então **nota = Σ (nível × peso) ÷ 4**. Quem fica em
-"Adequado" em tudo tira 7,5.
+"Adequado" em tudo tira 7,5. A exceção é a Etapa 3, organizada em sete blocos com pesos
+que somam 23: lá, **nota = (Σ ponderado ÷ 92) × 10**.
 
 As rubricas de projeto começam por **pré-requisitos sim/não** (o piso) e seguem com
 **4 a 6 critérios** de qualidade. Artefatos intermediários (canvas, matriz de decisão, atas)

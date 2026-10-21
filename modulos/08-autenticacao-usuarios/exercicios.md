@@ -1,6 +1,9 @@
 # M08 — Exercícios
 
-## E08.1 — Modelo de ameaça: sessão ou token (individual)
+> **O que é cobrado.** Entrega **E4** do [portfólio](../../avaliacao/rubrica-portfolio.md): senha com hash, login com expiração, 2 papéis, `curl` mostrando 401 e 403, e o ADR sessão × token.
+> Exercícios 📌 produzem parte do que a rubrica verifica; os ➕ são prática opcional.
+
+## E08.1 — Modelo de ameaça: sessão ou token (individual) · 📌 cobrado
 
 Uma prefeitura quer que o **sistema de matrículas dela** consulte a API do BiblioCom toda
 noite, para saber quais alunos têm empréstimo em atraso. Não há navegador nem pessoa
@@ -15,7 +18,7 @@ digitando senha.
 
 ---
 
-## E08.2 — Matriz de autorização (individual) ⭐
+## E08.2 — Matriz de autorização (individual) ⭐ · 📌 cobrado
 
 Acrescente as rotas de **exemplares** à matriz da etapa 13 e decida, para cada uma, quem
 pode o quê:
@@ -35,7 +38,7 @@ pode o quê:
 
 ---
 
-## E08.3 — Não vazar segredo (individual)
+## E08.3 — Não vazar segredo (individual) · ➕ opcional
 
 Percorra **todas** as respostas que envolvem usuário — login, `GET /api/sessao`,
 `POST /api/usuarios` e as mensagens de erro — e liste cada campo que aparece.
@@ -47,7 +50,7 @@ Percorra **todas** as respostas que envolvem usuário — login, `GET /api/sessa
 
 ---
 
-## E08.4 — Enumeração de usuários (individual)
+## E08.4 — Enumeração de usuários (individual) · ➕ opcional
 
 1. Altere o `validar` para responder `"E-mail não cadastrado"` quando o usuário não existir.
 2. Escreva os dois `curl.exe` que provam que, agora, dá para descobrir quais e-mails estão
@@ -57,7 +60,7 @@ Percorra **todas** as respostas que envolvem usuário — login, `GET /api/sessa
 
 ---
 
-## E08.5 — Desativar sem apagar (em duplas)
+## E08.5 — Desativar sem apagar (em duplas) · ➕ opcional
 
 Implementem `PATCH /api/usuarios/:id` (só coordenação) que liga e desliga o campo `ativo`.
 
@@ -72,7 +75,7 @@ expirar? Como o `AutenticadoGuard` resolveria isso, e quanto custaria?
 
 ---
 
-## E08.6 — Fixação de sessão (individual)
+## E08.6 — Fixação de sessão (individual) · ➕ opcional
 
 1. Comente a linha do `regenerate` no login.
 2. Com `curl.exe -c antes.txt`, faça uma requisição qualquer que crie sessão — ou, se nenhuma
