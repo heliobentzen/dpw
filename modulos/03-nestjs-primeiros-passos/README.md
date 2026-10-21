@@ -2,12 +2,10 @@
 
 > **Pré-requisitos:** M01, M02 · **Duração:** média
 
-Este é o primeiro código do backend, e o primeiro TypeScript da disciplina. Ao final existe
-uma API que responde de verdade, e você entende cada linha dela.
+Primeiro código do backend e primeiro TypeScript da disciplina. Ao final existe uma API que
+responde de verdade, e você entende cada linha dela.
 
-> **A teoria não está num bloco separado.** Ela está nas etapas 5, 6, 7, 11 e 20 —
-> em que a gente para de digitar e lê — mais as explicações dentro de cada etapa. Conceito
-> chega quando o código pede, e não antes.
+> A teoria vem quando o código pede: as etapas 5, 6, 7, 11 e 20 são de leitura e raciocínio.
 
 ## 🎯 Objetivos
 
@@ -21,26 +19,10 @@ Ao final você será capaz de:
 6. Ler configuração de fora do código e **impedir a aplicação de subir** quando faltar.
 7. Publicar a documentação interativa da API com Swagger em `/api/docs` e gerar o schema OpenAPI a partir do código.
 
-## 🧭 Por que este módulo é o ponto de virada
-
-M03 é o primeiro momento em que o aluno passa da leitura do problema para a construção do sistema.
-Até aqui, o foco era ambiente, contrato e linguagem da web. A partir daqui, o aluno começa a
-escrever software executável e a entender que estrutura, organização e documentação não são
-acessórios: são partes do próprio produto.
-
-A evolução pedagógica é clara:
-
-- antes: você entende como a web e a API se comunicam;
-- agora: você organiza a própria API e a torna legível para outras pessoas;
-- depois: você vai evoluir essa API com banco, regras, segurança e operação.
-
-> Este módulo é a primeira "peça de engenharia" do curso: o aluno aprende a leitura do código como estratégia e não como memorização.
-
----
-
 ## 🧭 O que você vai construir
 
-Uma API de acervo com três rotas. No fim da aula, isto funciona na sua máquina:
+Até aqui você entendeu como a web e uma API conversam; agora você constrói a sua. Uma API de
+acervo com três rotas — no fim da aula, isto funciona na sua máquina:
 
 ```
 GET /api/obras          → 200  [{"id":1,"titulo":"Dom Casmurro","ano":1899}, …]
@@ -50,39 +32,21 @@ GET /api/obras/999      → 404  {"message":"Obra 999 não encontrada"…}
 GET /api/docs           → Swagger UI, gerado a partir do código
 ```
 
-Três rotas parecem pouco. O que importa não são elas: é a **estrutura** que o M04 (banco), o
-M06 (consultas) e o M07 (validação) vão preencher sem precisar mover nada de lugar.
+Três rotas parecem pouco, mas o que importa é a **estrutura**: o M04 (banco), o M06
+(consultas) e o M07 (validação) vão preenchê-la sem mover nada de lugar.
 
 ## 📋 Como este módulo funciona
 
-Vinte etapas curtas, em ordem. Nenhum comando tem mais que uma linha. Cada etapa tem sempre
-as mesmas quatro partes:
+Vinte etapas curtas, em ordem. Cada uma tem quatro partes: **Faça** (o que digitar),
+**Linha a linha** (o que cada elemento significa), **Rode** (como verificar) e **Deu certo
+se** (o resultado esperado).
 
-| Parte | O que é |
-| --- | --- |
-| **Faça** | O comando ou o código, para digitar |
-| **Linha a linha** | Uma tabela explicando **cada elemento** do que você acabou de escrever |
-| **Rode** | Como verificar |
-| **Deu certo se** | O resultado exato esperado |
+**Não pule etapas.** Cada uma assume que a anterior funcionou, e várias provocam um erro de
+propósito — o erro é o conteúdo.
 
-**Não pule para a frente.** Cada etapa assume que a anterior funcionou, e várias delas
-existem para você ver um erro de propósito — o erro é o conteúdo.
-
-### 🪟 Sobre o sistema operacional
-
-Os comandos deste módulo são **os mesmos no Windows, no macOS e no Linux**, com uma exceção:
-
-| No PowerShell (Windows) | No macOS / Linux / Git Bash |
-|---|---|
-| `curl.exe` | `curl` |
-
-No PowerShell, `curl` é apelido de outro programa (`Invoke-WebRequest`) e não aceita os
-mesmos parâmetros. **Escrevendo `curl.exe` você chama o programa certo.** Daqui em diante o
-material escreve `curl.exe`; no macOS e no Linux, apague o `.exe`.
-
-> Esta é uma das cinco diferenças do Windows que valem a pena conhecer. As outras estão em
-> [`recursos/comandos-windows.md`](../../recursos/comandos-windows.md), para consultar quando
-> aparecerem.
+> 🪟 **Windows:** os comandos são iguais nos três sistemas, exceto um. No PowerShell, `curl` é
+> apelido de outro programa (`Invoke-WebRequest`); escreva **`curl.exe`**. No macOS e no
+> Linux, apague o `.exe`. Outras diferenças: [`recursos/comandos-windows.md`](../../recursos/comandos-windows.md).
 
 ### As vinte etapas
 
@@ -151,11 +115,9 @@ cd C:\dev\bibliocom
 
 *(No macOS ou Linux: `cd ~/dev/bibliocom`.)*
 
-**Deu certo se:** existe um `package.json` nessa pasta. Confira abrindo-o no VS Code — ele
-deve ter um campo `workspaces` listando `backend` e `pacotes/*`.
-
-Essas pastas ainda não existem, e é normal: `backend/` nasce daqui a duas etapas e
-`pacotes/tipos/` no M11. O campo `workspaces` é uma **declaração de intenção** — ele diz ao npm onde procurar projetos quando eles existirem.
+**Deu certo se:** existe um `package.json` nessa pasta, com um campo `workspaces` listando
+`backend` e `pacotes/*`. Essas pastas ainda não existem — `backend/` nasce na etapa 3 e
+`pacotes/tipos/` no M11. O campo só diz ao npm onde procurar projetos quando eles existirem.
 
 ---
 
@@ -186,22 +148,18 @@ responde `12.` seguido de outros números.
 
 ### Por que uma CLI, e por que fixar a versão
 
-Uma **CLI** (*Command Line Interface*) é um programa que você usa pelo terminal. Esta faz
-duas coisas para você: cria a estrutura inicial do projeto e gera arquivos novos já
-registrados nos lugares certos. Nada que ela faz é obrigatório — dá para escrever todos os
-arquivos à mão, e o exercício E03.3 pede exatamente isso. Ela apenas evita a digitação
-repetitiva e, principalmente, evita esquecimentos de registro.
+Uma **CLI** (*Command Line Interface*) é um programa usado pelo terminal. Esta cria a
+estrutura inicial do projeto e gera arquivos novos **já registrados** nos lugares certos.
+Nada disso é obrigatório — o exercício E03.3 pede tudo à mão —, mas ela evita digitação
+repetitiva e, principalmente, esquecimentos de registro.
 
-O `@11` merece uma frase própria. **Uma turma inteira precisa produzir o mesmo projeto.** Sem
-fixar a versão, quem instalar hoje e quem instalar em novembro receberiam versões diferentes,
-com arquivos gerados diferentes — e o material deixaria de bater com a tela de metade da
-sala. Fixar versão em material didático é o mesmo cuidado que se toma em produção, e pelo
-mesmo motivo: previsibilidade vale mais que novidade.
+O `@12` existe porque **a turma inteira precisa produzir o mesmo projeto**. Sem fixar,
+quem instala hoje e quem instala daqui a meses recebe versões diferentes, com arquivos
+diferentes. É o mesmo cuidado de produção: previsibilidade vale mais que novidade.
 
-> 📌 **Nota para quem for atualizar este material.** Quando o Nest 13 sair, troque o `@12`
-> aqui e confira três pontos: se a CLI continua gerando os `import` com `.js` (etapa 5), se
-> os pacotes `@nestjs/*` acompanham a mesma versão principal, e se o executor de testes do
-> M10 continua sendo o Vitest.
+> 📌 **Para quem atualizar este material:** quando sair o Nest 13, confira se a CLI ainda gera
+> imports com `.js` (etapa 5), se os pacotes `@nestjs/*` seguem a mesma versão principal e se
+> o M10 continua no Vitest.
 
 ---
 
@@ -232,15 +190,11 @@ A CLI vai **perguntar** qual gerenciador de pacotes usar:
 
 **`npm` já vem selecionado. Aperte Enter.**
 
-Ela então lista os arquivos criados e instala as dependências. Na primeira vez leva um ou
-dois minutos — está baixando o Nest inteiro.
+Na primeira vez a instalação leva um ou dois minutos.
 
-**Deu certo se:** apareceu `🚀 Successfully created project backend`, e agora existe uma
-pasta `backend` com uma pasta `src` dentro dela.
+**Deu certo se:** apareceu `🚀 Successfully created project backend` e existe `backend\src`.
 
-⚠️ **Confira que não existe `backend\.git`.** No VS Code, com "mostrar arquivos ocultos"
-ligado, ela não deve aparecer. Se apareceu, apague essa pasta e siga — nada mais quebra por
-causa disso.
+⚠️ **Confira que não existe `backend\.git`** (pasta oculta). Se existir, apague-a e siga.
 
 ---
 
@@ -264,9 +218,8 @@ npm run start:dev
 | `start:dev` | O nome do script. Abra o `package.json` e procure `"scripts"`: você vai ver que `start:dev` é um apelido para `nest start --watch` |
 | `--watch` (dentro do script) | Fica observando os arquivos. A cada `Ctrl+S`, recompila e reinicia sozinho |
 
-Este comando **ocupa o terminal** e não devolve o cursor — ele fica rodando. Deixe-o numa
-janela e abra **outra** para os comandos das próximas etapas. No VS Code, o `+` no painel de
-terminal abre a segunda.
+Este comando **ocupa o terminal**. Deixe-o rodando e abra **outro** terminal (o `+` no
+painel do VS Code) para as próximas etapas.
 
 **Rode:** abra <http://localhost:3000> no navegador.
 
@@ -276,22 +229,19 @@ terminal abre a segunda.
 [Nest] LOG [NestApplication] Nest application successfully started
 ```
 
-> ⚠️ **`EADDRINUSE: address already in use :::3000`** significa que já existe um servidor
-> nessa porta — provavelmente um que você esqueceu aberto. Feche-o com `Ctrl+C` na janela
-> dele. Este erro vai reaparecer no curso; guarde a causa.
+> ⚠️ **`EADDRINUSE: address already in use :::3000`**: já há um servidor nessa porta,
+> provavelmente esquecido aberto. Feche-o com `Ctrl+C` na janela dele.
 
-Você não escreveu uma linha ainda e já tem um servidor HTTP no ar. As próximas três etapas
-são para entender de onde ele veio.
+Sem escrever uma linha, você já tem um servidor HTTP no ar. As próximas três etapas mostram
+de onde ele veio.
 
 ---
 
 ## Etapa 5 — Ler o `main.ts`
 
-Pare de digitar. As etapas 5, 6 e 7 são de leitura: são **quatro arquivos pequenos**, e o
-`Hello World!` que você acabou de ver sai deles.
-
-> Em `src` você vai contar cinco arquivos. O quinto é o `app.controller.spec.ts`, um teste
-> que a CLI deixa de brinde. Ignore-o por enquanto — ele é assunto do M10.
+Pare de digitar. As etapas 5, 6 e 7 são de leitura: o `Hello World!` sai de **quatro
+arquivos pequenos**. (O quinto arquivo em `src`, `app.controller.spec.ts`, é um teste —
+fica para o M10.)
 
 Abra `src\main.ts`:
 
@@ -322,13 +272,9 @@ await bootstrap();
 
 ### 5a. Por que o import termina em `.js` se o arquivo é `.ts`
 
-Esta é a pergunta que o arquivo provoca, e ela tem uma resposta curta e uma regra.
-
-**A resposta curta:** o TypeScript **não reescreve caminhos de import**. Ele só apaga os
-tipos e entrega o arquivo ao Node. Quando você roda `npm run build`, o `src/app.module.ts`
-vira `dist/app.module.js` — e é esse nome que vai existir na hora em que o programa rodar.
-O import precisa apontar para o arquivo que **vai existir**, não para o que você está
-editando.
+O TypeScript **não reescreve caminhos de import**: ele só apaga os tipos e entrega o arquivo
+ao Node. Na compilação, `src/app.module.ts` vira `dist/app.module.js` — e o import precisa
+apontar para o arquivo que **vai existir** quando o programa rodar.
 
 ```
 você escreve      src/app.module.ts
@@ -343,11 +289,10 @@ logo, o import    "./app.module.js"
 | um arquivo **seu** | com `.js` no fim | `from "./acervo.service.js"` |
 | um **pacote** instalado | sem extensão | `from "@nestjs/common"` |
 
-Duas coisas que ajudam a não sofrer com isso:
+Na prática, pouco sofrimento:
 
-1. **A CLI escreve sozinha.** Todo arquivo gerado por `nest generate` já vem com os imports
-   certos. Você só escreve à mão quando acrescenta um import novo.
-2. **O erro é sempre o mesmo, e ele te dá a resposta.** Se esquecer, o TypeScript avisa:
+1. **A CLI já gera os imports certos.** Você só escreve à mão os imports novos.
+2. **O erro, se esquecer, já traz a resposta:**
 
    ```
    error TS2835: Relative import paths need explicit file extensions in ECMAScript
@@ -355,12 +300,10 @@ Duas coisas que ajudam a não sofrer com isso:
    Did you mean './acervo.service.js'?
    ```
 
-   A última linha é literalmente o que você deve escrever. É um dos erros mais gentis que
-   você vai encontrar no curso — aproveite, porque nem todos são assim.
+   A última linha é literalmente a correção.
 
-> Isso se chama **ESM** (*ECMAScript Modules*), o sistema de módulos oficial do JavaScript.
-> O JavaScript que roda nos navegadores modernos também é ESM — então um cliente web que
-> consumir a sua API fala a mesma língua de módulos que o seu backend.
+> Esse sistema se chama **ESM** (*ECMAScript Modules*): o padrão oficial do JavaScript, o
+> mesmo dos navegadores modernos.
 
 **O que reter da etapa:** toda a aplicação sai de **um** módulo, o `AppModule`. Tudo o que
 você criar daqui em diante vai, direta ou indiretamente, pendurar nele.
@@ -420,22 +363,20 @@ novo, e a etapa 13 explica o que ele faz.
 
 Você viu três coisas começando com `@`. Elas têm nome: **decorators**.
 
-Um decorator é **uma função que anexa informação a uma classe ou a um método**. Ele não
-executa o método, não muda o que ele faz e não é mágica — ele **registra** algo.
+Um decorator é **uma função que anexa informação a uma classe ou a um método**. Não executa
+nem altera o método — só **registra** algo, como uma etiqueta colada numa caixa.
 
 ```ts
 @Get()                 // registra: "este método responde a GET"
 getHello(): string {}
 ```
 
-Quando a aplicação sobe, o Nest **lê esses registros** e monta a tabela de rotas a partir
-deles. É exatamente por isso que o terminal, ao iniciar, imprime:
+Ao subir, o Nest **lê essas etiquetas** e monta a tabela de rotas. É isso que o terminal
+anuncia ao iniciar:
 
 ```
 [RouterExplorer] Mapped {/, GET} route
 ```
-
-Ele está lendo o que os decorators anexaram e anunciando o que encontrou.
 
 | Pergunta comum | Resposta |
 | --- | --- |
@@ -443,8 +384,7 @@ Ele está lendo o que os decorators anexaram e anunciando o que encontrou.
 | Por que os parênteses em `@Get()`? | Porque é uma chamada de função. `@Get()` chama sem argumento; `@Get(":id")` passa o caminho |
 | Onde mais vou ver isso? | Em `@Entity()` no M04 e em `@IsString()` no M07. **Um mecanismo, três usos** |
 
-**Não decore os decorators.** Cada um vai aparecer no momento em que resolve um problema
-seu, e é aí que ele gruda.
+**Não decore os decorators.** Cada um aparece quando resolve um problema seu.
 
 ---
 
@@ -465,8 +405,7 @@ import { AppService } from "./app.service.js";
 export class AppModule {}
 ```
 
-Repare que o corpo da classe está **vazio** — `{}`. Todo o conteúdo do arquivo está no
-decorator. O módulo não *faz* nada: ele **declara** o que existe.
+O corpo da classe está **vazio**: o módulo não *faz* nada, só **declara** o que existe.
 
 **As três listas, que é tudo o que um módulo é:**
 
@@ -485,8 +424,8 @@ AppController  @Get() na raiz, pede o texto ao AppService
 AppService     devolve "Hello World!"
 ```
 
-**Esse é o projeto inteiro.** Quatro arquivos, cada um com uma responsabilidade. Tudo que
-vem depois é mais do mesmo, em maior quantidade.
+**Esse é o projeto inteiro:** quatro arquivos, uma responsabilidade cada. Todo o resto do
+curso é mais do mesmo, em maior quantidade.
 
 ---
 
@@ -500,19 +439,13 @@ Antes de acrescentar conceito, feche o ciclo básico: editar, salvar, ver o resu
 return "BiblioCom no ar";
 ```
 
-**Rode:** salve o arquivo e olhe o terminal do `start:dev`. Ele imprime
+**Rode:** salve. O terminal do `start:dev` mostra `File change detected…` e reinicia sozinho.
+Atualize o navegador.
 
-```
-File change detected. Starting incremental compilation...
-```
+**Deu certo se:** a página mostra `BiblioCom no ar`, sem reinício manual.
 
-e reinicia sozinho. Atualize o navegador.
-
-**Deu certo se:** a página mostra `BiblioCom no ar`, sem você ter reiniciado nada à mão.
-
-> **Se este passo falhar, pare aqui.** Nada das próximas etapas vai funcionar, e o problema
-> é de ambiente, não de código. Confira se o `start:dev` ainda está rodando naquela outra
-> janela — é comum tê-lo fechado sem perceber.
+> **Se falhar, pare aqui** — o problema é de ambiente, não de código. O mais comum: o
+> `start:dev` foi fechado sem você perceber.
 
 ---
 
@@ -558,13 +491,11 @@ import { AcervoService } from "./acervo.service.js";
 export class AcervoModule {}
 ```
 
-**Este arquivo é a peça que faz tudo funcionar.** Confira também o `app.module.ts`: o
-`AcervoModule` apareceu no `imports` sozinho.
+Confira também o `app.module.ts`: o `AcervoModule` apareceu no `imports` sozinho.
 
-Repare no que a CLI fez de mais valioso: **os registros**. Ela não só criou três arquivos —
-ela os anunciou nos lugares certos, em dois módulos diferentes. É justamente isso que se
-esquece ao criar arquivo à mão, e o erro que aparece quando falta **não menciona registro
-nenhum**. Você vai provocar esse erro de propósito na etapa 13.
+O mais valioso que a CLI fez foram **os registros**, em dois módulos diferentes. É o que se
+esquece ao criar arquivos à mão — e o erro resultante **não menciona registro nenhum**. Você
+vai provocá-lo de propósito na etapa 13.
 
 Os outros dois arquivos vieram quase vazios:
 
@@ -587,9 +518,8 @@ de rota. Nós queremos `/obras`. Troque:
 @Controller("obras")
 ```
 
-> Módulo e rota não precisam ter o mesmo nome, e frequentemente não têm. O módulo organiza o
-> **código**; a rota nomeia o **recurso** que o cliente enxerga. Aqui o módulo cuida do
-> acervo, e o recurso que ele publica é a obra.
+> Módulo e rota não precisam ter o mesmo nome: o módulo organiza o **código** (acervo); a
+> rota nomeia o **recurso** que o cliente enxerga (obra).
 
 ---
 
@@ -635,74 +565,40 @@ export class AcervoController {
 | `Content-Type: application/json` | O Nest pôs o cabeçalho ao ver que você devolveu um objeto |
 | `status(200)` | 200 é o padrão para `GET` |
 
-Você devolveu um valor e o framework cuidou do HTTP. Essa é a diferença prática entre o Nest
-e o Express da conversa do M02.
+Você devolveu um valor e o framework cuidou do HTTP — a diferença prática para o Express do M02.
 
 ---
 
 ## Etapa 11 — Por que separar em camadas
 
-Pare o teclado. Esta etapa é a mais importante do módulo, e ela é de raciocínio.
+Pare o teclado. Esta é a etapa mais importante do módulo, e é de raciocínio.
 
-O endpoint da etapa 10 **funciona**. Devolve o que deveria, com o status certo. Então por que
-todo material de NestJS insiste que os dados não podem ficar ali?
+O endpoint da etapa 10 **funciona**. Por que, então, os dados não podem ficar no controller?
+Não é "porque é boa prática": são quatro situações concretas, e todas vão acontecer nesta
+disciplina.
 
-A resposta honesta não é "porque é a boa prática". É que existem quatro situações concretas
-em que essa escolha cobra a conta — e todas as quatro vão acontecer nesta disciplina.
+Pense num **restaurante**: o garçom (controller) anota o pedido e entrega o prato; a cozinha
+(service) sabe fazer o prato. Se o garçom cozinhar na mesa, tudo funciona — até o restaurante
+precisar de delivery, de um cozinheiro novo ou de dois garçons ao mesmo tempo.
 
-### Situação 1 — o mesmo dado é preciso em outro lugar
+| Situação | Com a lógica no controller | Com a lógica no service |
+| --- | --- | --- |
+| **1. O dado é preciso fora do HTTP** — um script de terminal (M08) ou um relatório mensal | Copia-se a lista; alguém corrige uma cópia e a outra fica errada em silêncio | O script chama o service |
+| **2. Testar a regra** "no máximo três empréstimos em aberto" (M10) | Subir app → montar requisição → enviar → ler status. Lento, e quebra por porta ocupada ou rota renomeada | Uma linha, sem servidor (abaixo) |
+| **3. A fonte dos dados muda** para o PostgreSQL (M04) | Conexão, consultas e erros de banco caem no arquivo de rotas: 10 linhas viram 60 | A troca acontece só no service; o controller não muda uma vírgula — você confere no M06 |
+| **4. Duas pessoas na mesma semana** — uma em rotas, outra em regras | Editam as mesmas linhas; conflito de merge | Arquivos separados, merge limpo |
 
-No M08 vai existir um **script** que roda no terminal, sem HTTP nenhum — o que cria o
-primeiro usuário. Um relatório mensal do acervo para a coordenação seria igual: um comando,
-não uma requisição. E ele precisa da lista de obras.
-
-Com a lista dentro do `listar()` do controller, só há duas saídas: chamar um método de
-controller fora de uma requisição (que arrasta consigo o `@Get`, a rota, o status) ou
-**copiar a lista**. Todo mundo copia. Aí existem duas cópias, alguém corrige uma, e a outra
-fica errada em silêncio.
-
-### Situação 2 — testar a regra exige subir um servidor
-
-No M10 você vai testar a regra "um associado não pode ter mais de três empréstimos em
-aberto". Se essa regra morar no controller, testá-la exige:
-
-```
-subir a aplicação → montar uma requisição HTTP → mandar → ler a resposta → interpretar o status
-```
-
-Cinco passos, um servidor de pé, e um teste lento que quebra por motivos que nada têm a ver
-com a regra: porta ocupada, JSON malformado, rota renomeada.
-
-Se a regra mora no service, o teste é:
+O teste da situação 2, com a regra no service:
 
 ```ts
 expect(() => servico.emprestar(exemplar, associadoComTres)).toThrow();
 ```
 
-Uma linha, sem rede, sem servidor. **A separação em camadas é, na prática, o que torna o
-teste barato** — e teste caro é teste que ninguém escreve.
-
-### Situação 3 — a fonte dos dados vai mudar
-
-No M04 a lista sai de um array e passa a vir do PostgreSQL. Essa é uma mudança **grande**:
-entra uma conexão, entram consultas, entra tratamento de erro de banco.
-
-Se o dado estiver no controller, tudo isso desemboca no arquivo que também cuida de rota,
-status e parâmetro de URL — que era de 10 linhas e vira de 60. Com o service no meio, a troca
-acontece **só dentro dele**, e o controller não muda **uma vírgula**.
-
-Isso não é promessa: no M06 você vai fazer exatamente essa troca e conferir que o controller
-continua igual. Guarde para comparar.
-
-### Situação 4 — duas pessoas mexendo na mesma semana
-
-Numa equipe de quatro, alguém está criando rotas e alguém está escrevendo regra de negócio.
-Em arquivos separados, os dois trabalham em paralelo e o Git mescla sem conflito. No mesmo
-arquivo, os dois editam as mesmas linhas — e o M00 já mostrou como termina.
+**Separar camadas é o que torna o teste barato** — e teste caro é teste que ninguém escreve.
 
 ### A regra, e como decidir
 
-Dessas quatro situações sai a divisão que o Nest impõe:
+Dessas situações sai a divisão que o Nest impõe:
 
 | Peça | Responsabilidade | O que **não** deve fazer |
 | --- | --- | --- |
@@ -728,23 +624,17 @@ Aplique aos casos que você já viu:
 
 ### O que acontece quando não se separa
 
-Este é o problema que a separação evita, com nome e endereço. Um projeto Express típico
-começa assim:
+Um projeto Express típico começa assim:
 
 ```ts
 app.get("/obras", (req, res) => { /* consulta o banco, valida, responde */ });
 ```
 
-Funciona lindamente no primeiro mês. Meses depois, com 40 rotas, isso é um arquivo de 800 linhas
-onde ninguém acha nada, nada é testável isoladamente e cada pessoa da equipe organizou do seu
-jeito.
+No primeiro mês, funciona. Com 40 rotas, é um arquivo de 800 linhas onde ninguém acha nada,
+nada é testável isoladamente e cada pessoa organizou do seu jeito.
 
-**O NestJS impõe a estrutura, e a imposição é o produto.** Não é que ele saiba organizar
-melhor que você; é que ele organiza **igual para todo mundo**, e é isso que permite quatro
-pessoas mexerem no mesmo backend sem colidir — e você voltar ao seu próprio código seis meses
-depois e ainda entendê-lo.
-
-As próximas duas etapas aplicam essa decisão ao endpoint que você acabou de escrever.
+**O NestJS impõe a estrutura, e a imposição é o produto.** Ele não organiza melhor que você —
+organiza **igual para todo mundo**. As próximas duas etapas aplicam isso ao seu endpoint.
 
 ---
 
@@ -780,8 +670,8 @@ export class AcervoService {
 | `listar(): Obra[]` | Se você errar e devolver outra coisa, o TypeScript acusa antes de rodar |
 | o comentário | Vale a pena escrever: ele diz ao leitor que o array é **provisório**, e até quando |
 
-**Deu certo se:** o arquivo salva sem erro. A rota ainda responde a lista antiga — o
-controller ainda não sabe que o service existe. É a próxima etapa.
+**Deu certo se:** o arquivo salva sem erro. A rota ainda responde a lista antiga: o
+controller não sabe que o service existe — próxima etapa.
 
 ---
 
@@ -797,22 +687,21 @@ export class AcervoController {
 }
 ```
 
-Funciona. E é ruim por dois motivos concretos:
+Funciona, e é ruim por dois motivos:
 
 1. **O controller fica soldado a essa implementação.** Num teste (M10), não há como trocar o
-   service por um dublê — a linha `new` está dentro dele, e o teste não alcança.
-2. **Quando o service passar a precisar de coisas**, como a conexão de banco do M04, o
-   controller passa a ter de saber montá-las. E quem cria o controller, também. A ignorância
-   se espalha para cima.
+   service por um dublê — o `new` está lá dentro.
+2. **Quando o service precisar de coisas** (a conexão de banco do M04), o controller terá de
+   saber montá-las. E quem cria o controller, também.
 
 ### 13b. A forma do Nest
 
-Pense numa **geladeira e na tomada**. A geladeira não constrói a própria usina: ela recebe
-energia pela tomada, num formato combinado, e não sabe — nem precisa saber — se a energia vem
-de uma hidrelétrica ou de painéis solares. Trocar a fonte não exige abrir a geladeira.
+Pense numa **geladeira e na tomada**. A geladeira não constrói a própria usina: recebe
+energia pela tomada e não sabe se ela vem de uma hidrelétrica ou de painéis solares. Trocar a
+fonte não exige abrir a geladeira.
 
-**Injeção de dependência** é isso: a classe **recebe** as ferramentas de que precisa, em vez
-de fabricá-las. Quem liga os fios é o Nest. A dependência **chega pronta**, pelo construtor.
+**Injeção de dependência** é isso: a classe **recebe** o que precisa, pronto, pelo
+construtor, em vez de fabricar. Quem liga os fios é o Nest.
 
 **Faça:** em `src\acervo\acervo.controller.ts`:
 
@@ -845,13 +734,12 @@ Isso é **injeção de dependência**: a classe declara *o que precisa*, não *c
 
 **Rode:** atualize <http://localhost:3000/obras> no navegador.
 
-**Deu certo se:** responde as duas obras, exatamente como antes. O comportamento visível é o
-mesmo da etapa 10 — o que mudou foi **onde o dado mora**, que é tudo o que a etapa 11
-argumentou.
+**Deu certo se:** responde as duas obras, como antes. O comportamento é o mesmo; mudou
+**onde o dado mora** — exatamente o que a etapa 11 defendeu.
 
 ### 13c. A prova de que a injeção é real
 
-Até aqui, "o Nest entrega o service" é uma afirmação. Vamos verificá-la quebrando.
+"O Nest entrega o service" ainda é só uma afirmação. Vamos verificá-la quebrando.
 
 **Faça:** em `src\acervo\acervo.module.ts`, comente o `AcervoService` da lista `providers`:
 
@@ -879,18 +767,14 @@ in the AcervoModule module.
 | `at index [0]` | O primeiro parâmetro do construtor |
 | `is available in the AcervoModule module` | **Onde procurar:** a lista `providers` daquele módulo |
 
-Descomente e o servidor volta.
+Descomente e o servidor volta. Guarde este erro: é o mais comum deste módulo e do M04, e a
+causa é quase sempre uma classe esquecida fora de `providers`.
 
-Guarde este erro: é o mais comum deste módulo e do M04, e a causa é quase sempre a mesma —
-alguém criou uma classe e esqueceu de registrá-la em `providers`.
+**O que a injeção traz:**
 
-**Três consequências práticas**, agora que você viu como funciona:
-
-1. **Testar fica barato** — o teste passa um dublê no lugar do service (M10). É a situação 2
-   da etapa 11, resolvida.
+1. **Teste barato** — o teste passa um dublê no lugar do service (situação 2 da etapa 11).
 2. **Uma instância só** (*singleton*), reaproveitada em toda a aplicação.
-3. **Trocar a implementação não toca quem usa** — é a situação 3 da etapa 11, e você vai
-   comprová-la no M06.
+3. **Trocar a implementação não toca quem usa** (situação 3; você comprova no M06).
 
 ---
 
@@ -934,16 +818,15 @@ Acrescente `Param` e `ParseIntPipe` ao `import` de `@nestjs/common`.
 
 ### 14c. O conceito: o que é um pipe
 
-Um **pipe** é uma peça que roda **entre a requisição e o seu método**. Ele recebe o valor que
-chegou e devolve o valor que o método vai receber — convertendo, validando, ou as duas coisas.
+Um **pipe** roda **entre a requisição e o seu método**, como o porteiro que confere o
+documento antes de você entrar: converte, valida, ou as duas coisas.
 
-O `ParseIntPipe` pega a string vinda da URL e tenta convertê-la em número. Se conseguir,
-entrega o número; se não conseguir, **responde 400 sozinho** e o seu método nunca é chamado.
+O `ParseIntPipe` tenta converter a string da URL em número. Se conseguir, entrega o número;
+se não, **responde 400 sozinho** e o seu método nunca é chamado.
 
 ### 14d. Ver os dois casos
 
-Aqui o navegador não basta: precisamos ver o **código de status**, e o navegador mostra só o
-corpo. É a hora do `curl`.
+O navegador mostra só o corpo; para ver o **código de status**, use o `curl`.
 
 **Faça** — na segunda janela do terminal:
 
@@ -991,9 +874,8 @@ Recoloque o `ParseIntPipe` antes de seguir.
 
 **Rode:** chame `/obras/999`.
 
-Hoje responde `200` com corpo vazio — que é pior do que um erro. O cliente não tem como saber
-se a obra não existe, se a API quebrou ou se ele digitou a URL errada. Um `200` é uma promessa
-de que deu certo.
+Hoje responde `200` com corpo vazio — pior do que um erro. Um `200` promete que deu certo, e
+o cliente não tem como saber se a obra não existe, se a API quebrou ou se a URL está errada.
 
 **Faça:** no service, troque o `buscarUm`:
 
@@ -1038,18 +920,16 @@ curl.exe -i http://localhost:3000/obras/999
 | montou o JSON de erro | o corpo veio padronizado |
 
 Você lançou uma exceção em **linguagem de domínio** ("não encontrada") e o framework a
-traduziu para HTTP. O service continua sem saber que HTTP existe — é o critério da etapa 11,
-funcionando na sua máquina.
+traduziu para HTTP. O service continua sem saber que HTTP existe — o critério da etapa 11.
 
-O Nest tem uma exceção para cada situação comum: `BadRequestException` (400),
-`ConflictException` (409), `ForbiddenException` (403). O M07 e o M08 usam as outras.
+Há uma exceção para cada caso comum: `BadRequestException` (400), `ForbiddenException`
+(403), `ConflictException` (409). O M07 e o M08 as usam.
 
 ---
 
 ## Etapa 16 — Configuração fora do código
 
-O nome da biblioteca não pode estar escrito no meio do código: ele muda por instalação, e
-alguém sem acesso ao repositório precisa poder trocá-lo.
+O nome da biblioteca muda por instalação e precisa ser trocável sem mexer no código.
 
 ### 16a. Os dois arquivos
 
@@ -1067,10 +947,9 @@ PORT=
 NOME_BIBLIOTECA=
 ```
 
-> Por que dois arquivos: o `.env` tem os **seus** valores e é secreto; o `.env.example`
-> documenta **quais** variáveis existem e é público. É por ele que uma pessoa nova descobre o
-> que precisa configurar. Variável nova no `.env` sem entrada no `.env.example` é o bug de
-> integração mais comum que existe, e só aparece quando alguém clona o projeto.
+> O `.env` tem os **seus** valores e é secreto; o `.env.example` documenta **quais**
+> variáveis existem e é público. Variável nova no `.env` sem entrada no `.env.example` é o
+> bug de integração mais comum — só aparece quando alguém clona o projeto.
 
 ### 16b. Ligar o ConfigModule
 
@@ -1082,10 +961,8 @@ Ler `.env` não vem de fábrica no Nest.
 npm install @nestjs/config
 ```
 
-> Repare que aqui **não** vai versão. Os pacotes `@nestjs/*` acompanham a versão principal do
-> framework, e o seu projeto é o 12 — então o npm já traz o `@nestjs/config` 12, que combina.
-> A única versão que este curso fixa é a da CLI, na etapa 2, e por um motivo diferente:
-> reprodutibilidade da turma.
+> Sem versão aqui: os pacotes `@nestjs/*` acompanham a versão principal do projeto (12). Só a
+> CLI é fixada (etapa 2), por reprodutibilidade da turma.
 
 Em `src\app.module.ts`, acrescente ao `imports` (o `AcervoModule` já está lá):
 
@@ -1133,9 +1010,8 @@ export class AcervoService {
 | `.get<string>("...")` | O `<string>` entre os sinais de menor/maior diz ao TypeScript o tipo esperado. Chama-se *genérico* |
 | `?? "sem nome"` | Se a variável não existir, usa esse valor. Na etapa 17 essa rede de proteção sai |
 
-Repare que você **não** precisou importar o `ConfigModule` dentro do `AcervoModule`: é o
-`isGlobal: true` fazendo efeito. Sem ele, faltaria esse registro e você cairia no
-`can't resolve dependencies` da etapa 13c de novo.
+Você **não** precisou importar o `ConfigModule` no `AcervoModule`: é o `isGlobal: true`.
+Sem ele, cairia de novo no `can't resolve dependencies` da etapa 13c.
 
 **Faça:** exponha num endpoint temporário. No `acervo.controller.ts`, **acima** do
 `@Get(":id")`:
@@ -1147,10 +1023,9 @@ nome() {
 }
 ```
 
-⚠️ **A ordem importa, e é por isso que a instrução diz "acima".** Se o `@Get("nome")` ficar
-**depois** do `@Get(":id")`, o Nest casa a URL com o primeiro que serve — que é `:id` — e o
-`ParseIntPipe` tenta converter `"nome"` em número. Resultado: **400 numa rota que existe**.
-Rota literal sempre vem antes de rota com parâmetro. O M07 volta a isso.
+⚠️ **A ordem importa.** Se `@Get("nome")` ficar **depois** de `@Get(":id")`, o Nest casa a
+URL com o primeiro que serve (`:id`) e o `ParseIntPipe` tenta converter `"nome"` em número:
+**400 numa rota que existe**. Rota literal vem sempre antes de rota com parâmetro.
 
 **Deu certo se:** <http://localhost:3000/obras/nome> responde
 `{"nome":"Biblioteca Comunitária do Bairro"}`.
@@ -1159,9 +1034,8 @@ Rota literal sempre vem antes de rota com parâmetro. O M07 volta a isso.
 
 ## Etapa 17 — Não subir quebrado
 
-Hoje, se alguém apagar `NOME_BIBLIOTECA` do `.env`, a aplicação sobe normalmente e o erro só
-aparece quando alguém abre a tela que usa aquele valor — possivelmente em produção,
-possivelmente na frente de um usuário. Melhor não subir.
+Hoje, sem `NOME_BIBLIOTECA` no `.env`, a aplicação sobe normalmente e o erro só aparece
+quando alguém usa aquele valor — talvez em produção, na frente de um usuário. Melhor não subir.
 
 **Faça:**
 
@@ -1228,13 +1102,11 @@ Error: Variáveis de ambiente inválidas:
 Descomente e ela volta. Depois experimente `NOME_BIBLIOTECA=` (vazia): a mensagem muda para
 `não pode ficar vazia`.
 
-> Você vai ver um *stack trace* embaixo da mensagem. É normal — o Nest imprime a pilha de
-> qualquer erro de inicialização. A linha que interessa é a primeira.
+> O *stack trace* embaixo é normal; a linha que interessa é a primeira.
 >
-> **Por que isto vale uma etapa:** um serviço que não sobe é um problema óbvio, que alguém
-> resolve em dois minutos lendo a mensagem. Um serviço que sobe pela metade é um problema
-> caro, que aparece na frente do usuário e leva horas para ser rastreado até uma variável
-> faltando.
+> **Por que isto vale uma etapa:** serviço que não sobe se resolve em dois minutos lendo a
+> mensagem. Serviço que sobe pela metade falha na frente do usuário e leva horas para ser
+> rastreado até uma variável faltando.
 
 ---
 
@@ -1255,11 +1127,9 @@ await app.listen(process.env.PORT ?? 3000);
 **Deu certo se:** <http://localhost:3000/api/obras> responde a lista, e
 <http://localhost:3000/obras> — que funcionava até agora — passa a dar erro 404.
 
-**Por que fazer isso hoje, e não depois:** no M12 a API vai para um domínio público, e é
-comum ela dividir esse domínio com outras coisas — a documentação, um painel, um site. O
-prefixo `/api` é o que deixa o proxy da plataforma separar "isto é da API" do resto. Definir
-agora custa uma linha; definir depois do deploy custaria avisar **todo cliente** que já
-estiver chamando as URLs antigas — e você não controla quando eles atualizam.
+**Por que agora:** no M12 a API vai para um domínio público, que costuma dividir com
+documentação, painel ou site. O `/api` permite ao proxy separar o que é da API. Hoje custa
+uma linha; depois do deploy, custaria avisar **todo cliente** que já usa as URLs antigas.
 
 ---
 
@@ -1306,14 +1176,13 @@ com os imports correspondentes no topo.
 **Deu certo se:** <http://localhost:3000/api/docs> lista `GET /api/obras` e
 `GET /api/obras/{id}`, com um botão *Try it out* que funciona de verdade.
 
-Ninguém escreveu essa documentação. Ela saiu dos `@Controller` e `@Get` que você escreveu nas
-etapas 10 e 14 — os mesmos decorators, lidos por outra ferramenta. É o terceiro uso do mesmo
-mecanismo, e o M04 e o M07 trazem mais dois.
+Ninguém escreveu essa documentação: ela saiu dos `@Controller` e `@Get` das etapas 10 e 14 —
+os mesmos decorators, lidos por outra ferramenta.
 
 ### Gravar o schema em arquivo
 
-A página serve para pessoas. O projeto também versiona o schema como arquivo para que clientes
-externos e o CI possam consultá-lo e verificar a compatibilidade do contrato.
+A página serve a pessoas. O arquivo versionado serve a clientes externos e ao CI, que
+verificam a compatibilidade do contrato.
 
 **Faça:** crie `src\gerar-schema.ts`:
 
@@ -1359,13 +1228,11 @@ npm run gerar:schema
 **Deu certo se:** aparece `openapi.json gerado`, e o arquivo `backend\openapi.json` contém
 `"/api/obras"`.
 
-Repare que **nenhum servidor subiu**: o `NestFactory.create` monta a árvore de módulos em
-memória, o Swagger a percorre, e pronto. É por isso que o comando roda em segundos e serve
-para rodar no CI a cada *pull request*.
+**Nenhum servidor subiu**: o `NestFactory.create` monta os módulos em memória e o Swagger
+os percorre. Por isso roda em segundos, a cada *pull request* no CI.
 
-Esse arquivo é o **contrato** de que o M02 falou. No M07 ele ganha os formatos de entrada e
-saída, exemplos e caminhos de erro. Como nasce do código, o CI consegue detectar divergências
-antes do deploy.
+Esse arquivo é o **contrato** do M02. No M07 ele ganha formatos de entrada e saída, exemplos
+e erros. Como nasce do código, o CI detecta divergências antes do deploy.
 
 ---
 
@@ -1389,17 +1256,13 @@ flowchart TB
     class MW,G,RP futuro
 ```
 
-Nenhuma das caixas vazias exige mexer nas que você construiu — elas se **encaixam** em volta.
-É esse o retorno da separação que a etapa 11 justificou: quatro pessoas podem preencher
-caixas diferentes na mesma semana sem colidir.
-
-Guarde o diagrama. Cada módulo daqui em diante preenche uma caixa: o M06 o *Repository*, o M07
-os DTOs, o M08 o *Guard*, o M09 os *middlewares* de segurança.
+As caixas tracejadas se **encaixam** em volta das suas, sem exigir mudança nelas — o retorno
+da separação da etapa 11. Cada módulo seguinte preenche uma: M06 o *Repository*, M07 os DTOs,
+M08 o *Guard*, M09 os *middlewares* de segurança.
 
 💼 **No mercado:** "explique injeção de dependência" e "onde você colocaria esta regra" são
-perguntas de entrevista para vaga júnior de Node. Quem responde com o critério da etapa 11 —
-*"se o código não mudaria vindo de um comando de terminal, é service"* — e consegue dar um
-exemplo concreto se destaca de quem responde "no service, porque sim".
+perguntas clássicas de entrevista júnior. Quem responde com o critério da etapa 11 e um
+exemplo concreto se destaca de quem diz "no service, porque sim".
 
 ---
 
@@ -1425,23 +1288,19 @@ exemplo concreto se destaca de quem responde "no service, porque sim".
 
 ## 🤖 IA no fluxo
 
-Peça a um assistente de IA "um CRUD de obras em NestJS" e ele entrega em segundos — com
-grande chance de vir no formato antigo do Nest (CommonJS, sem o `.js` nos imports, Jest no
-lugar do Vitest), porque é o que mais aparece nos exemplos públicos. O erro `TS2835` da
-etapa 5 é o primeiro sinal.
+Peça a uma IA "um CRUD de obras em NestJS" e ela entrega em segundos — provavelmente no
+formato antigo (CommonJS, imports sem `.js`, Jest em vez de Vitest), que domina os exemplos
+públicos. O erro `TS2835` da etapa 5 é o primeiro sinal.
 
-Use o assistente para **explicar**: cole uma linha que você não entendeu e peça o porquê.
-Use-o com cuidado para **escrever**: todo código que vier, passe pelo critério da etapa 11 —
-*a regra de negócio está no service?* — e pela versão do Nest do seu projeto. Quem decide a
-arquitetura é você; o assistente digita rápido.
+Use a IA para **explicar** linhas que você não entendeu. Para **escrever**, revise tudo pelo
+critério da etapa 11 (*a regra está no service?*) e pela versão do Nest do projeto. Quem
+decide a arquitetura é você; a IA só digita rápido.
 
 ## 💣 Pegadinha de mercado
 
-**`new` dentro da classe.** Escrever `private acervo = new AcervoService()` funciona hoje e
-amarra o controller àquela implementação para sempre: não dá para testá-lo com um dublê
-(M10), e quando o service passar a precisar do banco, o controller vai precisar saber montar
-o banco também. Em revisão de código, `new` de um service dentro de outra classe do Nest é
-quase sempre devolvido.
+**`new` dentro da classe.** `private acervo = new AcervoService()` funciona hoje e amarra o
+controller àquela implementação: sem dublê no teste (M10) e, quando o service precisar do
+banco, o controller terá de saber montá-lo. Em revisão de código, é devolvido quase sempre.
 
 ## 🧩 Desafio de fixação
 

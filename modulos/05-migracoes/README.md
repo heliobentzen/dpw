@@ -3,10 +3,9 @@
 > **Pré-requisito:** M04 · **Duração:** média
 
 O `synchronize: true` do M04 foi um andaime. Aqui ele cai, e o banco passa a evoluir por
-arquivos versionados — que é como se altera um banco que tem dado dentro.
+arquivos versionados — como se altera um banco que tem dado dentro.
 
-> **A teoria não está num bloco separado.** Ela está nas etapas 1, 6, 9 e 11 — em que a
-> gente para de digitar e lê — mais as explicações dentro de cada etapa.
+> A teoria vem quando o código pede: as etapas 1, 6, 9 e 11 são de leitura e raciocínio.
 
 ## 🎯 Objetivos
 
@@ -23,14 +22,12 @@ Ao final você será capaz de:
 ## 🧭 Por que este módulo chega agora
 
 Pense numa **reforma de prédio com os moradores dentro**. A planta nova (a entidade) diz como
-o apartamento deve ficar no fim. Ela não diz em que ordem derrubar paredes, onde guardar os
-móveis enquanto isso, nem o que fazer com o quarto que vai sumir. Quem responde isso é o
-**cronograma de obra** — escrito antes, revisado por alguém, e seguido na mesma ordem em
-todos os andares.
+o apartamento deve ficar, mas não em que ordem derrubar paredes nem onde guardar os móveis.
+Isso é o **cronograma de obra** — escrito antes, revisado, e seguido na mesma ordem em todos
+os andares.
 
-No M04 o banco estava vazio, então dava para derrubar e reconstruir à vontade. A partir de
-agora ele tem dado, e a migração é o cronograma de obra: cada mudança vira um arquivo que
-alguém leu antes de rodar.
+No M04 o banco estava vazio e dava para reconstruir à vontade. Agora ele tem dado, e a
+migração é o cronograma: cada mudança vira um arquivo que alguém leu antes de rodar.
 
 ```mermaid
 flowchart LR
@@ -43,31 +40,21 @@ flowchart LR
     F --> G[migration:run<br/>em produção]
 ```
 
-> **Regra de trabalho.** Migração é código de produção. Ela deve ser pequena, nomeada,
-> versionada e testada numa cópia do banco antes de ser aplicada. **Nunca apague nem edite
-> uma migração que já foi aplicada** em outro banco além do seu: crie outra que corrija o
-> estado.
+> **Regra de trabalho.** Migração é código de produção: pequena, nomeada, versionada e
+> testada antes. **Nunca apague nem edite uma migração já aplicada** em outro banco além do
+> seu — crie outra que corrija o estado.
 
 ## 🧭 O que você vai construir
 
-Uma pasta `src/migracoes/` com alguns arquivos numerados, versionados no Git, que descrevem
-**toda** a história do banco — do `CREATE TABLE` inicial até a última coluna renomeada.
-Qualquer pessoa que clonar o repositório reproduz o banco exato rodando um comando.
-
-E, mais importante: a partir daqui **nenhuma mudança no banco acontece sem alguém ter lido o
+Uma pasta `src/migracoes/`, versionada no Git, com **toda** a história do banco — do
+`CREATE TABLE` inicial à última coluna renomeada. Quem clonar o repositório reproduz o banco
+com um comando. E, daqui em diante, **nenhuma mudança no banco acontece sem alguém ter lido o
 SQL antes**.
 
 ## 📋 Como este módulo funciona
 
-Mesmo formato do M03 e do M04. Treze etapas curtas, e a primeira existe para você entender
-*por que* está desmontando algo que funcionava.
-
-| Parte | O que é |
-|---|---|
-| **Faça** | O comando ou o código, para digitar |
-| **Linha a linha** | Uma tabela explicando **cada elemento** |
-| **Rode** | Como verificar |
-| **Deu certo se** | O resultado exato esperado |
+Mesmo formato do M03 e do M04 (**Faça → Linha a linha → Rode → Deu certo se**), em treze
+etapas curtas.
 
 ### As treze etapas
 
@@ -91,11 +78,8 @@ Mesmo formato do M03 e do M04. Treze etapas curtas, e a primeira existe para voc
 
 ## Etapa 1 — Por que trocar o que funciona
 
-Você terminou o M04 com um banco completo, gerado sozinho a partir das classes. Funcionava.
-Por que desmontar isso?
-
-Porque na etapa 16 do M04 você viu o `synchronize` fazer coisas muito diferentes com a mesma
-naturalidade:
+O banco do M04 nasceu sozinho das classes e funcionava. Por que desmontar? Porque na etapa
+16 do M04 o `synchronize` fez coisas muito diferentes com a mesma naturalidade:
 
 | Mudança | O que ele fez | Consequência |
 |---|---|---|
@@ -103,17 +87,12 @@ naturalidade:
 | `text` → `varchar(10)` com dado dentro | `DROP COLUMN` seguido de `ADD COLUMN` | **Perda total, sem aviso** |
 | `nullable` → `NOT NULL` com linhas nulas | Falha na inicialização | A aplicação não sobe |
 
-### O problema não é que ele erre
-
-Repare: num dos casos o `synchronize` acertou, e acertou o mais difícil. Ele é razoavelmente
-esperto.
-
-**O problema é que você não sabe qual comportamento vai receber antes de rodar** — e um deles
-apaga dados em silêncio, com a aplicação subindo normalmente e nenhum erro em lugar nenhum.
+**O problema não é ele errar** — num caso acertou o mais difícil. **É não saber qual
+comportamento você vai receber antes de rodar**, e um deles apaga dados em silêncio.
 
 ### Por que não dá para automatizar melhor
 
-Estas perguntas **não têm resposta automática**, e não é limitação de ferramenta:
+Estas perguntas **não têm resposta automática** — e não por limitação de ferramenta:
 
 - Os textos que não cabem em `varchar(10)` devem ser truncados, movidos para outra tabela, ou
   a mudança deve ser recusada?
@@ -121,23 +100,21 @@ Estas perguntas **não têm resposta automática**, e não é limitação de fer
 - Renomear `sinopse` para `resumo` é renomeação mesmo, ou são dois campos diferentes e o
   antigo deve sumir?
 
-Só quem conhece o negócio responde. **Migração é o lugar onde essa resposta fica registrada**
-— escrita antes de rodar, revisada em *pull request*, e aplicada na mesma ordem em toda
-máquina, da sua até a de produção.
+Só quem conhece o negócio responde. **A migração registra essa resposta** — escrita antes,
+revisada em *pull request*, aplicada na mesma ordem da sua máquina até a produção.
 
-> A troca que este módulo faz, em uma frase: você deixa de **descobrir** o que aconteceu com
-> o banco e passa a **decidir** o que vai acontecer.
+> Em uma frase: você deixa de **descobrir** o que aconteceu com o banco e passa a **decidir**
+> o que vai acontecer.
 
-💼 **No mercado:** `synchronize: true` num repositório é achado de auditoria. Saber explicar
-por que ele não pode ir para produção é pergunta corriqueira em entrevista de backend.
+💼 **No mercado:** `synchronize: true` num repositório é achado de auditoria, e explicar por
+quê é pergunta corriqueira em entrevista de backend.
 
 ---
 
 ## Etapa 2 — Um `DataSource` para a CLI
 
-A CLI do TypeORM roda **fora do Nest**: não tem `ConfigModule`, não tem injeção de
-dependência e não conhece o `app.module.ts`. Ela precisa de um arquivo que exporte a
-configuração sozinho.
+A CLI do TypeORM roda **fora do Nest** — sem `ConfigModule`, sem injeção, sem
+`app.module.ts`. Precisa de um arquivo que exporte a configuração sozinho.
 
 **Faça:** crie `backend\src\data-source.ts`:
 
@@ -174,9 +151,8 @@ export default new DataSource({
 | `migrations: [...]` | Onde gravar os arquivos novos e de onde ler os existentes |
 | `synchronize: false` | **A linha do módulo.** A partir daqui, o banco só muda por migração |
 
-> **Por que não escrever `"src/**/*.entity.ts"` e pronto?** Funcionaria hoje. Mas em
-> produção só existe o `dist/`, com arquivos `.js`, e esse caminho fixo faria a CLI procurar
-> um `.ts` que o servidor não tem — o erro só apareceria no dia do deploy.
+> **Por que não `"src/**/*.entity.ts"` fixo?** Funcionaria hoje, mas em produção só existe
+> `dist/` com `.js` — o erro apareceria no dia do deploy.
 
 **Faça:** instale as duas dependências que faltam:
 
@@ -195,13 +171,9 @@ npm install -D ts-node
 | Pacote | Para quê |
 |---|---|
 | `dotenv` | Lê o arquivo `.env`. O `ConfigModule` usa isso por baixo, mas aqui não há Nest |
-| `ts-node` | Faz a CLI executar os seus `.ts` **direto**, sem compilar antes. É `-D` porque só o desenvolvimento precisa — em produção os arquivos já estão compilados (M12) |
+| `ts-node` | Faz a CLI executar os seus `.ts` **direto**, sem compilar. É `-D` porque só o desenvolvimento precisa — a aplicação não usa, e em produção tudo já está compilado (M12) |
 
-> O `ts-node` não vem no projeto do Nest 12: a aplicação em si não precisa dele. Quem precisa
-> é a CLI do TypeORM.
-
-**Deu certo se:** o arquivo salva sem erro de tipo. Ele ainda não é usado por nada — a etapa
-4 cria os atalhos que o chamam.
+**Deu certo se:** o arquivo salva sem erro de tipo. Quem o chama são os atalhos da etapa 4.
 
 ---
 
@@ -228,14 +200,12 @@ TypeOrmModule.forRoot({
 | A **aplicação** (`npm run start:dev`) | `app.module.ts` | `dist/migracoes/*.js` — ela roda **compilada** |
 | A **CLI** (`npm run migration:*`) | `data-source.ts` | `src/migracoes/*.ts` — em desenvolvimento, ela roda o **fonte** |
 
-> Caminhos diferentes para a mesma coisa. **Guarde isso: é o que mais confunde neste módulo.**
-> Se um comando de migração parecer não enxergar seus arquivos, é quase sempre porque você
-> olhou para o caminho do outro programa.
+> **Guarde: é o que mais confunde neste módulo.** Se um comando parecer não enxergar suas
+> migrações, quase sempre você olhou o caminho do outro programa.
 
-⚠️ **Esquecer o `synchronize: false` do `app.module.ts` é o erro clássico.** Tudo parece
-funcionar — as migrações rodam, o banco muda — até alguém subir a aplicação e o `synchronize`
-desfazer o trabalho delas, porque ele compara entidades × banco e "corrige" o que achar
-diferente.
+⚠️ **O erro clássico é esquecer o `synchronize: false` do `app.module.ts`.** As migrações
+rodam, o banco muda — até a aplicação subir e o `synchronize` "corrigir" o que achar
+diferente, desfazendo o trabalho delas.
 
 **Deu certo se:** a aplicação sobe e, no log, **não** há mais nenhum `CREATE TABLE` nem
 `ALTER TABLE` na inicialização.
@@ -263,16 +233,9 @@ diferente.
 | `-d src/data-source.ts` | Diz à CLI onde está a configuração da etapa 2 |
 | os três `npm run typeorm …` | Reaproveitam o primeiro, acrescentando o subcomando. Assim o `-d` fica escrito num lugar só |
 
-⚠️ **Repare que o `migration:create` é diferente: ele não passa o `-d`.**
-
-Esse subcomando só **escreve um arquivo vazio** — não conecta no banco, não lê entidade
-nenhuma, e por isso **recusa** o parâmetro. Se você o chamar pelo atalho `typeorm`, recebe:
-
-```
-Unknown argument: d
-```
-
-Um erro que não explica nada. Por isso ele tem script próprio.
+⚠️ **O `migration:create` não passa o `-d`.** Ele só **escreve um arquivo vazio**, sem
+conectar no banco, e por isso **recusa** o parâmetro. Chamado pelo atalho `typeorm`, dá
+`Unknown argument: d` — daí o script próprio.
 
 **Deu certo se:**
 
@@ -286,8 +249,8 @@ lista os subcomandos disponíveis.
 
 ## Etapa 5 — A migração inicial
 
-O banco de hoje foi construído pelo `synchronize`. Vamos recriá-lo pelo caminho oficial, para
-que exista uma migração descrevendo o estado inicial.
+O banco atual veio do `synchronize`. Vamos recriá-lo pelo caminho oficial, para existir uma
+migração do estado inicial.
 
 **Faça:**
 
@@ -304,9 +267,7 @@ docker compose up -d
 | `down` | Para e remove os contêineres |
 | `-v` | Remove também o **volume** — ou seja, o banco inteiro |
 
-> Aqui isso é seguro porque não há nada que importe dentro. **É a última vez no curso que
-> essa frase será verdadeira** — daqui em diante o banco tem dado, e é justamente por isso
-> que o módulo existe.
+> Seguro aqui porque não há nada que importe dentro — **pela última vez no curso**.
 
 **Faça:**
 
@@ -322,9 +283,8 @@ npm run migration:generate src/migracoes/Inicial
 **Deu certo se:** aparece `Migration /…/src/migracoes/<números>-Inicial.ts has been generated
 successfully.`
 
-> ⚠️ **Gerar não é aplicar.** São dois comandos porque entre eles cabe um passo humano:
-> **revisar**. Migração que ninguém leu é migração que apaga dados calada — exatamente o que
-> a etapa 16 do M04 mostrou o `synchronize` fazendo. A próxima etapa é a revisão.
+> ⚠️ **Gerar não é aplicar.** Entre os dois comandos cabe um passo humano: **revisar**.
+> Migração que ninguém leu apaga dados calada, como o `synchronize` no M04.
 
 ---
 
@@ -366,12 +326,10 @@ export class Inicial1788295597072 implements MigrationInterface {
 
 **Duas coisas para reparar no arquivo:**
 
-1. **A ordem do `CREATE TYPE`.** Ele vem **antes** do `CREATE TABLE "exemplar"` que o usa —
-   no PostgreSQL o enum é um objeto do banco, e a coluna não pode referenciar um tipo que
-   ainda não existe. Você viu isso no M04; agora está escrito num arquivo que você controla.
-2. **Os nomes das constraints.** `PK_51d3959df48c82010ae1c4907fb`, `FK_1fa7f93a…` — *hashes*
-   gerados pelo TypeORM. Feios, e **propositalmente estáveis**: é assim que o `down()`
-   consegue derrubar exatamente a constraint que o `up()` criou.
+1. **O `CREATE TYPE` vem antes** do `CREATE TABLE "exemplar"` que o usa (M04, etapa 14) —
+   agora num arquivo que você controla.
+2. **Os nomes das constraints** (`PK_51d3…`, `FK_1fa7…`) são *hashes* feios e
+   **propositalmente estáveis**: é assim que o `down()` derruba exatamente o que o `up()` criou.
 
 **Faça:** agora sim, aplique:
 
@@ -388,10 +346,9 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "SELECT * FROM migratio
 
 devolve uma linha.
 
-> 🤖 **IA no fluxo.** Colar uma migração gerada num assistente de IA e pedir *"explique cada
-> linha e aponte o que pode perder dado"* é um ótimo segundo par de olhos. Mas a pergunta
-> que decide — *"esse dado pode sumir?"* — é de negócio, e a resposta é sua. O assistente
-> não sabe o que os textos da `biografia` valem para a biblioteca.
+> 🤖 **IA no fluxo.** Pedir a uma IA *"explique cada linha desta migração e aponte o que pode
+> perder dado"* é um bom segundo par de olhos. Mas *"esse dado pode sumir?"* é pergunta de
+> negócio: a IA não sabe quanto valem os textos da `biografia` para a biblioteca.
 
 ---
 
@@ -418,9 +375,8 @@ npm run migration:generate src/migracoes/AdicionaDestaque
 await queryRunner.query(`ALTER TABLE "obra" ADD "destaque" boolean NOT NULL DEFAULT false`);
 ```
 
-O `DEFAULT false` importa: sem ele, as linhas existentes ficariam nulas numa coluna
-`NOT NULL`, e a migração **falharia**. O TypeORM só soube colocá-lo porque você escreveu
-`default: false` na entidade — a decisão da etapa 8 do M04 pagando dividendo aqui.
+Sem o `DEFAULT false`, as linhas existentes ficariam nulas numa coluna `NOT NULL` e a
+migração **falharia**. Ele veio do `default: false` da entidade (M04, etapa 8).
 
 **Faça:**
 
@@ -435,7 +391,7 @@ duas linhas.
 
 ## Etapa 8 — Reverter
 
-Esta é a metade que quase ninguém testa — e a que importa às duas da manhã.
+A metade que quase ninguém testa — e a que importa às duas da manhã.
 
 **Faça:**
 
@@ -453,9 +409,8 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d obra"
 
 **Faça:** rode `npm run migration:run` de novo. Ela volta.
 
-**É este par que torna o deploy reversível.** Um `down()` que ninguém executou é uma
-**suposição**, não um plano de retorno — e a hora de descobrir que ele não funciona não é com
-o sistema fora do ar.
+**Esse par torna o deploy reversível.** Um `down()` nunca executado é **suposição**, não
+plano de retorno — e não se descobre isso com o sistema fora do ar.
 
 | Detalhe | Consequência |
 |---|---|
@@ -467,9 +422,9 @@ o sistema fora do ar.
 
 ## Etapa 9 — A mesma destruição, agora visível
 
-Esta etapa é o argumento inteiro do módulo em poucos minutos de trabalho.
+O argumento inteiro do módulo, em poucos minutos.
 
-**Faça:** repita a provocação da etapa 16 do M04. Encurte a `biografia` da `Autor`:
+**Faça:** repita a provocação da etapa 16 do M04 — encurte a `biografia` da `Autor`:
 
 ```ts
 @Column({ type: "varchar", length: 10, default: "" })
@@ -489,13 +444,9 @@ await queryRunner.query(`ALTER TABLE "autor" DROP COLUMN "biografia"`);
 await queryRunner.query(`ALTER TABLE "autor" ADD "biografia" character varying(10) NOT NULL DEFAULT ''`);
 ```
 
-É **exatamente** o que o `synchronize` fez no M04 — o mesmo `DROP`, o mesmo `ADD`, a mesma
-perda de dados.
+**Exatamente** o que o `synchronize` fez no M04: mesmo `DROP`, mesmo `ADD`, mesma perda.
 
-**A diferença inteira do módulo está em uma palavra: agora você está lendo isso antes de
-acontecer.**
-
-E aqui você tem escolha:
+**A diferença: agora você lê isso antes de acontecer** — e pode escolher:
 
 | Opção | Como |
 |---|---|
@@ -504,24 +455,19 @@ E aqui você tem escolha:
 | Salvar antes | Acrescentar um `UPDATE` que move o texto longo para outro lugar, antes do `ALTER` |
 | Recusar a mudança | Concluir que a regra de negócio está errada e o campo deve continuar `text` |
 
-Nenhuma dessas decisões o `synchronize` conseguiria tomar, porque **nenhuma delas está na
-entidade**. Elas dependem de saber o que aqueles textos são e quanto valem.
+Nenhuma dessas decisões **está na entidade**, então nenhuma ferramenta as toma por você.
 
-**Faça:** apague o arquivo gerado e desfaça a mudança na entidade — este passo era para ler,
-não para aplicar.
+**Faça:** apague o arquivo gerado e desfaça a mudança na entidade — era para ler, não aplicar.
 
-> ⚠️ **Um aviso para a etapa 12:** o `migration:generate` deduz renomeação exatamente como o
-> `synchronize` faz. Se você renomear uma propriedade e mandar gerar, vem um `RENAME COLUMN`
-> pronto. Às vezes é o que você quer; na etapa 12, é justamente o que não queremos.
+> ⚠️ **Aviso para a etapa 12:** o `migration:generate` deduz renomeação como o `synchronize`.
+> Renomeie uma propriedade e vem um `RENAME COLUMN` pronto — justamente o que a etapa 12 evita.
 
 ---
 
 ## Etapa 10 — Migração de dados
 
-Regra nova, vinda da coordenação: obras publicadas antes de 1900 entram em destaque.
-
-Isso não está em nenhuma entidade. Não há o que o TypeORM compare para gerar — a regra está
-na cabeça de quem pediu.
+Regra nova da coordenação: obras publicadas antes de 1900 entram em destaque. Isso não está
+em entidade nenhuma — não há o que o TypeORM comparar.
 
 **Faça:**
 
@@ -586,34 +532,27 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "SELECT titulo, \"anoPu
 
 ### Olhe o `down` de novo
 
-Ele zera **todos** os destaques, inclusive os que alguém marcou à mão depois da migração.
-Não é reversível de verdade — é o mais próximo disso que dá para fazer sem guardar o estado
-anterior numa tabela auxiliar.
+Ele zera **todos** os destaques, inclusive os marcados à mão depois. Não é reversível de
+verdade — seria preciso guardar o estado anterior numa tabela auxiliar.
 
-**Comente essa limitação no arquivo**, como está no exemplo. Migração de dados raramente é
-perfeitamente reversível, e é muito melhor **declarar** a limitação do que descobri-la no
-pior momento possível.
+**Comente a limitação no arquivo**, como no exemplo. Migração de dados raramente é
+perfeitamente reversível; melhor **declarar** do que descobrir no pior momento.
 
 ---
 
 ## Etapa 11 — Expandir e contrair
 
-Última parada de raciocínio antes do exercício final.
-
-**A pergunta:** como renomear uma coluna sem derrubar o sistema?
-
-Você já sabe que o `RENAME COLUMN` funciona e preserva os dados — viu no M04. Então por que
-não usá-lo e pronto?
+**A pergunta:** como renomear uma coluna sem derrubar o sistema? O `RENAME COLUMN` preserva
+os dados (M04) — por que não usá-lo e pronto?
 
 ### Porque o deploy não é instantâneo
 
-Pense na **troca de pista de um aeroporto**: não dá para fechar a pista velha e abrir a nova
-no mesmo segundo, porque há aviões pousando. Primeiro a nova é construída ao lado, os voos
-migram aos poucos, e só então a velha é fechada.
+Pense na **troca de pista de um aeroporto**: não dá para fechar a velha e abrir a nova no
+mesmo segundo, com aviões pousando. Constrói-se a nova ao lado, os voos migram, e só então a
+velha fecha.
 
-Em produção é igual: quando você sobe uma versão nova, por alguns minutos **as duas versões
-do código estão rodando ao mesmo tempo** — as instâncias antigas ainda atendendo requisições
-enquanto as novas sobem.
+Em produção, durante alguns minutos de deploy, **as duas versões do código rodam ao mesmo
+tempo**: as instâncias antigas atendem enquanto as novas sobem.
 
 ```
 minuto 0    código v1 rodando           banco com coluna "sinopse"
@@ -621,8 +560,8 @@ minuto 1    v1 e v2 rodando juntos      ← e agora?
 minuto 2    só v2 rodando               banco com coluna "resumo"
 ```
 
-Um `RENAME` instantâneo derruba a v1 na hora: ela procura `sinopse`, que deixou de existir.
-Todas as requisições que ela estiver atendendo falham.
+Um `RENAME` instantâneo derruba a v1: ela procura `sinopse`, que deixou de existir, e todas
+as requisições dela falham.
 
 ### A solução: quatro passos, nunca um
 
@@ -641,12 +580,9 @@ flowchart LR
 | 3. Trocar leitura | — | Código lê só `resumo` |
 | 4. Contrair | Remove `sinopse` | — |
 
-**Em nenhum momento existe uma versão do código incompatível com o banco.** É isso que a
-estratégia compra.
-
-Parece burocracia até o dia em que você precisa **reverter** um deploy. Com expandir/contrair,
-o código antigo continua funcionando com o banco novo. Sem ele, reverter significa restaurar
-backup — e aí a conversa muda de tom.
+**Em nenhum momento o código fica incompatível com o banco.** Parece burocracia até você
+precisar **reverter** um deploy: com expandir/contrair, o código antigo funciona com o banco
+novo; sem, reverter significa restaurar backup.
 
 💼 **No mercado:** *"como você renomearia uma coluna de uma tabela com 10 milhões de linhas,
 sem downtime?"* é pergunta clássica de entrevista pleno. A resposta é esta etapa.
@@ -669,11 +605,8 @@ em que o sistema quebre**.
 | 3 | *(sem migração)* | Seria o deploy do código que passa a ler `resumo` |
 | 4 | `RemoveSinopse` | `DROP COLUMN "sinopse"` |
 
-⚠️ **Use `migration:create` nos três, e escreva o SQL você mesmo.**
-
-Se você usar `migration:generate` no passo 1, o TypeORM vai deduzir uma renomeação e gerar um
-`RENAME COLUMN` — que é **exatamente** o que este exercício existe para evitar. O aviso da
-etapa 9 era sobre isto.
+⚠️ **Use `migration:create` nos três e escreva o SQL você mesmo.** Com `migration:generate`,
+o TypeORM deduziria um `RENAME COLUMN` — o que este exercício evita (aviso da etapa 9).
 
 **Ao final:** rode `npm run migration:revert` três vezes e confira que o banco voltou ao
 início **com os dados intactos**.
@@ -692,9 +625,8 @@ início **com os dados intactos**.
 
 ## Etapa 13 — O banco nasce do zero
 
-Falta provar a promessa do começo do módulo: **qualquer pessoa reproduz o banco com um
-comando**. E falta uma rede de proteção para o esquecimento mais comum da equipe — mudar a
-entidade e não gerar a migração.
+Falta provar a promessa do módulo — **qualquer pessoa reproduz o banco com um comando** — e
+criar uma rede para o esquecimento mais comum: mudar a entidade sem gerar a migração.
 
 **Faça:** mais um atalho no `package.json`:
 
@@ -722,10 +654,9 @@ migração, e rode de novo.
 **Deu certo se:** o comando mostra `Unexpected changes in database schema were found in check
 mode`, imprime o SQL que faltou e **termina com erro**. Desfaça o campo.
 
-> Terminar com erro é a parte que importa. Um comando que falha é um comando que o CI
-> consegue usar: no M10, o pipeline cria um banco vazio, roda `migration:run` e depois
-> `migration:check`. Se alguém esqueceu a migração, o *pull request* fica vermelho antes de o
-> problema chegar a qualquer outro banco.
+> Terminar com erro é o que importa: o CI consegue usar. No M10, o pipeline cria um banco
+> vazio, roda `migration:run` e `migration:check` — migração esquecida deixa o *pull request*
+> vermelho antes de chegar a qualquer outro banco.
 
 **Faça:** documente no `README.md` do repositório, numa seção **Banco de dados**:
 
@@ -769,12 +700,10 @@ e só então `npm run migration:run`.
 
 ## 💣 Pegadinha de mercado
 
-**Editar uma migração que já rodou em outro banco.** Parece inofensivo — "só corrigi um
-nome de coluna". Mas a tabela `migrations` daquele banco já registrou o arquivo como
-aplicado, e ele **nunca mais roda lá**. Resultado: o seu banco tem uma versão do esquema, o
-de produção tem outra, e ninguém percebe até o primeiro erro de coluna inexistente. A regra
-de trabalho do começo do módulo existe por isso: errou? **Crie uma migração nova** que
-corrige.
+**Editar uma migração que já rodou em outro banco.** "Só corrigi um nome de coluna" — mas a
+tabela `migrations` daquele banco já a registrou como aplicada, e ela **nunca mais roda lá**.
+Seu banco fica com um esquema, a produção com outro, até o primeiro erro de coluna
+inexistente. Errou? **Crie uma migração nova** que corrige.
 
 ## ✅ Checklist de saída
 

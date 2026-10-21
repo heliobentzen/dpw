@@ -3,10 +3,9 @@
 > **Pré-requisitos:** M04, M05 · **Duração:** longa
 
 O item da ementa *"realização de consultas e operações de CRUD utilizando a API do
-framework"*. Aqui a entidade deixa de ser esquema e passa a ser dado consultado.
+framework"*. A entidade deixa de ser esquema e passa a ser dado consultado.
 
-> **A teoria não está num bloco separado.** Ela está nas etapas 3, 8, 10, 11, 13 e
-> 14 — em que a gente para de digitar e pensa — mais as explicações dentro de cada etapa.
+> A teoria vem quando o código pede: as etapas 3, 8, 10, 11, 13 e 14 são de raciocínio.
 
 ## 🎯 Objetivos
 
@@ -17,50 +16,23 @@ Ao final você será capaz de:
 3. Diagnosticar e corrigir o problema **N+1**, com medição.
 4. Escolher entre `Repository`, `QueryBuilder` e SQL puro com critério.
 
-## 🧭 Por que este módulo vem agora
-
-M04 ensinou a representar o domínio e M05 ensinou a versionar a estrutura do banco. Agora o
-aluno precisa fazer o sistema trabalhar com dados reais: ler, filtrar, criar, atualizar e
-remover.
-
-A progressão é deliberada:
-
-- primeiro uma leitura simples, para separar acesso a dados de lógica de apresentação;
-- depois volume e medição, para perceber que código correto também pode ser caro;
-- por fim escrita, consultas complexas e transações, para preservar consistência.
-
-O N+1 aparece de propósito porque esta é uma oportunidade de aprendizagem baseada em evidência:
-o aluno vê o problema nos logs, mede seu custo e só então escolhe uma solução. No M07, essa
-base vira uma API pública com entrada validada e respostas desenhadas para consumidores reais.
-
-> O ganho de competência do M06 é passar de “sei criar tabelas” para “sei buscar e alterar dados
-sem perder de vista desempenho, segurança e consistência”.
-
----
-
 ## 🧭 O que você vai construir
 
-Os cinco endpoints do acervo, agora saindo do banco de verdade — mais uma busca com filtros
-opcionais e uma operação que grava em duas tabelas de uma vez sem risco de deixar metade
-feita.
+O M04 representou o domínio e o M05 versionou o banco. Agora o sistema trabalha com dados
+reais: os cinco endpoints do acervo saindo do banco, uma busca com filtros opcionais e uma
+operação que grava em duas tabelas sem risco de deixar metade feita.
 
-E, no meio do caminho, você vai **provocar e medir** o problema de desempenho mais comum de
-API. Não ler sobre ele: medir, com número na tabela.
+No caminho, você vai **provocar e medir** o problema de desempenho mais comum de API — com
+número na tabela, não por ouvir dizer. O objetivo é passar de "sei criar tabelas" para "sei
+buscar e alterar dados sem perder de vista desempenho, segurança e consistência".
 
 ## 📋 Como este módulo funciona
 
-Quinze etapas, indo **do mais simples ao mais caro**: ler antes de escrever, uma consulta por
-vez, e só então o `QueryBuilder` e a transação.
+Mesmo formato dos anteriores (**Faça → Linha a linha → Rode → Deu certo se**), em quinze
+etapas **do mais simples ao mais caro**: leitura, depois volume e medição, por fim escrita,
+`QueryBuilder` e transação.
 
-| Parte | O que é |
-| --- | --- |
-| **Faça** | O comando ou o código, para digitar |
-| **Linha a linha** | Uma tabela explicando **cada elemento** |
-| **Rode** | Como verificar |
-| **Deu certo se** | O resultado exato esperado |
-
-> 🪟 No PowerShell, escreva `curl.exe`; no macOS e Linux, `curl`. O material escreve
-> `curl.exe`.
+> 🪟 No PowerShell, `curl.exe`; no macOS e Linux, `curl`.
 
 ### As quinze etapas
 
@@ -86,8 +58,7 @@ vez, e só então o `QueryBuilder` e a transação.
 
 ## Etapa 1 — Trocar a memória pelo banco
 
-O `AcervoService` ainda é o do M03: um array em memória e um endpoint temporário com o nome
-da biblioteca. Os dois saem de cena agora.
+O `AcervoService` ainda é o do M03: array em memória e um endpoint temporário. Os dois saem.
 
 **Faça:** em `src\acervo\acervo.service.ts`, apague o corpo antigo e comece assim:
 
@@ -118,15 +89,13 @@ export class AcervoService {
 
 **Faça:** no `acervo.controller.ts`, **apague o `@Get("nome")`** e o método `nome()`.
 
-Ele existia para provar que o `ConfigService` funcionava, e já provou. **Endpoint temporário
-que sobrevive ao módulo vira endpoint permanente por acidente** — e daqui a três meses
-ninguém sabe se pode remover.
+Ele já provou que o `ConfigService` funcionava. **Endpoint temporário que sobrevive ao módulo
+vira permanente por acidente** — e em três meses ninguém sabe se pode remover.
 
-> O controller fica sem nada que compile por um minuto — é esperado. A etapa 2 devolve a
-> listagem.
+> O controller fica sem compilar por um minuto; a etapa 2 devolve a listagem.
 
-**Deu certo se:** o `start:dev` reinicia sem `can't resolve dependencies`. Se aparecer esse
-erro, a entidade não está no `forFeature`.
+**Deu certo se:** o `start:dev` reinicia sem `can't resolve dependencies` (se aparecer, a
+entidade não está no `forFeature`).
 
 ---
 
@@ -157,10 +126,8 @@ async listar(pagina = 1, tamanho = 20) {
 | `skip` / `take` | `OFFSET` e `LIMIT` do SQL. A página 1 tem `skip: 0` — daí o `- 1` |
 | `pagina = 1, tamanho = 20` | Valores padrão do JavaScript: quem chamar sem argumento recebe a primeira página |
 
-⚠️ **O `order` não é enfeite.** Sem ordenação explícita, o banco devolve as linhas na ordem
-que for mais conveniente para ele — e essa ordem **pode mudar entre duas consultas**. O
-sintoma é a página 2 repetindo itens da página 1, e é um bug difícil de acreditar quando
-aparece.
+⚠️ **O `order` não é enfeite.** Sem ele, o banco devolve na ordem que lhe convier, e ela
+**pode mudar entre consultas**: a página 2 repete itens da página 1.
 
 **Faça:** no controller:
 
@@ -173,9 +140,8 @@ listar(@Query("pagina") pagina?: string, @Query("tamanho") tamanho?: string) {
 
 Acrescente `Query` ao `import` de `@nestjs/common`.
 
-> O `Number(pagina) || 1` é feio de propósito: *query string* chega sempre como texto, e
-> converter na mão é o que se faz quando não há nada melhor. O M07 troca isto por um DTO
-> validado, e aí a feiura sai.
+> O `Number(pagina) || 1` é feio de propósito: *query string* chega sempre como texto. O M07
+> troca isto por um DTO validado.
 
 **Rode:**
 
@@ -183,15 +149,14 @@ Acrescente `Query` ao `import` de `@nestjs/common`.
 curl.exe -s "http://localhost:3000/api/obras?pagina=1&tamanho=5"
 ```
 
-**Deu certo se:** responde `{"itens":[],"total":0,"pagina":1,"tamanho":5}`. Vazio, porque o
-banco ainda não tem obras — a etapa 5 resolve isso.
+**Deu certo se:** responde `{"itens":[],"total":0,"pagina":1,"tamanho":5}` — vazio até a
+etapa 5 popular o banco.
 
 ---
 
 ## Etapa 3 — Por que paginar sempre
 
-Você acabou de escrever `take` sem discutir. Vale discutir, porque essa é a diferença entre
-uma API que aguenta o segundo ano e uma que não.
+Você escreveu `take` sem discutir. Ele separa uma API que aguenta o segundo ano de uma que não.
 
 **O que acontece sem `take`:**
 
@@ -205,14 +170,11 @@ await this.obras.find();     // devolve o banco inteiro
 | 800 registros | Uns 200 KB de JSON. Ainda passa |
 | 200 mil registros do cliente | O banco monta tudo em memória, o Node serializa tudo em memória, a rede carrega tudo, o navegador tenta desenhar tudo |
 
-O último caso não fica lento: ele **derruba**. E derruba em produção, porque em
-desenvolvimento ninguém tem 200 mil registros.
+O último caso não fica lento: **derruba** — e em produção, porque em desenvolvimento ninguém
+tem 200 mil registros. É pedir ao bibliotecário **todos os livros** no balcão para escolher
+um: com dez, ele traz; com o acervo inteiro, o balcão desaba.
 
-É como pedir ao bibliotecário que traga **todos os livros** até o balcão para você escolher
-um. Com dez livros, ele traz. Com o acervo inteiro, o balcão desaba antes de você olhar o
-primeiro.
-
-**Três custos, não um:**
+**Quatro custos, não um:**
 
 ```mermaid
 flowchart LR
@@ -223,14 +185,12 @@ flowchart LR
 
 Paginação corta os quatro de uma vez.
 
-> **A regra deste material:** toda listagem é paginada, sem exceção e desde a primeira linha.
-> Acrescentar paginação depois é fácil no backend e **caro para quem consome**: cada
-> cliente foi escrito supondo a lista inteira, e trocar um *array* por um envelope paginado é
-> uma mudança incompatível do contrato (M11).
+> **A regra deste material:** toda listagem é paginada, desde a primeira linha. Paginar
+> depois é fácil no backend e **caro para quem consome**: trocar um *array* por um envelope
+> paginado quebra o contrato (M11).
 
-⚠️ **Falta uma proteção.** Hoje `?tamanho=999999` funciona: o cliente escolhe o tamanho da
-página e pode pedir o banco inteiro de qualquer forma. **Limite de paginação é segurança**,
-não capricho — e é o M07 que põe o teto, junto com a validação da entrada.
+⚠️ **Falta uma proteção.** Hoje `?tamanho=999999` pede o banco inteiro mesmo assim. **Limite
+de paginação é segurança** — o M07 põe o teto, junto com a validação da entrada.
 
 ---
 
@@ -266,14 +226,11 @@ curl.exe -i http://localhost:3000/api/obras/999
 
 **Deu certo se:** responde **404**, com o mesmo corpo de antes.
 
-### O que acabou de acontecer, e é o ponto da etapa
+### O ponto da etapa
 
-A lógica mudou de "array em memória" para "consulta em PostgreSQL". O `NotFoundException`
-continua idêntico. **O contrato HTTP não mudou nada** — quem consome a API não tem como
-perceber a troca.
-
-Isso é a separação de camadas do M03, etapa 11, pagando dividendo **exatamente como
-prometido na situação 3**. Guarde: era uma promessa, agora é um fato observado.
+A lógica trocou o array em memória pelo PostgreSQL, e **o contrato HTTP não mudou nada** —
+quem consome a API não percebe. É a separação de camadas do M03 (etapa 11, **situação 3**):
+era uma promessa, agora é um fato observado.
 
 ---
 
@@ -302,8 +259,7 @@ npx ts-node --esm src/semear.ts
 
 Gera 60 autores, 800 obras e cerca de 2.000 exemplares.
 
-> Com 20 registros tudo é rápido, **inclusive o errado**. Sem volume, as próximas três etapas
-> viram teoria.
+> Com 20 registros tudo é rápido, **inclusive o errado**.
 
 **Rode:**
 
@@ -317,19 +273,17 @@ curl.exe -s "http://localhost:3000/api/obras?tamanho=5"
 
 ## Etapa 6 — A versão ruim, de propósito
 
-Você vai escrever código ruim de propósito. É parte do exercício: quem só viu a versão certa
-não reconhece o padrão quando ele aparece disfarçado, dentro de um `map`, em outro arquivo,
-escrito por outra pessoa.
+Código ruim de propósito: quem só viu a versão certa não reconhece o padrão quando ele
+aparece disfarçado num `map`, em outro arquivo.
 
-**O cenário:** listar obras com o nome da autora. Você já sabe que o TypeORM não traz
-relação sem pedir:
+**O cenário:** listar obras com o nome da autora. O TypeORM não traz relação sem pedir:
 
 ```ts
 const obras = await this.obras.find();
 obras[0].autor;      // undefined — não foi buscado
 ```
 
-A tentação, então, é buscar cada uma dentro de um laço.
+A tentação é buscar cada uma num laço.
 
 **Faça:** no service:
 
@@ -348,7 +302,7 @@ async listarRuim() {
 
 | Trecho | Por quê |
 | --- | --- |
-| `obra.autorId` | O campo que você declarou explicitamente no M04, etapa 11c. **Sem ele seria preciso um `as any`** — e aqui está o dividendo daquela decisão |
+| `obra.autorId` | O campo declarado no M04, etapa 11c. **Sem ele seria preciso um `as any`** |
 | `if (autor)` | `findOneBy` devolve `Autor \| null`. Sem o `if`, o TypeScript recusa a atribuição — e ele está certo |
 | `await` **dentro** do `for` | É a linha do problema. Cada volta espera uma ida ao banco antes de começar a próxima |
 
@@ -363,18 +317,16 @@ async listarBom() {
 **Faça:** exponha as duas em endpoints temporários, `@Get("ruim")` e `@Get("bom")`, **acima**
 do `@Get(":id")` — a regra de ordenação de rotas do M03 continua valendo.
 
-**Deu certo se:** as duas rotas respondem 50 obras cada, com o campo `autor` preenchido. Do
-lado de fora, elas são **indistinguíveis**. A diferença está no terminal.
+**Deu certo se:** as duas respondem 50 obras com `autor` preenchido — **indistinguíveis** de
+fora. A diferença está no terminal.
 
 ---
 
 ## Etapa 7 — Medir
 
-Agora conte. Com o `logging: true` do M04 ligado, cada consulta vira uma linha `query:` no
-terminal.
+Com o `logging: true`, cada consulta é uma linha `query:` no terminal.
 
-**Faça:** limpe a tela do terminal do `start:dev`, chame um endpoint, conte as linhas.
-Depois o outro.
+**Faça:** limpe o terminal do `start:dev`, chame um endpoint e conte as linhas. Depois o outro.
 
 ```powershell
 curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/ruim
@@ -415,7 +367,7 @@ Referência: **201 consultas / ~253 ms** contra **2 consultas / ~23 ms**.
 
 ## Etapa 8 — O que os números dizem
 
-Você tem quatro medições. O que elas mostram não é o que parece à primeira vista.
+Quatro medições — e o que mostram não é o que parece à primeira vista.
 
 | Estratégia | 50 itens | 200 itens | Cresce? |
 | --- | --- | --- | --- |
@@ -425,28 +377,25 @@ Você tem quatro medições. O que elas mostram não é o que parece à primeira
 
 ### O problema tem nome: N+1
 
-Uma consulta para a lista, mais **uma por item**. Com N itens, N+1 consultas. É a causa mais
-comum de API lenta, e a mais fácil de introduzir sem perceber.
+Uma consulta para a lista, mais **uma por item**. A causa mais comum de API lenta, e a mais
+fácil de introduzir sem perceber.
 
-É ir ao mercado **uma vez para cada item da lista de compras**: o arroz, volta para casa;
-o feijão, volta para casa. Cada viagem é curta, e a tarde inteira some. O `relations` é
-levar a lista e comprar tudo de uma vez.
+É ir ao mercado **uma vez por item da lista**: o arroz, volta para casa; o feijão, volta.
+Cada viagem é curta, e a tarde some. O `relations` é levar a lista e comprar tudo de uma vez.
 
 ### Por que 2 e não 1
 
-A versão boa faz **duas** consultas, não uma, e isso é de propósito. Com `take` **e** relação,
-o TypeORM:
+Com `take` **e** relação, o TypeORM faz duas consultas de propósito:
 
 1. seleciona os *ids* da página;
 2. busca os dados desses ids, com `JOIN`.
 
-Se fizesse tudo de uma vez, o `LIMIT` contaria linhas do **JOIN** em vez de obras — e uma
-obra com três categorias comeria três vagas da página. Você pediria 20 obras e receberia 7.
+Numa consulta só, o `LIMIT` contaria linhas do **JOIN**, não obras: uma obra com três
+categorias comeria três vagas, e você pediria 20 e receberia 7.
 
-### O número que importa não é 1 nem 2
+### O que importa é crescer ou não
 
-**É que 2 não cresce e 51 cresce.** Os 60 ms de hoje parecem aceitáveis; o problema é o que
-acontece depois:
+**2 não cresce; 51 cresce.** Os 60 ms de hoje parecem aceitáveis — o problema é depois:
 
 | Mudança | Versão boa | Versão ruim |
 | --- | --- | --- |
@@ -454,25 +403,25 @@ acontece depois:
 | A página passa a mostrar 200 | igual | quadruplica |
 | O banco vai para outro servidor | +1 ida e volta | **+201 idas e voltas** |
 
-A última linha é a que mata. Em desenvolvimento o banco está na mesma máquina e cada consulta
-custa microssegundos. Em produção, cada uma paga a rede — e 201 delas viram segundos.
+A última linha é a que mata: em desenvolvimento, cada consulta custa microssegundos; em
+produção, paga a rede — e 201 delas viram segundos.
 
-### Como detectar no seu código
+### Como detectar
 
-> Com o log de consultas ligado, chame a rota e **conte as linhas de SQL**. Se o número cresce
-> com a quantidade de itens da lista, é N+1. Não precisa de ferramenta nenhuma.
+> Com o log ligado, chame a rota e **conte as linhas de SQL**. Se o número cresce com o
+> tamanho da lista, é N+1.
 
-**Faça:** apague os dois endpoints temporários antes de seguir. Guarde os métodos no service
-se quiser consultá-los; **rota temporária que fica é dívida**.
+**Faça:** apague os dois endpoints temporários (os métodos podem ficar no service). **Rota
+temporária que fica é dívida.**
 
-💼 **No mercado:** N+1 e falta de paginação são os dois achados mais comuns em revisão de API
-júnior. Quem sabe demonstrá-lo com o log na mão se destaca de quem só cita o nome.
+💼 **No mercado:** N+1 e falta de paginação são os achados mais comuns em revisão de API
+júnior. Demonstrar com o log na mão vale mais que citar o nome.
 
 ---
 
 ## Etapa 9 — Escrever: criar, atualizar, remover
 
-Até aqui só lemos. As três operações de escrita fecham o CRUD.
+As três operações de escrita fecham o CRUD.
 
 **Faça:** no service:
 
@@ -545,13 +494,12 @@ O CRUD funciona. Agora mande isto:
 curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"\",\"criadoEm\":\"1999-01-01\",\"autorId\":1}'
 ```
 
-**Passa.** Título vazio, data de criação forjada pelo cliente, e nenhuma reclamação.
+**Passa.** Título vazio, data de criação forjada pelo cliente, nenhuma reclamação.
 
 ### Por que isso acontece
 
-`Partial<Obra>` significa "qualquer subconjunto dos campos da entidade". E **a entidade não é
-um formulário**: ela tem campos que existem por razões internas e que o cliente jamais
-deveria escrever.
+`Partial<Obra>` é "qualquer subconjunto dos campos da entidade" — e **a entidade não é um
+formulário**: tem campos internos que o cliente jamais deveria escrever.
 
 | Problema | Consequência |
 | --- | --- |
@@ -559,27 +507,19 @@ deveria escrever.
 | O cliente escolhe **quais campos** gravar | Ele pode escrever `criadoEm`, `destaque`, o que existir na tabela |
 | A resposta devolve a **entidade inteira** | Quando `Usuario` existir (M08), a resposta vai levar o hash da senha junto |
 
-O segundo tem nome — ***mass assignment*** — e é uma das falhas mais exploradas em API. O
-cliente descobre um campo que você não esperava e o escreve.
+O segundo tem nome — ***mass assignment*** — e é uma das falhas mais exploradas em API.
 
 ### Isso é o M07 inteiro
 
-| O que resolve | Qual problema |
-| --- | --- |
-| DTO de **entrada** | As duas primeiras linhas da tabela |
-| DTO de **saída** | A terceira |
-
-Deixe as rotas como estão. O M07 troca as assinaturas, e você vai ver os três `curl` acima
-mudarem de resposta.
-
-> Esta etapa existe para o M07 começar com um problema seu, e não com uma boa prática
-> abstrata. Guarde o comando acima: você vai repeti-lo lá.
+O DTO de **entrada** resolve as duas primeiras linhas; o DTO de **saída**, a terceira. Deixe as
+rotas como estão e guarde o comando acima: o M07 começa por ele, com um problema seu em vez
+de uma boa prática abstrata.
 
 ---
 
 ## Etapa 11 — As duas APIs do TypeORM
 
-Até aqui você usou uma só. Existe outra, e saber quando trocar é o conteúdo desta etapa.
+Você usou uma. Existe outra, e o conteúdo desta etapa é saber quando trocar.
 
 | API | Cara de | Boa para | Limite |
 | --- | --- | --- | --- |
@@ -606,21 +546,16 @@ Para este caso o `Repository` é melhor: mais curto e igualmente claro.
 
 ### Quando o `Repository` deixa de servir
 
-O ponto de virada é o **filtro opcional**. Imagine uma busca em que o usuário pode informar
-um termo, uma categoria e um ano-limite — ou nenhum dos três, ou só o do meio.
+O ponto de virada é o **filtro opcional**: uma busca por termo, categoria e ano-limite —
+qualquer combinação, ou nenhum. Com o `Repository`, o `where` vira um quebra-cabeça de `if`
+acrescentando chaves a um objeto. Com o `QueryBuilder`, cada filtro é um `if` que acrescenta
+uma linha (etapa 12).
 
-Com o `Repository`, você precisaria montar o objeto `where` condicionalmente, com `if` que
-acrescentam chaves a um objeto, e o resultado é um quebra-cabeça difícil de ler e mais
-difícil de alterar.
+> **A regra prática:** comece pelo `Repository`; migre para `QueryBuilder` quando o objeto de
+> opções virar quebra-cabeça — **não antes**.
 
-Com o `QueryBuilder`, cada filtro é um `if` que acrescenta uma linha. É o que a etapa 12 faz.
-
-> **A regra prática:** comece pelo `Repository`. Migre para `QueryBuilder` quando o objeto de
-> opções virar um quebra-cabeça — **não antes**. Verbosidade sem necessidade também é custo.
-
-E existe um terceiro nível, para quando nem o `QueryBuilder` alcança: `query()` com SQL puro.
-Ele existe, é legítimo para relatórios e agregações complexas, e cobra o preço de você mesmo
-garantir a segurança — que é o assunto da etapa 13.
+Há um terceiro nível, `query()` com SQL puro: legítimo para relatórios e agregações
+complexas, com o preço de você mesmo garantir a segurança (etapa 13).
 
 ---
 
@@ -679,8 +614,7 @@ curl.exe -s "http://localhost:3000/api/obras/buscar?termo=maria"
 curl.exe -s "http://localhost:3000/api/obras/buscar?termo=maria&ate=1900"
 ```
 
-**Deu certo se:** o `WHERE` no terminal **muda** a cada chamada — some quando não há filtro,
-tem uma condição na segunda, duas na terceira. É a consulta sendo montada conforme a entrada.
+**Deu certo se:** o `WHERE` no terminal **muda** a cada chamada: nenhuma condição, uma, duas.
 
 ---
 
@@ -693,13 +627,17 @@ Olhe de novo a linha do `termo` na etapa 12. Ela poderia ter sido escrita assim:
 .where("obra.titulo = :titulo", { titulo: termo }) // ✅
 ```
 
-As duas parecem equivalentes. **Não são**, e a diferença é a vulnerabilidade mais antiga e
-mais explorada da web.
+Parecem equivalentes. **Não são** — a diferença é a vulnerabilidade mais antiga e explorada
+da web.
+
+Pense num **formulário de banco**: no campo "valor", escrever "R$ 10 e transfira todo o
+saldo" não vira ordem, porque o caixa sabe que ali só cabe um valor. A concatenação apaga
+essa fronteira entre campo e instrução.
 
 ### O que acontece na primeira forma
 
-O valor é **colado dentro do comando** antes de sair da aplicação. O banco recebe uma string
-só e não tem como saber onde termina o comando e começa o dado.
+O valor é **colado dentro do comando**. O banco recebe uma string só e não sabe onde termina
+o comando e começa o dado.
 
 Se alguém buscar por `' OR 1=1 --`:
 
@@ -719,16 +657,14 @@ comando:  SELECT * FROM obra WHERE obra.titulo = $1
 valores:  ["' OR 1=1 --"]
 ```
 
-O banco compila o comando primeiro e depois encaixa o valor. **Não existe caminho** pelo qual
-o conteúdo de `$1` vire instrução — ele é tratado como texto, sempre, mesmo que pareça SQL.
+O banco compila o comando e depois encaixa o valor. **Não há caminho** para o conteúdo de
+`$1` virar instrução — é texto, sempre, mesmo que pareça SQL.
 
 ### A regra
 
-> Esta é a **única** proteção contra injeção de SQL que importa, e ela é **gratuita**: dá o
-> mesmo trabalho escrever das duas formas.
->
-> **Se você usou crase ou `+` para montar um trecho de consulta com dado do usuário, está
-> errado.** Não há exceção, não há "mas eu validei antes".
+> A **única** proteção contra injeção de SQL que importa, e **gratuita**: dá o mesmo trabalho
+> escrever das duas formas. **Crase ou `+` montando consulta com dado do usuário está
+> errado** — sem exceção, sem "mas eu validei antes".
 
 **Faça:** confira o seu código da etapa 12. Todos os valores passam por `:nome`? Nenhum foi
 colado na string?
@@ -739,10 +675,9 @@ colado na string?
 curl.exe -s "http://localhost:3000/api/obras/buscar?termo=' OR 1=1 --"
 ```
 
-**Deu certo se:** a busca devolve **nada** — porque não existe obra com aquele título
-literal. No log, o `%' OR 1=1 --%` aparece como **parâmetro**, separado do comando.
-
-O M09 volta ao assunto com o restante do OWASP. Aqui fica a regra e a demonstração.
+**Deu certo se:** a busca devolve **nada** (não há obra com aquele título literal) e, no log,
+`%' OR 1=1 --%` aparece como **parâmetro**, separado do comando. O M09 volta ao tema com o
+restante do OWASP.
 
 ---
 
@@ -761,12 +696,11 @@ reiniciado no meio:
 ❌ exemplar continua marcado como disponível
 ```
 
-O sistema agora mente. O exemplar está na mão de alguém e o catálogo diz que está na
-estante. O segundo leitor que o pedir vai até a prateleira e não encontra.
+O sistema mente: o exemplar está na mão de alguém e o catálogo diz que está na estante.
 
-Pense numa **transferência bancária**: o débito na sua conta e o crédito na conta de
-destino. Se o sistema caísse entre os dois, o dinheiro sumiria. Por isso os bancos tratam as
-duas operações como **uma só**: ou acontecem as duas, ou nenhuma. Isso é uma transação.
+Pense numa **transferência bancária**: débito numa conta, crédito na outra. Se o sistema
+caísse entre os dois, o dinheiro sumiria. Por isso as duas operações são **uma só**: ou
+acontecem ambas, ou nenhuma. Isso é uma transação.
 
 ### A solução
 
@@ -777,8 +711,7 @@ await this.dataSource.transaction(async (manager) => {
 });
 ```
 
-Se **qualquer** linha lançar, tudo é desfeito. Ou as duas escritas acontecem, ou nenhuma
-acontece. Não existe meio-termo.
+Se **qualquer** linha lançar, tudo é desfeito. Não há meio-termo.
 
 | Trecho | O que faz |
 | --- | --- |
@@ -795,20 +728,18 @@ await this.dataSource.transaction(async (manager) => {
 });
 ```
 
-A segunda linha usa `this.exemplares` — o repositório normal, não o `manager`. Ela roda
-**fora** da transação e **não é desfeita** no `ROLLBACK`.
-
-Tudo parece certo. O código compila, os testes felizes passam, e o problema só aparece no dia
-em que algo falha no meio — que é justamente o dia em que a transação deveria ter salvado
-você. **Dentro da transação, use sempre o `manager`.**
+`this.exemplares` é o repositório normal, não o `manager`: roda **fora** da transação e **não
+é desfeito** no `ROLLBACK`. Compila, os testes felizes passam, e o problema só aparece no dia
+em que algo falha no meio — justamente quando a transação deveria salvar você. **Dentro da
+transação, sempre o `manager`.**
 
 ### A regra
 
-> **Duas ou mais escritas que precisam ser verdadeiras juntas vão numa transação.** Se você
-> consegue descrever um estado intermediário que seria mentira, precisa de transação.
+> **Escritas que precisam ser verdadeiras juntas vão numa transação.** Se existe um estado
+> intermediário que seria mentira, precisa de transação.
 
-E é aqui que o `disponivel` do M04 cobra a conta. Ele é um campo **derivado** — materializá-lo
-trocou uma consulta por uma **obrigação de sincronia**. A transação é o preço dessa escolha.
+É aqui que o `disponivel` (campo **derivado** do M04) cobra a conta: a transação é o preço
+da obrigação de sincronia.
 
 ---
 
@@ -824,8 +755,7 @@ Agora é com você.
 4. Criar o empréstimo, com previsão de devolução em 14 dias.
 5. Marcar o exemplar como indisponível.
 
-**Os passos 4 e 5 vão na mesma transação.** Os três primeiros são verificações e podem ficar
-fora — eles não escrevem nada.
+**Os passos 4 e 5 vão na mesma transação.** Os três primeiros só verificam e podem ficar fora.
 
 Injete o `DataSource` no construtor:
 
@@ -833,9 +763,8 @@ Injete o `DataSource` no construtor:
 constructor(private readonly dataSource: DataSource) {}
 ```
 
-**E depois force uma falha**, que é a parte que prova o aprendizado: lance um erro de
-propósito **entre** as linhas 4 e 5, chame o endpoint, e confira no banco que o empréstimo
-do passo 4 **não** ficou lá.
+**Depois force uma falha** — é o que prova o aprendizado: lance um erro **entre** os passos 4
+e 5, chame o endpoint e confira que o empréstimo **não** ficou no banco.
 
 ```powershell
 docker compose exec db psql -U bibliocom -d bibliocom -c "SELECT count(*) FROM emprestimo;"
@@ -843,32 +772,29 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "SELECT count(*) FROM e
 
 **Deu certo se:** a contagem não subiu, apesar de o `save` ter rodado.
 
-> Depois, refaça o teste com `this.emprestimos.save(...)` no lugar do `manager.save(...)` e
-> veja o empréstimo **ficar** no banco mesmo com o erro. É a armadilha da etapa 14, na sua
-> máquina, com o seu código.
+> Refaça com `this.emprestimos.save(...)` no lugar de `manager.save(...)` e veja o empréstimo
+> **ficar** no banco mesmo com o erro — a armadilha da etapa 14, no seu código.
 
 ---
 
 ## 🤖 IA no fluxo
 
-Peça a um assistente de IA uma consulta com filtros e ele a escreve em segundos. Três coisas
-para conferir em toda consulta que vier pronta — as três que este módulo mediu:
+Uma IA escreve consultas com filtros em segundos. Confira em toda consulta pronta as três
+coisas que este módulo mediu:
 
 - [ ] Algum laço com `await` dentro, buscando relação item a item? (N+1, etapa 8)
 - [ ] Algum valor do usuário colado no texto da consulta? (etapa 13)
 - [ ] Duas escritas que precisam ser verdadeiras juntas, fora de transação — ou com
       `this.repositorio` dentro dela em vez do `manager`? (etapa 14)
 
-E ligue o `logging: true`: o SQL que o TypeORM realmente executou é a única resposta
-definitiva sobre o que a consulta faz.
+E mantenha o `logging: true`: o SQL executado é a única resposta definitiva sobre o que a
+consulta faz.
 
 ## 💣 Pegadinha de mercado
 
-**Testar desempenho com 20 registros.** Toda consulta é rápida com o banco de
-desenvolvimento quase vazio — inclusive a que faz 201 viagens ao banco. O N+1 e a listagem
-sem paginação não aparecem nos testes da equipe; aparecem no terceiro mês de uso do cliente.
-Por isso a etapa 5 popula o banco antes de medir: desempenho só se avalia com volume
-parecido com o real.
+**Testar desempenho com 20 registros.** Com o banco quase vazio, até a consulta de 201
+viagens é rápida. N+1 e listagem sem paginação não aparecem nos testes da equipe — aparecem
+no terceiro mês de uso do cliente. Desempenho só se avalia com volume parecido com o real.
 
 ## 🧩 Desafio de fixação
 

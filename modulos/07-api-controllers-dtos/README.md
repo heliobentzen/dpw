@@ -2,15 +2,13 @@
 
 > **Pré-requisitos:** M03, M06 · **Duração:** longa
 
-Fecha o backend. Aqui a ementa é atendida em dois itens: *"mapeamento de URLs"* e *"criação
-de classes, métodos e funções para processamento das requisições"*.
+Fecha o backend e atende dois itens da ementa: *"mapeamento de URLs"* e *"criação de
+classes, métodos e funções para processamento das requisições"*.
 
 O M06 terminou com um CRUD que funciona e **aceita qualquer coisa**. Este módulo conserta o
-"qualquer coisa" — e ao final a API está pronta para consumo externo e integração segura.
+"qualquer coisa" e deixa a API pronta para consumo externo.
 
-> **A teoria não está num bloco separado.** Ela está nas etapas 2, 5, 10, 12, 13,
-> 15 e 17 — em que a gente para de digitar e pensa — mais as explicações dentro de cada
-> etapa.
+> A teoria vem quando o código pede: as etapas 2, 5, 10, 12, 13, 15 e 17 são de raciocínio.
 
 ## 🎯 Objetivos
 
@@ -22,32 +20,18 @@ Ao final você será capaz de:
 4. Receber upload de arquivo com validação de tipo, tamanho e nome.
 5. Publicar e revisar a documentação Swagger em `/api/docs`, com contrato OpenAPI, exemplos e erros.
 
-## 🧭 Por que este módulo fecha a construção do backend
+## 🧭 O que você vai construir
 
-Até o M06, o backend já consultava o banco, mas ainda aceitava entradas sem uma fronteira clara
-e podia expor mais dados do que o consumidor precisava. O M07 transforma esse protótipo funcional
-em uma API com contrato: rotas coerentes, validação, respostas estáveis e documentação.
-
-O estudante consolida quatro perguntas que vão acompanhar o restante da disciplina:
+O protótipo do M06 vira uma **API com contrato**, que responde a quatro perguntas — as mesmas
+que acompanham o resto da disciplina:
 
 1. O que o cliente pode enviar?
 2. O que o servidor aceita como válido?
-3. O que o servidor devolve, e em qual formato?
-4. Como outra pessoa pode conhecer esse acordo sem ler a implementação?
+3. O que o servidor devolve, e em que formato?
+4. Como outra pessoa conhece esse acordo sem ler o código?
 
-Essa é a passagem da construção interna para a integração externa. Depois do M07, a API está
-pronta para receber identidade e permissões no M08, ser auditada no M09 e ser protegida por uma
-suíte de testes no M10.
-
-> O critério de saída não é apenas ter endpoints funcionando: é conseguir explicar e verificar
-o contrato de cada endpoint.
-
----
-
-## 🧭 O que você vai construir
-
-A mesma API do M06, mas que agora **recusa** o que não deveria aceitar e **não entrega** o
-que não deveria mostrar:
+Na prática, a API passa a **recusar** o que não deveria aceitar e a **não entregar** o que não
+deveria mostrar:
 
 ```
 POST /api/obras  {"titulo":"","anoPublicacao":3000}   → 400, com as duas falhas listadas
@@ -58,25 +42,19 @@ POST /api/obras/1/capa                                → upload validado
 GET  /api/docs                                        → contrato completo, com formatos
 ```
 
-E um `openapi.json` versionado, usado por clientes externos e pelo CI para verificar o contrato.
+E um `openapi.json` versionado, que clientes externos e o CI usam para verificar o contrato.
+O critério de saída não é só ter endpoints funcionando: é saber explicar e verificar o
+contrato de cada um.
 
 ## 📋 Como este módulo funciona
 
-Dezoito etapas. As três primeiras partem de um problema seu — o `POST` que passou no M06 e
-não deveria — e o resto constrói a solução por partes.
+Mesmo formato dos anteriores (**Faça → Linha a linha → Rode → Deu certo se**), em dezoito
+etapas. As três primeiras partem do `POST` que passou no M06 e não deveria.
 
-| Parte | O que é |
-| --- | --- |
-| **Faça** | O comando ou o código, para digitar |
-| **Linha a linha** | Uma tabela explicando **cada elemento** |
-| **Rode** | Como verificar |
-| **Deu certo se** | O resultado exato esperado |
-
-> 🪟 No PowerShell, escreva `curl.exe`; no macOS e Linux, `curl`. Para o corpo JSON no
-> PowerShell 5.1 (o que vem no Windows), use aspas simples por fora **e** `\"` nas de dentro
-> (`-d '{\"titulo\":\"X\"}'`); no macOS, no Linux e no PowerShell 7, só as aspas simples
-> (`-d '{"titulo":"X"}'`). E evite acento no JSON digitado no terminal: o PowerShell 5.1
-> entrega o texto ao `curl.exe` em outra codificação. Para testar acentos, use o Swagger.
+> 🪟 **Windows:** `curl.exe` no PowerShell (`curl` no macOS/Linux). JSON no PowerShell 5.1:
+> aspas simples por fora **e** `\"` dentro (`-d '{\"titulo\":\"X\"}'`); no PowerShell 7,
+> macOS e Linux, só as simples. Evite acento no JSON digitado no terminal (o 5.1 muda a
+> codificação) — para acentos, use o Swagger.
 
 ### As dezoito etapas
 
@@ -138,14 +116,13 @@ app.useGlobalPipes(
 
 | Opção | O que faz | Por que importa |
 | --- | --- | --- |
-| `useGlobalPipes` | Aplica o pipe a **todas** as rotas. Um `ParseIntPipe` vale para um parâmetro; este vale para a aplicação inteira |
+| `useGlobalPipes` | Aplica o pipe a **todas** as rotas | O `ParseIntPipe` valia para um parâmetro; este vale para a aplicação inteira |
 | `whitelist: true` | **Remove** propriedades não declaradas no DTO | É a proteção contra *mass assignment* — etapa 5 |
 | `forbidNonWhitelisted: true` | Em vez de remover em silêncio, responde **400** | Erro de integração aparece cedo, não em produção |
 | `transform: true` | Converte o corpo numa instância do DTO e faz coerção de tipo | Sem isto, `"42"` da *query string* continua sendo texto |
 
-> **Pipe de novo.** É o mesmo conceito do `ParseIntPipe` do M03, etapa 14c: uma peça que roda
-> **entre a requisição e o seu método**, e que pode recusar sozinha. Terceiro uso do mesmo
-> mecanismo.
+> **Pipe de novo** (M03, etapa 14c): o porteiro **entre a requisição e o seu método**, que
+> pode recusar sozinho.
 
 **Rode:** reinicie e repita o `POST` que passou no M06:
 
@@ -153,15 +130,14 @@ app.useGlobalPipes(
 curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"X\",\"autorId\":1,\"destaque\":true}'
 ```
 
-**Deu certo se:** ele **continua passando**. Sim, continua — e a próxima etapa explica por
-quê.
+**Deu certo se:** ele **continua passando**. Sim — a próxima etapa explica por quê.
 
 ---
 
 ## Etapa 2 — Por que nada mudou
 
-Você ligou uma proteção global e o ataque continuou funcionando. Isso não é bug: é como o
-mecanismo funciona, e entender por quê evita duas horas de confusão.
+Proteção global ligada, e o ataque continua funcionando. Não é bug: é como o mecanismo
+funciona, e entender isso evita horas de confusão.
 
 ### O pipe precisa de algo para ler
 
@@ -173,9 +149,8 @@ validação nele. Hoje o seu controller tem:
 criar(@Body() dados: Partial<Obra>) { … }
 ```
 
-`Partial<Obra>` é um **tipo do TypeScript**, não uma classe. E tipos do TypeScript
-**desaparecem** quando o código vira JavaScript — é a mesma lição do experimento do
-`ParseIntPipe` no M03, etapa 14e.
+`Partial<Obra>` é um **tipo do TypeScript**, não uma classe — e tipos **desaparecem** na
+compilação (a lição do M03, etapa 14e).
 
 ```
 o que você escreveu     Partial<Obra>
@@ -191,14 +166,9 @@ o que ele faz           nada
 | Uma **classe**, não um tipo | Classe sobrevive à compilação; tipo não |
 | Com **decorators** de validação | São eles que o pipe lê, como o `@Get` é lido pelo roteador |
 
-É exatamente isso que um **DTO** é: uma classe que descreve o formato aceito, com as regras
-anexadas por decorator.
-
-> DTO significa *Data Transfer Object* — objeto de transferência de dados. O nome é pomposo
-> para uma ideia simples: **uma classe que existe só para descrever o que entra e o que sai**,
-> separada da entidade que descreve o que é guardado.
-
-O pipe está ligado e funcionando. Falta dar a ele o que ler — é a etapa 3.
+Isso é um **DTO** (*Data Transfer Object*): nome pomposo para uma ideia simples — **uma
+classe que só descreve o que entra e o que sai**, com as regras anexadas por decorator,
+separada da entidade, que descreve o que é guardado. A etapa 3 cria o primeiro.
 
 ---
 
@@ -249,14 +219,13 @@ export class CriarObraDto {
 
 ### Duas decisões que parecem detalhe e não são
 
-**`categoriaIds`, não `categorias`.** O cliente manda **ids**, não objetos de categoria. O que
-ele envia e o que existe no banco são coisas diferentes — e essa diferença **é a razão de o
-DTO existir**. Se fossem sempre iguais, bastaria a entidade.
+**`categoriaIds`, não `categorias`.** O cliente manda **ids**, não objetos. O que se envia e o
+que se guarda são coisas diferentes — **essa diferença é a razão de o DTO existir**.
 
 **Os limites repetem a entidade de propósito.** `Length(1, 200)` aqui e `length: 200` no
-`@Column` do M04 dizem a mesma coisa em dois lugares. Parece duplicação, e é — mas cada uma
-protege num ponto diferente: o DTO recusa **antes** de tocar o banco, com mensagem legível;
-a coluna é a última linha de defesa, inclusive contra código que não passa pela API.
+`@Column` são duplicação, sim, mas protegem pontos diferentes: o DTO recusa **antes** do
+banco, com mensagem legível; a coluna é a última defesa, inclusive contra código que não
+passa pela API.
 
 **Faça:** use no controller. Troque **só** a assinatura do `POST`:
 
@@ -267,9 +236,8 @@ criar(@Body() dto: CriarObraDto) {
 }
 ```
 
-⚠️ **O TypeScript vai reclamar:** `CriarObraDto` não é `Partial<Obra>`, porque `categoriaIds`
-não é um campo da entidade. **Deixe o erro aí** — a etapa 8 conserta o service. O
-`npm run start:dev` roda mesmo com erro de tipo, então dá para testar antes.
+⚠️ **O TypeScript vai reclamar:** `categoriaIds` não é campo da entidade. **Deixe o erro** — a
+etapa 8 conserta o service, e o `start:dev` roda mesmo com erro de tipo.
 
 ---
 
@@ -317,45 +285,37 @@ e o terceiro responde 400 com:
 | Título vazio, ano 3000 | | |
 | Campo `destaque` não declarado | | |
 
-### Duas coisas para reparar
+### O que reparar
 
-**A segunda resposta traz as duas falhas, não a primeira que apareceu.** O `class-validator`
-avalia tudo e devolve a lista completa. É por isso que qualquer formulário que consuma a API consegue marcar
-dois campos errados de uma vez, em vez de fazer o usuário descobrir um por vez.
-
-**O terceiro caso é o `forbidNonWhitelisted` em ação.** O mesmo `destaque` que passou na
-etapa 1 agora é **recusado**. É a diferença entre uma API que avisa e uma que grava lixo em
-silêncio.
-
-**E repare no que você não escreveu:** nenhum `if`, nenhum `try`, nenhuma montagem de
-mensagem de erro. Você declarou o formato; o framework fez o resto.
+- **A segunda resposta lista as duas falhas**, não só a primeira: quem consome a API marca
+  todos os campos errados de uma vez.
+- **O terceiro caso é o `forbidNonWhitelisted`**: o `destaque` que passou na etapa 1 agora é
+  **recusado**, em vez de gravado em silêncio.
+- **Você não escreveu** nenhum `if`, `try` ou mensagem de erro. Declarou o formato; o
+  framework fez o resto.
 
 ---
 
 ## Etapa 5 — Por que DTO e não a entidade
 
-Você acabou de ver a proteção funcionar. Agora o raciocínio completo — porque são **três**
-problemas distintos, e o DTO de entrada resolve só o primeiro.
+São **três** problemas distintos, e o DTO de entrada resolve só o primeiro.
 
-Pense no **formulário de um balcão de atendimento**. O atendente só processa os campos que
-estão impressos nele; um bilhete grampeado pedindo "e me promova a gerente" vai para o lixo.
-E, na volta, você recebe um comprovante com o que lhe diz respeito — não a ficha interna da
-empresa. O **DTO de entrada** é o formulário; o **DTO de saída** é o comprovante. A entidade
-é a ficha interna, e nunca deveria atravessar o balcão.
+Pense no **formulário de um balcão de atendimento**. O atendente só processa os campos
+impressos; um bilhete grampeado pedindo "e me promova a gerente" vai para o lixo. Na volta,
+você recebe um comprovante — não a ficha interna da empresa. O **DTO de entrada** é o
+formulário, o **DTO de saída** é o comprovante, e a entidade é a ficha interna, que nunca
+atravessa o balcão.
 
 ### Problema 1 — *mass assignment* (entrada)
 
-É o que você testou no caso 3. Com `@Body() dados: Partial<Obra>`, o cliente escolhe **quais
-campos** gravar. Ele manda:
+O caso 3. Com `@Body() dados: Partial<Obra>`, o cliente escolhe **quais campos** gravar:
 
 ```json
 {"titulo":"X", "destaque":true, "criadoEm":"1999-01-01"}
 ```
 
-e os três são gravados, porque o service só faz `save(dados)`.
-
-O nome vem daí: uma **atribuição em massa** de tudo que veio no corpo. O atacante não precisa
-de nada sofisticado — basta descobrir um campo que você não esperava.
+e os três são gravados — uma **atribuição em massa** de tudo que veio no corpo. Basta ao
+atacante descobrir um campo que você não esperava.
 
 | Campo | O que ele consegue |
 | --- | --- |
@@ -363,32 +323,26 @@ de nada sofisticado — basta descobrir um campo que você não esperava.
 | `criadoEm` | Forjar a data de cadastro |
 | `papel` (numa entidade `Usuario`) | **Virar administrador** |
 
-A última linha é a que aparece nos relatórios de incidente. E ela vai existir no M08.
+A última linha é a dos relatórios de incidente — e ela vai existir no M08.
 
-> **A regra:** o DTO define **o que é aceito**; o resto vai para o lixo. `whitelist: true` é a
-> linha que executa isso.
+> **A regra:** o DTO define **o que é aceito**; o resto vai para o lixo (`whitelist: true`).
 
 ### Problema 2 — vazamento (saída)
 
-O inverso, e o DTO de entrada não resolve. Hoje o controller devolve a **entidade inteira**:
+O inverso. Hoje o controller devolve a **entidade inteira**:
 
 ```ts
 return this.acervo.buscarUm(id);   // devolve tudo que a tabela tem
 ```
 
-Enquanto a entidade é `Obra`, o prejuízo é excesso de dados. Quando existir `Usuario` (M08),
-com um campo `senhaHash`, devolvê-la inteira **publica o hash de todo mundo**.
-
-E não adianta lembrar de tirar: alguém acrescenta um campo sensível à entidade seis meses
-depois, e ele **aparece na resposta sozinho**, sem ninguém decidir isso.
+Com `Obra`, o prejuízo é excesso de dados. Com `Usuario` (M08) e seu `senhaHash`, **publica o
+hash de todo mundo**. E não adianta lembrar de tirar: um campo sensível acrescentado meses
+depois **aparece na resposta sozinho**, sem ninguém decidir.
 
 ### Problema 3 — acoplamento (contrato)
 
-Se a resposta **é** a entidade, então renomear uma coluna quebra clientes externos. A decisão de
-banco vaza para o contrato público da API.
-
-Com DTO de saída existe uma camada onde a mudança é **absorvida de propósito**: renomeia-se a
-coluna, ajusta-se uma linha no DTO, e quem consome não percebe.
+Se a resposta **é** a entidade, renomear uma coluna quebra clientes externos. Com DTO de
+saída, a mudança é **absorvida**: ajusta-se uma linha no DTO e quem consome não percebe.
 
 ### O desenho completo
 
@@ -399,16 +353,15 @@ Resposta   ◀── [ DTO de saída   ] ◀── Service ◀── Entidade �
 
 Duas fronteiras, duas classes, dois problemas diferentes. A etapa 9 constrói a de saída.
 
-💼 **No mercado:** *"como você evita mass assignment?"* é pergunta de entrevista para vaga
-júnior de backend. A resposta completa tem duas partes — DTO **e** `whitelist` —, e quem cita
-só uma normalmente decorou.
+💼 **No mercado:** *"como você evita mass assignment?"* é pergunta de entrevista júnior. A
+resposta completa tem duas partes — DTO **e** `whitelist`.
 
 ---
 
 ## Etapa 6 — O DTO de atualização
 
-O `PATCH` aceita qualquer subconjunto dos campos. Escrever outra classe com tudo opcional
-seria duplicação — e duplicação sai de sincronia.
+O `PATCH` aceita qualquer subconjunto dos campos. Outra classe com tudo opcional seria
+duplicação — e duplicação sai de sincronia.
 
 **Faça:** crie `src\acervo\dto\atualizar-obra.dto.ts`:
 
@@ -428,8 +381,8 @@ export class AtualizarObraDto extends PartialType(CriarObraDto) {}
 | as validações | **São preservadas.** `titulo` continua limitado a 200 caracteres — só deixa de ser obrigatório |
 | de `@nestjs/swagger` | Existe uma versão em `@nestjs/mapped-types` também; a do Swagger preserva os `@ApiProperty` junto |
 
-Uma linha em vez de um arquivo duplicado. E é exatamente a semântica do `PATCH`: **mande só o
-que mudou, mas o que você mandar tem de ser válido**.
+Uma linha, e a semântica exata do `PATCH`: **mande só o que mudou, mas o que mandar tem de
+ser válido**.
 
 **Faça:** no controller:
 
@@ -447,8 +400,7 @@ atualizar(@Param("id", ParseIntPipe) id: number, @Body() dto: AtualizarObraDto) 
 
 ## Etapa 7 — A query também é entrada
 
-Quase todo mundo valida o corpo e esquece a *query string*. Ela vem do mesmo lugar — do
-cliente — e merece o mesmo tratamento.
+Quase todo mundo valida o corpo e esquece a *query string* — que também vem do cliente.
 
 **Faça:** crie `src\acervo\dto\listar-obras.dto.ts`:
 
@@ -479,15 +431,12 @@ export class ListarObrasDto {
 
 ### O `@Max(100)` é segurança, não capricho
 
-A etapa 3 do M06 terminou com uma dívida: *"hoje `?tamanho=999999` funciona"*. É esta linha
-que paga.
+Paga a dívida da etapa 3 do M06 (*"hoje `?tamanho=999999` funciona"*). Sem teto, o cliente
+decide quanto trabalho o servidor faz — e repetir algumas vezes uma requisição pelo acervo
+inteiro derruba a aplicação, sem técnica de ataque nenhuma.
 
-Sem teto, o cliente decide quanto trabalho o seu servidor vai fazer. Uma requisição pedindo
-o acervo inteiro custa memória no banco, memória no Node, e banda — e repetir essa requisição
-algumas vezes derruba a aplicação sem precisar de nenhuma técnica de ataque.
-
-> É a mesma classe de problema do `limits.fileSize` que aparece na etapa 14: **todo limite
-> que o cliente controla precisa de um teto que o servidor imponha.**
+> Mesma classe do `limits.fileSize` da etapa 14: **todo limite que o cliente controla precisa
+> de um teto imposto pelo servidor.**
 
 **Faça:** no controller:
 
@@ -498,8 +447,7 @@ listar(@Query() filtros: ListarObrasDto) {
 }
 ```
 
-Repare que `@Query()` agora vem **sem nome**: ele captura a query inteira e a valida como um
-objeto, em vez de pescar um campo por vez.
+`@Query()` **sem nome** captura a query inteira e a valida como objeto.
 
 **Rode:**
 
@@ -507,15 +455,14 @@ objeto, em vez de pescar um campo por vez.
 curl.exe -s -i "http://localhost:3000/api/obras?tamanho=999999"
 ```
 
-**Deu certo se:** responde **400** com `tamanho must not be greater than 100`. Antes desta
-etapa, essa mesma URL mandava o banco inteiro pela rede.
+**Deu certo se:** responde **400** com `tamanho must not be greater than 100`.
 
 ---
 
 ## Etapa 8 — O service passa a falar em DTO
 
-Agora o erro de tipo que a etapa 3 deixou pendente. O service precisa lidar com
-`categoriaIds`, que é um campo do **pedido** e não da tabela.
+O erro de tipo pendente da etapa 3: o service precisa lidar com `categoriaIds`, campo do
+**pedido**, não da tabela.
 
 **Faça:**
 
@@ -551,8 +498,8 @@ async atualizar(id: number, dto: AtualizarObraDto): Promise<Obra> {
 | `if (categoriaIds)` | **No `PATCH`, `undefined` significa "não mexa nas categorias" e `[]` significa "tire todas".** São coisas diferentes, e sem o `if` você apagaria as categorias em toda atualização que não as mencionasse |
 | `return this.buscarUm(...)` | Rebusca **com as relações carregadas**, para o DTO de saída da etapa 9 ter o que ler |
 
-> A linha do `if (categoriaIds)` é sutil e vale reler. É o tipo de bug que passa em todo teste
-> e aparece quando um usuário edita só o título de uma obra e perde as categorias dela.
+> O `if (categoriaIds)` é sutil: sem ele, o bug passa em todo teste e aparece quando alguém
+> edita só o título e perde as categorias.
 
 **Deu certo se:** o erro de tipo some, o `POST` da etapa 4 continua respondendo 201, e um
 `POST` com `"categoriaIds":[1,2]` devolve a obra ligada às duas categorias.
@@ -624,19 +571,18 @@ async buscarUm(@Param("id", ParseIntPipe) id: number) {
 | `autor: { id, nome }` | Só os dois campos necessários ao consumidor |
 | `@ApiProperty({ nullable: true })` | Documenta que o campo pode vir nulo no contrato OpenAPI |
 
-> **Esse é o argumento do DTO de saída.** Não é cerimônia: é **desenhar a resposta para quem
-> vai consumi-la**, em vez de despejar a tabela e desejar boa sorte.
+> **DTO de saída não é cerimônia:** é **desenhar a resposta para quem vai consumi-la**, em vez
+> de despejar a tabela.
 >
-> ⚠️ O `de()` **exige** que a obra venha com `autor` carregado. Se aparecer
-> `Cannot read properties of undefined (reading 'nome')`, o service buscou sem `relations` —
-> é o M06 cobrando.
+> ⚠️ O `de()` **exige** `autor` carregado. `Cannot read properties of undefined (reading
+> 'nome')` significa que o service buscou sem `relations` (M06).
 
 ---
 
 ## Etapa 10 — O recurso é um substantivo
 
-Você tem entrada e saída resolvidas. Falta desenhar **as rotas** — e há uma convenção que
-economiza discussão em toda equipe.
+Entrada e saída resolvidas. Falta desenhar **as rotas**, com uma convenção que economiza
+discussão em toda equipe.
 
 ### O erro comum
 
@@ -646,9 +592,8 @@ economiza discussão em toda equipe.
 ❌ GET  /api/buscarObrasPorAutor    ✅ GET    /api/obras?autorId=3
 ```
 
-A URL identifica **o quê**; o método HTTP diz **o que fazer** com ele. **Verbo na URL é sinal
-de que o método HTTP está sendo ignorado** — e de que a API vai crescer inventando um nome
-novo para cada operação.
+A URL identifica **o quê** (substantivo); o método HTTP diz **o que fazer** (verbo). **Verbo
+na URL significa método HTTP ignorado** — e uma API que inventa um nome novo por operação.
 
 ### O mapa completo
 
@@ -661,9 +606,8 @@ novo para cada operação.
 | `PUT` | `/obras/42` | Substitui inteiro | 200 |
 | `DELETE` | `/obras/42` | Remove | **204** (sem corpo) |
 
-Repare que **`/obras` aparece duas vezes** e `/obras/42` aparece quatro. Não são seis
-endereços: são dois, com métodos diferentes. É isso que a convenção compra — o cliente que
-souber o padrão consegue adivinhar a API inteira.
+Não são seis endereços: são **dois**, com métodos diferentes. Quem conhece o padrão adivinha
+a API inteira.
 
 ### `PATCH` ou `PUT`?
 
@@ -673,20 +617,17 @@ souber o padrão consegue adivinhar a API inteira.
 | Campo omitido | É **apagado** | Fica como estava |
 | Serve para | Substituição completa | Formulário de edição |
 
-Formulário de edição quase sempre quer `PATCH` — quem edita o título de uma obra não espera
-perder o ISBN. **Este material usa `PATCH`**, e é por isso que a etapa 6 usou `PartialType`.
+Edição quase sempre quer `PATCH` — quem edita o título não espera perder o ISBN. **Este
+material usa `PATCH`** (daí o `PartialType` da etapa 6).
 
 ### Por que o status importa
 
-Responder `200` para tudo obriga o cliente a **abrir o corpo** da resposta para descobrir se
-deu certo. Com status correto, ele decide olhando um número:
+`200` para tudo obriga o cliente a **abrir o corpo** para saber se deu certo. Com status
+correto, ele decide olhando um número — e trata erro **num lugar só**:
 
 ```
 if (resposta.status >= 400) → mostrar erro
 ```
-
-É por confiar no status que um cliente consegue tratar erro **num lugar só**, em vez de espalhar
-verificação por cada chamada.
 
 ---
 
@@ -756,15 +697,14 @@ curl.exe -s -o NUL -w "%{http_code}`n" -X DELETE http://localhost:3000/api/obras
 
 **Deu certo se:** responde **204** e não devolve corpo nenhum.
 
-⚠️ **Ordem de rotas, pela terceira vez.** Se você criar `@Get("destaques")` **depois** de
-`@Get(":id")`, a requisição a `/obras/destaques` casa com `:id` e o `ParseIntPipe` responde
-400. Rotas literais vêm **antes** das paramétricas — mesma regra do M03 e do M06.
+⚠️ **Ordem de rotas, pela terceira vez:** `@Get("destaques")` **depois** de `@Get(":id")`
+responde 400. Rotas literais vêm **antes** das paramétricas.
 
 ---
 
 ## Etapa 12 — Escolher o status certo
 
-Você usou cinco status. Vale saber escolher, porque é decisão de projeto e cai em entrevista.
+Você usou cinco status. Escolher é decisão de projeto — e cai em entrevista.
 
 ### A família dos 2xx — deu certo
 
@@ -785,10 +725,10 @@ Você usou cinco status. Vale saber escolher, porque é decisão de projeto e ca
 | **409** Conflict | Conflito com o estado atual | Tombo duplicado, por exemplo |
 | **422** Unprocessable | Sintaxe certa, semântica errada | Ver abaixo |
 
-**400 ou 422?** Há discussão genuína. A leitura mais útil: **400** para entrada malformada
-(campo faltando, tipo errado) e **422** para entrada bem formada que viola regra de negócio
-("data de devolução anterior à de saída"). O Nest usa 400 por padrão no `ValidationPipe`, e
-este material fica com isso — o importante é a equipe escolher **uma** convenção.
+**400 ou 422?** Leitura mais útil: **400** para entrada malformada (campo faltando, tipo
+errado); **422** para entrada bem formada que viola regra de negócio ("devolução anterior à
+saída"). Este material fica com o 400 padrão do `ValidationPipe` — o importante é a equipe
+escolher **uma** convenção.
 
 ### A família dos 5xx — você errou
 
@@ -796,9 +736,8 @@ este material fica com isso — o importante é a equipe escolher **uma** conven
 |---|---|
 | **500** Internal Server Error | Exceção não tratada |
 
-⚠️ **500 nunca deve vazar detalhe.** Se a resposta traz o *stack trace* ou a mensagem do banco,
-você está dando ao atacante o mapa da aplicação — nome de tabela, versão da biblioteca,
-caminho de arquivo. O Nest já protege por padrão em produção; o M09 confere isso.
+⚠️ **500 nunca vaza detalhe.** *Stack trace* ou mensagem do banco na resposta dão ao
+atacante o mapa da aplicação. O Nest protege por padrão em produção; o M09 confere.
 
 **Exercite:** que status para cada situação?
 
@@ -810,14 +749,14 @@ caminho de arquivo. O Nest já protege por padrão em produção; o M09 confere 
 | Empréstimo recusado por limite de 3 em aberto | |
 | `PATCH /obras/42` sem estar autenticado | |
 
-> As duas últimas merecem discussão em sala. E a de autenticação é para **responder no
-> papel**: a API do M07 ainda é aberta, e os guards chegam no M08.
+> As duas últimas merecem discussão em sala. A de autenticação é **no papel**: os guards só
+> chegam no M08.
 
 ---
 
 ## Etapa 13 — Erros no formato do domínio
 
-Você já usa isso desde o M03, sem ter visto o conjunto.
+Você usa isso desde o M03. Eis o conjunto:
 
 ```ts
 throw new NotFoundException("Obra não encontrada");
@@ -834,20 +773,15 @@ Cada uma vira o status certo, com corpo JSON padronizado, sem você escrever nú
 | Descreve o problema em português | Monta `{message, error, statusCode}` |
 | Não importa `Response` | Escreve a resposta |
 
-**É o mesmo princípio da separação de camadas do M03, etapa 11:** o service não sabe que HTTP
-existe. Se você precisou importar `Request` ou `Response` dentro dele, a lógica está na camada
-errada.
-
-> **A regra que resolve a dúvida na hora de escrever:** lance a exceção que descreve **o que
-> aconteceu no negócio**, não o status que você quer. `ConflictException` porque *há
-> conflito*, e o 409 vem junto — não `HttpException(409)` porque você quer um 409.
+> **A regra:** lance a exceção que descreve **o que aconteceu no negócio**, não o status que
+> você quer. `ConflictException` porque *há conflito* — o 409 vem junto —, e não
+> `HttpException(409)` porque você quer um 409.
 
 ---
 
 ## Etapa 14 — Upload: receber o arquivo
 
-Toda obra tem capa. É o requisito mais comum de qualquer CRUD e um dos que mais aparecem mal
-feitos.
+Toda obra tem capa. Upload é requisito comum em CRUD — e um dos mais mal feitos.
 
 **Faça:**
 
@@ -898,23 +832,19 @@ curl.exe -s -o NUL -w "%{http_code}`n" -X POST http://localhost:3000/api/obras/1
 
 **Deu certo se:** responde 201 com um `.jpg` e 400 com um `.pdf`.
 
-> 🔒 **Este endpoint está aberto, e não deveria.** Upload é escrita: qualquer pessoa na
-> internet pode encher o seu disco. O M08 traz autenticação e volta aqui para pôr um
-> `@UseGuards` nesta rota. **Anote a dívida no código**, com um comentário
-> `// TODO(M08): exigir autenticação`, para ela não sumir de vista.
+> 🔒 **Este endpoint está aberto, e não deveria:** qualquer pessoa pode encher o seu disco. O
+> M08 põe um `@UseGuards` aqui. **Anote a dívida no código:** `// TODO(M08): exigir autenticação`.
 
 ---
 
 ## Etapa 15 — Upload: as três decisões
 
-O código da etapa 14 funciona e ainda está inseguro. Três decisões que ninguém toma no seu
-lugar.
+O código da etapa 14 funciona e ainda é inseguro. Três decisões que ninguém toma por você.
 
 ### 1. Confie no conteúdo, não na extensão nem no `Content-Type`
 
-O `mimetype` que o `fileFilter` recebe vem **do cliente** — quem envia escolhe o que declarar.
-Um arquivo `.php` renomeado para `.jpg`, com `Content-Type: image/jpeg`, passa pelo filtro
-sem esforço.
+O `mimetype` vem **do cliente**, que declara o que quiser. Um `.php` renomeado para `.jpg`,
+com `Content-Type: image/jpeg`, passa pelo filtro sem esforço.
 
 **Faça:** confira os *magic bytes* — os primeiros bytes que identificam o formato de verdade:
 
@@ -943,7 +873,7 @@ const nome = arquivo.originalname;                                // ❌
 const nome = `${randomUUID()}${extname(arquivo.originalname)}`;   // ✅
 ```
 
-O nome original é **entrada do usuário como qualquer outra**, e serve para três ataques:
+O nome original é **entrada do usuário** e serve a três ataques:
 
 | Nome enviado | O que consegue |
 | --- | --- |
@@ -951,22 +881,20 @@ O nome original é **entrada do usuário como qualquer outra**, e serve para tr�
 | `capa.jpg` (o mesmo de outra pessoa) | Sobrescrever o arquivo de outro usuário |
 | `orçamento-final-v3.jpg` | Vazar informação pelo próprio nome |
 
-`randomUUID()` resolve os três: nome imprevisível, único, e sem informação. A extensão você
-deriva do que **validou**, não do que veio.
+`randomUUID()` resolve os três: nome imprevisível, único e sem informação. Derive a extensão
+do que você **validou**, não do que veio.
 
 ### 3. Disco de contêiner é efêmero
 
-Na PaaS do M12, o disco é recriado a cada deploy: **os uploads somem**. Não é falha, é como
-contêiner funciona.
+Na PaaS do M12, o disco é recriado a cada deploy: **os uploads somem**.
 
 | Ambiente | Onde gravar |
 | --- | --- |
 | Desenvolvimento | `backend/uploads/` — e ponha no `.gitignore` |
 | Produção | Armazenamento de objetos: S3, R2, Blob |
 
-> O código muda **em um lugar só** se você isolar a gravação num service — `salvarCapa`
-> decide onde, e o controller nem sabe que existe S3. É a separação de camadas do M03 pagando
-> mais uma vez.
+> Isolando a gravação no service (`salvarCapa`), a troca acontece **num lugar só** — o
+> controller nem sabe que existe S3.
 
 **Rode — o teste que fecha a etapa:**
 
@@ -976,15 +904,14 @@ curl.exe -s -o NUL -w "%{http_code}`n" -X POST http://localhost:3000/api/obras/1
 
 Depois **renomeie o PDF para `.jpg`** e reenvie.
 
-**Deu certo se:** os dois respondem 400. Se o segundo passar, falta a checagem de conteúdo do
-item 1 — e é exatamente assim que se hospeda malware sem querer.
+**Deu certo se:** os dois respondem 400. Se o segundo passar, falta a checagem do item 1 — é
+assim que se hospeda malware sem querer.
 
 ---
 
 ## Etapa 16 — Regerar o contrato
 
-O `gerar:schema` já existe desde o M03. Agora que há DTOs de entrada e saída, ele tem muito
-mais o que descrever.
+O `gerar:schema` existe desde o M03; agora, com DTOs, tem muito mais a descrever.
 
 **Faça:**
 
@@ -1010,23 +937,19 @@ caminho.
 git diff backend/openapi.json
 ```
 
-Aquele tinha rotas e nada mais. Este tem os formatos — e é a diferença entre um índice e um
-contrato.
+Aquele tinha só rotas; este tem os formatos — a diferença entre um índice e um contrato.
 
-**Faça:** commite o arquivo.
-
-O CI passa a **falhar** quando o arquivo commitado não bate com o schema gerado. É assim que
+**Faça:** commite o arquivo. O CI passa a **falhar** quando ele não bate com o schema gerado:
 o contrato deixa de ser promessa e vira verificação.
 
-> **Repare no que não aconteceu:** ninguém escreveu documentação. Ela saiu dos mesmos
-> decorators que já estavam lá fazendo outra coisa — validar entrada e mapear rota. Quarto
-> uso do mecanismo do M03.
+> Ninguém escreveu documentação: ela saiu dos decorators que já validavam entrada e mapeavam
+> rotas.
 
 ---
 
 ## Etapa 17 — As quatro camadas
 
-O backend está pronto. Vale ver o conjunto, porque agora todas as peças existem.
+O backend está pronto. Agora que todas as peças existem, veja o conjunto.
 
 | Camada | Responsabilidade | Onde você a construiu |
 | --- | --- | --- |
@@ -1035,13 +958,11 @@ O backend está pronto. Vale ver o conjunto, porque agora todas as peças existe
 | **Service** | Regra de negócio | M06, etapa 8 |
 | **Repository** | Acesso a dados | M06, etapa 1 |
 
-**A regra que resolve a dúvida de "onde ponho isto?"**, e que agora tem quatro respostas
-possíveis em vez de duas:
+**A regra de ouro:** o service **não sabe que HTTP existe**. Se você importou `Request` ou
+`Response` nele, a lógica está na camada errada (M03, etapa 11 — e por isso as exceções da
+etapa 13 falam em domínio).
 
-> O service **não sabe que HTTP existe**. Se você precisou importar `Request` ou `Response`
-> dentro dele, a lógica está na camada errada.
-
-E o critério original do M03 continua valendo, agora afiado:
+O critério de "onde ponho isto?" agora tem quatro respostas:
 
 | Este código… | Camada |
 | --- | --- |
@@ -1062,15 +983,15 @@ flowchart TB
     D --> F(["201 + JSON"])
 ```
 
-Compare com o diagrama do M03, etapa 20: as caixas que estavam vazias foram preenchidas.
-Faltam duas — `Guard` (M08) e `Middleware` (M09) —, e nenhuma delas exige mexer no que você
-construiu. **Elas se encaixam em volta**, que era exatamente a promessa da etapa 11 do M03.
+Compare com o diagrama do M03, etapa 20: as caixas vazias foram preenchidas. Faltam `Guard`
+(M08) e `Middleware` (M09), que **se encaixam em volta** sem mexer no que você construiu — a
+promessa da etapa 11 do M03.
 
 ---
 
 ## Etapa 18 — O que vai para o projeto
 
-O backend está pronto para integração. O que a equipe entrega aos consumidores da API:
+O que a equipe entrega aos consumidores da API:
 
 | Entrega | Onde |
 | --- | --- |
@@ -1080,34 +1001,31 @@ O backend está pronto para integração. O que a equipe entrega aos consumidore
 | Erros padronizados, distinguíveis pelo status | 400, 404, 409 |
 | **Um contrato legível por máquina** | `openapi.json` |
 
-A última linha é a que protege a integração: nenhum consumidor precisa adivinhar nomes de campo
-ou descobrir formatos por tentativa. O CI compara o schema gerado com o arquivo versionado,
-de modo que uma mudança de contrato seja percebida **antes** do deploy.
+A última linha protege a integração: ninguém adivinha nomes de campo nem descobre formatos
+por tentativa, e o CI percebe mudança de contrato **antes** do deploy.
 
-💼 **No mercado:** desenhar rota, escolher status e validar entrada é o trabalho diário de
-quem faz backend. Em entrevista, *"quando você usaria PATCH em vez de PUT?"* e *"como você
-evita mass assignment?"* separam quem copiou tutorial de quem entendeu — e você acabou de
-implementar as duas respostas.
+💼 **No mercado:** desenhar rota, escolher status e validar entrada é o dia a dia do backend.
+*"Quando usar PATCH em vez de PUT?"* e *"como evitar mass assignment?"* separam quem copiou
+tutorial de quem entendeu — e você implementou as duas respostas.
 
 ---
 
 ## 🤖 IA no fluxo
 
-Um assistente de IA escreve DTOs e decorators do Swagger com fluência — e costuma pular
-exatamente o que este módulo ensinou a não pular: o `whitelist`, o teto do `tamanho`, o DTO
-de saída ("é só devolver a entidade"), o `@Type(() => Number)` da query.
+A IA escreve DTOs e decorators do Swagger com fluência — e costuma pular justamente o que
+este módulo ensinou: `whitelist`, teto do `tamanho`, DTO de saída ("é só devolver a
+entidade"), `@Type(() => Number)` na query.
 
-Antes de aceitar um controller gerado, faça as perguntas das etapas 5 e 9: *o que acontece se
-o cliente mandar um campo a mais? E se alguém acrescentar uma coluna sensível à entidade
-amanhã?* Se a resposta for "aparece na API", o código ainda não está pronto.
+Antes de aceitar um controller gerado, pergunte (etapas 5 e 9): *e se o cliente mandar um
+campo a mais? E se alguém acrescentar uma coluna sensível amanhã?* Se a resposta for "aparece
+na API", não está pronto.
 
 ## 💣 Pegadinha de mercado
 
-**Devolver a entidade "só por enquanto".** A rota nasce devolvendo `this.repo.findOne(…)`
-porque é mais rápido, e o DTO de saída fica para depois. Depois nunca chega: a coluna
-`senhaHash`, o `observacaoInterna`, o `cpf` entram na entidade meses depois e saem na API
+**Devolver a entidade "só por enquanto".** O DTO de saída fica para depois, e depois nunca
+chega: `senhaHash`, `observacaoInterna` e `cpf` entram na entidade meses depois e saem na API
 pública sem ninguém decidir. O M09 encontra exatamente isso na listagem de obras deste
-módulo — procure-a antes dele.
+módulo — procure antes dele.
 
 ## 🧩 Desafio de fixação
 
