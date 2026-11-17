@@ -1,221 +1,130 @@
 # M00 — Ambiente e ferramentas
 
-> **Pré-requisito:** nenhum · **Duração:** média
+> **Pré-requisito:** nenhum · **Duração:** média · **Semana:** 1
+> **No projeto:** cria o repositório da equipe · conferido na P2 (critério 4) e na P3 (critério 6)
 
-Módulo complementar: a ementa não pede, mas sem ele nada funciona. Pode virar
-pré-atividade assíncrona.
+## Por que este módulo existe no projeto
 
-## 📌 O que a avaliação cobra
+Quatro pessoas vão escrever o mesmo sistema durante 18 semanas. Sem um ambiente igual para
+todos e um jeito combinado de juntar o código, metade do tempo vai para "na minha máquina
+funciona" e para conflitos de merge. Este módulo monta a base: **o repositório da equipe**,
+com as regras que valem até o fim do semestre.
 
-| Onde | O quê |
-| --- | --- |
-| [Portfólio](../../avaliacao/rubrica-portfolio.md) | nenhuma entrega neste módulo |
-| [Projeto](../../avaliacao/) | Etapa 3 · G2 — fluxo Git com branches, PRs e revisão. |
-| Etapas ➕ opcionais | nenhuma: todas sustentam algo que é avaliado |
+## 🎯 Ao final do módulo
 
-## 🎯 Objetivos
-
-Ao final você será capaz de:
-
-1. Explicar o papel de ambiente virtual, gerenciador de pacotes e controle de versão.
-2. Preparar um projeto Node reprodutível, com dependências versionadas.
-3. Usar o fluxo Git básico em equipe (branch → commit → push → PR).
-4. Diagnosticar sozinho os erros mais comuns de instalação.
-
-## 🧭 Como este módulo se encaixa na trilha
-
-Este módulo não ensina a aplicação em si; ele ensina a condição que torna a aplicação
-ensinável. Sem ambiente consistente, sem Git funcionando e sem reprodutibilidade, o aluno
-passa a maior parte da energia tentando descobrir se o problema é do código, da máquina ou
-do terminal.
-
-Em termos de pedagogia, a ordem é intencional:
-
-- primeiro o aluno aprende a controlar o ambiente;
-- depois passa a focar no comportamento do software;
-- em seguida entra em camada de domínio, API, segurança e operação.
-
-> O objetivo aqui não é instalar software por hábito; é reduzir a fricção cognitiva para que a aprendizagem real comece sem ruído.
-
-Em outras palavras, o M00 é a "janela de operação" da disciplina. Ele não é o módulo mais
-bonito do curso, mas é o mais importante para que tudo que vem depois pareça um sistema e
-não um conjunto de erros aleatórios.
-
-## 🧭 Por que este módulo abre a sequência
-
-Este módulo não é "instalação por fora": ele define a base de confiabilidade da disciplina.
-Sem ambiente reprodutível, sem Git consistente e sem a linguagem compartilhada de terminal,
-os módulos seguintes perdem tempo com erro de ferramenta em vez de aprender conceito.
-
-A lógica didática é simples:
-
-- primeiro o aluno consegue rodar a máquina;
-- depois entende que o projeto precisa ser reproduzível;
-- então entra no backend com menos ruído cognitivo.
-
-> Em termos de aprendizagem evolutiva, este módulo reduz fricção. Ele não ensina o domínio da aplicação ainda; ensina a base para que o domínio possa existir.
+1. A equipe tem **um repositório** no GitHub, com `main` protegida.
+2. Cada integrante clonou, instalou e rodou o projeto na própria máquina.
+3. Cada integrante abriu **um Pull Request** que outra pessoa revisou e mesclou.
 
 ---
 
-## 📖 Teoria
+## 📖 Conceitos
 
-### 1. Por que dependências ficam no projeto
+### 1. Dependências ficam dentro do projeto
 
-Pense em duas **obras de construção** na mesma rua. Se as duas usassem a mesma caixa de
-ferramentas, uma equipe levaria a furadeira bem na hora em que a outra precisa dela — e
-devolveria com outra broca. Cada obra tem a **sua** caixa.
+O projeto A precisa do NestJS 11; o B, do NestJS 12. Se a instalação fosse uma só para a
+máquina inteira, um sobrescreveria o outro. Por isso **cada projeto Node tem sua própria
+pasta `node_modules/`**, e não há nada para "ativar": basta estar dentro da pasta.
 
-Projetos de software são iguais. O projeto A precisa do NestJS 11; o projeto B, do NestJS 12.
-Instalados num lugar só, para a máquina inteira, um sobrescreve o outro.
+**No projeto:** todo mundo instala as dependências com `npm install` na raiz do repositório.
 
-O Node resolve isso por padrão: **cada projeto tem sua própria pasta `node_modules/`**, e o
-`import` procura a partir do arquivo que importou, subindo até encontrá-la.
+### 2. Reprodutibilidade: o projeto precisa rodar em qualquer máquina
 
-```
-maquina/
-├── projeto-a/node_modules/     NestJS 11
-└── projeto-b/node_modules/     NestJS 12
-```
+| Arquivo | Função | Vai para o Git? |
+| --- | --- | --- |
+| `package.json` | Quais dependências, e em que faixa de versão | Sim |
+| **`package-lock.json`** | A versão **exata** de cada uma | **Sim** |
+| `node_modules/` | As dependências baixadas — reconstruível com `npm install` | **Não** |
+| `.env` | Configuração com segredos (senha do banco) | **Não** |
+| `.env.example` | Quais variáveis existem, sem os valores | Sim |
+| `README.md` | Como subir o projeto em poucos comandos | Sim |
 
-Não há comando de "ativar": basta estar dentro da pasta. Outros ecossistemas pedem um passo
-explícito. Em Python, por exemplo, você ativa um *ambiente virtual* em cada terminal novo, e
-esquecer disso rende uma tarde inteira de erro estranho. Aqui esse passo não existe.
+O `package.json` diz `"^12.0.0"`, que aceita 12.0.0 ou 12.4.2; o **lock** registra qual
+delas foi. É ele que garante que os quatro integrantes, o CI e o servidor rodem a mesma
+coisa. **Nunca apague o lock para "resolver" um erro**: o erro some na sua máquina e aparece
+na do colega.
 
-> **O que substitui a ativação é a pasta em que você está.** Rodar `npm test` dentro de
-> `backend/` e dentro de `pacotes/tipos/` executa suítes diferentes. Quem decide é o
-> `package.json` mais próximo.
+**No projeto:** a P3 exige um README que suba o backend em poucos comandos. Ele começa hoje.
 
-### 2. Reprodutibilidade
+### 3. Git: fotos do projeto, com legenda
 
-Se o projeto só roda na sua máquina, ele não existe. O que garante que roda em qualquer
-lugar:
-
-| Artefato | Função |
-| --- | --- |
-| `package.json` | Quais dependências, e em que faixa de versão |
-| **`package-lock.json`** | A versão **exata** de cada uma, e das dependências delas |
-| `.env.example` | Quais variáveis de ambiente são necessárias (sem os valores) |
-| `README.md` | Como subir o projeto em ≤ 5 comandos |
-| `docker-compose.yml` | Serviços externos (banco) idênticos para todos |
-
-⚠️ **O arquivo de lock é versionado.** É ele, e não o `package.json`, que garante que você e
-seu colega instalem exatamente as mesmas versões. O `package.json` diz
-`"@nestjs/core": "^12.0.0"`, o que aceita tanto a 12.0.0 quanto a 12.4.2; o lock registra
-qual delas foi — como uma receita que diz não só "farinha", mas a marca e o lote. Apagar o lock
-"para resolver um problema" troca o seu bug por um bug que só aparece na máquina dos outros,
-o que é uma forma criativa de não resolver nada.
-
-💼 **No mercado:** a primeira tarefa de quem entra num time é *rodar o projeto localmente*.
-Times maduros medem esse tempo. A meta é minutos, não dias.
-
-### 3. Git: o modelo mental
-
-Pense num **álbum de fotos com legenda**. Cada commit é uma foto do projeto inteiro naquele
-momento, com uma frase dizendo o que mudou. Dá para voltar a qualquer foto, comparar duas, ou
-seguir por um caminho alternativo (uma *branch*) sem estragar o álbum principal.
-
-Git guarda **snapshots** do projeto, não diferenças. Três áreas locais, e uma remota:
+Cada **commit** é uma foto do projeto inteiro, com uma frase dizendo o que mudou. Uma
+**branch** é um caminho paralelo, onde você trabalha sem mexer na `main`. Um **Pull Request
+(PR)** é o pedido para juntar sua branch à `main`, com revisão de outra pessoa.
 
 ```mermaid
 flowchart LR
-    W["Pasta de trabalho<br/>(working directory)"] -- "git add" --> S["Área de preparação<br/>(staging)"]
+    W["Sua pasta"] -- "git add" --> S["Preparação"]
     S -- "git commit" --> L[("Repositório local")]
-    L -- "git push" --> R[("Repositório remoto<br/>GitHub")]
+    L -- "git push" --> R[("GitHub")]
     R -- "git pull" --> W
 ```
 
-Comandos que resolvem 95% do dia a dia:
+O fluxo da equipe, do M00 até a P3:
 
-```bash
-git status                       # onde estou, o que mudou
-git add <arquivo>                # seleciona o que entra no commit
-git commit -m "mensagem"         # grava o snapshot
-git log --oneline --graph        # histórico
-git switch -c feat/cadastro-obra # cria e vai para uma branch
-git switch main
-git pull origin main             # traz o que os outros fizeram
-git push -u origin feat/cadastro-obra
+```text
+história do backlog → branch → commits pequenos → PR → revisão → merge na main
 ```
 
-### 4. Mensagens de commit (Conventional Commits)
+**No projeto:** a `main` é protegida — ninguém faz push direto nela. Todo código entra por
+PR revisado. É isso que a P3 confere no critério 6, e o histórico de commits de cada pessoa
+entra no [fator de participação](../../avaliacao/README.md#3-nota-da-equipe-e-participação-de-cada-pessoa).
 
+### 4. Mensagens de commit
+
+```text
+<tipo>(<escopo>): <o que mudou, no imperativo>
+
+feat(cadastro): adiciona busca por nome
+fix(agenda): impede reserva em horário ocupado
+docs: atualiza instruções de instalação
 ```
-<tipo>(<escopo opcional>): <o que mudou, no imperativo>
 
-feat(acervo): adiciona cadastro de obra
-fix(emprestimo): corrige calculo de data de devolucao
-docs: atualiza instrucoes de instalacao
-refactor(acervo): extrai regra de disponibilidade para o service
-test(acervo): cobre limite de emprestimos por associado
-chore: atualiza dependencias
-```
-
-Tipos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
-Regra: a mensagem responde **por que**, o diff mostra **o quê**. Nada de "ajustes",
-"update" ou "final v2 agora vai".
+Tipos: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`. A mensagem diz **por quê**; o
+diff já mostra o quê. Nada de "ajustes" ou "final v2 agora vai".
 
 ---
 
-## 🛠️ Roteiro prático
+## 🧩 No projeto da equipe
 
-### Passo 1 — Instalar as ferramentas
+### Passo 1 — Cada pessoa instala as ferramentas
 
-Só três coisas hoje: **Node 24 (LTS), Git e VS Code**. Docker e PostgreSQL entram no M04, quando
-passam a servir para alguma coisa. Instalar tudo agora só antecipa problemas.
+Só três coisas hoje: **Node 24 (LTS), Git e VS Code**. Docker entra no M04, quando passa a
+servir para alguma coisa. Siga o [guia de ambiente](../../docs/ambiente-setup.md), passos
+0 a 6 — ele traz o comando de Windows 🪟 e de Linux/macOS 🐧 lado a lado.
 
-Siga o [guia de ambiente](../../docs/ambiente-setup.md), **passos 0 a 6**. Ele serve aos três
-sistemas: onde o comando muda, mostra o bloco 🪟 Windows e o bloco 🐧 Linux e macOS lado a lado.
+> 🪟 **No Windows, não "adapte" comandos de Linux.** Use o bloco 🪟 do guia.
 
-> 🪟 **No Windows, não "adapte" comandos de Linux.** Use sempre o bloco 🪟 do guia: metade
-> dos problemas da primeira semana vem dessa adaptação.
-
-**Deu certo se:** os quatro comandos abaixo respondem uma versão.
+**Deu certo se:** os quatro comandos respondem uma versão.
 
 ```bash
 node --version      # v24 ou superior
-npm --version       # 11 ou superior
+npm --version
 git --version
 code --version
 ```
 
-> Repare no que **não** está na lista: nenhum segundo runtime, nenhum ambiente virtual para
-> ativar. Tudo roda sobre o mesmo Node.
+### Passo 2 — Uma pessoa cria o repositório
 
-### Passo 2 — Criar o monorepo
-
-Aqui começa o conteúdo do módulo. **Digite os comandos, não cole sem ler.** Cada linha
-corresponde a um conceito que a avaliação teórica cobra.
-
-#### 🐧 Linux / 🍎 macOS / WSL2 / Git Bash
+Escolham um nome curto para o projeto, sem espaço nem acento. Nos exemplos do material, ele
+se chama `projeto`. A pessoa que fará o papel de *Ops* na primeira sprint cria a pasta:
 
 ```bash
-mkdir -p ~/dev/bibliocom
-cd ~/dev/bibliocom
+# Linux / macOS / WSL / Git Bash
+mkdir -p ~/dev/projeto && cd ~/dev/projeto
 ```
-
-#### 🪟 Windows (PowerShell)
 
 ```powershell
-New-Item -ItemType Directory -Force -Path C:\dev\bibliocom
-Set-Location C:\dev\bibliocom
+# Windows PowerShell — fora do OneDrive, sem espaço nem acento no caminho
+New-Item -ItemType Directory -Force -Path C:\dev\projeto
+Set-Location C:\dev\projeto
 ```
 
-| Linha | O que faz |
-| --- | --- |
-| criar a pasta | O projeto fica em `dev/bibliocom`. 🪟 **Fora do OneDrive, sem espaço nem acento no caminho.** O OneDrive tenta sincronizar as 30 mil dependências e trava o Git |
-| entrar na pasta | Todo o resto acontece daqui |
-
-#### O manifesto do projeto
-
-```bash
-npm init -y
-```
-
-Isso cria um `package.json`. Abra-o e **edite** para:
+Crie o manifesto com `npm init -y` e **edite** o `package.json` para:
 
 ```json
 {
-  "name": "bibliocom",
+  "name": "projeto",
   "private": true,
   "workspaces": ["backend", "pacotes/*"],
   "scripts": {
@@ -224,291 +133,166 @@ Isso cria um `package.json`. Abra-o e **edite** para:
 }
 ```
 
-| Campo | O que faz |
+| Campo | Para quê |
 | --- | --- |
-| `"private": true` | Impede publicação acidental no npm. **Obrigatório** na raiz de um workspace |
-| `"workspaces"` | Declara os projetos do monorepo. É esta linha que faz um único `npm install` na raiz resolver todos eles, com **um** `package-lock.json` e **uma** pasta `node_modules`, ambos na raiz |
-| `scripts` | Atalhos que rodam de qualquer pasta. `npm run dev:api` sobe o backend sem você precisar entrar nele |
-| `-w backend` | "*workspace* backend": roda o script lá dentro, a partir da raiz |
+| `"private": true` | Impede publicar o projeto no npm por acidente |
+| `"workspaces"` | Um repositório com várias partes: `backend/` nasce no M03 e `pacotes/tipos/` no M11. Um único `npm install` na raiz instala todas |
+| `scripts` | `npm run dev:api` sobe o backend a partir da raiz |
 
-As pastas ainda não existem: `backend/` nasce no M03 e `pacotes/tipos/` no M11. Declará-las
-agora é o que faz o `npm install` já saber onde procurar quando elas chegarem.
+Rode `npm install`. **Deu certo se** surgirem `node_modules/` e `package-lock.json`.
 
-**Por que monorepo:** um único PR mostra a mudança completa — da entidade à migração, ao
-contrato e aos tipos gerados (M11). Com dois
-repositórios, a mesma mudança vira dois PRs, que alguém pode mesclar fora de ordem e quebrar
-produção na sexta-feira.
+### Passo 3 — Decidir o que não entra no Git
 
-**Deu certo se:** `npm install` roda sem erro e cria `node_modules/` e `package-lock.json`.
+Ainda na raiz, crie três arquivos **pelo VS Code** (`code .gitignore`). 🪟 O Bloco de Notas
+grava `.gitignore.txt` e esconde a extensão.
 
-⚠️ **O `package-lock.json` é versionado; o `node_modules/` não.** O primeiro é a receita, o
-segundo é o bolo. Confundir os dois é como versionar 30 mil arquivos que qualquer um
-reconstrói com um comando, e é assim que nasce repositório de 500 MB.
-
-### Passo 3 — Versionar o projeto
-
-O ambiente existe, mas nada dele está versionado. Agora criamos o repositório e, antes do
-primeiro commit, decidimos **o que não entra nele**.
-
-#### 3a. Iniciar o repositório
-
-```bash
-cd ~/dev/bibliocom            # 🪟 Windows: Set-Location C:\dev\bibliocom
-git init
-git config core.autocrlf input
-```
-
-| Linha | O que faz |
-| --- | --- |
-| `cd ~/dev/bibliocom` | Sobe um nível: a raiz do repositório é `bibliocom`, não `backend`. O repositório abraça as duas camadas |
-| `git init` | Cria o repositório. Passa a existir a pasta oculta `.git`, onde mora todo o histórico |
-| `git config core.autocrlf input` | Ao commitar, converte CRLF → LF. Relevante sobretudo no Windows: sem isto, o deploy do M12 falha com `bad interpreter` e ninguém relaciona a causa ao efeito |
-
-A estrutura agora:
-
-```
-bibliocom/                 ← raiz do repositório
-├── package.json           scripts e metadados   — PRECISA entrar no Git
-├── package-lock.json      versões exatas        — PRECISA entrar no Git
-└── node_modules/          dependências baixadas — NÃO pode entrar no Git
-```
-
-A coluna da direita é o assunto do próximo arquivo. O `.gitignore` é onde você diz o que
-entra e o que fica de fora.
-
-#### 3b. `.gitignore`: o que fica de fora
-
-Crie `.gitignore` **na raiz** (`bibliocom/`):
+**`.gitignore`** — o que fica de fora:
 
 ```gitignore
-# Node
 node_modules/
 dist/
-.vite/
-*.tsbuildinfo
 coverage/
-
-# Banco local (a partir do M04)
-
-# Logs
 *.log
-
-# Ambiente
 .env
 .env.*
 !.env.example
-
-# Editores e sistema
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
 ```
 
-| Padrão | Por que fica de fora |
-| --- | --- |
-| `node_modules/` | É **reconstruível** a partir do `package.json` + `package-lock.json`. São dezenas de milhares de arquivos: versioná-los incha o repositório e gera conflito a cada instalação |
-| `dist/`, `coverage/` | Saída de build e de teste. Geradas por comando, não escritas por pessoa |
-| `.env` | Contém segredo. **Segredo que entra no Git é segredo vazado** — mesmo removido depois, continua nos commits anteriores |
-| `!.env.example` | A `!` **desfaz** o ignore da linha acima. O `.env.example` entra sim: ele documenta *quais* variáveis existem, sem os valores |
+> **Segredo que entra no Git é segredo vazado** — mesmo apagado depois, continua no
+> histórico. Por isso o `.env` fica de fora desde o primeiro commit.
 
-> 🪟 **Não crie este arquivo pelo Bloco de Notas.** Ele acrescenta `.txt` ao salvar e o
-> Explorer esconde a extensão: você digita `.gitignore`, ele grava `.gitignore.txt`, a tela
-> mostra "`.gitignore`" — e o Git ignora o arquivo. Use o VS Code (`code .gitignore`) e
-> confira os nomes reais com `Get-ChildItem -Force`.
-
-#### 3c. `.gitattributes`: proteção da equipe
-
-Crie também `.gitattributes` na raiz:
+**`.gitattributes`** — finais de linha iguais para todos (sem isto, o deploy do M12 falha
+com `bad interpreter` quando alguém usa Windows):
 
 ```gitattributes
 * text=auto eol=lf
-
-*.sh   text eol=lf
-*.ts   text eol=lf
-*.tsx  text eol=lf
-*.json text eol=lf
-*.yml  text eol=lf
-
 *.bat text eol=crlf
 *.ps1 text eol=crlf
-
 *.png binary
 *.jpg binary
 ```
 
-O `core.autocrlf` do passo 3a protege **você**; o `.gitattributes` protege **quem clonar**,
-inclusive quem não configurou nada. Por isso um é versionado e o outro não.
-
-Ele precisa estar no **primeiro commit**. Arquivo já commitado com CRLF continua com CRLF,
-e ninguém vai lembrar disso quando o deploy quebrar no M12.
-
-#### 3d. README: como rodar o projeto
-
-Crie `README.md` na raiz:
+**`README.md`** — o que alguém precisa para rodar o projeto. Ele cresce a cada módulo:
 
 ````markdown
-# BiblioCom
+# <Nome do projeto>
 
-Sistema de gestão para bibliotecas comunitárias. Estudo de caso da disciplina DPW.
+<Uma frase: para qual organização, resolvendo qual problema.>
+
+## Equipe
 
 ## Como rodar
 
-### Linux / macOS
-
 ```bash
-npm install          # instala o backend e os pacotes de uma vez
-npm run dev:api      # http://localhost:3000/api/docs
+npm install
+npm run dev:api      # http://localhost:3000/api/docs (a partir do M03)
 ```
-
-Os mesmos comandos valem no Windows, no macOS e no Linux.
 ````
 
-Este arquivo é o que decide se alguém consegue rodar seu projeto. Ele cresce junto com o
-código: no M03 ganha os comandos do backend, no M04 o banco em Docker. Um README
-desatualizado é pior que nenhum, porque manda a pessoa por um caminho que não existe mais.
-
-#### 3e. Primeiro commit
+### Passo 4 — Primeiro commit e publicação
 
 ```bash
+git init
+git config core.autocrlf input
 git status
 git add .
 git commit -m "chore: inicializa estrutura do projeto"
 ```
 
-| Linha | O que faz |
-| --- | --- |
-| `git status` | Mostra o que entraria no commit. **Leia antes de commitar** |
-| `git add .` | Move para a *staging area* tudo que mudou e não está no `.gitignore` |
-| `git commit -m "..."` | Grava o snapshot com a mensagem |
+**Leia o `git status` antes de commitar.** Deu certo se aparecerem só `.gitignore`,
+`.gitattributes`, `README.md`, `package.json` e `package-lock.json`. Se `node_modules/` ou
+`.env` aparecerem, pare e corrija o `.gitignore`.
 
-**Deu certo se:** o `git status` listou **seis itens**: `.gitignore`, `.gitattributes`,
-`README.md`, `package.json` e `package-lock.json`.
-
-⚠️ Se `node_modules/` ou `.env` aparecerem, pare e corrija o `.gitignore`
-antes de commitar. Depois de commitado, o arquivo fica no histórico mesmo que você o apague
-no commit seguinte.
-
-> 🪟 **`warning: CRLF will be replaced by LF` não é erro.** É o `core.autocrlf input`
-> guardando o arquivo com finais de linha do Linux. Na sua pasta ele continua com CRLF.
-
-#### 3f. Conferir o ambiente
+Crie o repositório **vazio** na organização GitHub da turma (sem README nem `.gitignore`) e
+publique:
 
 ```bash
-node ~/dpw/recursos/codigo/verifica-ambiente.mjs
-```
-
-Este script **não instala nada**. Ele confere e, para cada falha, diz o comando exato que
-corrige. Rode-o sempre que algo parar de funcionar.
-
-**Só avance com os itens do M00 em OK.** As dependências do backend e o Docker aparecem
-como pendentes até os módulos em que entram, e isso é esperado.
-
-### Passo 4 — Publicar no GitHub
-
-Crie o repositório **vazio** em github.com. Sem README, sem `.gitignore`: você já tem os dois, e deixar o GitHub criar outros só rende conflito no primeiro push.
-
-```bash
-git remote add origin git@github.com:<seu-usuario>/bibliocom.git
+git remote add origin git@github.com:<organizacao-da-turma>/projeto.git
 git branch -M main
 git push -u origin main
 ```
 
-### Passo 5 — Ciclo de branch e Pull Request (em duplas)
+Em *Settings → Collaborators*, adicione o resto da equipe e o docente.
 
-Uma pessoa é dona do repositório e adiciona a outra como colaboradora
-(*Settings → Collaborators*).
+### Passo 5 — Proteger a `main`
+
+Em *Settings → Branches → Add rule* para `main`: exija Pull Request antes do merge e
+**1 aprovação**. No M10 vocês acrescentam "CI verde".
+
+### Passo 6 — Cada integrante faz o seu primeiro PR
+
+Cada pessoa clona, instala e acrescenta **o próprio nome** na seção "Equipe" do README:
 
 ```bash
-git switch -c docs/instrucoes-de-uso
-# edite o README.md, acrescente uma seção "Equipe"
+git clone git@github.com:<organizacao-da-turma>/projeto.git
+cd projeto
+npm install
+git switch -c docs/equipe-<seu-nome>
+# edite o README.md
 git add README.md
-git commit -m "docs: adiciona secao de equipe ao README"
-git push -u origin docs/instrucoes-de-uso
+git commit -m "docs: adiciona <seu nome> à equipe"
+git push -u origin docs/equipe-<seu-nome>
 ```
 
-No GitHub: **Compare & pull request** → descreva o que mudou e por quê → peça revisão à
-dupla → a dupla comenta pelo menos uma sugestão → aplique → *Merge*.
-
-Depois, sincronize e limpe:
+No GitHub: **Compare & pull request** → descreva → peça revisão a um colega → o revisor
+comenta ao menos uma sugestão → aplique → *Merge*. Depois:
 
 ```bash
 git switch main
-git pull origin main
-git branch -d docs/instrucoes-de-uso
+git pull
+git branch -d docs/equipe-<seu-nome>
 ```
 
-Inverta os papéis e repita.
+Os PRs vão conflitar no README — **isso é proposital**. Resolver o primeiro conflito em aula,
+com ajuda, é muito melhor que resolver o primeiro na véspera da P2.
 
-### Passo 6 — Proteger a branch principal (extra)
+### Passo 7 — Conferir o ambiente
 
-Em *Settings → Branches → Add rule*: exija Pull Request antes do merge e ao menos uma
-aprovação. Vale para o projeto da equipe também, e evita o clássico push direto na `main` às
-vésperas da entrega.
+```bash
+node <caminho-deste-material>/recursos/codigo/verifica-ambiente.mjs
+```
+
+O script **não instala nada**: confere e, para cada falha, diz o comando que corrige. Os
+itens do M03 e do M04 aparecem como pendentes até lá.
 
 ---
-
-## 🤖 IA no fluxo
-
-Assistentes de IA explicam bem mensagens de erro de instalação e de Git — cole a mensagem
-inteira e pergunte o que ela quer dizer. Eles também sugerem mensagens de commit a partir do
-`git diff`.
-
-Duas desconfianças saudáveis: comandos com `sudo`, `--force` ou `Set-ExecutionPolicy
-Unrestricted` (que resolvem o sintoma abrindo uma porta maior), e mensagens de commit que
-descrevem **o quê** em vez de **por quê**. O *diff* já mostra o quê; o porquê só você sabe.
-
-## 💣 Pegadinha de mercado
-
-**Apagar o `package-lock.json` para "resolver" um erro de instalação.** O erro some na sua
-máquina, porque o npm escolheu versões novas — e aparece na do colega, no CI ou em produção,
-com versões diferentes das suas. Em equipe, o lock é contrato: se ele precisa mudar, a
-mudança vai num commit próprio, revisado como qualquer outro código.
-
-## 🧩 Desafio de fixação
-
-Uma pessoa nova entra na equipe amanhã, com um computador recém-formatado. Liste, em ordem,
-**todos** os comandos que ela vai rodar até ver o projeto funcionando — e marque quais deles
-dependem de um arquivo que precisa estar no Git. O seu README de hoje já cobre essa lista?
 
 ## ⚠️ Erros comuns
 
 | Sintoma | Diagnóstico |
 | --- | --- |
 | `Cannot find module` depois de clonar | Faltou `npm install` na raiz |
-| `node_modules/` aparece no `git status` | Falta a linha no `.gitignore` |
+| `node_modules/` ou `.env` no `git status` | Falta a linha no `.gitignore` |
 | Colega tem versão diferente da sua | O `package-lock.json` não foi commitado, ou alguém o apagou |
-| `.env` aparece em `git status` | Falta a linha no `.gitignore` |
-| Push rejeitado | Alguém enviou antes; `git pull --rebase origin main` |
-| Cinco commits `wip` seguidos | Commit é unidade coerente de mudança, não botão de salvar |
+| Push rejeitado na `main` | A `main` está protegida (como deve): abra um PR |
+| Push rejeitado na sua branch | Alguém enviou antes: `git pull --rebase` |
+| Cinco commits `wip` seguidos | Commit é uma mudança coerente, não botão de salvar |
 
-🪟 **Erros de Windows** (política de execução bloqueando o `npm`, OneDrive travando o Git,
-`Filename too long` no `node_modules`) estão catalogados em
+🪟 Erros de Windows (política de execução, OneDrive, `Filename too long`) estão em
 [`docs/ambiente-setup.md`, passo 10](../../docs/ambiente-setup.md#passo-10--erros-e-diagnóstico).
 
-## ✅ Checklist de saída
+## 🤖 IA no fluxo
 
-- [ ] `node verifica-ambiente.mjs` termina com "Ambiente da etapa M00 pronto"
-- [ ] `npm install` roda sem erro na raiz
-- [ ] `package.json` com `"private": true` e `workspaces` declarando `backend` e `pacotes/*`
-- [ ] Repositório `bibliocom` no GitHub, com `.gitignore`, `.gitattributes` e `README.md`
-- [ ] 🪟 Windows: terminal escolhido, projeto em `C:\dev` (fora do OneDrive), `core.autocrlf input`
-      e `core.longpaths` habilitado
-- [ ] `node_modules/` **não** versionado; `package-lock.json` **sim**
-- [ ] Ao menos 2 commits com mensagem no padrão Conventional Commits
-- [ ] Ao menos 1 Pull Request revisado e mesclado por outra pessoa
-- [ ] Chave SSH configurada (push sem digitar senha)
+Assistentes explicam bem mensagens de erro de instalação e de Git: cole a mensagem inteira.
+Desconfie de comandos com `sudo`, `--force` ou `Set-ExecutionPolicy Unrestricted`, que
+resolvem o sintoma abrindo uma porta maior.
 
-## 🧪 Exercícios
+## ✅ Marco do módulo
 
-Ver [`exercicios.md`](exercicios.md).
+- [ ] Repositório da equipe na organização da turma, com `.gitignore`, `.gitattributes` e `README.md`
+- [ ] `main` protegida: PR obrigatório e 1 aprovação
+- [ ] **Cada integrante** clonou, rodou `npm install` e teve um PR revisado e mesclado
+- [ ] `package-lock.json` versionado; `node_modules/` e `.env` fora
+- [ ] `verifica-ambiente.mjs` com os itens do M00 em OK em todas as máquinas
 
 ## 📚 Para aprofundar
 
-- [Pro Git (livro completo, em português)](https://git-scm.com/book/pt-br/v2)
-- [Learn Git Branching (visual e interativo)](https://learngitbranching.js.org/?locale=pt_BR)
+- [Pro Git (em português)](https://git-scm.com/book/pt-br/v2)
+- [Learn Git Branching](https://learngitbranching.js.org/?locale=pt_BR)
 - [Conventional Commits](https://www.conventionalcommits.org/pt-br/)
 - [npm — workspaces](https://docs.npmjs.com/cli/using-npm/workspaces)
-- [Node.js — resolução de módulos](https://nodejs.org/api/modules.html#all-together)
-- [`../../docs/ambiente-setup.md`](../../docs/ambiente-setup.md) — setup completo, Windows, Linux e macOS
-- 🪟 [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md) — tabela de equivalências, para consulta durante o curso
+- 🪟 [`recursos/comandos-windows.md`](../../recursos/comandos-windows.md)

@@ -1,112 +1,68 @@
 # Módulos de conteúdo
 
-14 módulos, de M00 a M13. A sequência foi pensada como uma progressão de aprendizagem, não como uma lista de tópicos:
+14 módulos, de M00 a M13. Cada módulo ensina uma peça e termina com a equipe aplicando essa
+peça no **próprio projeto**.
 
-- M00–M02 constroem o modelo mental do aluno para web, API e projeto.
-- M03–M07 transformam esse entendimento em uma API funcional e documentada.
-- M08–M09 adicionam segurança e autonomia crítica sobre risco real.
-- M10–M11 consolidam qualidade, contrato e confiabilidade do código.
-- M12–M13 fecham a jornada com operação e manutenção em ambiente real.
+## Como cada módulo é organizado
 
-Cada módulo é autocontido e segue a mesma estrutura:
+| Seção | Para quê |
+| --- | --- |
+| **Por que este módulo existe no projeto** | O problema concreto do projeto que o módulo resolve |
+| 🎯 **Ao final do módulo** | O que a equipe terá e saberá fazer |
+| 📖 **Conceitos** | O essencial, com o porquê antes do como e um exemplo curto. Os exemplos usam domínios variados (pessoas, atendimentos, agendamentos) só para ilustrar |
+| 🧩 **No projeto da equipe** | Os passos, aplicados ao sistema de vocês, com "Deu certo se" para conferir |
+| ⚠️ **Erros comuns** | O que quebra e como diagnosticar |
+| ✅ **Marco do módulo** | O que precisa estar no repositório da equipe ao final, e onde é conferido |
 
-```
-README.md          Objetivos · Etapas guiadas · Erros comuns · Checklist · No mercado
-exercicios.md      Atividades sem passo a passo, com critérios de verificação
-cheatsheet.md      Referência rápida (quando o volume de sintaxe justifica)
-```
+Os módulos M04, M06 e M07 têm também um `cheatsheet.md` de referência rápida.
 
-A **Duração** de cada módulo é relativa — curta, média ou longa — e serve para calibrar o
-fôlego. A carga horária oficial está no [plano de ensino](../docs/plano-de-ensino.md) e no
-[plano de ensino](../docs/plano-de-ensino.md#9-cronograma-semanal).
+> **Como trabalhar em aula:** a teoria é exposta e discutida em turma; a aplicação acontece
+> em laboratório, com a equipe junta. Uma máquina projetada e **troca de quem digita a cada
+> passo** funciona melhor que cada um no seu canto: todos precisam entender a base, e a
+> arguição da P4 pergunta sobre o que a pessoa **não** escreveu.
 
-## Trilha
+## A trilha e o que cada módulo deixa no projeto
 
-### Como ler esta trilha
+| # | Módulo | Semana | Fica no projeto | Conferido em |
+| --- | --- | ---: | --- | --- |
+| [00](00-ambiente-e-ferramentas/) | Ambiente e ferramentas | 1 | Repositório da equipe, `main` protegida, um PR de cada pessoa | P2 · 4 |
+| [01](01-fundamentos-web-http/) | Fundamentos da web e HTTP | 2 | `docs/cenario-http.md`: as requisições do cenário principal | P1 · 5 |
+| [02](02-arquitetura-desacoplada/) | Arquitetura desacoplada e contrato | 3 | `docs/api.md`: C4 e contrato inicial | P1 · 5 |
+| [03](03-nestjs-primeiros-passos/) | NestJS: a primeira API | 4 | `backend/` com o recurso principal e `/api/docs` | P2 · 4 |
+| [04](04-entidades-typeorm/) | Entidades: classes que geram o banco | 5–6 | Entidades do domínio e `docs/modelo-de-dados.md` | P2 · 1 |
+| [05](05-migracoes/) | Migrações | 6 | Banco criado só por migrações | P2 · pré-requisito |
+| [06](06-orm-consultas-crud/) | Consultas e CRUD | 6–7 | CRUD no banco, sem N+1, com transação | P2 · 2 e 3 |
+| [07](07-api-controllers-dtos/) | Rotas, controllers e DTOs | 8–9 | Entrada validada, saída controlada, `openapi.json` | P2 · 2 e 3 |
+| [08](08-autenticacao-usuarios/) | Autenticação e autorização | 9–10 | Login, papéis, matriz de acesso | P3 · 3 |
+| [09](09-seguranca/) | Segurança de APIs | 11 | `docs/seguranca.md` e as correções | P3 · 3 |
+| [10](10-testes-e-qualidade/) | Testes e qualidade | 12 | Testes e CI obrigatório para merge | P3 · 4 |
+| [11](11-tipos-compartilhados/) | Contrato OpenAPI versionado | 13 | Contrato conferido no CI e cliente tipado | P3 · 2 |
+| [12](12-deploy/) | Deploy da API | 13–14 | **API no ar** e `docs/deploy.md` | P3 · 5 |
+| [13](13-observabilidade-e-manutencao/) | Observabilidade e manutenção | 14 | Logs, monitor, backup testado, `docs/manutencao.md` | P3 · 5 · P4 · 6 |
 
-Cada bloco responde a uma pergunta concreta para o aluno:
+Carga horária e calendário: [plano de ensino](../docs/plano-de-ensino.md#9-cronograma-semanal).
 
-| Bloco | Pergunta central | Resultado esperado |
-| --- | --- | --- |
-| M00–M02 | “Como o software funciona antes de ser escrito?” | ambiente, HTTP, contrato e visão de sistema |
-| M03–M07 | “Como construir uma API que faça sentido e seja documentada?” | backend funcional, dados, CRUD e API pública |
-| M08–M09 | “Como proteger o que foi construído?” | autenticação, autorização e análise de risco |
-| M10–M11 | “Como garantir qualidade e continuidade sem quebrar o contrato?” | testes, validação e schema compartilhado |
-| M12–M13 | “Como entregar e manter o sistema em operação?” | deploy, observabilidade e manutenção |
-
-### Bloco 1 — Fundamentos
-
-| # | Módulo | Duração | Entrega |
-| --- | --- | --- | --- |
-| [00](00-ambiente-e-ferramentas/) | Ambiente e ferramentas | média | Ambiente validado |
-| [01](01-fundamentos-web-http/) | Fundamentos da web e HTTP | longa | **E0** — relatório de inspeção HTTP |
-| [02](02-arquitetura-desacoplada/) | Arquitetura desacoplada e contrato de API | curta | Contrato do BiblioCom |
-
-### Bloco 2 — Backend: aplicação, dados e API
-
-| # | Módulo | Duração | Entrega |
-| --- | --- | --- | --- |
-| [03](03-nestjs-primeiros-passos/) | NestJS: a primeira API, passo a passo | média | API respondendo JSON + Swagger UI em `/api/docs` |
-| [04](04-entidades-typeorm/) | Entidades: classes que geram o banco | longa | **E1** — modelo de dados |
-| [05](05-migracoes/) | Migrações | média | Migrações versionadas |
-| [06](06-orm-consultas-crud/) | Repository e QueryBuilder: consultas e CRUD | longa | **E2** — caderno de consultas |
-| [07](07-api-controllers-dtos/) | API: rotas, controllers, DTOs e documentação Swagger | longa | **E3** — API documentada, com OpenAPI versionado |
-
-### Bloco 3 — Segurança, qualidade e operação
-
-| # | Módulo | Duração | Entrega |
-| --- | --- | --- | --- |
-| [08](08-autenticacao-usuarios/) | Autenticação e autorização na API | longa | **E4** — login e rotas protegidas |
-| [09](09-seguranca/) | Segurança de APIs | longa | **E5** — checklist OWASP |
-| [10](10-testes-e-qualidade/) | Testes e qualidade no backend | média | **E6** — suíte de API verde |
-| [11](11-tipos-compartilhados/) | Tipos compartilhados e contrato OpenAPI | curta | **E7** — schema versionado e integração de cliente |
-| [12](12-deploy/) | Deploy da API | média | **E8** — API no ar |
-| [13](13-observabilidade-e-manutencao/) | Observabilidade e manutenção da API | curta | Operação documentada |
-
-## Dependências entre módulos
+## Dependências
 
 ```mermaid
 flowchart LR
-    subgraph F[Fundamentos]
-        M00 --> M01 --> M02
+    subgraph F[Fundamentos — sem. 1–4]
+        M00 --> M01 --> M02 --> M03
     end
-    subgraph B[Backend]
-        M03 --> M04 --> M05 --> M06 --> M07
+    subgraph B[O núcleo da API — sem. 5–10]
+        M04 --> M05 --> M06 --> M07
     end
-    subgraph Q[Segurança, qualidade e produção]
+    subgraph Q[Pronta para ser usada — sem. 9–14]
         M08 --> M09 --> M10 --> M11 --> M12 --> M13
     end
-    M02 --> M03
+    M03 --> M04
     M07 --> M08
+    P1([P1 · sem. 4]) -.-> M04
+    M07 -.-> P2([P2 · sem. 10])
+    M13 -.-> P3([P3 · sem. 18])
 ```
 
-**A regra que estrutura o curso:** cada módulo acrescenta uma camada executável ao mesmo
-backend. O Swagger nasce no M03, é completado no M07 e acompanha a API até o deploy.
-
-**Pense na sequência como desenvolvimento de competência:**
-
-- primeiro o aluno entende a base;
-- depois monta a aplicação;
-- em seguida protege e valida;
-- por fim entrega e opera.
+A **P1** (semana 4) vem antes do M04 porque o modelo de dados é o do domínio da equipe: sem
+o problema entendido, não há o que modelar.
 
 **Não pule** M01, M02, M04, M05 e M07: todo o resto depende deles.
-
-## Estudo de caso: BiblioCom
-
-Todos os módulos constroem o mesmo sistema, incrementalmente.
-
-| Módulo | O que o BiblioCom ganha |
-| --- | --- |
-| M02 | Contrato de API definido (recursos, rotas, formatos) |
-| M03 | `backend/` (NestJS) respondendo JSON, com Swagger UI e schema OpenAPI configurados |
-| M04 | `Autor`, `Obra`, `Categoria`, `Exemplar`, `Associado`, `Emprestimo` |
-| M05 | Migrações versionadas e PostgreSQL reproduzível |
-| M06 | Consultas de catálogo, disponibilidade, atrasos, relatórios |
-| M07 | `/api/obras`, `/api/emprestimos`, filtros, paginação e documentação Swagger/OpenAPI revisada |
-| M08 | Login, papéis e rotas protegidas na API |
-| M09 | Correção de vulnerabilidades da API |
-| M10 | Vitest/Supertest, lint e CI do backend |
-| M11 | Schema OpenAPI versionado e integração de cliente |
-| M12 | API no ar, HTTPS, banco gerenciado e CI/CD |
-| M13 | Logs, healthcheck, backup e plano de manutenção |

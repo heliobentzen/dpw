@@ -1,22 +1,26 @@
-# Rubrica — Atividades extensionistas
+# Rubrica — ➕ Bônus: parceria com a comunidade (opcional)
 
-> **Peso:** 10% · **Entregas:** X1 (semana 15), X2 (semana 19), X3 (semana 20) · **Eliminatória**
+> **Valor:** até **+1,0** na média final (nota desta rubrica × 0,1, média limitada a 10) ·
+> **Opcional** · Orientações em [`projeto/extensao/`](../projeto/extensao/)
 > Escala por critério: 4 Excelente · 3 Adequado · 2 Em desenvolvimento · 0–1 Insuficiente
 
 **Equipe:** `<...>` · **Organização parceira:** `<...>` · **Data:** `<...>`
 
+**O que esta rubrica verifica:** se a equipe que escolheu ir além levou o sistema a uma
+organização real, e se a troca aconteceu nos dois sentidos. Nenhuma equipe é obrigada a
+seguir esta trilha; quem não segue não perde nada.
+
 ---
 
-## Pré-requisito: é extensão?
+## Pré-requisito: houve parceria real?
 
-Qualquer "não" significa que a atividade **não é extensão** — não se trata de nota baixa.
+Qualquer "não" significa que não há bônus.
 
 | Verificação | Sim | Não |
 | --- | :---: | :---: |
-| Organização externa à instituição, com demanda vinda dela | ☐ | ☐ |
-| Interação continuada (3+ encontros ao longo do semestre) | ☐ | ☐ |
-| Algo concreto permanece com a comunidade | ☐ | ☐ |
-| Houve devolutiva à organização | ☐ | ☐ |
+| Organização externa à instituição, com aceite por escrito (carta ou e-mail) | ☐ | ☐ |
+| A demanda veio da organização ou foi confirmada por ela | ☐ | ☐ |
+| 2+ encontros com a organização, registrados em ata | ☐ | ☐ |
 
 ---
 
@@ -24,38 +28,31 @@ Qualquer "não" significa que a atividade **não é extensão** — não se trat
 
 | Critério | Peso | 4 — Excelente | 3 — Adequado | 2 — Em desenvolvimento | 0–1 — Insuficiente | Nível |
 | --- | ---: | --- | --- | --- | --- | :---: |
-| **1. Diagnóstico e plano (X1)** | 2,0 | Processo observado no local (equipamento, conexão, rotina); demanda nas palavras da organização; plano com datas, responsáveis e indicadores com forma de medir | Conversa registrada; plano com datas e indicadores verificáveis | Plano genérico ou demanda definida pela equipe | Sem diagnóstico | |
-| **2. Implantação e capacitação (X2)** | 3,0 | Sistema em uso no equipamento da organização, com dados reais; cada pessoa executou o fluxo sozinha; guia rápido de 1 página entregue | Sistema acessível no local; capacitação prática realizada; material de apoio entregue | Implantado sem teste no local, ou só demonstração | Não implantado na organização | |
-| **3. Uso e autonomia** | 2,5 | Uso contínuo com registros reais crescendo; 2+ pessoas operam sem a equipe; responsável e custo de continuidade acordados; indicadores medidos antes e depois | Usado ao menos uma vez em situação real; a organização opera o fluxo principal sozinha | Usado só na demonstração | Não usado | |
-| **4. Devolutiva e relato (X3)** | 2,5 | Devolutiva presencial com escuta registrada; relato com cenas concretas, o que a comunidade ensinou e o que a equipe faria diferente | Devolutiva realizada; relato concreto, reconhecendo a troca | Devolutiva por mensagem; relato genérico | Sem devolutiva ou relato | |
+| **1. Validação com a organização** | 2,0 | Problema e cenário da P1 confirmados (ou corrigidos) com a organização; metas com valor de "hoje" medido lá | Problema validado em conversa registrada | Conversa superficial | Sem validação | |
+| **2. Implantação e capacitação** | 3,0 | Sistema em uso no equipamento da organização, com dados reais; pessoas de lá executaram o fluxo sozinhas; guia de 1 página | Sistema acessível no local e capacitação prática | Só demonstração | Não implantado | |
+| **3. Uso e transferência** | 2,5 | Uso real com registros crescendo; contas e custos transferidos à organização; 2 administradores lá | Usado em situação real; transferência combinada | Usado só na demonstração | Não usado | |
+| **4. Devolutiva e relato** | 2,5 | Devolutiva com a fala da organização registrada; relato com cenas concretas e o que a equipe faria diferente | Devolutiva realizada; relato concreto | Devolutiva por mensagem; relato genérico | Sem devolutiva ou relato | |
 | **Total** | **10** | | | | | |
 
-**Nota** = Σ (nível × peso) ÷ 4
+**Nota** = Σ (nível × peso) ÷ 4 · **Bônus** = nota × 0,1
 
-**Evidências:** lista de presença, fotos **autorizadas**, prints **anonimizados** e indicadores.
-Dado pessoal exposto nas evidências rebaixa o critério 2 em um nível.
+**Evidências:** atas, fotos **autorizadas**, prints **anonimizados** e indicadores. Dado
+pessoal exposto nas evidências zera o critério 2.
 
 ---
 
-## Registro para a instituição
+## Registro de extensão no IFPE
+
+Quando a atividade é registrada como ação de extensão junto à coordenação de extensão do
+campus:
 
 | Campo | Conteúdo |
 | --- | --- |
 | Título da ação | |
 | Organização parceira e CNPJ | |
 | Município / território | |
-| Área temática | `<Tecnologia e Produção / Educação / Cultura / ...>` |
 | Público atingido (direto / indireto) | |
-| Carga horária extensionista por estudante | A prevista no [plano de ensino](../docs/plano-de-ensino.md) |
 | Período de execução | |
 | Estudantes envolvidos | |
 | Docente responsável | |
 | Produtos gerados | Sistema, material de apoio, capacitação, relato |
-
-## Devolutiva
-
-**O que a organização ganhou:**
-
-**O que a equipe aprendeu com a comunidade:**
-
-**Recomendações para a continuidade:**

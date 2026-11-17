@@ -34,7 +34,7 @@
       <div class="side-lbl">Você escreve</div>
       <pre class="code lg">
 @Entity()
-export class Autor {
+export class Pessoa {
   @Column()
   nome: string;
 }
@@ -44,7 +44,7 @@ export class Autor {
     <div class="f right">
       <div class="side-lbl">O banco recebe</div>
       <pre class="code lg" data-lang="sql">
-CREATE TABLE "autor" (
+CREATE TABLE "pessoa" (
   "nome" varchar NOT NULL
 )
 </pre>
@@ -55,26 +55,22 @@ CREATE TABLE "autor" (
 
 <section class="slide">
   <div class="eyebrow in">Ao fim da aula</div>
-  <h2 class="in">O banco do BiblioCom, inteiro</h2>
+  <h2 class="in">O banco do exemplo, inteiro</h2>
   <div class="stack fill-v">
     <div class="flow">
-      <div class="node f">AUTOR</div>
-      <div class="arrow f"><span class="arrow-label">escreve</span></div>
-      <div class="node g f">OBRA</div>
-      <div class="arrow f"><span class="arrow-label">classificada em</span></div>
-      <div class="node f">CATEGORIA</div>
+      <div class="node f">PESSOA</div>
+      <div class="arrow f"><span class="arrow-label">é atendida em</span></div>
+      <div class="node g f">ATENDIMENTO</div>
+      <div class="arrow f"><span class="arrow-label">inclui</span></div>
+      <div class="node f">SERVICO</div>
     </div>
     <div class="flow" style="margin-top:56px">
-      <div class="node g f">OBRA</div>
-      <div class="arrow f"><span class="arrow-label">tem cópias</span></div>
-      <div class="node f">EXEMPLAR</div>
-      <div class="arrow f"><span class="arrow-label">sai em</span></div>
-      <div class="node f">EMPRESTIMO</div>
-      <div class="arrow rev f"><span class="arrow-label">faz</span></div>
-      <div class="node f">ASSOCIADO</div>
+      <div class="node g f">ATENDIMENTO</div>
+      <div class="arrow f"><span class="arrow-label">tem</span></div>
+      <div class="node f">ANEXO</div>
     </div>
   </div>
-  <div class="note ok f"><b>Meta</b> Seis tabelas. Nenhuma linha de SQL escrita por você.</div>
+  <div class="note ok f"><b>Meta</b> Quatro tabelas do exemplo, mais duas por sua conta no fim. Nenhuma linha de SQL escrita por você. Depois, o mesmo com as entidades do <b>seu</b> projeto.</div>
 </section>
 
 <section class="slide">
@@ -105,7 +101,7 @@ CREATE TABLE "autor" (
   <div class="eyebrow in">Mão na massa</div>
   <h2 class="in">Ligue o banco</h2>
   <pre class="code term lg in" data-lang="sh">
-cd C:\dev\bibliocom
+cd C:\dev\projeto
 docker compose up -d
 docker compose ps
 > db   postgres:16   running
@@ -121,7 +117,7 @@ docker compose ps
   <div class="eyebrow in">Mão na massa</div>
   <h2 class="in">Confira: o banco está <span class="hl">vazio</span></h2>
   <pre class="code term lg in" data-lang="sh">
-docker compose exec db psql -U bibliocom -d bibliocom -c "\dt"
+docker compose exec db psql -U app -d app -c "\dt"
 > Did not find any relations.
 </pre>
   <div class="note ok f mt"><b>Ótimo</b> Vazio é o ponto de partida. As tabelas vão nascer das <b>suas classes</b>.</div>
@@ -146,17 +142,17 @@ npm install @nestjs/typeorm typeorm pg
   <h2 class="in">Lendo uma <span class="hl">DATABASE_URL</span></h2>
   <div class="anat in">
     <span class="seg f dimmed" data-order="1">postgres://</span>
-    <span class="seg f dimmed" data-order="2">bibliocom:devpassword</span>
+    <span class="seg f dimmed" data-order="2">app:devpassword</span>
     <span class="seg f dimmed" data-order="3">@localhost</span>
     <span class="seg f dimmed" data-order="4">:5432</span>
-    <span class="seg f dimmed" data-order="5">/bibliocom</span>
+    <span class="seg f dimmed" data-order="5">/app</span>
   </div>
   <div class="captions" style="text-align:center">
     <p class="f" data-order="1">qual banco → <b>PostgreSQL</b></p>
     <p class="f" data-order="2">usuário e senha → definidos no <b>docker-compose.yml</b></p>
     <p class="f" data-order="3">onde → <b>sua máquina</b></p>
     <p class="f" data-order="4">porta → a padrão do PostgreSQL</p>
-    <p class="f" data-order="5">qual banco dentro do servidor → <b>bibliocom</b></p>
+    <p class="f" data-order="5">qual banco dentro do servidor → <b>app</b></p>
   </div>
   <div class="note info f mt-auto" data-order="6"><b>Onde fica</b> No <code>.env</code>. E a chave vazia no <code>.env.example</code>, como no M03.</div>
 </section>
@@ -222,11 +218,11 @@ TypeOrmModule.forRoot({
   <h2 class="in">SQL escrito à mão</h2>
   <pre class="code lg in">
 const { rows } = await pool.query(
-  "SELECT id, titulo FROM obra WHERE id = $1", [id]
+  "SELECT id, nome FROM pessoa WHERE id = $1", [id]
 );
-const obra = rows[0];   // tipo: any
+const pessoa = rows[0];   // tipo: any
 </pre>
-  <p class="f lead mt">Funciona. Mas o TypeScript <b>não sabe nada</b> sobre <code>obra</code>.</p>
+  <p class="f lead mt">Funciona. Mas o TypeScript <b>não sabe nada</b> sobre <code>pessoa</code>.</p>
 </section>
 
 <section class="slide">
@@ -249,7 +245,7 @@ const obra = rows[0];   // tipo: any
   <div class="eyebrow in">Com ORM</div>
   <h2 class="in">A classe vira a <span class="hl">única fonte de verdade</span></h2>
   <div class="flow fill-v">
-    <div class="node g f zoom" style="font-size:24px;padding:22px 28px">class Obra</div>
+    <div class="node g f zoom" style="font-size:24px;padding:22px 28px">class Pessoa</div>
     <div class="arrow f"></div>
     <div class="stack" style="flex:0 0 340px">
       <div class="node f right">o tipo do TypeScript</div>
@@ -282,12 +278,12 @@ const obra = rows[0];   // tipo: any
   <div class="pair fill-v">
     <pre class="code lg in">
 @Entity()
-export class Autor {
+export class Pessoa {
 }
 </pre>
     <div class="to f">→</div>
     <pre class="code lg f right" data-lang="sql">
-CREATE TABLE "autor" (
+CREATE TABLE "pessoa" (
 )
 </pre>
   </div>
@@ -352,11 +348,11 @@ nascimento: string | null;
     <pre class="code lg in">
 @Column({ type: "text",
           default: "" })
-biografia: string;
+observacoes: string;
 </pre>
     <div class="to f">→</div>
     <pre class="code lg f right" data-lang="sql">
-"biografia" text
+"observacoes" text
   NOT NULL ⟪DEFAULT ''⟫
 </pre>
   </div>
@@ -364,11 +360,11 @@ biografia: string;
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Mão na massa · acervo.module.ts</div>
+  <div class="eyebrow in">Mão na massa · pessoas.module.ts</div>
   <h2 class="in">Avise o módulo que a entidade existe</h2>
   <pre class="code lg in">
 @Module({
-  imports: [TypeOrmModule.forFeature([Autor])],
+  imports: [TypeOrmModule.forFeature([Pessoa])],
   ...
 })
 </pre>
@@ -380,10 +376,10 @@ biografia: string;
   <h2 class="in">A tabela <span class="hl">nasceu</span></h2>
   <pre class="code term in" data-lang="sh">
 npm run start:dev
-> query: CREATE TABLE "autor" ("id" SERIAL NOT NULL, "nome" varchar(150) ...
-docker compose exec db psql -U bibliocom -d bibliocom -c "\d autor"
+> query: CREATE TABLE "pessoa" ("id" SERIAL NOT NULL, "nome" varchar(150) ...
+docker compose exec db psql -U app -d app -c "\d pessoa"
 </pre>
-  <div class="note ok f mt"><b>Deu certo se</b> o <code>\d autor</code> mostra as quatro colunas.</div>
+  <div class="note ok f mt"><b>Deu certo se</b> o <code>\d pessoa</code> mostra as quatro colunas.</div>
   <p class="f muted mt">O <code>CREATE TABLE</code> aparece só na primeira vez. Depois a tabela já existe.</p>
 </section>
 
@@ -417,7 +413,7 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d autor"
   <h2 class="in">Quando o nulo faz sentido?</h2>
   <div class="vs fill-v">
     <div class="card big g f left"><span class="tag">nascimento</span><h3>nullable ✓</h3><p>Nulo quer dizer "não sabemos a data". Faz sentido.</p></div>
-    <div class="card big f right"><span class="tag">biografia</span><h3>default: "" ✓</h3><p>Texto vazio já quer dizer "sem biografia". Nulo seria repetir.</p></div>
+    <div class="card big f right"><span class="tag">observacoes</span><h3>default: "" ✓</h3><p>Texto vazio já quer dizer "sem observações". Nulo seria repetir.</p></div>
   </div>
 </section>
 
@@ -432,12 +428,12 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d autor"
   <h2 class="in">Qual <code>@Column</code>?</h2>
   <div class="vs fill-v">
     <div class="card big">
-      <span class="tag">CPF do associado</span>
+      <span class="tag">CPF da pessoa</span>
       <h3 class="f zoom" style="color:var(--green-d)"><code>length: 11, unique: true</code></h3>
       <p class="f fade">Obrigatório e não pode repetir.</p>
     </div>
     <div class="card big">
-      <span class="tag">Valor da multa</span>
+      <span class="tag">Valor da taxa de inscrição</span>
       <h3 class="f zoom" style="color:var(--green-d)"><code>type: "decimal"</code></h3>
       <p class="f fade"><b class="hl-red">Nunca float</b> para dinheiro: ele perde centavos.</p>
     </div>
@@ -450,14 +446,14 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d autor"
   <h2 class="in">Qual <code>@Column</code>?</h2>
   <div class="vs fill-v">
     <div class="card big">
-      <span class="tag">Data da devolução</span>
+      <span class="tag">Data de conclusão do atendimento</span>
       <h3 class="f zoom" style="color:var(--green-d)"><code>type: "date", nullable: true</code></h3>
-      <p class="f fade">Aqui o nulo significa algo: "ainda não devolveu".</p>
+      <p class="f fade">Aqui o nulo significa algo: "ainda não concluiu".</p>
     </div>
     <div class="card big">
       <span class="tag">Aceita avisos por e-mail</span>
       <h3 class="f zoom" style="color:var(--green-d)"><code>type: "boolean", default: true</code></h3>
-      <p class="f fade">Sempre tem valor. O padrão é decisão da biblioteca.</p>
+      <p class="f fade">Sempre tem valor. O padrão é decisão da organização.</p>
     </div>
   </div>
 </section>
@@ -481,12 +477,12 @@ docker compose exec db psql -U bibliocom -d bibliocom -c "\d autor"
     <pre class="code lg in">
 @Column({ length: 60,
           default: "" })
-nacionalidade: string;
+bairro: string;
 </pre>
     <div class="to f">→</div>
     <pre class="code lg f right" data-lang="sql">
-ALTER TABLE "autor"
-  ADD "nacionalidade"
+ALTER TABLE "pessoa"
+  ADD "bairro"
   varchar(60)
 </pre>
   </div>
@@ -502,69 +498,69 @@ ALTER TABLE "autor"
 
 <section class="slide">
   <div class="eyebrow in">Relação 1:N</div>
-  <h2 class="in">Uma autora, <span class="hl">muitas obras</span></h2>
+  <h2 class="in">Uma pessoa, <span class="hl">muitos atendimentos</span></h2>
   <div class="split even fill-v" style="align-items:center">
     <table class="dbt in">
-      <caption>autor</caption>
+      <caption>pessoa</caption>
       <tr><th>id</th><th>nome</th></tr>
-      <tr><td class="key">1</td><td>Machado de Assis</td></tr>
-      <tr><td>2</td><td>Clarice Lispector</td></tr>
+      <tr><td class="key">1</td><td>Ana Souza</td></tr>
+      <tr><td>2</td><td>Bruno Lima</td></tr>
     </table>
     <table class="dbt f right">
-      <caption>obra</caption>
-      <tr><th>id</th><th>titulo</th><th>autorId</th></tr>
-      <tr><td>10</td><td>Dom Casmurro</td><td class="key">1</td></tr>
-      <tr><td>11</td><td>Quincas Borba</td><td class="key">1</td></tr>
-      <tr><td>12</td><td>A hora da estrela</td><td>2</td></tr>
+      <caption>atendimento</caption>
+      <tr><th>id</th><th>descricao</th><th>pessoaId</th></tr>
+      <tr><td>10</td><td>Orientação sobre documentos</td><td class="key">1</td></tr>
+      <tr><td>11</td><td>Inscrição no curso</td><td class="key">1</td></tr>
+      <tr><td>12</td><td>Encaminhamento ao CRAS</td><td>2</td></tr>
     </table>
   </div>
-  <div class="note ok f"><b>Regra</b> A coluna que aponta (<code>autorId</code>) fica do lado <b>"muitos"</b> — na obra.</div>
+  <div class="note ok f"><b>Regra</b> A coluna que aponta (<code>pessoaId</code>) fica do lado <b>"muitos"</b> — no atendimento.</div>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Em código · obra.entity.ts</div>
-  <h2 class="in">"Muitas obras para uma autora"</h2>
+  <div class="eyebrow in">Em código · atendimento.entity.ts</div>
+  <h2 class="in">"Muitos atendimentos para uma pessoa"</h2>
   <pre class="code lg in">
-@ManyToOne(() => Autor, (autor) => autor.obras)
-autor: Relation&lt;Autor>;
+@ManyToOne(() => Pessoa, (pessoa) => pessoa.atendimentos)
+pessoa: Relation&lt;Pessoa>;
 </pre>
   <div class="captions">
-    <p class="f" data-hl="1"><b>@ManyToOne</b> cria a coluna <code>autorId</code> e a chave estrangeira.</p>
-    <p class="f" data-hl="2"><b>Relation&lt;Autor></b>: a obra "conhece" sua autora. O <code>Relation</code> é explicado já, já.</p>
+    <p class="f" data-hl="1"><b>@ManyToOne</b> cria a coluna <code>pessoaId</code> e a chave estrangeira.</p>
+    <p class="f" data-hl="2"><b>Relation&lt;Pessoa></b>: o atendimento "conhece" sua pessoa. O <code>Relation</code> é explicado já, já.</p>
   </div>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Em código · obra.entity.ts</div>
-  <h2 class="in">Declare também o <code>autorId</code></h2>
+  <div class="eyebrow in">Em código · atendimento.entity.ts</div>
+  <h2 class="in">Declare também o <code>pessoaId</code></h2>
   <pre class="code lg in">
 @Column()
-autorId: number;
+pessoaId: number;
 </pre>
   <p class="f lead mt">A coluna já existia no banco. Declarar dá <b>tipo</b> a ela no TypeScript — e o M06 vai usá-la.</p>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Em código · autor.entity.ts</div>
+  <div class="eyebrow in">Em código · pessoa.entity.ts</div>
   <h2 class="in">O outro lado: <code>@OneToMany</code></h2>
   <pre class="code lg in">
-@OneToMany(() => Obra, (obra) => obra.autor)
-obras: Relation&lt;Obra[]>;
+@OneToMany(() => Atendimento, (a) => a.pessoa)
+atendimentos: Relation&lt;Atendimento[]>;
 </pre>
-  <div class="note info f mt"><b>Detalhe</b> Este lado <b>não cria coluna</b>. Só permite navegar da autora até as obras.</div>
+  <div class="note info f mt"><b>Detalhe</b> Este lado <b>não cria coluna</b>. Só permite navegar da pessoa até os atendimentos.</div>
 </section>
 
 <section class="slide">
   <div class="eyebrow in">Por que <code>Relation&lt;&gt;</code>?</div>
   <h2 class="in">O problema do <span class="hl">ovo e da galinha</span></h2>
   <div class="flow fill-v">
-    <div class="node mono f">obra.entity.ts</div>
-    <div class="arrow f"><span class="arrow-label">precisa de Autor</span></div>
-    <div class="node mono f">autor.entity.ts</div>
-    <div class="arrow f"><span class="arrow-label">precisa de Obra</span></div>
-    <div class="node mono ghost f">obra.entity.ts<small>ainda carregando…</small></div>
+    <div class="node mono f">atendimento.entity.ts</div>
+    <div class="arrow f"><span class="arrow-label">precisa de Pessoa</span></div>
+    <div class="node mono f">pessoa.entity.ts</div>
+    <div class="arrow f"><span class="arrow-label">precisa de Atendimento</span></div>
+    <div class="node mono ghost f">atendimento.entity.ts<small>ainda carregando…</small></div>
   </div>
-  <div class="note warn f"><b>Sem Relation</b> A API nem sobe: <code>Cannot access 'Autor' before initialization</code></div>
+  <div class="note warn f"><b>Sem Relation</b> A API nem sobe: <code>Cannot access 'Pessoa' before initialization</code></div>
 </section>
 
 <section class="slide dark statement">
@@ -577,15 +573,15 @@ obras: Relation&lt;Obra[]>;
   <div class="eyebrow in">Exercite</div>
   <h2 class="in">Responda antes de revelar</h2>
   <table class="tbl">
-    <tr class="in"><td>A coluna se chama <code>autorId</code>. Por quê?</td><td class="f fade ans">Nome da relação + Id</td></tr>
-    <tr class="in"><td><code>@OneToMany</code> criou coluna em <code>autor</code>?</td><td class="f fade ans">Não, só navega</td></tr>
-    <tr class="in"><td>Se apagar <code>@Column() autorId</code>, a coluna some?</td><td class="f fade ans">Não, o @ManyToOne a cria</td></tr>
+    <tr class="in"><td>A coluna se chama <code>pessoaId</code>. Por quê?</td><td class="f fade ans">Nome da relação + Id</td></tr>
+    <tr class="in"><td><code>@OneToMany</code> criou coluna em <code>pessoa</code>?</td><td class="f fade ans">Não, só navega</td></tr>
+    <tr class="in"><td>Se apagar <code>@Column() pessoaId</code>, a coluna some?</td><td class="f fade ans">Não, o @ManyToOne a cria</td></tr>
   </table>
 </section>
 
 <section class="slide statement">
   <div class="eyebrow in">Uma pergunta de negócio</div>
-  <div class="big in">Alguém apaga a autora.<br><span class="hl-red">E as obras dela?</span></div>
+  <div class="big in">Alguém apaga a pessoa.<br><span class="hl-red">E os atendimentos dela?</span></div>
   <p class="sub f">Quem responde é a opção <code>onDelete</code>.</p>
 </section>
 
@@ -593,9 +589,9 @@ obras: Relation&lt;Obra[]>;
   <div class="eyebrow in"><code>onDelete</code></div>
   <h2 class="in">Três respostas possíveis</h2>
   <div class="grid-3 fill-v">
-    <div class="card big g f zoom"><span class="tag">RESTRICT</span><h3>Impede</h3><p>Não deixa apagar enquanto houver obras.</p></div>
-    <div class="card big f zoom"><span class="tag">CASCADE</span><h3>Apaga junto</h3><p>Some a autora, somem as obras.</p></div>
-    <div class="card big f zoom"><span class="tag">SET NULL</span><h3>Desvincula</h3><p>A obra fica, sem autora.</p></div>
+    <div class="card big g f zoom"><span class="tag">RESTRICT</span><h3>Impede</h3><p>Não deixa apagar enquanto houver atendimentos.</p></div>
+    <div class="card big f zoom"><span class="tag">CASCADE</span><h3>Apaga junto</h3><p>Some a pessoa, some o histórico.</p></div>
+    <div class="card big f zoom"><span class="tag">SET NULL</span><h3>Desvincula</h3><p>O atendimento fica, sem pessoa.</p></div>
   </div>
 </section>
 
@@ -603,8 +599,8 @@ obras: Relation&lt;Obra[]>;
   <div class="eyebrow in">Como decidir</div>
   <div class="big in">"Este registro faz sentido <span class="hl">sozinho</span>?"</div>
   <div class="grid-2 mt" style="max-width:1000px">
-    <div class="card f zoom"><span class="tag">Obra sem autora?</span><h3>Faz sentido.</h3><p><b style="color:#f5f5f7">→ RESTRICT</b></p></div>
-    <div class="card f zoom"><span class="tag">Exemplar sem obra?</span><h3>Não faz.</h3><p><b style="color:#f5f5f7">→ CASCADE</b></p></div>
+    <div class="card f zoom"><span class="tag">Atendimento sem a pessoa?</span><h3>É histórico: fica.</h3><p><b style="color:#f5f5f7">→ RESTRICT</b></p></div>
+    <div class="card f zoom"><span class="tag">Anexo sem atendimento?</span><h3>Não faz sentido.</h3><p><b style="color:#f5f5f7">→ CASCADE</b></p></div>
   </div>
 </section>
 
@@ -616,24 +612,24 @@ obras: Relation&lt;Obra[]>;
 
 <section class="slide">
   <div class="eyebrow in">Relação N:N</div>
-  <h2 class="in">Muitas obras, <span class="hl">muitas categorias</span></h2>
+  <h2 class="in">Muitos atendimentos, <span class="hl">muitos serviços</span></h2>
   <div class="flow fill-v">
-    <div class="node f">obra</div>
+    <div class="node f">atendimento</div>
     <div class="arrow f"></div>
-    <div class="node g f zoom" style="padding:18px 30px">obra_categoria<small>obraId · categoriaId</small></div>
+    <div class="node g f zoom" style="padding:18px 30px">atendimento_servico<small>atendimentoId · servicoId</small></div>
     <div class="arrow rev f"></div>
-    <div class="node f">categoria</div>
+    <div class="node f">servico</div>
   </div>
   <p class="f lead">Nenhum dos lados consegue guardar a ligação. Nasce uma <b>terceira tabela</b>.</p>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Em código · obra.entity.ts</div>
+  <div class="eyebrow in">Em código · atendimento.entity.ts</div>
   <h2 class="in"><code>@ManyToMany</code> + <code>@JoinTable</code></h2>
   <pre class="code lg in">
-@ManyToMany(() => Categoria, (c) => c.obras)
-@JoinTable({ name: "obra_categoria" })
-categorias: Relation&lt;Categoria[]>;
+@ManyToMany(() => Servico, (s) => s.atendimentos)
+@JoinTable({ name: "atendimento_servico" })
+servicos: Relation&lt;Servico[]>;
 </pre>
   <div class="captions">
     <p class="f" data-hl="1"><b>@ManyToMany</b> vai nos dois lados.</p>
@@ -642,44 +638,44 @@ categorias: Relation&lt;Categoria[]>;
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Obra × exemplar</div>
-  <h2 class="in">Um livro no catálogo, <span class="hl">três na estante</span></h2>
+  <div class="eyebrow in">Atendimento × anexo</div>
+  <h2 class="in">Um atendimento, <span class="hl">vários documentos</span></h2>
   <div class="flow fill-v">
-    <div class="node g f zoom" style="padding:26px 32px;font-size:24px">Dom Casmurro<small>obra · o catálogo</small></div>
+    <div class="node g f zoom" style="padding:26px 32px;font-size:24px">Atendimento 42<small>a ficha do atendimento</small></div>
     <div class="arrow f"></div>
     <div class="stack" style="flex:0 0 320px">
-      <div class="node f right">Volume 1<small>exemplar · tombo 0001</small></div>
-      <div class="node f right">Volume 2<small>exemplar · tombo 0002</small></div>
-      <div class="node f right">Volume 3<small>exemplar · tombo 0003</small></div>
+      <div class="node f right">RG.pdf<small>anexo · código A-0001</small></div>
+      <div class="node f right">comprovante.jpg<small>anexo · código A-0002</small></div>
+      <div class="node f right">laudo.pdf<small>anexo · código A-0003</small></div>
     </div>
   </div>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Em código · exemplar.entity.ts</div>
-  <h2 class="in">Duas decisões do exemplar</h2>
+  <div class="eyebrow in">Em código · anexo.entity.ts</div>
+  <h2 class="in">Duas decisões do anexo</h2>
   <pre class="code lg in">
 @Column({ length: 20, unique: true })
-tombo: string;
+codigo: string;
 
-@Column({ type: "enum", enum: EstadoExemplar })
-estado: EstadoExemplar;
+@Column({ type: "enum", enum: TipoAnexo })
+tipo: TipoAnexo;
 </pre>
   <div class="captions">
-    <p class="f" data-hl="1-2"><b>unique</b>: dois volumes com o mesmo tombo é erro de cadastro.</p>
-    <p class="f" data-hl="4-5"><b>enum</b>: só valores da lista (novo, bom, desgastado, descartado). Nada de "Bom" e "bom".</p>
+    <p class="f" data-hl="1-2"><b>unique</b>: dois anexos com o mesmo código é erro de cadastro.</p>
+    <p class="f" data-hl="4-5"><b>enum</b>: só valores da lista (documento, foto, laudo). Nada de "Foto" e "foto".</p>
   </div>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Em código · exemplar.entity.ts</div>
-  <h2 class="in">Exemplar não existe sem obra</h2>
+  <div class="eyebrow in">Em código · anexo.entity.ts</div>
+  <h2 class="in">Anexo não existe sem atendimento</h2>
   <pre class="code lg in">
-@ManyToOne(() => Obra, (o) => o.exemplares,
+@ManyToOne(() => Atendimento, (a) => a.anexos,
            { onDelete: "CASCADE" })
-obra: Relation&lt;Obra>;
+atendimento: Relation&lt;Atendimento>;
 </pre>
-  <p class="f lead mt">Aqui o <code>CASCADE</code> é legítimo: apagou a obra, os volumes dela não fazem sentido.</p>
+  <p class="f lead mt">Aqui o <code>CASCADE</code> é legítimo: apagou o atendimento, os anexos dele não fazem sentido.</p>
 </section>
 
 <section class="slide statement">
@@ -689,14 +685,14 @@ obra: Relation&lt;Obra>;
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Em código · obra.entity.ts</div>
+  <div class="eyebrow in">Em código · atendimento.entity.ts</div>
   <h2 class="in">Um <code>@Index</code> no que é muito buscado</h2>
   <pre class="code lg in">
 @Index()
-@Column({ length: 13, default: "" })
-isbn: string;
+@Column({ length: 150 })
+nome: string;
 </pre>
-  <div class="note ok f mt"><b>Regra</b> Indexe o que é buscado <b>com frequência</b>. O balcão busca ISBN o dia inteiro.</div>
+  <div class="note ok f mt"><b>Regra</b> Indexe o que é buscado <b>com frequência</b>. A recepção busca por nome o dia inteiro.</div>
 </section>
 
 <section class="slide">
@@ -720,8 +716,8 @@ isbn: string;
   <div class="eyebrow in">Experimento 1</div>
   <h2 class="in">Encurtar uma coluna com texto dentro</h2>
   <pre class="code term red lg in" data-lang="sh">
-> ALTER TABLE "autor" ⟦DROP COLUMN "biografia"⟧
-> ALTER TABLE "autor" ADD "biografia" varchar(10)
+> ALTER TABLE "pessoa" ⟦DROP COLUMN "observacoes"⟧
+> ALTER TABLE "pessoa" ADD "observacoes" varchar(10)
 </pre>
   <div class="card r big f mt"><span class="tag">Resultado</span><h3>O texto sumiu.</h3><p>Sem erro. Sem aviso. A aplicação subiu normalmente.</p></div>
 </section>
@@ -730,8 +726,8 @@ isbn: string;
   <div class="eyebrow in">Experimento 2</div>
   <h2 class="in">Renomear uma coluna</h2>
   <pre class="code term lg in" data-lang="sh">
-> ALTER TABLE "obra"
->   ⟪RENAME COLUMN "sinopse" TO "resumo"⟫
+> ALTER TABLE "atendimento"
+>   ⟪RENAME COLUMN "descricao" TO "resumo"⟫
 </pre>
   <div class="card g big f mt"><span class="tag">Resultado</span><h3>O dado sobreviveu.</h3><p>Ele adivinhou certo — desta vez.</p></div>
   <aside class="notes">Desfaça os dois experimentos antes de seguir.</aside>
@@ -746,12 +742,12 @@ isbn: string;
 <!-- ================================================================ FECHO -->
 <section class="slide">
   <div class="eyebrow in">Mão na massa · por sua conta</div>
-  <h2 class="in">Modele o <span class="hl">empréstimo</span></h2>
+  <h2 class="in">Modele o <span class="hl">agendamento</span></h2>
   <ul class="clean focus-list">
-    <li class="f">Associado: nome, e-mail único, data de inscrição.</li>
-    <li class="f">Empréstimo: um exemplar + um associado + três datas.</li>
-    <li class="f">Apagar associado com empréstimo aberto: <b>não pode</b>.</li>
-    <li class="f">Apagar exemplar emprestado: <b>não pode</b>.</li>
+    <li class="f">Profissional: nome, e-mail único, especialidade.</li>
+    <li class="f">Agendamento: uma pessoa + um profissional + início, fim e cancelado em.</li>
+    <li class="f">Apagar pessoa com agendamento: <b>não pode</b>.</li>
+    <li class="f">Apagar profissional com agendamento: <b>não pode</b>.</li>
   </ul>
 </section>
 
@@ -759,12 +755,12 @@ isbn: string;
   <div class="eyebrow in">Mão na massa · o que entregar</div>
   <h2 class="in">Código <span class="hl">e justificativa</span></h2>
   <ol class="steps">
-    <li class="f">As entidades <code>Associado</code> e <code>Emprestimo</code>.</li>
+    <li class="f">As entidades <code>Profissional</code> e <code>Agendamento</code>.</li>
     <li class="f">O registro no <code>forFeature</code>.</li>
-    <li class="f">A conferência com <code>\d emprestimo</code>.</li>
+    <li class="f">A conferência com <code>\d agendamento</code>.</li>
     <li class="f"><b>Uma frase</b> justificando cada <code>nullable</code>, <code>unique</code> e <code>onDelete</code>.</li>
   </ol>
-  <div class="note info f mt"><b>Dica</b> Empréstimo tem dois <code>@ManyToOne</code>.</div>
+  <div class="note info f mt"><b>Dica</b> Agendamento tem dois <code>@ManyToOne</code>. <b>Depois:</b> o mesmo com as entidades da P1 do seu projeto.</div>
 </section>
 
 <section class="slide">
@@ -809,12 +805,12 @@ isbn: string;
 
 <section class="slide">
   <div class="eyebrow in">Desafio de fixação</div>
-  <h2 class="in">Multa por atraso</h2>
-  <p class="lead in">R$ 0,50 por dia, até R$ 10,00. Uma coluna em <code>Emprestimo</code> ou uma entidade própria?</p>
+  <h2 class="in">Taxa por falta</h2>
+  <p class="lead in">R$ 5,00 por falta sem aviso, até R$ 20,00 por mês. Uma coluna em <code>Agendamento</code> ou uma entidade própria?</p>
   <ol class="steps mt">
     <li class="f">Dá para pagar em parcelas?</li>
     <li class="f">A coordenação pode perdoar?</li>
-    <li class="f">O valor da diária pode mudar no futuro?</li>
+    <li class="f">O valor da taxa pode mudar no futuro?</li>
   </ol>
 </section>
 
@@ -836,7 +832,7 @@ isbn: string;
   <div class="title-body">
     <div class="eyebrow in">Próximo</div>
     <h1 class="in">M05 · Migrações:<br><span class="hl">evoluir o banco com segurança</span></h1>
-    <p class="lead in">Roteiro completo e exercícios em <code>modulos/04-entidades-typeorm/</code>.</p>
+    <p class="lead in">Roteiro completo, com a aplicação no projeto, em <code>modulos/04-entidades-typeorm/</code>.</p>
   </div>
   <div class="meta in">O <code>synchronize</code> foi um andaime. No M05, ele cai.</div>
 </section>

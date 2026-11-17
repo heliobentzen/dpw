@@ -1,21 +1,48 @@
-# Etapa 3 — Sistema final
+# P3 — Sistema final
 
-> **Entrega:** P3 · **Semana:** 18 · **Peso:** 20% · **Eliminatória** ·
+> **Semanas:** 11–18 · **Entrega:** semana 18 · **Peso:** 40% · **Eliminatória** ·
 > **Rubrica:** [`rubrica-etapa-3.md`](../../avaliacao/rubrica-etapa-3.md)
 
-## 🎯 O que esta etapa produz
+## Por que esta etapa existe
 
-A API **completa, segura, testada e no ar** — a maior entrega da disciplina. Parte do núcleo
-aprovado na [Etapa 2](../etapa-2-sistema-preliminar/) e acrescenta segurança, testes e
-implantação.
+A P2 provou que o núcleo funciona **na máquina de vocês**. Quem for usar o sistema precisa
+de outra coisa: uma API que esteja no ar, que não exponha os dados das pessoas e que não quebre quando
+alguém mexer no código. É a maior entrega da disciplina porque é o produto que vai ser usado.
+
+## Objetivo
+
+Ao final, a API do projeto está **completa, segura, testada e no ar**, pronta para a
+demonstração (P4) — e, para quem segue a trilha opcional, para a implantação numa
+organização real.
+
+## Como esta etapa é construída
+
+| Semana | Módulo | O que fica pronto no projeto | Critério |
+| ---: | --- | --- | --- |
+| 9–10 | [M08](../../modulos/08-autenticacao-usuarios/) | Login, papéis e rotas protegidas | 3 |
+| 11 | [M09](../../modulos/09-seguranca/) | Autorização por dono e correções de segurança | 3 |
+| 12 | [M10](../../modulos/10-testes-e-qualidade/) | Testes das regras e da matriz de acesso, no CI | 4 |
+| 13 | [M11](../../modulos/11-tipos-compartilhados/) | `openapi.json` versionado e conferido no CI | 2 |
+| 13–14 | [M12](../../modulos/12-deploy/) | **API no ar** com HTTPS e banco gerenciado | 5 |
+| 14 | [M13](../../modulos/13-observabilidade-e-manutencao/) | Logs, backup testado, plano de manutenção | 5 |
+| 15–16 | — | Histórias *Must* restantes · **teste com usuário** | 2, 4 |
+| 17–18 | — | Correções, documentação, entrega | todos |
+
+> **Deploy na semana 14, não na véspera.** Quem descobre na semana 18 que a API não sobe em
+> produção não entrega — e esta etapa é eliminatória.
+
+## Como esta etapa é usada depois
+
+O sistema entregue aqui é o que se demonstra ao vivo na P4 (e o que uma organização recebe,
+na trilha opcional). Problema não corrigido aqui aparece na frente da banca.
 
 ---
 
 ## Condições eliminatórias
 
-A etapa é considerada **não entregue** se qualquer uma ocorrer:
+A entrega é considerada **não realizada** se qualquer uma ocorrer:
 
-- O backend não está no ar
+- A API não está no ar
 - Não há autenticação, ou a API aceita operação sem a autorização adequada
 - Uma vulnerabilidade crítica apontada não foi corrigida
 - Não há nenhum teste automatizado
@@ -23,38 +50,19 @@ A etapa é considerada **não entregue** se qualquer uma ocorrer:
 
 ---
 
-## O que entregar, bloco por bloco
+## O que entregar, critério por critério
 
-A rubrica tem sete blocos. A nota de cada bloco é a média dos seus critérios.
-
-| Bloco | Peso | Para chegar a "Adequado" | Módulo |
+| Critério | Peso | Para chegar a "Adequado" | Por que importa para quem usa |
 | --- | ---: | --- | --- |
-| **A. Modelagem** | 3 | 5+ entidades com 1-N e N-N; `onDelete` justificado; 2+ constraints; migrações versionadas | M04, M05 |
-| **B. API** | 4 | Todas as histórias *Must*; CRUD em 2+ recursos; validação; filtros e paginação; regra no *service*; `/api/docs` com schema versionado | M06, M07 |
-| **C. Contrato e integração** | 4 | Contrato estável; um cliente externo consome sem adivinhar o formato; um único padrão de erro | M02, M07, M11 |
-| **D. Segurança** | 4 | Login com 2+ papéis; autorização por papel **e** por dono; segredos fora do código; mapa de dados pessoais | M08, M09 |
-| **E. Qualidade** | 3 | 15+ testes, incluindo a matriz de acesso; CI bloqueante; 1 teste com usuário real; lint limpo | M10 |
-| **F. Implantação** | 3 | API no ar com HTTPS; PostgreSQL gerenciado com backup; deploy documentado | M12, M13 |
-| **G. Processo** | 2 | Todos contribuíram; PRs revisados; quadro em uso | — |
+| **1. Dados** | 1,5 | 5+ entidades; `onDelete` justificado; migrações versionadas; paginação | Histórico preservado; API rápida com dados reais |
+| **2. API e contrato** | 2,5 | Todas as *Must*; DTOs de entrada e saída; `/api/docs` coerente | O sistema faz o que foi combinado na P1 |
+| **3. Segurança** | 2,0 | Login com 2+ papéis; autorização por dono; Helmet e CORS | Os dados são de pessoas reais |
+| **4. Testes e validação com usuário** | 1,5 | 15+ testes com a matriz de acesso; CI; 1 sessão de teste com usuário | Mudar sem quebrar; saber que alguém de fora consegue usar |
+| **5. Implantação e operação** | 1,5 | No ar com HTTPS; banco gerenciado com backup; `/health`; deploy documentado | Funciona sem vocês por perto |
+| **6. Processo de equipe** | 1,0 | Todos contribuíram via PR; quadro em uso | Qualquer um da equipe consegue manter |
 
-> **Os blocos mais pesados são B, C e D.** Uma API completa, com contrato claro e acesso bem
-> controlado, vale mais que qualquer detalhe extra.
-
----
-
-## Ritmo de trabalho
-
-| Sprint | Semanas | Foco |
-| --- | --- | --- |
-| S2 | 13–14 | Histórias *Must* restantes, autenticação e papéis |
-| S3 | 15–16 | Autorização por dono, segurança (M09), testes e **deploy** |
-| S4 | 17–18 | Teste com usuário real, correções, documentação |
-
-**Deploy na semana 16**, não na véspera. Quem descobre na semana 18 que a API não sobe em
-produção não entrega.
-
-Rituais curtos: planejamento no início da sprint (30 min), acompanhamento 2×/semana
-(10 min), revisão e retrospectiva no fim (50 min).
+> **Os critérios 2 e 3 pesam mais.** Uma API que faz o que prometeu e protege os dados vale
+> mais que qualquer detalhe extra.
 
 ## Fluxo de trabalho
 
@@ -67,18 +75,19 @@ revisão, confira:
 
 - [ ] A regra está no *service* e tem teste que falharia se ela quebrasse?
 - [ ] O service filtra pelo usuário da sessão (sem IDOR)?
-- [ ] Sem N+1 nas listagens?
 - [ ] A resposta usa DTO de saída, sem campo sensível?
 - [ ] Nenhum segredo ou dado pessoal real no diff?
 
 Checklist completo em [`recursos/checklists/revisao-de-codigo.md`](../../recursos/checklists/revisao-de-codigo.md).
 
-## Teste com usuário real (critério E4)
+## Teste com usuário (critério 4)
 
-O teste mais valioso da etapa:
+**Para quê:** descobrir o que só quem vai usar consegue mostrar. É o teste mais valioso da
+etapa.
 
-1. Peça a alguém da organização para fazer uma tarefa real usando a API (pelo `/api/docs`
-   ou por um cliente simples).
+1. Peça a **alguém de fora da equipe** — colega de outra equipe, familiar, alguém parecido
+   com a persona (ou alguém da organização, na trilha opcional) — para fazer o cenário
+   principal usando a API (pelo `/api/docs` ou por um cliente simples).
 2. **Não ajude. Só observe e anote:** onde hesitou, onde errou, quanto tempo levou.
 3. Corrija os 3 problemas mais graves.
 4. Registre tudo em `docs/teste-usuario.md`.
@@ -87,7 +96,7 @@ Os demais testes vão no [plano de teste](../modelos-de-documentos/plano-de-test
 
 ## 📦 Entrega P3
 
-**Semana 18**
+Na semana 18, tudo isto precisa estar no lugar:
 
 | Item | Onde |
 | --- | --- |
@@ -103,9 +112,9 @@ Os demais testes vão no [plano de teste](../modelos-de-documentos/plano-de-test
 
 | Erro | Prevenção |
 | --- | --- |
-| Deploy deixado para o fim | Deploy na semana 16 |
+| Deploy deixado para o fim | Deploy na semana 14, junto com o M12 |
 | Branches enormes que não se juntam | PRs pequenos, merge frequente |
 | Uma pessoa faz tudo | Tarefas distribuídas e pareamento |
 | Testar só no final | Teste junto com cada história |
 | Escopo crescendo | Troca 1 por 1, registrada no quadro |
-| Nunca mostrar à organização | Demonstração a cada sprint |
+| Nunca mostrar a ninguém de fora | Revisão com o docente a cada sprint |

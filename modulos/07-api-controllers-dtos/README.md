@@ -1,422 +1,96 @@
 # M07 — API: rotas, controllers e DTOs
 
-> **Pré-requisitos:** M03, M06 · **Duração:** longa
+> **Pré-requisitos:** M03, M06 · **Duração:** longa · **Semanas:** 8–9
+> **Ementa:** *Mapeamento de URLs; criação de classes / métodos / funções para processamento de requisições.*
+> **No projeto:** o CRUD da equipe passa a validar a entrada e a controlar a resposta · P2 (critérios 2 e 3) e P3 (critério 2)
 
-Fecha o backend e atende dois itens da ementa: *"mapeamento de URLs"* e *"criação de
-classes, métodos e funções para processamento das requisições"*.
+## Por que este módulo existe no projeto
 
-O M06 terminou com um CRUD que funciona e **aceita qualquer coisa**. Este módulo conserta o
-"qualquer coisa" e deixa a API pronta para consumo externo.
+O CRUD do M06 funciona e **aceita qualquer coisa**: nome vazio, data impossível, e qualquer
+campo da entidade que alguém resolva mandar. E devolve a entidade inteira — quando o M08
+criar o usuário com o hash da senha, ele vai sair na resposta.
 
-> A teoria vem quando o código pede: as etapas 2, 5, 10, 12, 13, 15 e 17 são de raciocínio.
+Este módulo coloca duas fronteiras na API da equipe: **o que pode entrar** (DTO de entrada)
+e **o que pode sair** (DTO de saída). Com elas, a API fica pronta para ser usada pela
+organização sem ninguém de vocês por perto — e o `/api/docs` passa a ser um contrato de
+verdade, que a P2 e a P3 confrontam com o `docs/api.md` do M02.
 
-## 📌 O que a avaliação cobra
+## 🎯 Ao final do módulo
 
-| Onde | O quê |
-| --- | --- |
-| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E3** — ver [📦 Entrega E3](#-entrega-e3--api-crud-documentada) no fim |
-| [Projeto](../../avaliacao/) | Etapa 2 · critérios 2 e 3 · Etapa 3 · blocos B e C. |
-| Etapas ➕ opcionais | 14, 15 — nenhuma rubrica as cobra |
-
-## 🎯 Objetivos
-
-Ao final você será capaz de:
-
-1. Desenhar rotas REST coerentes, com o método e o status corretos.
-2. Validar entrada com DTOs, sem escrever `if` de validação.
-3. Explicar por que a entidade **não** deve ser exposta na resposta.
-4. Receber upload de arquivo com validação de tipo, tamanho e nome.
-5. Publicar e revisar a documentação Swagger em `/api/docs`, com contrato OpenAPI, exemplos e erros.
-
-## 🧭 O que você vai construir
-
-O protótipo do M06 vira uma **API com contrato**, que responde a quatro perguntas — as mesmas
-que acompanham o resto da disciplina:
-
-1. O que o cliente pode enviar?
-2. O que o servidor aceita como válido?
-3. O que o servidor devolve, e em que formato?
-4. Como outra pessoa conhece esse acordo sem ler o código?
-
-Na prática, a API passa a **recusar** o que não deveria aceitar e a **não entregar** o que não
-deveria mostrar:
-
-```
-POST /api/obras  {"titulo":"","anoPublicacao":3000}   → 400, com as duas falhas listadas
-POST /api/obras  {"titulo":"X","destaque":true}       → 400: campo não declarado
-GET  /api/obras?tamanho=999999                        → 400: teto de paginação
-GET  /api/obras/1                                     → só os campos que o cliente usa
-POST /api/obras/1/capa                                → upload validado
-GET  /api/docs                                        → contrato completo, com formatos
-```
-
-E um `openapi.json` versionado, que clientes externos e o CI usam para verificar o contrato.
-O critério de saída não é só ter endpoints funcionando: é saber explicar e verificar o
-contrato de cada um.
-
-## 📋 Como este módulo funciona
-
-Mesmo formato dos anteriores (**Faça → Linha a linha → Rode → Deu certo se**), em dezoito
-etapas. As três primeiras partem do `POST` que passou no M06 e não deveria.
-
-> 🪟 **Windows:** `curl.exe` no PowerShell (`curl` no macOS/Linux). JSON no PowerShell 5.1:
-> aspas simples por fora **e** `\"` dentro (`-d '{\"titulo\":\"X\"}'`); no PowerShell 7,
-> macOS e Linux, só as simples. Evite acento no JSON digitado no terminal (o 5.1 muda a
-> codificação) — para acentos, use o Swagger.
-
-### As dezoito etapas
-
-| # | Etapa | Duração | O que entra |
-| --- | --- | --- | --- |
-| 1 | [Ligar a validação global](#etapa-1--ligar-a-validação-global) | média | `ValidationPipe` |
-| 2 | [**Por que nada mudou**](#etapa-2--por-que-nada-mudou) | média | **o pipe precisa de um DTO** |
-| 3 | [O primeiro DTO de entrada](#etapa-3--o-primeiro-dto-de-entrada) | longa | `class-validator` |
-| 4 | [Ver a validação agir](#etapa-4--ver-a-validação-agir) | média | três casos |
-| 5 | [**Por que DTO e não a entidade**](#etapa-5--por-que-dto-e-não-a-entidade) | longa | ***mass assignment*** |
-| 6 | [O DTO de atualização](#etapa-6--o-dto-de-atualização) | média | `PartialType` |
-| 7 | [A query também é entrada](#etapa-7--a-query-também-é-entrada) | média | teto de paginação |
-| 8 | [O service passa a falar em DTO](#etapa-8--o-service-passa-a-falar-em-dto) | longa | tradução DTO → entidade |
-| 9 | [DTO de saída](#etapa-9--dto-de-saída) | longa | desenhar a resposta |
-| 10 | [**O recurso é um substantivo**](#etapa-10--o-recurso-é-um-substantivo) | longa | **REST na prática** |
-| 11 | [O controller completo](#etapa-11--o-controller-completo) | longa | as cinco rotas |
-| 12 | [**Escolher o status certo**](#etapa-12--escolher-o-status-certo) | média | **201, 204, 400, 404** |
-| 13 | [**Erros no formato do domínio**](#etapa-13--erros-no-formato-do-domínio) | curta | exceções do Nest |
-| 14 | [Upload: receber o arquivo](#etapa-14--upload-receber-o-arquivo) ➕ | longa | `multipart`, `FileInterceptor` |
-| 15 | [**Upload: as três decisões**](#etapa-15--upload-as-três-decisões) ➕ | longa | **segurança de arquivo** |
-| 16 | [Regerar o contrato](#etapa-16--regerar-o-contrato) | média | OpenAPI com formatos |
-| 17 | [**As quatro camadas**](#etapa-17--as-quatro-camadas) | média | **fecho do backend** |
-| 18 | [O que vai para o projeto](#etapa-18--o-que-vai-para-o-projeto) | curta | — |
+1. Toda entrada da API é validada, sem nenhum `if` de validação escrito à mão.
+2. Nenhuma resposta devolve a entidade: cada recurso tem seu DTO de saída.
+3. Rotas, métodos e status seguem o contrato, e o `/api/docs` mostra formatos e erros.
 
 ---
 
-## Etapa 1 — Ligar a validação global
+## 📖 Conceitos
 
-**Faça:**
+### 1. Três problemas que o DTO resolve
 
-```powershell
-cd C:\dev\bibliocom\backend
-```
+Pense no **formulário de um balcão**: o atendente só processa os campos impressos; um
+bilhete grampeado pedindo "me promova a gerente" vai para o lixo. Na volta, você recebe um
+comprovante — não a ficha interna. O **DTO de entrada** é o formulário; o **DTO de saída**, o
+comprovante; a **entidade**, a ficha que nunca atravessa o balcão.
 
-```powershell
-npm install class-validator class-transformer
-```
-
-| Pacote | Para quê |
-| --- | --- |
-| `class-validator` | Os decorators de regra: `@IsString`, `@Min`, `@IsOptional`… |
-| `class-transformer` | Converte o JSON cru numa **instância** da sua classe. Sem isto, os decorators não teriam onde agir |
-
-**Faça:** em `src\main.ts`, ao lado do `setGlobalPrefix` do M03:
-
-```ts
-import { ValidationPipe } from "@nestjs/common";
-
-app.useGlobalPipes(
-  new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }),
-);
-```
-
-**Linha a linha:**
-
-| Opção | O que faz | Por que importa |
+| Problema | Exemplo | Resolve |
 | --- | --- | --- |
-| `useGlobalPipes` | Aplica o pipe a **todas** as rotas | O `ParseIntPipe` valia para um parâmetro; este vale para a aplicação inteira |
-| `whitelist: true` | **Remove** propriedades não declaradas no DTO | É a proteção contra *mass assignment* — etapa 5 |
-| `forbidNonWhitelisted: true` | Em vez de remover em silêncio, responde **400** | Erro de integração aparece cedo, não em produção |
-| `transform: true` | Converte o corpo numa instância do DTO e faz coerção de tipo | Sem isto, `"42"` da *query string* continua sendo texto |
-
-> **Pipe de novo** (M03, etapa 14c): o porteiro **entre a requisição e o seu método**, que
-> pode recusar sozinho.
-
-**Rode:** reinicie e repita o `POST` que passou no M06:
-
-```powershell
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"X\",\"autorId\":1,\"destaque\":true}'
-```
-
-**Deu certo se:** ele **continua passando**. Sim — a próxima etapa explica por quê.
-
----
-
-## Etapa 2 — Por que nada mudou
-
-Proteção global ligada, e o ataque continua funcionando. Não é bug: é como o mecanismo
-funciona, e entender isso evita horas de confusão.
-
-### O pipe precisa de algo para ler
-
-O `ValidationPipe` olha para o **tipo declarado** no `@Body()` e procura decorators de
-validação nele. Hoje o seu controller tem:
-
-```ts
-@Post()
-criar(@Body() dados: Partial<Obra>) { … }
-```
-
-`Partial<Obra>` é um **tipo do TypeScript**, não uma classe — e tipos **desaparecem** na
-compilação (a lição do M03, etapa 14e).
-
-```
-o que você escreveu     Partial<Obra>
-o que existe ao rodar   Object
-o que o pipe encontra   nenhuma regra
-o que ele faz           nada
-```
-
-### O que precisa existir
-
-| Precisa | Por quê |
-| --- | --- |
-| Uma **classe**, não um tipo | Classe sobrevive à compilação; tipo não |
-| Com **decorators** de validação | São eles que o pipe lê, como o `@Get` é lido pelo roteador |
-
-Isso é um **DTO** (*Data Transfer Object*): nome pomposo para uma ideia simples — **uma
-classe que só descreve o que entra e o que sai**, com as regras anexadas por decorator,
-separada da entidade, que descreve o que é guardado. A etapa 3 cria o primeiro.
-
----
-
-## Etapa 3 — O primeiro DTO de entrada
-
-**Faça:** crie `src\acervo\dto\criar-obra.dto.ts`:
-
-```ts
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsArray, IsInt, IsOptional, IsString, Length, Max, Min } from "class-validator";
-
-export class CriarObraDto {
-  @ApiProperty({ example: "Dom Casmurro", maxLength: 200 })
-  @IsString()
-  @Length(1, 200)
-  titulo: string;
-
-  @ApiPropertyOptional({ example: 1899 })
-  @IsOptional()
-  @IsInt()
-  @Min(1400)
-  @Max(2100)
-  anoPublicacao?: number;
-
-  @ApiProperty({ example: 3, description: "id do autor" })
-  @IsInt()
-  autorId: number;
-
-  @ApiPropertyOptional({ type: [Number], example: [1, 4] })
-  @IsOptional()
-  @IsArray()
-  @IsInt({ each: true })
-  categoriaIds?: number[];
-}
-```
-
-**Linha a linha:**
-
-| Trecho | O que faz |
-| --- | --- |
-| `@IsString()`, `@IsInt()` | Conferem o tipo **em tempo de execução** — que é onde o TypeScript não alcança |
-| `@Length(1, 200)` | Mínimo 1 impede título vazio; 200 casa com o `@Column({ length: 200 })` da entidade |
-| `@Min(1400) @Max(2100)` | Ano de publicação plausível. Uma regra de negócio, escrita onde ela pode ser aplicada |
-| `@IsOptional()` | **Sem ele, `undefined` reprova nas outras regras.** Campo opcional precisa dizer isso explicitamente |
-| `@IsInt({ each: true })` | Valida **cada item** do array, não o array |
-| `@ApiProperty` / `@ApiPropertyOptional` | Alimentam o Swagger. É o que faz a documentação nascer do código — etapa 16 |
-| `?` em `anoPublicacao?` | O lado TypeScript do `@IsOptional`. Os dois precisam concordar |
-
-### Duas decisões que parecem detalhe e não são
-
-**`categoriaIds`, não `categorias`.** O cliente manda **ids**, não objetos. O que se envia e o
-que se guarda são coisas diferentes — **essa diferença é a razão de o DTO existir**.
-
-**Os limites repetem a entidade de propósito.** `Length(1, 200)` aqui e `length: 200` no
-`@Column` são duplicação, sim, mas protegem pontos diferentes: o DTO recusa **antes** do
-banco, com mensagem legível; a coluna é a última defesa, inclusive contra código que não
-passa pela API.
-
-**Faça:** use no controller. Troque **só** a assinatura do `POST`:
-
-```ts
-@Post()
-criar(@Body() dto: CriarObraDto) {
-  return this.acervo.criar(dto);
-}
-```
-
-⚠️ **O TypeScript vai reclamar:** `categoriaIds` não é campo da entidade. **Deixe o erro** — a
-etapa 8 conserta o service, e o `start:dev` roda mesmo com erro de tipo.
-
----
-
-## Etapa 4 — Ver a validação agir
-
-Os três casos que justificam o módulo.
-
-**Faça — 1. o caso válido:**
-
-```powershell
-curl.exe -s -i -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"Quincas Borba\",\"anoPublicacao\":1891,\"autorId\":1}'
-```
-
-**Faça — 2. título vazio e ano impossível:**
-
-```powershell
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"\",\"anoPublicacao\":3000,\"autorId\":1}'
-```
-
-**Faça — 3. campo que o DTO não declara:**
-
-```powershell
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"X\",\"autorId\":1,\"destaque\":true}'
-```
-
-**Deu certo se** o segundo responde 400 com **as duas** mensagens:
-
-```json
-{"message":["titulo must be longer than or equal to 1 characters",
-            "anoPublicacao must not be greater than 2100"],
- "error":"Bad Request","statusCode":400}
-```
-
-e o terceiro responde 400 com:
-
-```json
-{"message":["property destaque should not exist"],"error":"Bad Request","statusCode":400}
-```
-
-**Preencha:**
-
-| Requisição | Status | O corpo explica o erro? |
-| --- | --- | --- |
-| Válida | | |
-| Título vazio, ano 3000 | | |
-| Campo `destaque` não declarado | | |
-
-### O que reparar
-
-- **A segunda resposta lista as duas falhas**, não só a primeira: quem consome a API marca
-  todos os campos errados de uma vez.
-- **O terceiro caso é o `forbidNonWhitelisted`**: o `destaque` que passou na etapa 1 agora é
-  **recusado**, em vez de gravado em silêncio.
-- **Você não escreveu** nenhum `if`, `try` ou mensagem de erro. Declarou o formato; o
-  framework fez o resto.
-
----
-
-## Etapa 5 — Por que DTO e não a entidade
-
-São **três** problemas distintos, e o DTO de entrada resolve só o primeiro.
-
-Pense no **formulário de um balcão de atendimento**. O atendente só processa os campos
-impressos; um bilhete grampeado pedindo "e me promova a gerente" vai para o lixo. Na volta,
-você recebe um comprovante — não a ficha interna da empresa. O **DTO de entrada** é o
-formulário, o **DTO de saída** é o comprovante, e a entidade é a ficha interna, que nunca
-atravessa o balcão.
-
-### Problema 1 — *mass assignment* (entrada)
-
-O caso 3. Com `@Body() dados: Partial<Obra>`, o cliente escolhe **quais campos** gravar:
-
-```json
-{"titulo":"X", "destaque":true, "criadoEm":"1999-01-01"}
-```
-
-e os três são gravados — uma **atribuição em massa** de tudo que veio no corpo. Basta ao
-atacante descobrir um campo que você não esperava.
-
-| Campo | O que ele consegue |
-| --- | --- |
-| `destaque` | Pôr a própria obra na vitrine |
-| `criadoEm` | Forjar a data de cadastro |
-| `papel` (numa entidade `Usuario`) | **Virar administrador** |
-
-A última linha é a dos relatórios de incidente — e ela vai existir no M08.
-
-> **A regra:** o DTO define **o que é aceito**; o resto vai para o lixo (`whitelist: true`).
-
-### Problema 2 — vazamento (saída)
-
-O inverso. Hoje o controller devolve a **entidade inteira**:
-
-```ts
-return this.acervo.buscarUm(id);   // devolve tudo que a tabela tem
-```
-
-Com `Obra`, o prejuízo é excesso de dados. Com `Usuario` (M08) e seu `senhaHash`, **publica o
-hash de todo mundo**. E não adianta lembrar de tirar: um campo sensível acrescentado meses
-depois **aparece na resposta sozinho**, sem ninguém decidir.
-
-### Problema 3 — acoplamento (contrato)
-
-Se a resposta **é** a entidade, renomear uma coluna quebra clientes externos. Com DTO de
-saída, a mudança é **absorvida**: ajusta-se uma linha no DTO e quem consome não percebe.
-
-### O desenho completo
-
-```
+| **Mass assignment** — o cliente escolhe os campos | `{"nome": "X", "papel": "admin"}` grava o papel | DTO de entrada + `whitelist` |
+| **Vazamento** — a resposta é a tabela inteira | `senhaHash`, `cpf`, `observacaoInterna` saem na API | DTO de saída |
+| **Acoplamento** — renomear coluna quebra quem consome | `nome` → `nomeCompleto` na entidade | DTO de saída absorve a mudança |
+
+```text
 Requisição ──▶ [ DTO de entrada ] ──▶ Service ──▶ Entidade ──▶ Banco
 Resposta   ◀── [ DTO de saída   ] ◀── Service ◀── Entidade ◀── Banco
 ```
 
-Duas fronteiras, duas classes, dois problemas diferentes. A etapa 9 constrói a de saída.
+### 2. Por que precisa ser uma classe
 
-💼 **No mercado:** *"como você evita mass assignment?"* é pergunta de entrevista júnior. A
-resposta completa tem duas partes — DTO **e** `whitelist`.
+`@Body() dados: Partial<Pessoa>` não valida nada: `Partial<Pessoa>` é um **tipo**, e tipos
+desaparecem na compilação. O `ValidationPipe` procura **decorators numa classe** — e só uma
+classe sobrevive até a execução. Um DTO é isso: uma classe que descreve o que entra ou sai,
+com as regras anexadas.
 
----
-
-## Etapa 6 — O DTO de atualização
-
-O `PATCH` aceita qualquer subconjunto dos campos. Outra classe com tudo opcional seria
-duplicação — e duplicação sai de sincronia.
-
-**Faça:** crie `src\acervo\dto\atualizar-obra.dto.ts`:
+### 3. DTO de entrada
 
 ```ts
-import { PartialType } from "@nestjs/swagger";
-import { CriarObraDto } from "./criar-obra.dto.js";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsArray, IsInt, IsOptional, IsString, Length } from "class-validator";
 
-export class AtualizarObraDto extends PartialType(CriarObraDto) {}
-```
+export class CriarAtendimentoDto {
+  @ApiProperty({ example: 7, description: "id da pessoa atendida" })
+  @IsInt()
+  pessoaId: number;
 
-**Linha a linha:**
+  @ApiProperty({ example: "Orientação sobre documentos", maxLength: 500 })
+  @IsString()
+  @Length(1, 500)
+  descricao: string;
 
-| Trecho | O que faz |
-| --- | --- |
-| `PartialType(...)` | Uma função que **devolve uma classe nova**, com todos os campos do original marcados como opcionais |
-| `extends` | A classe resultante é a base da sua |
-| as validações | **São preservadas.** `titulo` continua limitado a 200 caracteres — só deixa de ser obrigatório |
-| de `@nestjs/swagger` | Existe uma versão em `@nestjs/mapped-types` também; a do Swagger preserva os `@ApiProperty` junto |
-
-Uma linha, e a semântica exata do `PATCH`: **mande só o que mudou, mas o que mandar tem de
-ser válido**.
-
-**Faça:** no controller:
-
-```ts
-@Patch(":id")
-atualizar(@Param("id", ParseIntPipe) id: number, @Body() dto: AtualizarObraDto) {
-  return this.acervo.atualizar(id, dto);
+  @ApiPropertyOptional({ type: [Number], example: [1, 3] })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  servicoIds?: number[];
 }
 ```
 
-**Deu certo se:** um `PATCH` com `{"anoPublicacao": 3000}` responde 400, e com
-`{"anoPublicacao": 1900}` responde 200 — a regra vale, mas o campo não é mais obrigatório.
+| Detalhe | Por quê |
+| --- | --- |
+| `@IsOptional()` | Sem ele, `undefined` reprova nas outras regras |
+| `servicoIds`, não `servicos` | O cliente manda **ids**; o que se envia e o que se guarda são coisas diferentes — é a razão de o DTO existir |
+| `@Length(1, 500)` repete o `length` da coluna | O DTO recusa **antes**, com mensagem legível; a coluna é a última defesa |
+| `@ApiProperty` | Alimenta o `/api/docs` |
 
----
-
-## Etapa 7 — A query também é entrada
-
-Quase todo mundo valida o corpo e esquece a *query string* — que também vem do cliente.
-
-**Faça:** crie `src\acervo\dto\listar-obras.dto.ts`:
+Para o `PATCH`, uma linha — todos os campos opcionais, com as mesmas regras:
 
 ```ts
-import { Type } from "class-transformer";
-import { IsInt, IsOptional, IsString, Length, Max, Min } from "class-validator";
+export class AtualizarAtendimentoDto extends PartialType(CriarAtendimentoDto) {}   // de @nestjs/swagger
+```
 
-export class ListarObrasDto {
+### 4. A query string também é entrada
+
+```ts
+export class ListarDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1)
   pagina = 1;
 
@@ -428,682 +102,227 @@ export class ListarObrasDto {
 }
 ```
 
-**Linha a linha:**
+Query string chega **sempre como texto**: o `@Type(() => Number)` converte. O **`@Max(100)`
+é segurança**: sem teto, o cliente decide quanto trabalho o servidor faz. Todo limite que o
+cliente controla precisa de um teto imposto pelo servidor.
 
-| Trecho | Por quê |
-| --- | --- |
-| `@Type(() => Number)` | *Query string* chega **sempre** como texto. Sem esta conversão, `@IsInt` reprovaria `"2"` |
-| `= 1` e `= 20` | Valor padrão na própria classe. **Some o `Number(pagina) \|\| 1` feio do M06** |
-| `@Min(1)` na página | Página 0 ou negativa geraria `OFFSET` inválido |
-| **`@Max(100)` no `tamanho`** | O teto que faltava. Ver abaixo |
-
-### O `@Max(100)` é segurança, não capricho
-
-Paga a dívida da etapa 3 do M06 (*"hoje `?tamanho=999999` funciona"*). Sem teto, o cliente
-decide quanto trabalho o servidor faz — e repetir algumas vezes uma requisição pelo acervo
-inteiro derruba a aplicação, sem técnica de ataque nenhuma.
-
-> Mesma classe do `limits.fileSize` da etapa 14: **todo limite que o cliente controla precisa
-> de um teto imposto pelo servidor.**
-
-**Faça:** no controller:
+### 5. DTO de saída: a resposta desenhada para quem consome
 
 ```ts
-@Get()
-listar(@Query() filtros: ListarObrasDto) {
-  return this.acervo.listar(filtros.pagina, filtros.tamanho);
-}
-```
-
-`@Query()` **sem nome** captura a query inteira e a valida como objeto.
-
-**Rode:**
-
-```powershell
-curl.exe -s -i "http://localhost:3000/api/obras?tamanho=999999"
-```
-
-**Deu certo se:** responde **400** com `tamanho must not be greater than 100`.
-
----
-
-## Etapa 8 — O service passa a falar em DTO
-
-O erro de tipo pendente da etapa 3: o service precisa lidar com `categoriaIds`, campo do
-**pedido**, não da tabela.
-
-**Faça:**
-
-```ts
-async criar(dto: CriarObraDto): Promise<Obra> {
-  const { categoriaIds, ...campos } = dto;
-  const obra = this.obras.create(campos);
-  if (categoriaIds) {
-    obra.categorias = categoriaIds.map((id) => ({ id }) as Categoria);
-  }
-  await this.obras.save(obra);
-  return this.buscarUm(obra.id);
-}
-
-async atualizar(id: number, dto: AtualizarObraDto): Promise<Obra> {
-  const obra = await this.buscarUm(id);
-  const { categoriaIds, ...campos } = dto;
-  Object.assign(obra, campos);
-  if (categoriaIds) {
-    obra.categorias = categoriaIds.map((cid) => ({ id: cid }) as Categoria);
-  }
-  await this.obras.save(obra);
-  return this.buscarUm(id);
-}
-```
-
-**Linha a linha:**
-
-| Trecho | O que faz |
-| --- | --- |
-| `const { categoriaIds, ...campos }` | Desestruturação com *rest*: separa `categoriaIds` e junta **todo o resto** em `campos`. É a tradução DTO → entidade, e ela mora no service |
-| `({ id }) as Categoria` | Para ligar uma relação basta o id. O TypeORM grava as linhas em `obra_categoria` a partir disso, sem carregar as categorias inteiras |
-| `if (categoriaIds)` | **No `PATCH`, `undefined` significa "não mexa nas categorias" e `[]` significa "tire todas".** São coisas diferentes, e sem o `if` você apagaria as categorias em toda atualização que não as mencionasse |
-| `return this.buscarUm(...)` | Rebusca **com as relações carregadas**, para o DTO de saída da etapa 9 ter o que ler |
-
-> O `if (categoriaIds)` é sutil: sem ele, o bug passa em todo teste e aparece quando alguém
-> edita só o título e perde as categorias.
-
-**Deu certo se:** o erro de tipo some, o `POST` da etapa 4 continua respondendo 201, e um
-`POST` com `"categoriaIds":[1,2]` devolve a obra ligada às duas categorias.
-
----
-
-## Etapa 9 — DTO de saída
-
-Falta o lado da resposta — o problema 2 da etapa 5.
-
-**Faça:** crie `src\acervo\dto\obra.resposta.ts`:
-
-```ts
-import { ApiProperty } from "@nestjs/swagger";
-import { Obra } from "../entidades/obra.entity.js";
-
-export class ObraResposta {
+export class AtendimentoResposta {
   @ApiProperty() id: number;
-  @ApiProperty() titulo: string;
-  @ApiProperty({ nullable: true }) anoPublicacao: number | null;
-  @ApiProperty() autor: { id: number; nome: string };
-  @ApiProperty({ type: [String] }) categorias: string[];
-  @ApiProperty() exemplaresDisponiveis: number;
+  @ApiProperty() descricao: string;
+  @ApiProperty() pessoa: { id: number; nome: string };
+  @ApiProperty({ type: [String] }) servicos: string[];
+  @ApiProperty({ nullable: true }) concluidoEm: Date | null;
 
-  static de(obra: Obra): ObraResposta {
+  static de(a: Atendimento): AtendimentoResposta {
     return {
-      id: obra.id,
-      titulo: obra.titulo,
-      anoPublicacao: obra.anoPublicacao,
-      autor: { id: obra.autor.id, nome: obra.autor.nome },
-      categorias: (obra.categorias ?? []).map((c) => c.nome),
-      exemplaresDisponiveis: (obra.exemplares ?? []).filter((e) => e.disponivel).length,
+      id: a.id,
+      descricao: a.descricao,
+      pessoa: { id: a.pessoa.id, nome: a.pessoa.nome },
+      servicos: (a.servicos ?? []).map((s) => s.nome),
+      concluidoEm: a.concluidoEm,
     };
   }
 }
 ```
 
-**Faça:** use no `@Get(":id")`:
+Saem os campos internos e o CPF da pessoa; entra só o que quem consome usa. Um campo
+sensível acrescentado à entidade meses depois **não aparece sozinho** na API: alguém precisa
+decidir incluí-lo aqui.
+
+### 6. Rotas e status
+
+A URL é o substantivo; o método, o verbo (M01, M02). Dois endereços, seis operações:
+
+| Método | Rota | Faz | Sucesso |
+| --- | --- | --- | --- |
+| `GET` | `/atendimentos` | Lista | 200 |
+| `GET` | `/atendimentos/42` | Detalha | 200 · 404 |
+| `POST` | `/atendimentos` | Cria | **201** |
+| `PATCH` | `/atendimentos/42` | Altera só o que veio | 200 |
+| `DELETE` | `/atendimentos/42` | Remove | **204**, sem corpo |
+
+Este material usa `PATCH` para edição: quem corrige a descrição não espera perder os
+serviços (o `PUT` substituiria o recurso inteiro).
+
+| Status | Quando | De onde vem |
+| --- | --- | --- |
+| 400 | Entrada malformada | `ValidationPipe` |
+| 404 | Não existe | `NotFoundException` |
+| 409 | Conflita com o estado atual (duplicado, horário ocupado, item já emprestado) | `ConflictException` |
+| 401 / 403 | Não autenticado / sem permissão | M08 |
+
+**Lance a exceção que descreve o que aconteceu no negócio** — `ConflictException` porque há
+conflito — e o status vem junto.
+
+---
+
+## 🧩 No projeto da equipe
+
+### Passo 1 — Ligar a validação global
+
+```bash
+cd backend
+npm install class-validator class-transformer
+```
+
+Em `main.ts`, ao lado do `setGlobalPrefix`:
 
 ```ts
-@Get(":id")
-async buscarUm(@Param("id", ParseIntPipe) id: number) {
-  return ObraResposta.de(await this.acervo.buscarUm(id));
+app.useGlobalPipes(
+  new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+);
+```
+
+| Opção | Para quê |
+| --- | --- |
+| `whitelist` | Descarta o que o DTO não declara (contra *mass assignment*) |
+| `forbidNonWhitelisted` | Em vez de descartar em silêncio, responde 400: o erro de integração aparece cedo |
+| `transform` | Converte o corpo numa instância do DTO e faz a coerção de tipos |
+
+> Ligar o pipe **não muda nada** enquanto os controllers receberem `Partial<Entidade>`. A
+> proteção começa quando cada `@Body()` passa a ser um DTO.
+
+### Passo 2 — DTOs para cada recurso do MVP
+
+Para **cada** recurso (o mínimo da P2 são 2), em `src/<area>/dto/`:
+
+- [ ] `criar-<recurso>.dto.ts` com as regras da organização (tamanhos, intervalos, obrigatórios)
+- [ ] `atualizar-<recurso>.dto.ts` com `PartialType`
+- [ ] `listar-<recurso>.dto.ts` com `pagina`, `tamanho` (teto 100) e os filtros do contrato
+- [ ] `<recurso>.resposta.ts` com o método `de()`
+
+O **service** passa a receber o DTO e traduzir para a entidade:
+
+```ts
+async criar(dto: CriarAtendimentoDto) {
+  const { servicoIds, ...campos } = dto;
+  const atendimento = this.atendimentos.create(campos);
+  if (servicoIds) atendimento.servicos = servicoIds.map((id) => ({ id }) as Servico);
+  await this.atendimentos.save(atendimento);
+  return this.buscarUm(atendimento.id);   // rebusca com as relações, para o DTO de saída
 }
 ```
 
-**Rode:** chame `/api/obras/1` antes e depois, e **compare as duas respostas lado a lado**.
+> ⚠️ No `atualizar`, **`undefined` significa "não mexa"** e `[]` significa "remova todos".
+> Sem o `if (servicoIds)`, editar só a descrição apagaria os serviços.
 
-### O que sumiu, e o que apareceu
-
-| Sumiu | Por quê |
-| --- | --- |
-| `criadoEm`, `atualizadoEm` | Auditoria interna. O cliente não usa |
-| `autorId` cru | Redundante: a autora já vem como objeto |
-| A biografia inteira da autora | Quem consome mostra o nome. Trazer o resto é banda desperdiçada |
-| `isbn` vazio, `subtitulo` vazio | Campos que só o formulário de cadastro usa |
-| A lista completa de exemplares | Dez objetos com tombo e estado, para o cliente mostrar um número |
-
-| Apareceu | Por quê |
-|---|---|
-| `exemplaresDisponiveis` | Um número **calculado** que a entidade não tem. Sem ele, cada cliente faria a contagem — ou três requisições |
-
-**Linha a linha:**
-
-| Trecho | O que faz |
-| --- | --- |
-| `static de(obra)` | Um método de classe, chamado sem instanciar: `ObraResposta.de(x)`. A tradução mora **no DTO**, não espalhada pelos controllers |
-| `?? []` nas duas relações | Se alguém chamar o `de()` com uma obra buscada **sem** `relations`, o `map` receberia `undefined` e quebraria. O `?? []` devolve zero em vez de derrubar |
-| `autor: { id, nome }` | Só os dois campos necessários ao consumidor |
-| `@ApiProperty({ nullable: true })` | Documenta que o campo pode vir nulo no contrato OpenAPI |
-
-> **DTO de saída não é cerimônia:** é **desenhar a resposta para quem vai consumi-la**, em vez
-> de despejar a tabela.
->
-> ⚠️ O `de()` **exige** `autor` carregado. `Cannot read properties of undefined (reading
-> 'nome')` significa que o service buscou sem `relations` (M06).
-
----
-
-## Etapa 10 — O recurso é um substantivo
-
-Entrada e saída resolvidas. Falta desenhar **as rotas**, com uma convenção que economiza
-discussão em toda equipe.
-
-### O erro comum
-
-```
-❌ POST /api/criarObra              ✅ POST   /api/obras
-❌ GET  /api/obras/deletar/42       ✅ DELETE /api/obras/42
-❌ GET  /api/buscarObrasPorAutor    ✅ GET    /api/obras?autorId=3
-```
-
-A URL identifica **o quê** (substantivo); o método HTTP diz **o que fazer** (verbo). **Verbo
-na URL significa método HTTP ignorado** — e uma API que inventa um nome novo por operação.
-
-### O mapa completo
-
-| Método | Rota | Faz | Status de sucesso |
-| --- | --- | --- | --- |
-| `GET` | `/obras` | Lista | 200 |
-| `GET` | `/obras/42` | Detalha | 200 · **404** se não existe |
-| `POST` | `/obras` | Cria | **201** |
-| `PATCH` | `/obras/42` | Altera parcialmente | 200 |
-| `PUT` | `/obras/42` | Substitui inteiro | 200 |
-| `DELETE` | `/obras/42` | Remove | **204** (sem corpo) |
-
-Não são seis endereços: são **dois**, com métodos diferentes. Quem conhece o padrão adivinha
-a API inteira.
-
-### `PATCH` ou `PUT`?
-
-| | `PUT` | `PATCH` |
-| --- | --- | --- |
-| Semântica | Substitui o recurso **inteiro** | Altera **só o que veio** |
-| Campo omitido | É **apagado** | Fica como estava |
-| Serve para | Substituição completa | Formulário de edição |
-
-Edição quase sempre quer `PATCH` — quem edita o título não espera perder o ISBN. **Este
-material usa `PATCH`** (daí o `PartialType` da etapa 6).
-
-### Por que o status importa
-
-`200` para tudo obriga o cliente a **abrir o corpo** para saber se deu certo. Com status
-correto, ele decide olhando um número — e trata erro **num lugar só**:
-
-```
-if (resposta.status >= 400) → mostrar erro
-```
-
----
-
-## Etapa 11 — O controller completo
-
-**Faça:** junte tudo:
+### Passo 3 — O controller completo
 
 ```ts
-@ApiTags("obras")
-@Controller("obras")
-export class AcervoController {
-  constructor(private readonly acervo: AcervoService) {}
+@ApiTags("atendimentos")
+@Controller("atendimentos")
+export class AtendimentosController {
+  constructor(private readonly atendimentos: AtendimentosService) {}
 
   @Get()
-  @ApiOkResponse({ type: [ObraResposta] })
-  async listar(@Query() filtros: ListarObrasDto) {
-    return this.acervo.listar(filtros.pagina, filtros.tamanho);
+  @ApiOkResponse({ type: [AtendimentoResposta] })
+  async listar(@Query() filtros: ListarDto) {
+    const r = await this.atendimentos.listar(filtros);
+    return { ...r, itens: r.itens.map(AtendimentoResposta.de) };
   }
 
   @Get(":id")
-  @ApiOkResponse({ type: ObraResposta })
-  @ApiNotFoundResponse({ description: "Obra não encontrada" })
+  @ApiOkResponse({ type: AtendimentoResposta })
+  @ApiNotFoundResponse({ description: "Atendimento não encontrado" })
   async buscarUm(@Param("id", ParseIntPipe) id: number) {
-    return ObraResposta.de(await this.acervo.buscarUm(id));
+    return AtendimentoResposta.de(await this.atendimentos.buscarUm(id));
   }
 
   @Post()
-  @HttpCode(201)
-  @ApiCreatedResponse({ type: ObraResposta })
-  async criar(@Body() dto: CriarObraDto) {
-    return ObraResposta.de(await this.acervo.criar(dto));
+  @ApiCreatedResponse({ type: AtendimentoResposta })
+  async criar(@Body() dto: CriarAtendimentoDto) {
+    return AtendimentoResposta.de(await this.atendimentos.criar(dto));
   }
 
   @Patch(":id")
-  @ApiOkResponse({ type: ObraResposta })
-  async atualizar(
-    @Param("id", ParseIntPipe) id: number,
-    @Body() dto: AtualizarObraDto,
-  ) {
-    return ObraResposta.de(await this.acervo.atualizar(id, dto));
+  @ApiOkResponse({ type: AtendimentoResposta })
+  async atualizar(@Param("id", ParseIntPipe) id: number, @Body() dto: AtualizarAtendimentoDto) {
+    return AtendimentoResposta.de(await this.atendimentos.atualizar(id, dto));
   }
 
   @Delete(":id")
   @HttpCode(204)
   async remover(@Param("id", ParseIntPipe) id: number) {
-    await this.acervo.remover(id);
+    await this.atendimentos.remover(id);
   }
 }
 ```
 
-**Linha a linha:**
+### Passo 4 — Ver a validação agir
 
-| Trecho | O que faz |
+Para o recurso principal, testem três casos e anotem o status:
+
+| Requisição | Esperado |
 | --- | --- |
-| `@ApiTags("obras")` | Agrupa as rotas numa seção do Swagger. Sem ele, tudo cai em "default" |
-| `@HttpCode(201)` | O padrão do Nest **já é** 201 no `POST`; explicitar deixa o contrato legível para quem lê o código |
-| `@HttpCode(204)` | Este **é** necessário: o padrão do `DELETE` seria 200 |
-| retorno vazio no `DELETE` | 204 significa "sem conteúdo". Devolver corpo aqui contradiz o status |
-| `@ApiNotFoundResponse` | Documenta o **caminho de erro**. Contrato que só descreve o sucesso é contrato pela metade |
-| `@ApiOkResponse({ type: [ObraResposta] })` | Os colchetes dizem "array de". É o que faz o M11 gerar o tipo certo |
+| Válida | 201, com o DTO de saída |
+| Campo obrigatório vazio + valor fora do intervalo | 400, com **as duas** mensagens |
+| Campo que o DTO não declara (`"papel": "admin"`) | 400, `property papel should not exist` |
+| `?tamanho=999999` na listagem | 400 |
 
-**Rode:**
+Depois, procurem a **regra de negócio do cenário principal** que gera conflito (horário
+ocupado, item já emprestado, inscrição repetida) e implementem no service com
+`ConflictException`.
 
-```powershell
-curl.exe -s -o NUL -w "%{http_code}`n" -X DELETE http://localhost:3000/api/obras/1
-```
+### Passo 5 — Confrontar o contrato
 
-**Deu certo se:** responde **204** e não devolve corpo nenhum.
-
-⚠️ **Ordem de rotas, pela terceira vez:** `@Get("destaques")` **depois** de `@Get(":id")`
-responde 400. Rotas literais vêm **antes** das paramétricas.
-
----
-
-## Etapa 12 — Escolher o status certo
-
-Você usou cinco status. Escolher é decisão de projeto — e cai em entrevista.
-
-### A família dos 2xx — deu certo
-
-| Status | Quando |
-| --- | --- |
-| **200** OK | Sucesso com corpo. O caso comum |
-| **201** Created | Criou um recurso novo. Idealmente com o recurso no corpo |
-| **204** No Content | Sucesso **sem** corpo. Típico do `DELETE` |
-
-### A família dos 4xx — o cliente errou
-
-| Status | Quando | No seu código |
-| --- | --- | --- |
-| **400** Bad Request | A entrada não faz sentido | O `ValidationPipe` (etapa 4) |
-| **401** Unauthorized | Não sabemos quem você é | M08 |
-| **403** Forbidden | Sabemos quem você é, e você não pode | M08 |
-| **404** Not Found | O recurso não existe | `NotFoundException` (M03) |
-| **409** Conflict | Conflito com o estado atual | Tombo duplicado, por exemplo |
-| **422** Unprocessable | Sintaxe certa, semântica errada | Ver abaixo |
-
-**400 ou 422?** Leitura mais útil: **400** para entrada malformada (campo faltando, tipo
-errado); **422** para entrada bem formada que viola regra de negócio ("devolução anterior à
-saída"). Este material fica com o 400 padrão do `ValidationPipe` — o importante é a equipe
-escolher **uma** convenção.
-
-### A família dos 5xx — você errou
-
-| Status | Quando |
-|---|---|
-| **500** Internal Server Error | Exceção não tratada |
-
-⚠️ **500 nunca vaza detalhe.** *Stack trace* ou mensagem do banco na resposta dão ao
-atacante o mapa da aplicação. O Nest protege por padrão em produção; o M09 confere.
-
-**Exercite:** que status para cada situação?
-
-| Situação | Status |
-| --- | --- |
-| `POST /obras` com sucesso | |
-| `POST /exemplares` com tombo repetido | |
-| `GET /obras/9999` inexistente | |
-| Empréstimo recusado por limite de 3 em aberto | |
-| `PATCH /obras/42` sem estar autenticado | |
-
-> As duas últimas merecem discussão em sala. A de autenticação é **no papel**: os guards só
-> chegam no M08.
-
----
-
-## Etapa 13 — Erros no formato do domínio
-
-Você usa isso desde o M03. Eis o conjunto:
-
-```ts
-throw new NotFoundException("Obra não encontrada");
-throw new ConflictException("Já existe exemplar com este tombo");
-throw new ForbiddenException("Você não pode editar obra de outro usuário");
-throw new BadRequestException("Envie um arquivo em 'arquivo'");
-```
-
-Cada uma vira o status certo, com corpo JSON padronizado, sem você escrever número nenhum.
-
-| O service faz | O framework faz |
-| --- | --- |
-| Lança linguagem de **domínio** ("não encontrada") | Traduz para HTTP (404) |
-| Descreve o problema em português | Monta `{message, error, statusCode}` |
-| Não importa `Response` | Escreve a resposta |
-
-> **A regra:** lance a exceção que descreve **o que aconteceu no negócio**, não o status que
-> você quer. `ConflictException` porque *há conflito* — o 409 vem junto —, e não
-> `HttpException(409)` porque você quer um 409.
-
----
-
-## Etapa 14 — Upload: receber o arquivo
-
-> ➕ **Opcional**, exceto se o seu projeto recebe arquivos: aí a Etapa 3 (D4) cobra upload validado por conteúdo.
-
-Toda obra tem capa. Upload é requisito comum em CRUD — e um dos mais mal feitos.
-
-**Faça:**
-
-```powershell
-npm install -D @types/multer
-```
-
-**Faça:** no controller:
-
-```ts
-@Post(":id/capa")
-@UseInterceptors(
-  FileInterceptor("arquivo", {
-    limits: { fileSize: 2 * 1024 * 1024 },        // 2 MB
-    fileFilter: (_req, file, cb) => {
-      const permitidos = ["image/jpeg", "image/png", "image/webp"];
-      cb(null, permitidos.includes(file.mimetype));
-    },
-  }),
-)
-async enviarCapa(
-  @Param("id", ParseIntPipe) id: number,
-  @UploadedFile() arquivo: Express.Multer.File,
-) {
-  if (!arquivo) throw new BadRequestException("Envie um arquivo em 'arquivo'");
-  return this.acervo.salvarCapa(id, arquivo);
-}
-```
-
-**Linha a linha:**
-
-| Trecho | O que faz |
-| --- | --- |
-| `POST :id/capa` | Uma **sub-rota** do recurso. A capa pertence à obra, e a URL diz isso |
-| `FileInterceptor("arquivo")` | Lê o campo `arquivo` de um corpo `multipart/form-data` |
-| `multipart/form-data` | O formato do M01 para enviar binário. **JSON não transporta binário** — teria de virar base64, crescendo 33% |
-| `limits.fileSize` | **Teto obrigatório.** Sem ele, uma requisição de 4 GB derruba o servidor — mesma classe de problema do `@Max` da etapa 7 |
-| `fileFilter` | Recusa tipos fora da lista **antes** de gravar |
-| `cb(null, booleano)` | O padrão de *callback* do Node: primeiro argumento é erro, segundo é o resultado |
-| `@UploadedFile()` | Entrega o arquivo já lido, com `buffer`, `mimetype` e `originalname` |
-| `if (!arquivo)` | O interceptor não obriga o envio. Sem este `if`, o método receberia `undefined` |
-
-**Rode:**
-
-```powershell
-curl.exe -s -o NUL -w "%{http_code}`n" -X POST http://localhost:3000/api/obras/1/capa -F "arquivo=@capa.jpg"
-```
-
-**Deu certo se:** responde 201 com um `.jpg` e 400 com um `.pdf`.
-
-> 🔒 **Este endpoint está aberto, e não deveria:** qualquer pessoa pode encher o seu disco. O
-> M08 põe um `@UseGuards` aqui. **Anote a dívida no código:** `// TODO(M08): exigir autenticação`.
-
----
-
-## Etapa 15 — Upload: as três decisões
-
-> ➕ **Opcional**, exceto se o seu projeto recebe arquivos: aí a Etapa 3 (D4) cobra upload validado por conteúdo.
-
-O código da etapa 14 funciona e ainda é inseguro. Três decisões que ninguém toma por você.
-
-### 1. Confie no conteúdo, não na extensão nem no `Content-Type`
-
-O `mimetype` vem **do cliente**, que declara o que quiser. Um `.php` renomeado para `.jpg`,
-com `Content-Type: image/jpeg`, passa pelo filtro sem esforço.
-
-**Faça:** confira os *magic bytes* — os primeiros bytes que identificam o formato de verdade:
-
-```ts
-const ASSINATURAS: Record<string, number[]> = {
-  "image/jpeg": [0xff, 0xd8, 0xff],
-  "image/png": [0x89, 0x50, 0x4e, 0x47],
-};
-
-function pareceImagem(buffer: Buffer, mimetype: string): boolean {
-  const esperado = ASSINATURAS[mimetype];
-  return !!esperado && esperado.every((b, i) => buffer[i] === b);
-}
-```
-
-| Trecho | O que faz |
-| --- | --- |
-| `0xff, 0xd8, 0xff` | Todo JPEG começa com esses três bytes. É parte do formato, não convenção |
-| `0x89, 0x50, 0x4e, 0x47` | O PNG começa com `\x89PNG` |
-| `every((b, i) => buffer[i] === b)` | Compara byte a byte, na posição |
-
-### 2. Nunca use o nome de arquivo enviado pelo cliente
-
-```ts
-const nome = arquivo.originalname;                                // ❌
-const nome = `${randomUUID()}${extname(arquivo.originalname)}`;   // ✅
-```
-
-O nome original é **entrada do usuário** e serve a três ataques:
-
-| Nome enviado | O que consegue |
-| --- | --- |
-| `../../etc/cron.d/tarefa` | *Path traversal*: escrever fora da pasta de uploads |
-| `capa.jpg` (o mesmo de outra pessoa) | Sobrescrever o arquivo de outro usuário |
-| `orçamento-final-v3.jpg` | Vazar informação pelo próprio nome |
-
-`randomUUID()` resolve os três: nome imprevisível, único e sem informação. Derive a extensão
-do que você **validou**, não do que veio.
-
-### 3. Disco de contêiner é efêmero
-
-Na PaaS do M12, o disco é recriado a cada deploy: **os uploads somem**.
-
-| Ambiente | Onde gravar |
-| --- | --- |
-| Desenvolvimento | `backend/uploads/` — e ponha no `.gitignore` |
-| Produção | Armazenamento de objetos: S3, R2, Blob |
-
-> Isolando a gravação no service (`salvarCapa`), a troca acontece **num lugar só** — o
-> controller nem sabe que existe S3.
-
-**Rode — o teste que fecha a etapa:**
-
-```powershell
-curl.exe -s -o NUL -w "%{http_code}`n" -X POST http://localhost:3000/api/obras/1/capa -F "arquivo=@doc.pdf"
-```
-
-Depois **renomeie o PDF para `.jpg`** e reenvie.
-
-**Deu certo se:** os dois respondem 400. Se o segundo passar, falta a checagem do item 1 — é
-assim que se hospeda malware sem querer.
-
----
-
-## Etapa 16 — Regerar o contrato
-
-O `gerar:schema` existe desde o M03; agora, com DTOs, tem muito mais a descrever.
-
-**Faça:**
-
-```powershell
+```bash
 npm run gerar:schema
-```
-
-**Rode:** abra <http://localhost:3000/api/docs> e confira.
-
-**Deu certo se:** cada rota mostra o **formato** do que aceita e do que devolve — e não só o
-caminho.
-
-| O que aparece | Veio de |
-| --- | --- |
-| `titulo` com `maxLength: 200` | `@Length(1, 200)` no DTO |
-| `anoPublicacao` como opcional | `@ApiPropertyOptional` |
-| A resposta 404 no `GET /obras/{id}` | `@ApiNotFoundResponse` |
-| `categorias` como array de string | `@ApiProperty({ type: [String] })` |
-
-**Faça:** compare com o schema do M03:
-
-```powershell
 git diff backend/openapi.json
 ```
 
-Aquele tinha só rotas; este tem os formatos — a diferença entre um índice e um contrato.
+Abram o `/api/docs` ao lado do `docs/api.md` do M02 e anotem as diferenças. Para cada uma,
+decidam: o código está certo e o rascunho estava errado, ou o contrário? Corrijam e
+**versionem o `openapi.json`**. A partir de agora, ele é o contrato vivo.
 
-**Faça:** commite o arquivo. O CI passa a **falhar** quando ele não bate com o schema gerado:
-o contrato deixa de ser promessa e vira verificação.
+### Se o projeto recebe arquivos (fotos, documentos)
 
-> Ninguém escreveu documentação: ela saiu dos decorators que já validavam entrada e mapeavam
-> rotas.
+Upload é opcional no projeto, mas, se existir, a P3 cobra as três decisões:
 
----
+1. **Teto de tamanho** (`limits.fileSize` no `FileInterceptor`) — sem ele, 4 GB derrubam a API.
+2. **Validar o conteúdo, não a extensão**: o `mimetype` vem do cliente. Confira os primeiros
+   bytes (JPEG começa com `ff d8 ff`; PNG com `89 50 4e 47`). Um PDF renomeado para `.jpg`
+   precisa ser recusado.
+3. **Nunca usar o nome enviado**: gere `randomUUID()` + a extensão validada (contra `../../`
+   e sobrescrita). E em produção o disco do contêiner é apagado a cada deploy: guarde em
+   armazenamento de objetos (M12).
 
-## Etapa 17 — As quatro camadas
-
-O backend está pronto. Agora que todas as peças existem, veja o conjunto.
-
-| Camada | Responsabilidade | Onde você a construiu |
-| --- | --- | --- |
-| **DTO** | O formato aceito e devolvido | Etapas 3, 6, 7, 9 |
-| **Controller** | Rota, status, extração de parâmetros | Etapa 11 |
-| **Service** | Regra de negócio | M06, etapa 8 |
-| **Repository** | Acesso a dados | M06, etapa 1 |
-
-**A regra de ouro:** o service **não sabe que HTTP existe**. Se você importou `Request` ou
-`Response` nele, a lógica está na camada errada (M03, etapa 11 — e por isso as exceções da
-etapa 13 falam em domínio).
-
-O critério de "onde ponho isto?" agora tem quatro respostas:
-
-| Este código… | Camada |
-| --- | --- |
-| muda se a origem não for HTTP | **Controller** |
-| descreve o que o cliente pode mandar | **DTO** |
-| não muda vindo de um comando de terminal | **Service** |
-| fala com o banco | **Repository** |
-
-### O caminho completo de uma requisição
-
-```mermaid
-flowchart TB
-    R(["POST /api/obras<br/>{titulo: X, autorId: 1}"]) --> V["ValidationPipe<br/>lê o CriarObraDto, recusa o que não bate<br/>etapa 1"]
-    V --> C["Controller<br/>extrai o corpo, chama o service<br/>etapa 11"]
-    C --> S["Service<br/>separa categoriaIds, monta a entidade<br/>etapa 8"]
-    S --> RP["Repository<br/>INSERT INTO obra …<br/>M06"]
-    RP --> D["ObraResposta.de<br/>monta só o que o cliente usa<br/>etapa 9"]
-    D --> F(["201 + JSON"])
-```
-
-Compare com o diagrama do M03, etapa 20: as caixas vazias foram preenchidas. Faltam `Guard`
-(M08) e `Middleware` (M09), que **se encaixam em volta** sem mexer no que você construiu — a
-promessa da etapa 11 do M03.
+Referência completa: [NestJS — File upload](https://docs.nestjs.com/techniques/file-upload).
 
 ---
-
-## Etapa 18 — O que vai para o projeto
-
-O que a equipe entrega aos consumidores da API:
-
-| Entrega | Onde |
-| --- | --- |
-| Cinco rotas REST, com métodos e status corretos | `/api/obras` |
-| Entrada validada, com mensagens em lista | `ValidationPipe` + DTOs |
-| Respostas desenhadas para quem consome, sem campo interno | `ObraResposta` |
-| Erros padronizados, distinguíveis pelo status | 400, 404, 409 |
-| **Um contrato legível por máquina** | `openapi.json` |
-
-A última linha protege a integração: ninguém adivinha nomes de campo nem descobre formatos
-por tentativa, e o CI percebe mudança de contrato **antes** do deploy.
-
-💼 **No mercado:** desenhar rota, escolher status e validar entrada é o dia a dia do backend.
-*"Quando usar PATCH em vez de PUT?"* e *"como evitar mass assignment?"* separam quem copiou
-tutorial de quem entendeu — e você implementou as duas respostas.
-
----
-
-## 🤖 IA no fluxo
-
-A IA escreve DTOs e decorators do Swagger com fluência — e costuma pular justamente o que
-este módulo ensinou: `whitelist`, teto do `tamanho`, DTO de saída ("é só devolver a
-entidade"), `@Type(() => Number)` na query.
-
-Antes de aceitar um controller gerado, pergunte (etapas 5 e 9): *e se o cliente mandar um
-campo a mais? E se alguém acrescentar uma coluna sensível amanhã?* Se a resposta for "aparece
-na API", não está pronto.
-
-## 💣 Pegadinha de mercado
-
-**Devolver a entidade "só por enquanto".** O DTO de saída fica para depois, e depois nunca
-chega: `senhaHash`, `observacaoInterna` e `cpf` entram na entidade meses depois e saem na API
-pública sem ninguém decidir. O M09 encontra exatamente isso na listagem de obras deste
-módulo — procure antes dele.
-
-## 🧩 Desafio de fixação
-
-A biblioteca quer `PATCH /api/exemplares/{id}` para mudar o **estado** físico de um exemplar
-(novo, bom, desgastado, descartado). Escreva o DTO de entrada e o de saída. Que status a rota
-devolve ao tentar mudar um exemplar **descartado** para "bom"? Onde fica essa regra — no DTO,
-no controller ou no service?
 
 ## ⚠️ Erros comuns
 
 | Sintoma | Diagnóstico |
 | --- | --- |
-| DTO não valida nada | Faltou `useGlobalPipes`, ou o `@Body()` ainda está tipado como `Partial<Obra>` — etapa 2 |
-| `anoPublicacao` da query reprova sendo número | Faltou `@Type(() => Number)` e `transform: true` |
-| `Type 'CriarObraDto' is not assignable to 'Partial<Obra>'` | O service ainda espera a entidade. É a etapa 8 |
-| `/obras/destaques` responde 400 | Rota literal declarada depois da paramétrica |
-| Resposta traz `senhaHash` ou campos internos | Você devolveu a entidade em vez do DTO de saída |
-| `POST` responde 200 | Faltou `@HttpCode(201)` |
-| Campos extras são gravados no banco | Faltou `whitelist: true` |
-| `Cannot read properties of undefined (reading 'nome')` no DTO de saída | O service não carregou `relations` (M06) |
-| `PATCH` sem `categoriaIds` apagou as categorias | Faltou o `if (categoriaIds)`: `undefined` não é `[]` — etapa 8 |
-| Swagger vazio | Faltaram os `@ApiProperty` nos DTOs |
-| Upload responde 400 sempre | O nome do campo no `FileInterceptor` não bate com o do formulário |
-| Arquivo grande derruba o servidor | Faltou `limits.fileSize` |
-| PDF renomeado para `.jpg` passa | Falta a checagem de *magic bytes* — etapa 15 |
-| Upload some depois do deploy | Disco efêmero — use armazenamento de objetos (M12) |
+| DTO não valida nada | Falta `useGlobalPipes`, ou o `@Body()` ainda é `Partial<Entidade>` |
+| Número da query reprova | Faltou `@Type(() => Number)` ou `transform: true` |
+| `/x/algo` responde 400 | Rota literal declarada depois de `@Get(":id")` |
+| Resposta traz campos internos | A entidade saiu no lugar do DTO de saída |
+| `Cannot read properties of undefined (reading 'nome')` no `de()` | O service não carregou `relations` |
+| `PATCH` apagou uma relação | Faltou o `if`: `undefined` não é `[]` |
+| `DELETE` responde 200 | Faltou `@HttpCode(204)` |
+| Swagger sem formatos | Faltaram os `@ApiProperty` |
 
-## ✅ Checklist de saída
+## 🤖 IA no fluxo
+
+A IA escreve DTOs com fluência e costuma pular justamente o que importa: `whitelist`, teto do
+`tamanho`, `@Type` na query e o DTO de saída ("é só devolver a entidade"). Antes de aceitar,
+pergunte: *e se o cliente mandar um campo a mais? E se alguém acrescentar uma coluna sensível
+amanhã?*
+
+## ✅ Marco do módulo
 
 - [ ] `ValidationPipe` global com `whitelist` e `forbidNonWhitelisted`
-- [ ] Cinco rotas REST, com método e status corretos
-- [ ] DTOs de entrada com validação declarativa — **nenhum `if` de validação**
-- [ ] DTO da **query**, com teto de `tamanho`
-- [ ] DTO de saída que **não** expõe a entidade
-- [ ] Rotas literais declaradas antes das paramétricas
-- [ ] Os três casos da etapa 4 testados e a tabela preenchida
-- [ ] Upload com teto de tamanho, filtro de tipo, nome gerado no servidor e conferência de conteúdo
-- [ ] O PDF renomeado para `.jpg` foi **recusado**
-- [ ] `// TODO(M08)` anotado na rota de upload
-- [ ] `/api/docs` completo, com os caminhos de erro documentados
-- [ ] `openapi.json` regerado e versionado
-- [ ] Você sabe explicar *mass assignment* e as duas coisas que o impedem
-
-## 📦 Entrega E3 — API CRUD documentada
-
-**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
-
-- [ ] CRUD de 2+ recursos
-- [ ] DTOs de entrada (com `whitelist`) e de saída separados
-- [ ] Status corretos: 201, 204, 400, 404 e 409/422
-- [ ] Paginação com teto
-- [ ] `/api/docs` com os erros documentados
-
-**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
-
-- Upload de capa validado por conteúdo (etapas 14 e 15)
-
-**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
-
-## 🧪 Exercícios
-
-Ver [`exercicios.md`](exercicios.md).
+- [ ] 2+ recursos com DTOs de entrada, atualização, listagem (com teto) e saída
+- [ ] Nenhum controller devolve entidade; nenhum `if` de validação à mão
+- [ ] Status corretos (201, 204, 400, 404, 409) e a regra de conflito do cenário principal
+- [ ] `openapi.json` versionado, conferido contra o `docs/api.md`
 
 ## 📚 Para aprofundar
 
-- [NestJS — Controllers](https://docs.nestjs.com/controllers)
-- [NestJS — Validation](https://docs.nestjs.com/techniques/validation)
-- [NestJS — OpenAPI](https://docs.nestjs.com/openapi/introduction)
-- [MDN — Códigos de status HTTP](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status)
+- [`cheatsheet.md`](cheatsheet.md) — decorators de validação, de rota e do Swagger
+- [NestJS — Validation](https://docs.nestjs.com/techniques/validation) · [OpenAPI](https://docs.nestjs.com/openapi/introduction)
+- [OWASP — Mass Assignment](https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html)

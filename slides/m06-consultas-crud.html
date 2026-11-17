@@ -28,12 +28,12 @@
 
 <section class="slide">
   <div class="eyebrow in">Ao fim da aula</div>
-  <h2 class="in">O acervo saindo do <span class="hl">banco de verdade</span></h2>
+  <h2 class="in">Os atendimentos saindo do <span class="hl">banco de verdade</span></h2>
   <div class="routes">
-    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras?pagina=2</span><span class="pill g">200</span><span class="what">lista paginada e ordenada</span></div>
-    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/1</span><span class="pill g">200</span><span class="what">com autora, categorias e exemplares</span></div>
-    <div class="route f left"><span class="pill k">POST</span><span class="path">/api/obras</span><span class="pill g">201</span><span class="what">criar · PATCH e DELETE também</span></div>
-    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/buscar</span><span class="pill g">200</span><span class="what">filtros opcionais, sem injeção</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/atendimentos?pagina=2</span><span class="pill g">200</span><span class="what">lista paginada e ordenada</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/atendimentos/1</span><span class="pill g">200</span><span class="what">com pessoa, serviços e anexos</span></div>
+    <div class="route f left"><span class="pill k">POST</span><span class="path">/api/atendimentos</span><span class="pill g">201</span><span class="what">criar · PATCH e DELETE também</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/atendimentos/buscar</span><span class="pill g">200</span><span class="what">filtros opcionais, sem injeção</span></div>
     <div class="route f left"><span class="pill k">POST</span><span class="path">emprestar()</span><span class="pill g">TX</span><span class="what">duas escritas, tudo ou nada</span></div>
   </div>
   <div class="note ok f"><b>Meta</b> Passar de "sei criar tabelas" para "sei buscar e alterar dados sem perder de vista desempenho, segurança e consistência".</div>
@@ -56,26 +56,26 @@
 <section class="slide dark section">
   <div class="num in">01</div>
   <h1 class="in">Do array ao banco</h1>
-  <p class="lead in">O <code>AcervoService</code> ainda é o do M03. Ele muda; o controller, não.</p>
+  <p class="lead in">O service ainda guarda um array em memória, como no M03. Ele muda; o controller, não.</p>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Mão na massa · acervo.service.ts</div>
+  <div class="eyebrow in">Mão na massa · atendimentos.service.ts</div>
   <h2 class="in">Pedir ao Nest o <span class="hl">repositório</span></h2>
-  <pre class="code lg in">
+  <pre class="code in">
 @Injectable()
-export class AcervoService {
+export class AtendimentosService {
   constructor(
-    @InjectRepository(Obra) private readonly obras: Repository&lt;Obra>,
-    @InjectRepository(Autor) private readonly autores: Repository&lt;Autor>,
+    @InjectRepository(Atendimento) private readonly atendimentos: Repository&lt;Atendimento>,
+    @InjectRepository(Pessoa) private readonly pessoas: Repository&lt;Pessoa>,
   ) {}
 }
 </pre>
   <div class="captions">
-    <p class="f" data-hl="4"><b>@InjectRepository(Obra)</b>: a injeção do M03, com um decorator a mais para dizer <b>de qual</b> entidade.</p>
-    <p class="f" data-hl="4"><b>Repository&lt;Obra></b>: o genérico dá tipo ao retorno — <code>find()</code> devolve <code>Obra[]</code>, não <code>any[]</code>.</p>
+    <p class="f" data-hl="4"><b>@InjectRepository(Atendimento)</b>: a injeção do M03, com um decorator a mais para dizer <b>de qual</b> entidade.</p>
+    <p class="f" data-hl="4"><b>Repository&lt;Atendimento></b>: o genérico dá tipo ao retorno — <code>find()</code> devolve <code>Atendimento[]</code>, não <code>any[]</code>.</p>
     <p class="f" data-hl="4-5">Só funciona porque as entidades estão no <code>forFeature</code> (M04). Senão: <code>can't resolve dependencies</code>.</p>
-    <p class="f" data-hl="5">O repositório de <code>Autor</code> serve para demonstrar o N+1, na seção 03.</p>
+    <p class="f" data-hl="5">O repositório de <code>Pessoa</code> serve para demonstrar o N+1, na seção 03.</p>
   </div>
 </section>
 
@@ -91,9 +91,9 @@ export class AcervoService {
   <div class="split code-wide">
     <pre class="code sm in">
 async listar(pagina = 1, tamanho = 20) {
-  const [itens, total] = await this.obras.findAndCount({
-    relations: { autor: true },
-    order: { titulo: "ASC" },
+  const [itens, total] = await this.atendimentos.findAndCount({
+    relations: { pessoa: true },
+    order: { criadoEm: "DESC" },
     skip: (pagina - 1) * tamanho,
     take: tamanho,
   });
@@ -103,7 +103,7 @@ async listar(pagina = 1, tamanho = 20) {
     <div class="captions" style="align-self:center;margin:0">
       <p class="f" data-hl="1"><b>Valores padrão</b>: quem chama sem argumento recebe a primeira página.</p>
       <p class="f" data-hl="2"><b>findAndCount</b> devolve a página <b>e o total</b> — o que permite mostrar "página 3 de 41".</p>
-      <p class="f" data-hl="3"><b>relations</b>: sem isto, <code>obra.autor</code> vem <code>undefined</code>. O TypeORM não busca o que você não pediu.</p>
+      <p class="f" data-hl="3"><b>relations</b>: sem isto, <code>a.pessoa</code> vem <code>undefined</code>. O TypeORM não busca o que você não pediu.</p>
       <p class="f" data-hl="5-6"><b>skip / take</b> = <code>OFFSET</code> / <code>LIMIT</code>. Página 1 tem <code>skip: 0</code> — daí o <code>- 1</code>.</p>
       <p class="f" data-hl="4"><b>order</b> não é enfeite. Próximo slide.</p>
     </div>
@@ -116,11 +116,11 @@ async listar(pagina = 1, tamanho = 20) {
   <div class="vs fill-v">
     <div class="card big f left">
       <span class="tag">Página 1</span>
-      <h3>Dom Casmurro · Iracema · <span class="hl-red">Memórias Póstumas</span></h3>
+      <h3>#41 · #40 · <span class="hl-red">#39</span></h3>
     </div>
     <div class="card big f right">
       <span class="tag">Página 2</span>
-      <h3><span class="hl-red">Memórias Póstumas</span> · O Cortiço · Senhora</h3>
+      <h3><span class="hl-red">#39</span> · #38 · #37</h3>
     </div>
   </div>
   <div class="note warn f"><b>Sintoma</b> A página 2 repete itens da página 1 — porque, sem ordenação explícita, a ordem <b>pode mudar entre consultas</b>.</div>
@@ -135,12 +135,12 @@ async listar(pagina = 1, tamanho = 20) {
 
 <section class="slide statement">
   <div class="eyebrow in">Analogia</div>
-  <div class="big in">Pedir ao bibliotecário <span class="hl">todos os livros</span> no balcão para escolher um.</div>
-  <p class="sub f">Com dez livros, ele traz. Com o acervo inteiro, o balcão desaba antes de você olhar o primeiro.</p>
+  <div class="big in">Pedir à recepção <span class="hl">todas as fichas</span> do arquivo para achar uma.</div>
+  <p class="sub f">Com dez fichas, ela traz. Com o arquivo inteiro, o balcão desaba antes de você olhar a primeira.</p>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in"><code>await this.obras.find()</code> sem <code>take</code></div>
+  <div class="eyebrow in"><code>await this.atendimentos.find()</code> sem <code>take</code></div>
   <h2 class="in">O volume <span class="hl-red">não perdoa</span></h2>
   <div class="bars fill-v">
     <div class="bar-row f"><span class="lbl">20 registros</span><div class="track"><div class="fill" style="--v:1"></div></div><span class="val">instantâneo</span></div>
@@ -172,18 +172,18 @@ async listar(pagina = 1, tamanho = 20) {
   <div class="eyebrow in">Mão na massa · buscarUm</div>
   <h2 class="in">Peça <span class="hl">o que a resposta usa</span>, não tudo</h2>
   <pre class="code lg in">
-async buscarUm(id: number): Promise&lt;Obra> {
-  const obra = await this.obras.findOne({
+async buscarUm(id: number): Promise&lt;Atendimento> {
+  const a = await this.atendimentos.findOne({
     where: { id },
-    relations: { autor: true, categorias: true, exemplares: true },
+    relations: { pessoa: true, servicos: true, anexos: true },
   });
-  if (!obra) throw new NotFoundException(`Obra ${id} não encontrada`);
-  return obra;
+  if (!a) throw new NotFoundException(`Atendimento ${id} não encontrado`);
+  return a;
 }
 </pre>
   <div class="captions">
-    <p class="f" data-hl="4">O detalhe mostra autora, categorias e exemplares. A listagem só precisava da autora.</p>
-    <p class="f" data-hl="6"><b>findOne</b> devolve <code>Obra | null</code>, e o TypeScript <b>obriga</b> você a tratar o caso.</p>
+    <p class="f" data-hl="4">O detalhe mostra pessoa, serviços e anexos. A listagem só precisava da pessoa.</p>
+    <p class="f" data-hl="6"><b>findOne</b> devolve <code>Atendimento | null</code>, e o TypeScript <b>obriga</b> você a tratar o caso.</p>
     <p class="f" data-hl="">O array virou PostgreSQL e <b>o contrato HTTP não mudou nada</b>. A situação 3 do M03 era promessa; agora é fato observado.</p>
   </div>
 </section>
@@ -203,9 +203,9 @@ npm install -D @faker-js/faker
 npx ts-node --esm src/semear.ts
 </pre>
   <div class="grid-3 fill-v">
-    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="60">60</div><div class="stat-label">autores</div></div>
-    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="800">800</div><div class="stat-label">obras</div></div>
-    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="2000">2.000</div><div class="stat-label">exemplares</div></div>
+    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="300">300</div><div class="stat-label">pessoas</div></div>
+    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="900">900</div><div class="stat-label">atendimentos</div></div>
+    <div class="center f zoom" style="display:flex;flex-direction:column"><div class="stat g" data-count="1800">1.800</div><div class="stat-label">serviços ligados</div></div>
   </div>
   <div class="note info f"><b>Semente fixa</b> Toda a turma gera os mesmos dados — os tempos ficam comparáveis.</div>
 </section>
@@ -215,22 +215,22 @@ npx ts-node --esm src/semear.ts
   <h2 class="in">Quem só viu a certa <span class="hl">não reconhece</span> a errada</h2>
   <pre class="code sm red in">
 async listarRuim() {
-  const obras = await this.obras.find({ take: 50 });
-  for (const obra of obras) {
-    const autor = await this.autores.findOneBy({ id: obra.autorId });
-    if (autor) obra.autor = autor;
+  const lista = await this.atendimentos.find({ take: 50 });
+  for (const a of lista) {
+    const pessoa = await this.pessoas.findOneBy({ id: a.pessoaId });
+    if (pessoa) a.pessoa = pessoa;
   }
-  return obras;
+  return lista;
 }
 </pre>
   <div class="captions" style="margin-top:14px">
-    <p class="f" data-hl="2">Uma consulta para a lista. Sem <code>relations</code>, <code>obra.autor</code> vem vazio.</p>
-    <p class="f" data-hl="3-4">A tentação: buscar cada autora num laço. <b class="r">await dentro do for</b>: cada volta espera uma ida ao banco.</p>
-    <p class="f" data-hl="4"><b>autorId</b> é o campo declarado no M04. Sem ele, <code>as any</code>.</p>
+    <p class="f" data-hl="2">Uma consulta para a lista. Sem <code>relations</code>, <code>a.pessoa</code> vem vazio.</p>
+    <p class="f" data-hl="3-4">A tentação: buscar cada pessoa num laço. <b class="r">await dentro do for</b>: cada volta espera uma ida ao banco.</p>
+    <p class="f" data-hl="4"><b>pessoaId</b> é o campo declarado no M04. Sem ele, <code>as any</code>.</p>
   </div>
   <pre class="code sm f" style="margin-top:12px">
 async listarBom() {   // ✅ a versão boa
-  return this.obras.find({ take: 50, relations: { autor: true } });
+  return this.atendimentos.find({ take: 50, relations: { pessoa: true } });
 }
 </pre>
 </section>
@@ -239,8 +239,8 @@ async listarBom() {   // ✅ a versão boa
   <div class="eyebrow in">Mão na massa · medir</div>
   <h2 class="in">De fora são <span class="hl">indistinguíveis</span>. O terminal conta outra história.</h2>
   <pre class="code term in" data-lang="sh">
-curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/ruim
-curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/bom
+curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/atendimentos/ruim
+curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/atendimentos/bom
 </pre>
   <ol class="steps mt">
     <li class="f">Exponha as duas versões em rotas temporárias, <b>acima</b> do <code>@Get(":id")</code>.</li>
@@ -273,11 +273,11 @@ curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/bom
   <div class="eyebrow in">Detalhe · por que 2 e não 1</div>
   <h2 class="in">Com <code>take</code> e relação, o TypeORM faz <span class="hl">duas</span> consultas</h2>
   <div class="flow fill-v">
-    <div class="node f">1. seleciona os <b>ids</b> da página<small>LIMIT conta obras</small></div>
+    <div class="node f">1. seleciona os <b>ids</b> da página<small>LIMIT conta atendimentos</small></div>
     <div class="arrow f"></div>
     <div class="node g f">2. busca esses ids com JOIN<small>dados completos</small></div>
   </div>
-  <div class="note warn f"><b>Se fosse uma só</b> o <code>LIMIT</code> contaria linhas do JOIN, não obras: uma obra com três categorias comeria três vagas. Você pediria 20 e receberia 7.</div>
+  <div class="note warn f"><b>Se fosse uma só</b> o <code>LIMIT</code> contaria linhas do JOIN, não atendimentos: um atendimento com três serviços comeria três vagas. Você pediria 20 e receberia 7.</div>
 </section>
 
 <section class="slide">
@@ -285,7 +285,7 @@ curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/bom
   <h2 class="in">O que acontece <span class="hl-red">depois</span></h2>
   <table class="tbl">
     <tr class="in"><th>Mudança</th><th>Versão boa</th><th>Versão ruim</th></tr>
-    <tr class="f"><td>O acervo dobra</td><td class="ans">igual</td><td class="hl-red">dobra</td></tr>
+    <tr class="f"><td>O cadastro dobra</td><td class="ans">igual</td><td class="hl-red">dobra</td></tr>
     <tr class="f"><td>A página passa a mostrar 200</td><td class="ans">igual</td><td class="hl-red">quadruplica</td></tr>
     <tr class="f"><td>O banco vai para outro servidor</td><td class="ans">+1 ida e volta</td><td class="hl-red"><b>+201 idas e voltas</b></td></tr>
   </table>
@@ -303,18 +303,18 @@ curl.exe -s -o NUL -w "%{time_total}s`n" http://localhost:3000/api/obras/bom
   <div class="eyebrow in">Mão na massa · escrita no service</div>
   <h2 class="in">Três métodos, <span class="hl">três detalhes</span> que importam</h2>
   <pre class="code sm in">
-async criar(dados: Partial&lt;Obra>): Promise&lt;Obra> {
-  const obra = this.obras.create(dados);
-  return this.obras.save(obra);
+async criar(dados: Partial&lt;Atendimento>): Promise&lt;Atendimento> {
+  const a = this.atendimentos.create(dados);
+  return this.atendimentos.save(a);
 }
-async atualizar(id: number, dados: Partial&lt;Obra>): Promise&lt;Obra> {
-  const obra = await this.buscarUm(id);
-  Object.assign(obra, dados);
-  return this.obras.save(obra);
+async atualizar(id: number, dados: Partial&lt;Atendimento>): Promise&lt;Atendimento> {
+  const a = await this.buscarUm(id);
+  Object.assign(a, dados);
+  return this.atendimentos.save(a);
 }
 async remover(id: number): Promise&lt;void> {
-  const resultado = await this.obras.delete(id);
-  if (resultado.affected === 0) throw new NotFoundException(`Obra ${id} não encontrada`);
+  const resultado = await this.atendimentos.delete(id);
+  if (resultado.affected === 0) throw new NotFoundException(`Atendimento ${id} não encontrado`);
 }
 </pre>
   <div class="captions">
@@ -329,17 +329,17 @@ async remover(id: number): Promise&lt;void> {
   <div class="eyebrow in">O que está errado de propósito</div>
   <h2 class="in">O CRUD funciona. E <span class="hl-red">aceita qualquer coisa.</span></h2>
   <pre class="code term in" data-lang="sh">
-curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" `
-  -d '{\"titulo\":⟦\"\"⟧,⟦\"criadoEm\":\"1999-01-01\"⟧,\"autorId\":1}'
+curl.exe -s -X POST http://localhost:3000/api/atendimentos -H "Content-Type: application/json" `
+  -d '{\"descricao\":⟦\"\"⟧,⟦\"criadoEm\":\"1999-01-01\"⟧,\"pessoaId\":1}'
 > 201 Created
 </pre>
   <table class="tbl" style="margin-top:16px">
     <tr class="in"><th>Problema</th><th>Consequência</th></tr>
-    <tr class="f"><td>Nada valida <code>titulo</code></td><td>Obra sem título entra no acervo</td></tr>
+    <tr class="f"><td>Nada valida <code>descricao</code></td><td>Atendimento sem descrição entra no banco</td></tr>
     <tr class="f"><td>O cliente escolhe os campos</td><td><i>Mass assignment</i>: escreve <code>criadoEm</code>, <code>destaque</code>…</td></tr>
     <tr class="f"><td>A resposta é a entidade inteira</td><td>Com <code>Usuario</code> (M08), vaza o hash da senha</td></tr>
   </table>
-  <div class="note info f" style="margin-top:16px"><b>Ponte para o M07</b> <code>Partial&lt;Obra&gt;</code> não é formulário. Guarde este comando: o M07 começa por ele.</div>
+  <div class="note info f" style="margin-top:16px"><b>Ponte para o M07</b> <code>Partial&lt;Atendimento&gt;</code> não é formulário. Guarde este comando: o M07 começa por ele.</div>
 </section>
 
 <!-- ================================================================ 05 -->
@@ -355,19 +355,19 @@ curl.exe -s -X POST http://localhost:3000/api/obras -H "Content-Type: applicatio
   <div class="vs">
     <div class="stack">
       <pre class="code sm in" data-title="Repository">
-await this.obras.find({
-  where: { anoPublicacao: LessThan(1900) },
-  order: { titulo: "ASC" },
+await this.atendimentos.find({
+  where: { criadoEm: LessThan(inicio) },
+  order: { criadoEm: "DESC" },
 });
 </pre>
       <div class="card f"><span class="tag">Bom para</span><p>CRUD e filtros simples. Mais curto.</p></div>
     </div>
     <div class="stack">
       <pre class="code sm in" data-title="QueryBuilder">
-await this.obras.createQueryBuilder("obra")
-  .where("obra.anoPublicacao &lt; :ano",
-         { ano: 1900 })
-  .orderBy("obra.titulo", "ASC")
+await this.atendimentos.createQueryBuilder("a")
+  .where("a.criadoEm &lt; :inicio",
+         { inicio })
+  .orderBy("a.criadoEm", "DESC")
   .getMany();
 </pre>
       <div class="card g f"><span class="tag">Bom para</span><p>Agregação, <code>JOIN</code> explícito e condição <b>dinâmica</b>.</p></div>
@@ -380,21 +380,21 @@ await this.obras.createQueryBuilder("obra")
   <div class="eyebrow in">O ponto de virada · filtro opcional</div>
   <h2 class="in">Cada filtro é um <code>if</code> que <span class="hl">acrescenta uma linha</span></h2>
   <pre class="code sm in">
-async buscar(termo?: string, categoriaId?: number, ate?: number) {
-  const qb = this.obras.createQueryBuilder("obra")
-    .leftJoinAndSelect("obra.autor", "autor")
-    .leftJoin("obra.categorias", "categoria");
+async buscar(termo?: string, servicoId?: number, desde?: string) {
+  const qb = this.atendimentos.createQueryBuilder("a")
+    .leftJoinAndSelect("a.pessoa", "pessoa")
+    .leftJoin("a.servicos", "servico");
   if (termo) {
-    qb.andWhere("(obra.titulo ILIKE :termo OR autor.nome ILIKE :termo)",
+    qb.andWhere("(a.descricao ILIKE :termo OR pessoa.nome ILIKE :termo)",
       { termo: `%${termo}%` });
   }
-  if (categoriaId) qb.andWhere("categoria.id = :categoriaId", { categoriaId });
-  if (ate) qb.andWhere("obra.anoPublicacao &lt;= :ate", { ate });
-  return qb.orderBy("obra.titulo", "ASC").take(20).getMany();
+  if (servicoId) qb.andWhere("servico.id = :servicoId", { servicoId });
+  if (desde) qb.andWhere("a.criadoEm &gt;= :desde", { desde });
+  return qb.orderBy("a.criadoEm", "DESC").take(20).getMany();
 }
 </pre>
   <div class="captions">
-    <p class="f" data-hl="2"><b>"obra"</b> é o apelido da tabela no resto da consulta.</p>
+    <p class="f" data-hl="2"><b>"a"</b> é o apelido da tabela no resto da consulta.</p>
     <p class="f" data-hl="3"><b>leftJoinAndSelect</b> faz o JOIN <b>e traz</b> as colunas — o equivalente do <code>relations</code>.</p>
     <p class="f" data-hl="4"><b>leftJoin</b> sem Select: só para filtrar. Menos tráfego.</p>
     <p class="f" data-hl="5-10"><b>andWhere dentro de if</b>: o SQL é montado conforme o que veio.</p>
@@ -407,12 +407,12 @@ async buscar(termo?: string, categoriaId?: number, ate?: number) {
   <div class="eyebrow in">Rode · e leia o SQL de cada chamada</div>
   <h2 class="in">O <code>WHERE</code> <span class="hl">muda</span> conforme a entrada</h2>
   <pre class="code term in" data-lang="sh">
-curl.exe -s "http://localhost:3000/api/obras/buscar"
-> SELECT … ORDER BY "obra"."titulo" ASC
-curl.exe -s "http://localhost:3000/api/obras/buscar?termo=maria"
-> SELECT … ⟪WHERE (obra.titulo ILIKE $1 OR autor.nome ILIKE $1)⟫ …
-curl.exe -s "http://localhost:3000/api/obras/buscar?termo=maria&amp;ate=1900"
-> SELECT … ⟪WHERE (… ILIKE $1) AND obra.anoPublicacao &lt;= $2⟫ …
+curl.exe -s "http://localhost:3000/api/atendimentos/buscar"
+> SELECT … ORDER BY "a"."criadoEm" DESC
+curl.exe -s "http://localhost:3000/api/atendimentos/buscar?termo=maria"
+> SELECT … ⟪WHERE (a.descricao ILIKE $1 OR pessoa.nome ILIKE $1)⟫ …
+curl.exe -s "http://localhost:3000/api/atendimentos/buscar?termo=maria&amp;desde=2026-01-01"
+> SELECT … ⟪WHERE (… ILIKE $1) AND a.criadoEm &gt;= $2⟫ …
 </pre>
   <div class="captions">
     <p class="f" data-hl="1-2">Sem filtro: nenhuma condição.</p>
@@ -438,12 +438,12 @@ curl.exe -s "http://localhost:3000/api/obras/buscar?termo=maria&amp;ate=1900"
   <div class="eyebrow in">Parecem equivalentes</div>
   <h2 class="in">Não <span class="hl-red">são</span></h2>
   <pre class="code lg in">
-.where(`obra.titulo = '${termo}'`)                  // ❌ colado no comando
-.where("obra.titulo = :titulo", { titulo: termo })  // ✅ parâmetro
+.where(`pessoa.nome = '${termo}'`)                // ❌ colado no comando
+.where("pessoa.nome = :nome", { nome: termo })     // ✅ parâmetro
 </pre>
   <p class="f mt">Se alguém buscar por <code>' OR 1=1 --</code> na primeira forma, o banco recebe:</p>
   <pre class="code lg f" data-lang="sql">
-SELECT * FROM obra WHERE obra.titulo = ''⟦ OR 1=1 --⟧'
+SELECT * FROM pessoa WHERE pessoa.nome = ''⟦ OR 1=1 --⟧'
 </pre>
   <div class="captions">
     <p class="f"><b class="r">OR 1=1</b> é sempre verdadeiro; <b class="r">--</b> comenta o resto. Devolve <b>a tabela inteira</b>.</p>
@@ -455,7 +455,7 @@ SELECT * FROM obra WHERE obra.titulo = ''⟦ OR 1=1 --⟧'
   <div class="eyebrow in">O que acontece na forma certa</div>
   <h2 class="in">Comando e valores viajam <span class="hl">separados</span></h2>
   <div class="vs fill-v">
-    <div class="card big f left"><span class="tag">Comando</span><h3><code>SELECT * FROM obra WHERE obra.titulo = $1</code></h3><p>O banco compila primeiro.</p></div>
+    <div class="card big f left"><span class="tag">Comando</span><h3><code>SELECT * FROM pessoa WHERE pessoa.nome = $1</code></h3><p>O banco compila primeiro.</p></div>
     <div class="card big g f right"><span class="tag">Valores</span><h3><code>["' OR 1=1 --"]</code></h3><p>Depois encaixa o valor. É texto, sempre — mesmo que pareça SQL.</p></div>
   </div>
   <div class="note ok f"><b>A regra</b> A única proteção que importa, e é <b>gratuita</b>. Crase ou <code>+</code> montando consulta com dado do usuário está errado — sem exceção, sem "mas eu validei antes".</div>
@@ -465,12 +465,12 @@ SELECT * FROM obra WHERE obra.titulo = ''⟦ OR 1=1 --⟧'
   <div class="eyebrow in">Rode · teste o ataque</div>
   <h2 class="in">A busca devolve <span class="hl">nada</span></h2>
   <pre class="code term lg in" data-lang="sh">
-curl.exe -s "http://localhost:3000/api/obras/buscar?termo=' OR 1=1 --"
+curl.exe -s "http://localhost:3000/api/atendimentos/buscar?termo=' OR 1=1 --"
 > []
-> query: SELECT … WHERE (obra.titulo ILIKE $1 …) -- PARAMETERS: ⟪["%' OR 1=1 --%"]⟫
+> query: SELECT … WHERE (a.descricao ILIKE $1 …) -- PARAMETERS: ⟪["%' OR 1=1 --%"]⟫
 </pre>
   <ol class="steps mt">
-    <li class="f">Não existe obra com aquele título literal — logo, lista vazia.</li>
+    <li class="f">Não existe atendimento com aquele texto literal — logo, lista vazia.</li>
     <li class="f">No log, o ataque aparece como <b>parâmetro</b>, separado do comando.</li>
     <li class="f">Confira o seu código: todos os valores passam por <code>:nome</code>? O M09 volta ao tema com o OWASP.</li>
   </ol>
@@ -480,7 +480,7 @@ curl.exe -s "http://localhost:3000/api/obras/buscar?termo=' OR 1=1 --"
 <section class="slide dark section">
   <div class="num in">07</div>
   <h1 class="in">Transações</h1>
-  <p class="lead in">Emprestar um exemplar é <b>duas</b> escritas.</p>
+  <p class="lead in">Emprestar um equipamento da associação é <b>duas</b> escritas.</p>
 </section>
 
 <section class="slide">
@@ -489,7 +489,7 @@ curl.exe -s "http://localhost:3000/api/obras/buscar?termo=' OR 1=1 --"
   <div class="flow fill-v">
     <div class="node g f">✓ empréstimo criado<small>escrita 1</small></div>
     <div class="arrow r f"><span class="arrow-label">queda de rede, servidor reiniciado…</span></div>
-    <div class="node r f">✕ exemplar "disponível"<small>escrita 2 não aconteceu</small></div>
+    <div class="node r f">✕ item "disponível"<small>escrita 2 não aconteceu</small></div>
   </div>
   <div class="note warn f"><b>O sistema mente</b> O volume está na mão de alguém e o catálogo diz que está na estante. O próximo leitor vai à prateleira e não encontra.</div>
 </section>
@@ -507,7 +507,7 @@ curl.exe -s "http://localhost:3000/api/obras/buscar?termo=' OR 1=1 --"
   <pre class="code lg in">
 await this.dataSource.transaction(async (manager) => {
   await manager.save(emprestimo);
-  await manager.update(Exemplar, exemplar.id, { disponivel: false });
+  await manager.update(Item, item.id, { disponivel: false });
 });
 </pre>
   <div class="captions">
@@ -523,11 +523,11 @@ await this.dataSource.transaction(async (manager) => {
   <pre class="code lg red in">
 await this.dataSource.transaction(async (manager) => {
   await manager.save(emprestimo);                     // ✅ dentro
-  await this.exemplares.update(id, { disponivel: false }); // ❌ FORA
+  await this.itens.update(id, { disponivel: false });      // ❌ FORA
 });
 </pre>
   <ul class="clean mt focus-list">
-    <li class="f" data-hl="3"><code>this.exemplares</code> é o repositório normal: roda fora e <b>não é desfeito</b> no ROLLBACK.</li>
+    <li class="f" data-hl="3"><code>this.itens</code> é o repositório normal: roda fora e <b>não é desfeito</b> no ROLLBACK.</li>
     <li class="f">Compila. Os testes felizes passam.</li>
     <li class="f">O problema só aparece no dia em que algo falha no meio — justamente quando a transação deveria salvar você.</li>
   </ul>
@@ -536,7 +536,7 @@ await this.dataSource.transaction(async (manager) => {
 <section class="slide dark statement">
   <div class="eyebrow in">A regra</div>
   <div class="big in">Se existe um estado intermediário que seria <span class="hl">mentira</span>, precisa de transação.</div>
-  <p class="sub f">E é aqui que o <code>disponivel</code> do M04 cobra a conta: campo derivado gera obrigação de sincronia. A transação é o preço.</p>
+  <p class="sub f">E é aqui que um campo como <code>disponivel</code> cobra a conta: campo derivado gera obrigação de sincronia. A transação é o preço.</p>
 </section>
 
 <section class="slide">
@@ -544,11 +544,11 @@ await this.dataSource.transaction(async (manager) => {
   <h2 class="in"><code>EmprestimosService.emprestar()</code></h2>
   <div class="split" style="align-items:start">
     <ol class="steps">
-      <li class="f">Buscar o exemplar; erro se não existir.</li>
+      <li class="f">Buscar o item; erro se não existir.</li>
       <li class="f">Recusar se já estiver indisponível.</li>
-      <li class="f">Recusar se o associado tiver 3 em aberto.</li>
+      <li class="f">Recusar se a pessoa tiver 3 em aberto.</li>
       <li class="f"><b>Criar o empréstimo</b> (devolução em 14 dias).</li>
-      <li class="f"><b>Marcar o exemplar</b> como indisponível.</li>
+      <li class="f"><b>Marcar o item</b> como indisponível.</li>
     </ol>
     <div class="stack">
       <div class="card g f"><span class="tag">Transação</span><p>Passos 4 e 5 juntos. Os três primeiros só verificam e ficam fora.</p></div>
@@ -583,8 +583,8 @@ await this.dataSource.transaction(async (manager) => {
 
 <section class="slide">
   <div class="eyebrow in">Desafio de fixação</div>
-  <h2 class="in">As dez obras <span class="hl">mais emprestadas</span> do mês</h2>
-  <p class="lead in">Com o nome do autor e a quantidade de empréstimos. Escreva com o <code>QueryBuilder</code>.</p>
+  <h2 class="in">Os dez serviços <span class="hl">mais procurados</span> do mês</h2>
+  <p class="lead in">Com o nome do serviço e a quantidade de atendimentos. Escreva com o <code>QueryBuilder</code>.</p>
   <ol class="steps mt">
     <li class="f">Quantas consultas SQL ela deve gerar? Confira no log.</li>
     <li class="f">Onde fica o código: controller ou service?</li>
@@ -598,14 +598,14 @@ await this.dataSource.transaction(async (manager) => {
   <ul class="checks two">
     <li class="f fade">CRUD completo pelos cinco endpoints</li>
     <li class="f fade">Listagem paginada e ordenada, com <code>total</code></li>
-    <li class="f fade">Banco populado (≥ 800 obras)</li>
+    <li class="f fade">Banco populado com volume (centenas de registros)</li>
     <li class="f fade">N+1 reproduzido, medido e corrigido</li>
     <li class="f fade">Sabe dizer qual versão piorou com 200 e por quê</li>
     <li class="f fade">Busca com filtros opcionais e parâmetros</li>
     <li class="f fade">Nenhuma consulta por concatenação</li>
     <li class="f fade">Transação testada com falha proposital</li>
     <li class="f fade">Rotas temporárias apagadas</li>
-    <li class="f fade">Sabe o que há de errado em <code>Partial&lt;Obra&gt;</code></li>
+    <li class="f fade">Sabe o que há de errado em <code>Partial&lt;Atendimento&gt;</code></li>
   </ul>
 </section>
 
@@ -615,7 +615,7 @@ await this.dataSource.transaction(async (manager) => {
   <div class="title-body">
     <div class="eyebrow in">Próximo</div>
     <h1 class="in">M07 · API:<br><span class="hl">rotas, controllers e DTOs</span></h1>
-    <p class="lead in">Roteiro completo e exercícios em <code>modulos/06-orm-consultas-crud/</code>.</p>
+    <p class="lead in">Roteiro completo, com a aplicação no projeto, em <code>modulos/06-orm-consultas-crud/</code>.</p>
   </div>
   <div class="meta in">Traga o <code>curl</code> da seção 04: o M07 começa por ele.</div>
 </section>

@@ -1,18 +1,18 @@
 # Canvas do Projeto
 
 > Preencha em **uma página**. Se não couber, o escopo está grande demais.
-> Etapa 1 · Substitua os textos entre `<>`.
+> P1 · Substitua os textos entre `<>`.
 >
-> ➕ **Opcional.** Nenhuma rubrica pontua o canvas: use-o se ajudar a equipe a fechar o escopo da Etapa 1.
+> ➕ **Opcional.** Nenhuma rubrica pontua o canvas: use-o se ajudar a equipe a fechar o escopo da P1.
 
 **Projeto:** `<nome>` · **Equipe:** `<integrantes>` · **Data:** `<AAAA-MM-DD>`
-**Organização parceira:** `<nome da organização>`
+**Comunidade:** `<tipo de organização ou grupo>` · ➕ **Parceira real (opcional):** `<nome>`
 
 ---
 
 ## 1. Problema
 
-> Na `<organização>`, `<quem>` precisa `<fazer o quê>`, mas hoje `<como é feito>`, o que
+> Em `<tipo de organização>`, `<quem>` precisa `<fazer o quê>`, mas hoje `<como é feito>`, o que
 > causa `<qual consequência>`.
 
 **Evidências de que o problema existe** (dados, falas, observação):

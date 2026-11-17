@@ -1,21 +1,23 @@
 # Cola — Entidades TypeORM
 
+Exemplos com `Pessoa`, `Atendimento` e `Servico`. Troque pelas entidades do projeto.
+
 ## Esqueleto
 
 ```ts
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()                      // nome da tabela = nome da classe em minúsculas
-export class Obra {
+export class Pessoa {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 200 })
-  titulo: string;
+  @Column({ length: 150 })
+  nome: string;
 }
 ```
 
-`@Entity("acervo_obra")` força outro nome de tabela.
+`@Entity("cadastro_pessoa")` força outro nome de tabela.
 
 ## Colunas
 
@@ -52,16 +54,16 @@ export class Obra {
 import { type Relation } from "typeorm";   // só tipo: exige o "type"
 
 // 1:N — o @ManyToOne carrega a chave estrangeira
-@ManyToOne(() => Autor, (a) => a.obras, { nullable: false, onDelete: "RESTRICT" })
-autor: Relation<Autor>;
+@ManyToOne(() => Pessoa, (p) => p.atendimentos, { nullable: false, onDelete: "RESTRICT" })
+pessoa: Relation<Pessoa>;
 
-@OneToMany(() => Obra, (o) => o.autor)
-obras: Relation<Obra[]>;
+@OneToMany(() => Atendimento, (a) => a.pessoa)
+atendimentos: Relation<Atendimento[]>;
 
 // N:N — @JoinTable em UM só lado
-@ManyToMany(() => Categoria, (c) => c.obras)
-@JoinTable({ name: "obra_categoria" })
-categorias: Relation<Categoria[]>;
+@ManyToMany(() => Servico, (s) => s.atendimentos)
+@JoinTable({ name: "atendimento_servico" })
+servicos: Relation<Servico[]>;
 
 // 1:1
 @OneToOne(() => Perfil, { cascade: true })
@@ -71,14 +73,14 @@ perfil: Relation<Perfil>;
 
 Sempre `() => Entidade` (função), nunca a classe direta, e sempre `Relation<>` no tipo da
 propriedade: os dois evitam o erro de importação circular do ESM
-(`Cannot access 'Obra' before initialization`).
+(`Cannot access 'Pessoa' before initialization`).
 
 ### `onDelete`
 
 | Valor | O que acontece | Quando |
 |---|---|---|
 | `RESTRICT` | Impede apagar o pai | **Padrão sensato** |
-| `CASCADE` | Apaga os filhos junto | Filho não existe sem o pai (`Exemplar → Obra`) |
+| `CASCADE` | Apaga os filhos junto | Filho não existe sem o pai (`Anexo → Atendimento`) |
 | `SET NULL` | Zera a referência | Vínculo opcional |
 
 Pergunta que decide: *"este registro faz sentido sozinho?"*
@@ -87,13 +89,13 @@ Pergunta que decide: *"este registro faz sentido sozinho?"*
 
 ```ts
 @Index()                                    // coluna
-@Column({ length: 13 })
-isbn: string;
+@Column({ length: 150 })
+nome: string;
 
-@Index(["autor", "anoPublicacao"])          // composto, na classe
-@Index(["tombo"], { unique: true })
+@Index(["pessoa", "criadoEm"])              // composto, na classe
+@Index(["protocolo"], { unique: true })
 @Entity()
-export class Obra {}
+export class Atendimento {}
 ```
 
 Indexe o que aparece em `WHERE`/`ORDER BY`/`JOIN` com frequência. PK e FK já são indexadas.
@@ -102,7 +104,7 @@ Indexe o que aparece em `WHERE`/`ORDER BY`/`JOIN` com frequência. PK e FK já s
 
 ```ts
 // no módulo do domínio
-@Module({ imports: [TypeOrmModule.forFeature([Autor, Obra])] })
+@Module({ imports: [TypeOrmModule.forFeature([Pessoa, Atendimento])] })
 
 // no app.module.ts
 TypeOrmModule.forRoot({
@@ -117,8 +119,8 @@ TypeOrmModule.forRoot({
 ## Conferir o que foi gerado
 
 ```bash
-docker compose exec db psql -U bibliocom -d bibliocom -c "\d obra"    # uma tabela
-docker compose exec db psql -U bibliocom -d bibliocom -c "\dt"          # todas
+docker compose exec db psql -U app -d app -c "\d pessoa"   # uma tabela
+docker compose exec db psql -U app -d app -c "\dt"         # todas
 ```
 
 ## Erros

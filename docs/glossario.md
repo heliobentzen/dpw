@@ -126,7 +126,7 @@ entidades. Útil para aprender; **proibido em produção**, porque pode apagar d
 **Chave primária (PK)** — Identificador único da linha. `@PrimaryGeneratedColumn()` a cria.
 
 **Chave estrangeira (FK)** — Referência a outra tabela; no TypeORM, o lado `@ManyToOne` a
-carrega. Declarar `@Column() autorId` junto expõe a coluna ao TypeScript.
+carrega. Declarar `@Column() pessoaId` junto expõe a coluna ao TypeScript.
 
 **Relação N-N** — `@ManyToMany` + `@JoinTable`; o TypeORM cria a tabela intermediária.
 
@@ -152,11 +152,11 @@ usando **sempre** o `manager` recebido lá dentro.
 **Roteamento** — Mapeamento de URL para método, feito pelos decorators `@Controller` e
 `@Get`/`@Post`/`@Patch`/`@Delete`.
 
-**Prefixo de rota** — Definido em `@Controller("obras")`; todas as rotas da classe partem
+**Prefixo de rota** — Definido em `@Controller("pessoas")`; todas as rotas da classe partem
 dele. O prefixo global (`/api`) é definido uma vez, em `main.ts`.
 
-**Parâmetro de rota** — Trecho variável da URL (`/obras/:id`), lido com `@Param("id")`.
-Rotas literais (`/obras/buscar`) devem ser declaradas **antes** das paramétricas.
+**Parâmetro de rota** — Trecho variável da URL (`/pessoas/:id`), lido com `@Param("id")`.
+Rotas literais (`/pessoas/buscar`) devem ser declaradas **antes** das paramétricas.
 
 **DTO** — *Data Transfer Object*: classe que descreve **o que entra** ou **o que sai** da
 API, separada da entidade que descreve **o que é guardado** (M07).
@@ -188,8 +188,8 @@ ameaça, não pela moda (M08).
 **Cookie `HttpOnly`** — Cookie que o JavaScript da página não consegue ler. Protege a sessão
 contra roubo por XSS.
 
-**Papel (role)** — Conjunto de permissões atribuído a usuários (associado, bibliotecário,
-coordenação).
+**Papel (role)** — Conjunto de permissões atribuído a usuários (por exemplo: voluntário,
+recepção, coordenação).
 
 **Autorização por objeto** — Verificar não só o papel, mas se **aquele registro** pertence a
 quem pede. É o que impede IDOR.
@@ -269,9 +269,11 @@ transformadora entre instituição e sociedade; exige demanda real, dialogicidad
 verificável. Não é estágio, não é visita técnica e não é palestra.
 
 **Organização parceira** — Entidade externa (ONG, escola, associação, órgão público) que
-apresenta a demanda e recebe a entrega.
+apresenta a demanda e recebe a entrega. Na disciplina, só existe na trilha opcional; o
+projeto obrigatório usa um problema comunitário fundamentado e personas.
 
-**Carta de anuência** — Documento em que a organização concorda em participar.
+**Carta de anuência** — Documento em que a organização concorda em participar (trilha
+opcional).
 
 **Relato de experiência** — Registro reflexivo da ação extensionista: contexto, ação,
 resultados, aprendizados.

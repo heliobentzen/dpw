@@ -1,6 +1,6 @@
 # Checklist de revisão de código (Pull Request)
 
-Para usar nas Etapas 2 e 3 do projeto. Uma revisão leva de 15 a 30 minutos; PR que exige mais que
+Para usar em todo PR do projeto, do M00 à P3. Uma revisão leva de 15 a 30 minutos; PR que exige mais que
 isso está grande demais e deveria ser dividido.
 
 > Revisar código é como a segunda leitura de um contrato antes de assinar: quem escreveu
@@ -48,7 +48,7 @@ isso está grande demais e deveria ser dividido.
 - [ ] O verbo HTTP combina com o efeito (`GET` nunca altera dados)?
 - [ ] O status de resposta é o do contrato (201 no `POST`, 204 no `DELETE`)?
 - [ ] Rotas de escrita cobertas por guard (`@UseGuards`)?
-- [ ] Rota literal (`/obras/destaques`) declarada **antes** da rota com parâmetro (`/obras/:id`)?
+- [ ] Rota literal (`/pessoas/aniversariantes`) declarada **antes** da rota com parâmetro (`/pessoas/:id`)?
 - [ ] Recurso inexistente vira `NotFoundException`, não `null` com status 200?
 - [ ] Todo `@Body()` usa uma classe DTO, e toda resposta passa por DTO de saída?
 - [ ] O Swagger documenta as respostas de erro, não só a de sucesso?
@@ -64,7 +64,7 @@ isso está grande demais e deveria ser dividido.
 
 ## Legibilidade
 
-- [ ] Os nomes dizem o que a coisa é? (`obrasDisponiveis` > `lista2`)
+- [ ] Os nomes dizem o que a coisa é? (`pessoasAtivas` > `lista2`)
 - [ ] Alguma função com mais de ~40 linhas ou 3 níveis de indentação?
 - [ ] Alguma duplicação óbvia que pediria extração?
 - [ ] Comentários explicam **por quê**, não **o quê**?
@@ -83,7 +83,7 @@ isso está grande demais e deveria ser dividido.
 
 | ❌ | ✅ |
 |---|---|
-| "Isso está errado." | "Aqui pode dar N+1 na listagem — que tal `relations: { autor: true }`?" |
+| "Isso está errado." | "Aqui pode dar N+1 na listagem — que tal `relations: { pessoa: true }`?" |
 | "Código ruim." | "Essa função faz três coisas; extrair a regra para o service deixaria mais fácil de testar." |
 | "Você não sabe fazer isso?" | "Não conhecia essa abordagem — pode me explicar por que escolheu assim?" |
 

@@ -9,8 +9,13 @@ dependem de nenhuma biblioteca. Ponto de entrada: [`index.html`](index.html).
 | [`m04-entidades.html`](m04-entidades.html) | [M04 — Entidades](../modulos/04-entidades-typeorm/) |
 | [`m06-consultas-crud.html`](m06-consultas-crud.html) | [M06 — Consultas e CRUD](../modulos/06-orm-consultas-crud/) |
 
-Os slides acompanham o roteiro do módulo, sem substituí-lo: cada seção segue analogia →
-conceito → código → mão na massa, e o detalhe completo continua no `README.md` do módulo.
+Os slides acompanham o módulo, sem substituí-lo: cada seção segue analogia → conceito →
+código. O que a equipe aplica no projeto está na seção **🧩 No projeto da equipe** do
+`README.md` do módulo.
+
+> **Exemplo dos slides:** o mesmo dos módulos — pessoas, atendimentos, serviços e anexos,
+> mais um empréstimo de equipamentos para ilustrar a transação do M06. Ao apresentar, deixe claro que
+> é ilustração: a turma aplica cada conceito no domínio da própria equipe.
 
 ## Apresentar
 

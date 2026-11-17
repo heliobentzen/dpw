@@ -8,8 +8,8 @@ linha do *stack trace*** — ela quase sempre diz o que fazer.
 ```
 [Nest] ERROR [ExceptionsHandler] Cannot read properties of undefined (reading 'nome')
 TypeError: Cannot read properties of undefined (reading 'nome')
-    at ObraResposta.de (/app/dist/acervo/dto/obra.resposta.js:14:29)   <- SEU código
-    at AcervoController.buscarUm (/app/dist/acervo/acervo.controller.js:22:31)
+    at PessoaResposta.de (/app/dist/pessoas/dto/pessoa.resposta.js:14:29)   <- SEU código
+    at PessoasController.buscarUm (/app/dist/pessoas/pessoas.controller.js:22:31)
     at /app/node_modules/@nestjs/core/router/router-execution-context.js:38  <- framework
 ```
 
@@ -37,7 +37,7 @@ npm install                     # na RAIZ do monorepo
 npm ls X                         # confirma se está lá
 ```
 
-Se o módulo é `@bibliocom/tipos`, o workspace não foi resolvido: confira o
+Se o módulo é `@projeto/tipos`, o workspace não foi resolvido: confira o
 campo `workspaces` do `package.json` da raiz e rode `npm install` lá de novo.
 
 **`npm ci` falha no CI: `package.json` e `package-lock.json` fora de sincronia**
@@ -100,13 +100,13 @@ versão antiga, o que faz parecer que a mudança não teve efeito.
 
 ## Entidades e migrações
 
-**`Entity metadata for Obra#autor was not found`**
+**`Entity metadata for Atendimento#pessoa was not found`**
 A entidade não está no `TypeOrmModule.forFeature([...])` do módulo.
 
 **`Cannot read properties of undefined (reading 'name')` na inicialização**
 Importação circular entre entidades. Use sempre `() => Entidade`, nunca a classe direta.
 
-**`QueryFailedError: relation "obra" does not exist`**
+**`QueryFailedError: relation "pessoa" does not exist`**
 As migrações não foram aplicadas: `npm run migration:run`.
 
 **`No changes in database schema were found`**
@@ -134,7 +134,7 @@ npx ts-node src/semear.ts
 ## Consultas
 
 **Uma relação vem `undefined`**
-Faltou `relations: { autor: true }` ou `leftJoinAndSelect`. Ver M06.
+Faltou `relations: { pessoa: true }` ou `leftJoinAndSelect`. Ver M06.
 
 **A API está lenta e o log tem dezenas de SELECTs**
 Problema N+1. Declare as relações em vez de buscar dentro de um laço.

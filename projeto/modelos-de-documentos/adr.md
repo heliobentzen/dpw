@@ -2,7 +2,7 @@
 
 > Etapas 1 e 3 · Um arquivo por decisão, em `docs/adr/NNNN-titulo-curto.md`.
 >
-> 📌 **Cobrado em:** Etapa 1, critério 5 (1+ ADR; 2+ para nota máxima) e Etapa 4, critério 1 (decisões comparadas com alternativas). Seções marcadas ➕ não são avaliadas.
+> 📌 **Usado em:** P4, critério 1 (decisões comparadas com alternativas). Os ADRs nascem ao longo dos módulos, quando a decisão é tomada. Seções marcadas ➕ não são avaliadas.
 > ADR registra **por que** algo foi decidido — a informação que se perde primeiro e faz
 > mais falta seis meses depois.
 
@@ -80,13 +80,16 @@ Mantenha em `docs/adr/README.md`:
 > substituído. O valor do registro está justamente na trilha de raciocínio ao longo do
 > tempo.
 
-## ADRs mínimos exigidos
+## Quando escrever um ADR
 
-**Na Etapa 1:** pelo menos 1 (2+ para nota máxima), por exemplo:
+Escreva no momento em que a decisão é tomada, não na semana do relatório. Os módulos indicam
+os momentos naturais:
 
-1. Escolha da stack (linguagem, framework, banco) e justificativa
-2. Estratégia de autenticação e modelo de papéis
-3. Uma decisão de escopo técnico relevante (o que **não** será feito e por quê)
+| Módulo | Decisão típica do projeto |
+| --- | --- |
+| M04 | Uma política de `onDelete` que não é óbvia (o que acontece com o histórico?) |
+| M08 | Sessão ou token, e o modelo de papéis |
+| M09 | O que fazer com os dados pessoais (o que coletar, o que expor) |
+| M12 | Onde hospedar e quem paga |
 
-**Na Etapa 3:** acrescente ao menos mais um ADR sobre uma decisão tomada durante o
-desenvolvimento.
+A P4 pede **2 ou mais** ADRs com alternativas comparadas.

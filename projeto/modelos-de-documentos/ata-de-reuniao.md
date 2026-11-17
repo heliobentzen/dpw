@@ -2,7 +2,7 @@
 
 > Use para **toda** reunião com a organização parceira e para as reuniões de decisão da
 >
-> 📌 **Cobrado em:** Etapa 1, pré-requisito (conversa com a organização) e extensão (diagnóstico e devolutiva registrados). Seções marcadas ➕ não são avaliadas.
+> 📌 **Usado em:** trilha opcional de parceria (encontros e devolutiva registrados) e, se a equipe quiser, nas reuniões de decisão. Seções marcadas ➕ não são avaliadas.
 > equipe. Ata curta e imediata vale mais que ata completa escrita três dias depois.
 > Arquive em `docs/atas/AAAA-MM-DD-assunto.md`.
 
@@ -69,7 +69,7 @@
 
 ---
 
-**Assinaturas** (obrigatório em reuniões com a organização parceira)
+**Assinaturas** (em reuniões com a organização parceira, na trilha opcional)
 
 | Nome | Assinatura |
 |---|---|
@@ -77,7 +77,7 @@
 
 ---
 
-## Roteiro: reunião de diagnóstico (Etapa 1 e extensão)
+## Roteiro: primeira conversa (P1, semana 2)
 
 1. Como esse processo funciona hoje, do começo ao fim?
 2. Quem participa? Quantas pessoas? Com que frequência?

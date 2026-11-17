@@ -1,9 +1,10 @@
 # Termo de Transferência do Sistema
 
-> Etapa 4 · Documento assinado na devolutiva final. É o que impede que o projeto morra
+> P4 · É o que impede que o projeto morra junto com o semestre.
 >
-> 📌 **Cobrado em:** Etapa 4, critério 6 — acessos transferidos, senhas trocadas, custos, backup e 2 administradores. Seções marcadas ➕ não são avaliadas.
-> junto com o semestre.
+> 📌 **Cobrado em:** P4, critério 6 — preenchido como se o sistema fosse ser entregue amanhã:
+> contas, como trocar senhas, custos, backup e quem administraria. **Assinatura só na trilha
+> opcional**, quando há organização real. Seções marcadas ➕ não são avaliadas.
 
 ---
 

@@ -1,16 +1,16 @@
 # Relatório Técnico — estrutura e orientações
 
-> Etapa 4 · 8 a 15 páginas (só as seções obrigatórias) + apêndices · ABNT (ou norma da instituição) · PDF
+> P4 · 8 a 15 páginas (só as seções obrigatórias) + apêndices · ABNT · PDF
 >
-> 📌 **Cobrado em:** Etapa 4 — decisões técnicas (seção 5), resultados e limitações (seções 10 e 12), escrita (todo o texto). O relato é avaliado na extensão. Seções marcadas ➕ não são avaliadas.
+> 📌 **Cobrado em:** P4 — decisões técnicas (seção 5), resultados e limitações (seções 10 e 12), escrita (todo o texto). O relato é avaliado na extensão. Seções marcadas ➕ não são avaliadas.
 
 ---
 
 ## Capa
 
-`<INSTITUIÇÃO>` · `<CURSO>` · `<DISCIPLINA>`
+Instituto Federal de Pernambuco (IFPE) — Campus `<campus>` · Tecnologia em Análise e Desenvolvimento de Sistemas · Desenvolvimento de Projeto Web
 **`<TÍTULO DO PROJETO>`**
-`<Subtítulo: sistema web para <organização parceira>>`
+`<Subtítulo: sistema web para <tipo de organização ou grupo da comunidade>>`
 `<Nomes dos integrantes, em ordem alfabética>`
 `<Orientação: docente>`
 `<Cidade, mês/ano>`
@@ -25,12 +25,12 @@ Escreva por último.
 ## 1. Introdução (1–2 páginas)
 
 - Contexto: onde, com quem, por quê
-- Problema, na formulação da Etapa 1
+- Problema, na formulação da P1
 - Objetivo geral e objetivos específicos
 - Justificativa: relevância social e técnica
 - Como o documento está organizado
 
-## 2. A organização parceira (1 página) · ➕ opcional
+## 2. A comunidade e o problema (1 página) · ➕ opcional
 
 Quem é, quando surgiu, o que faz, quantas pessoas atende, como se sustenta. Como se deu o
 primeiro contato e como a relação evoluiu ao longo do semestre.
@@ -99,20 +99,20 @@ Inclua um diagrama do processo "como é" (as-is) e aponte onde estão os gargalo
 
 ## 10. Resultados (1–2 páginas)
 
-Retome os critérios de sucesso da Etapa 1:
+Retome os metas da P1, com o valor de "hoje" medido no início:
 
 | Objetivo | Meta | Alcançado | Evidência | Análise |
 |---|---|---|---|---|
 | | | | | |
 
-Inclua: evidências de uso real (nº de registros, período), depoimentos da organização,
-comparação antes × depois.
+Inclua: os números do teste com usuário (tempo, erros, hesitações), comparação com a
+referência da P1 e, na trilha opcional, evidências de uso real e depoimentos da organização.
 
 **Meta não alcançada não reprova — omiti-la, sim.** Analise honestamente por quê.
 
 ## 11. Relato de experiência (2–3 páginas) ⭐ · ➕ opcional
 
-A dimensão extensionista. Ver
+Só para quem seguiu a trilha opcional de parceria. Ver
 [`relato-de-experiencia.md`](relato-de-experiencia.md) para a estrutura detalhada.
 
 ## 12. Conclusão e trabalhos futuros (1 página)
@@ -134,9 +134,9 @@ ABNT NBR 6023. Inclua documentação oficial, livros, artigos e a legislação c
 | B | Modelo de dados completo |
 | C | Backlog final com situação de cada história |
 | D | Atas das reuniões |
-| E | Termo de transferência assinado |
-| F | Carta de anuência |
-| G | Evidências da ação extensionista |
+| E | Termo de transferência preenchido (assinado, na trilha opcional) |
+| F | ➕ Carta de anuência (trilha opcional) |
+| G | ➕ Evidências da parceria (trilha opcional) |
 | H | Ferramentas de apoio utilizadas (inclusive assistentes de IA, se usados) |
 
 ---

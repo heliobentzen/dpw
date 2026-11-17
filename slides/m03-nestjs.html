@@ -31,10 +31,10 @@
   <div class="eyebrow in">Ao fim da aula</div>
   <h2 class="in">Isto vai funcionar <span class="hl">na sua máquina</span></h2>
   <div class="routes">
-    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras</span><span class="pill g">200</span><span class="what">a lista do acervo</span></div>
-    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/1</span><span class="pill g">200</span><span class="what">uma obra</span></div>
-    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/abc</span><span class="pill r">400</span><span class="what">"abc" não é número</span></div>
-    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/obras/999</span><span class="pill r">404</span><span class="what">obra não encontrada</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/pessoas</span><span class="pill g">200</span><span class="what">a lista de pessoas</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/pessoas/1</span><span class="pill g">200</span><span class="what">uma pessoa</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/pessoas/abc</span><span class="pill r">400</span><span class="what">"abc" não é número</span></div>
+    <div class="route f left"><span class="pill k">GET</span><span class="path">/api/pessoas/999</span><span class="pill r">404</span><span class="what">pessoa não encontrada</span></div>
     <div class="route f left"><span class="pill k">GET</span><span class="path">/api/docs</span><span class="pill">UI</span><span class="what">documentação gerada do código</span></div>
   </div>
   <p class="f mt muted">Três rotas parecem pouco. O que importa é a <b>estrutura</b> — o M04, o M06 e o M07 vão preenchê-la sem mover nada de lugar.</p>
@@ -69,7 +69,7 @@ node --version
 > v24.11.0
 npm --version
 > 11.6.2
-cd C:\dev\bibliocom
+cd C:\dev\projeto
 </pre>
     <div class="stack focus-list">
       <div class="f" data-hl="1-2"><h3><code>node</code></h3><p class="muted">Executa JavaScript fora do navegador. É ele que roda a API.</p></div>
@@ -168,7 +168,7 @@ await bootstrap();
   </div>
   <p class="f mt">O TypeScript <b>não reescreve</b> caminhos de import: ele só apaga os tipos. O import aponta para o arquivo que <b>vai existir</b>.</p>
   <div class="grid-2 mt">
-    <div class="card g f"><span class="tag">Arquivo seu</span><h3><code>from "./acervo.service.js"</code></h3><p>com <code>.js</code> no fim</p></div>
+    <div class="card g f"><span class="tag">Arquivo seu</span><h3><code>from "./pessoas.service.js"</code></h3><p>com <code>.js</code> no fim</p></div>
     <div class="card f" data-with><span class="tag">Pacote instalado</span><h3><code>from "@nestjs/common"</code></h3><p>sem extensão</p></div>
   </div>
 </section>
@@ -179,7 +179,7 @@ await bootstrap();
   <pre class="code lg in" data-lang="text">
 error TS2835: Relative import paths need explicit file extensions
 in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'.
-⟪Did you mean './acervo.service.js'?⟫
+⟪Did you mean './pessoas.service.js'?⟫
 </pre>
   <div class="grid-2 mt">
     <div class="card f"><span class="tag">Na prática</span><p>A CLI já gera os imports certos. Você só escreve à mão os imports novos.</p></div>
@@ -291,7 +291,7 @@ export class AppModule {}
   <div class="split">
     <div class="stack">
       <pre class="code lg in" data-title="src/app.service.ts">
-return "BiblioCom no ar";
+return "API no ar";
 </pre>
       <pre class="code term f" data-lang="sh">
 > File change detected.
@@ -311,7 +311,7 @@ return "BiblioCom no ar";
 <section class="slide dark section">
   <div class="num in">03</div>
   <h1 class="in">Seu primeiro endpoint</h1>
-  <p class="lead in">Um módulo por área do domínio. O nosso: <b>acervo</b>.</p>
+  <p class="lead in">Um módulo por área do domínio. O do exemplo: <b>pessoas</b> — no projeto, o recurso do cenário principal.</p>
 </section>
 
 <section class="slide">
@@ -319,38 +319,38 @@ return "BiblioCom no ar";
   <h2 class="in">O mais valioso da CLI: <span class="hl">os registros</span></h2>
   <div class="split">
     <pre class="code term lg in" data-lang="sh">
-nest generate module acervo
-nest generate controller acervo --no-spec
-nest generate service acervo --no-spec
+nest generate module pessoas
+nest generate controller pessoas --no-spec
+nest generate service pessoas --no-spec
 </pre>
     <div class="stack focus-list">
-      <div class="f" data-hl="1"><h3>module</h3><p class="muted">Cria <code>acervo.module.ts</code> e o registra em <code>imports</code> do <code>AppModule</code>.</p></div>
-      <div class="f" data-hl="2"><h3>controller</h3><p class="muted">Cria e registra em <code>controllers</code> do <code>AcervoModule</code>.</p></div>
+      <div class="f" data-hl="1"><h3>module</h3><p class="muted">Cria <code>pessoas.module.ts</code> e o registra em <code>imports</code> do <code>AppModule</code>.</p></div>
+      <div class="f" data-hl="2"><h3>controller</h3><p class="muted">Cria e registra em <code>controllers</code> do <code>PessoasModule</code>.</p></div>
       <div class="f" data-hl="3"><h3>service</h3><p class="muted">Cria e registra em <code>providers</code>. O <code>--no-spec</code> pula o teste (fica para o M10).</p></div>
     </div>
   </div>
-  <div class="note warn f" data-hl=""><b>Ajuste</b> Troque <code>@Controller("acervo")</code> por <code>@Controller("obras")</code>. — o módulo organiza o código; a rota nomeia o recurso.</div>
+  <div class="note warn f" data-hl=""><b>Confira</b> A CLI usou o nome do módulo como rota: <code>@Controller("pessoas")</code>. Se o recurso tiver outro nome, ajuste.</div>
 </section>
 
 <section class="slide">
-  <div class="eyebrow in">Mão na massa · acervo.controller.ts</div>
+  <div class="eyebrow in">Mão na massa · pessoas.controller.ts</div>
   <h2 class="in">Devolva um valor. O Nest cuida do <span class="hl">HTTP</span>.</h2>
   <div class="split code-wide">
     <pre class="code sm in">
-@Controller("obras")
-export class AcervoController {
+@Controller("pessoas")
+export class PessoasController {
   @Get()
   listar() {
     return [
-      { id: 1, titulo: "Dom Casmurro", ano: 1899 },
-      { id: 2, titulo: "Grande Sertão: Veredas", ano: 1956 },
+      { id: 1, nome: "Ana Souza", telefone: "11 90000-0001" },
+      { id: 2, nome: "Bruno Lima", telefone: "11 90000-0002" },
     ];
   }
 }
 </pre>
     <div>
       <div class="captions" style="margin:0 0 24px">
-        <p class="f" data-hl="1"><b>"obras"</b>: todas as rotas desta classe começam em <code>/obras</code>.</p>
+        <p class="f" data-hl="1"><b>"pessoas"</b>: todas as rotas desta classe começam em <code>/pessoas</code>.</p>
         <p class="f" data-hl="3-4"><b>listar</b> é um nome seu — quem define a URL são os decorators.</p>
         <p class="f" data-hl="5-8">Um array comum de objetos JavaScript.</p>
       </div>
@@ -426,7 +426,7 @@ export class AcervoController {
   </div>
   <p class="muted in" style="margin-top:14px">Regra no controller: lento, e quebra por porta ocupada ou rota renomeada.</p>
   <pre class="code lg f mt">
-expect(() => servico.emprestar(exemplar, associadoComTres)).toThrow();
+expect(() => servico.marcar(pessoaComTresEmAberto)).toThrow();
 </pre>
   <p class="f muted" style="margin-top:14px">Regra no service: uma linha, sem rede, sem servidor.</p>
   <div class="note ok f mt-auto"><b>Moral</b> Teste caro é teste que ninguém escreve.</div>
@@ -441,7 +441,7 @@ expect(() => servico.emprestar(exemplar, associadoComTres)).toThrow();
     <tr class="f"><td>Controller</td><td>Traduzir HTTP ↔ chamada de método</td><td class="muted">Falar com o banco, conter regra de negócio</td></tr>
     <tr class="f"><td>Service</td><td>Regra de negócio e acesso a dados</td><td class="muted">Saber que HTTP existe</td></tr>
   </table>
-  <div class="note info f mt"><b>Sem separar</b> Um <code>app.get("/obras", …)</code> no Express funciona no primeiro mês. Com 40 rotas, é um arquivo de 800 linhas onde ninguém acha nada.</div>
+  <div class="note info f mt"><b>Sem separar</b> Um <code>app.get("/pessoas", …)</code> no Express funciona no primeiro mês. Com 40 rotas, é um arquivo de 800 linhas onde ninguém acha nada.</div>
 </section>
 
 <section class="slide dark statement">
@@ -458,9 +458,9 @@ expect(() => servico.emprestar(exemplar, associadoComTres)).toThrow();
   <h2 class="in">Onde fica cada código?</h2>
   <table class="tbl">
     <tr class="in"><th>Código</th><th>Muda sem HTTP?</th><th>Camada</th></tr>
-    <tr class="in"><td>A lista de obras</td><td class="f fade muted">Não — é a mesma de qualquer origem</td><td class="f zoom ans" data-with>Service</td></tr>
+    <tr class="in"><td>A lista de pessoas</td><td class="f fade muted">Não — é a mesma de qualquer origem</td><td class="f zoom ans" data-with>Service</td></tr>
     <tr class="in"><td>Converter <code>:id</code> da URL em número</td><td class="f fade muted">Sim — sem URL não há <code>:id</code></td><td class="f zoom ans" data-with>Controller</td></tr>
-    <tr class="in"><td>Obra sem exemplar não empresta</td><td class="f fade muted">Não — é regra da biblioteca</td><td class="f zoom ans" data-with>Service</td></tr>
+    <tr class="in"><td>Horário ocupado não aceita agendamento</td><td class="f fade muted">Não — é regra da organização</td><td class="f zoom ans" data-with>Service</td></tr>
     <tr class="in"><td>A resposta do POST é 201</td><td class="f fade muted">Sim — status é conceito HTTP</td><td class="f zoom ans" data-with>Controller</td></tr>
   </table>
   <aside class="notes">Deixe a turma responder antes de revelar cada linha.</aside>
@@ -469,7 +469,7 @@ expect(() => servico.emprestar(exemplar, associadoComTres)).toThrow();
 <section class="slide">
   <div class="eyebrow in">Checkpoint</div>
   <div class="quiz fill-v">
-    <div class="quiz-q in">"Um associado não pode ter mais de três empréstimos em aberto." Onde mora essa regra?</div>
+    <div class="quiz-q in">"Uma pessoa não pode ter mais de três agendamentos em aberto." Onde mora essa regra?</div>
     <div class="choices two in">
       <button>No controller, junto da rota</button>
       <button data-ok>No service</button>
@@ -500,8 +500,8 @@ expect(() => servico.emprestar(exemplar, associadoComTres)).toThrow();
   <div class="vs">
     <div class="stack">
       <pre class="code sm red in" id="bad" data-title="❌ fabricar">
-export class AcervoController {
-  private acervo = new AcervoService();
+export class PessoasController {
+  private pessoas = new PessoasService();
 }
 </pre>
       <div class="card tight r f"><span class="tag">Soldado</span><p>No teste (M10), não há como trocar o service por um dublê — o <code>new</code> está lá dentro.</p></div>
@@ -509,13 +509,13 @@ export class AcervoController {
     </div>
     <div class="stack">
       <pre class="code sm in" id="good" data-title="✅ receber">
-export class AcervoController {
+export class PessoasController {
   constructor(
-    private readonly acervo: AcervoService,
+    private readonly pessoas: PessoasService,
   ) {}
 }
 </pre>
-      <div class="card tight g f"><span class="tag">Declara o que precisa</span><p>Não diz <b>como</b> conseguir. Em nenhum lugar existe <code>new AcervoService()</code>.</p></div>
+      <div class="card tight g f"><span class="tag">Declara o que precisa</span><p>Não diz <b>como</b> conseguir. Em nenhum lugar existe <code>new PessoasService()</code>.</p></div>
       <div class="card tight g f"><span class="tag">Quem cria é o Nest</span><p>Lê o tipo do parâmetro, procura em <code>providers</code> e entrega uma instância pronta.</p></div>
     </div>
   </div>
@@ -525,7 +525,7 @@ export class AcervoController {
   <div class="eyebrow in">Por dentro</div>
   <h2 class="in">Como o Nest resolve o construtor</h2>
   <div class="flow fill-v" style="flex-direction:row">
-    <div class="node mono f">acervo: AcervoService<small>o tipo do parâmetro</small></div>
+    <div class="node mono f">pessoas: PessoasService<small>o tipo do parâmetro</small></div>
     <div class="arrow f"></div>
     <div class="node f">procura em<br>providers<small>do módulo</small></div>
     <div class="arrow f"></div>
@@ -539,21 +539,21 @@ export class AcervoController {
 <section class="slide">
   <div class="eyebrow in">Mão na massa · quebre de propósito</div>
   <h2 class="in">A prova de que a injeção é <span class="hl">real</span></h2>
-  <pre class="code lg in" id="mod" data-title="src/acervo/acervo.module.ts">
+  <pre class="code lg in" id="mod" data-title="src/pessoas/pessoas.module.ts">
 @Module({
-  controllers: [AcervoController],
-  providers: [⟦/* AcervoService */⟧],
+  controllers: [PessoasController],
+  providers: [⟦/* PessoasService */⟧],
 })
 </pre>
   <pre class="code term f" style="margin-top:14px" id="err" data-lang="sh">
-> Nest can't resolve dependencies of the AcervoController ⟦(?)⟧.
-> Please make sure that the argument AcervoService at ⟦index [0]⟧ is available
-> in the ⟦AcervoModule⟧ module.
+> Nest can't resolve dependencies of the PessoasController ⟦(?)⟧.
+> Please make sure that the argument PessoasService at ⟦index [0]⟧ is available
+> in the ⟦PessoasModule⟧ module.
 </pre>
   <div class="captions">
     <p class="f" data-hl="err:1"><b>(?)</b> é a posição do parâmetro que não resolveu.</p>
     <p class="f" data-hl="err:2"><b>index [0]</b>: o primeiro parâmetro do construtor.</p>
-    <p class="f" data-hl="err:3 mod:3"><b>Onde procurar:</b> a lista <code>providers</code> do <code>AcervoModule</code>. Descomente e o servidor volta.</p>
+    <p class="f" data-hl="err:3 mod:3"><b>Onde procurar:</b> a lista <code>providers</code> do <code>PessoasModule</code>. Descomente e o servidor volta.</p>
   </div>
   <aside class="notes">É o erro mais comum deste módulo e do M04: classe criada e esquecida fora de providers.</aside>
 </section>
@@ -572,7 +572,7 @@ export class AcervoController {
 <section class="slide dark section">
   <div class="num in">06</div>
   <h1 class="in">Parâmetros, pipes e erros</h1>
-  <p class="lead in">Buscar uma obra exige ler um pedaço da URL.</p>
+  <p class="lead in">Buscar uma pessoa exige ler um pedaço da URL.</p>
 </section>
 
 <section class="slide">
@@ -580,12 +580,12 @@ export class AcervoController {
   <h2 class="in">O <span class="hl">porteiro</span> entre a requisição e o seu método</h2>
   <div class="stack fill-v">
     <div class="flow">
-      <div class="node mono f">GET /obras/1</div><div class="arrow f"></div>
+      <div class="node mono f">GET /pessoas/1</div><div class="arrow f"></div>
       <div class="node gl f">ParseIntPipe<small>"1" → 1</small></div><div class="arrow g f"></div>
       <div class="node g f">buscarUm(1)<small>seu método roda</small></div>
     </div>
     <div class="flow" style="margin-top:34px">
-      <div class="node mono f">GET /obras/abc</div><div class="arrow f"></div>
+      <div class="node mono f">GET /pessoas/abc</div><div class="arrow f"></div>
       <div class="node rl f">ParseIntPipe<small>"abc" → ?</small></div><div class="arrow r f"></div>
       <div class="node r f">400 Bad Request<small>seu método nem é chamado</small></div>
     </div>
@@ -597,21 +597,21 @@ export class AcervoController {
   <div class="eyebrow in">Mão na massa · rota com parâmetro</div>
   <h2 class="in">Do service à rota</h2>
   <div class="grid-2" style="align-items:start">
-    <pre class="code in" id="svc" data-title="acervo.service.ts">
-buscarUm(id: number): Obra | undefined {
-  return this.obras.find((o) => o.id === id);
+    <pre class="code in" id="svc" data-title="pessoas.service.ts">
+buscarUm(id: number): Pessoa | undefined {
+  return this.pessoas.find((p) => p.id === id);
 }
 </pre>
-    <pre class="code in" id="ctl" data-title="acervo.controller.ts">
+    <pre class="code in" id="ctl" data-title="pessoas.controller.ts">
 @Get(":id")
 buscarUm(@Param("id", ParseIntPipe) id: number) {
-  return this.acervo.buscarUm(id);
+  return this.pessoas.buscarUm(id);
 }
 </pre>
   </div>
   <div class="captions">
-    <p class="f" data-hl="svc:1"><b>Obra | undefined</b> — tipo de união: "ou uma obra, ou nada". O tipo diz em voz alta o que o <code>find</code> faz.</p>
-    <p class="f" data-hl="ctl:1"><b>":id"</b> — os dois-pontos marcam um trecho variável: <code>/obras/1</code>, <code>/obras/42</code>…</p>
+    <p class="f" data-hl="svc:1"><b>Pessoa | undefined</b> — tipo de união: "ou uma pessoa, ou nada". O tipo diz em voz alta o que o <code>find</code> faz.</p>
+    <p class="f" data-hl="ctl:1"><b>":id"</b> — os dois-pontos marcam um trecho variável: <code>/pessoas/1</code>, <code>/pessoas/42</code>…</p>
     <p class="f" data-hl="ctl:2"><b>@Param("id")</b> extrai o pedaço da URL. O nome tem de bater com o do <code>@Get</code>.</p>
     <p class="f" data-hl="ctl:2"><b>ParseIntPipe</b> converte em número <b>antes</b> de o método ser chamado.</p>
   </div>
@@ -621,9 +621,9 @@ buscarUm(@Param("id", ParseIntPipe) id: number) {
   <div class="eyebrow in">Rode · o navegador só mostra o corpo</div>
   <h2 class="in">Veja o <span class="hl">status</span> com <code>curl -i</code></h2>
   <pre class="code term lg in" data-lang="sh">
-curl.exe -i http://localhost:3000/obras/1
+curl.exe -i http://localhost:3000/pessoas/1
 > HTTP/1.1 ⟪200 OK⟫
-curl.exe -i http://localhost:3000/obras/abc
+curl.exe -i http://localhost:3000/pessoas/abc
 > HTTP/1.1 ⟦400 Bad Request⟧
 > {"message":"Validation failed (numeric string is expected)","statusCode":400}
 </pre>
@@ -636,8 +636,8 @@ curl.exe -i http://localhost:3000/obras/abc
 
 <section class="slide statement">
   <div class="eyebrow in">Experimento · tire o pipe</div>
-  <div class="big in" style="font-size:52px"><code style="font-size:.8em">@Param("id") id: number</code><br>e chame <code style="font-size:.8em">/obras/1</code>. O que acontece?</div>
-  <p class="sub f"><b style="color:var(--red)">404 numa obra que existe.</b> O <code>id</code> chega como <code>"1"</code> — texto. E <code>"1" === 1</code> é <code>false</code>.</p>
+  <div class="big in" style="font-size:52px"><code style="font-size:.8em">@Param("id") id: number</code><br>e chame <code style="font-size:.8em">/pessoas/1</code>. O que acontece?</div>
+  <p class="sub f"><b style="color:var(--red)">404 numa pessoa que existe.</b> O <code>id</code> chega como <code>"1"</code> — texto. E <code>"1" === 1</code> é <code>false</code>.</p>
   <p class="sub f">O <code>: number</code> é TypeScript, e o TypeScript <b>some</b> ao virar JavaScript. Ninguém confere tipos em execução — exceto quem você mandar.</p>
 </section>
 
@@ -646,13 +646,13 @@ curl.exe -i http://localhost:3000/obras/abc
   <h2 class="in">Um <code>200</code> vazio é uma <span class="hl-red">mentira</span></h2>
   <div class="split">
     <pre class="code sm in">
-buscarUm(id: number): Obra {
-  const obra = this.obras.find((o) => o.id === id);
-  if (!obra) {
+buscarUm(id: number): Pessoa {
+  const pessoa = this.pessoas.find((p) => p.id === id);
+  if (!pessoa) {
     throw new NotFoundException(
-      `Obra ${id} não encontrada`);
+      `Pessoa ${id} não encontrada`);
   }
-  return obra;
+  return pessoa;
 }
 </pre>
     <table class="tbl">
@@ -671,7 +671,7 @@ buscarUm(id: number): Obra {
   <div class="vs">
     <div class="stack">
       <pre class="code red in" id="o1">
-@Get(":id")      // casa com /obras/nome
+@Get(":id")      // casa com /pessoas/nome
 buscarUm(...) {}
 
 @Get("nome")     // nunca alcançada
@@ -706,14 +706,14 @@ buscarUm(...) {}
     <div class="stack">
       <pre class="code sm in" data-lang="ini" data-title=".env  ·  fora do Git">
 PORT=3000
-NOME_BIBLIOTECA=Biblioteca Comunitária do Bairro
+NOME_ORGANIZACAO=Associação do Bairro
 </pre>
       <p class="f muted">Os <b>seus</b> valores. Secreto.</p>
     </div>
     <div class="stack">
       <pre class="code sm in" data-lang="ini" data-title=".env.example  ·  no Git">
 PORT=
-NOME_BIBLIOTECA=
+NOME_ORGANIZACAO=
 </pre>
       <p class="f muted"><b>Quais</b> variáveis existem. Público — é por ele que alguém novo sabe o que configurar.</p>
     </div>
@@ -728,14 +728,14 @@ NOME_BIBLIOTECA=
     <pre class="code in" id="am" data-title="app.module.ts">
 imports: [
   ConfigModule.forRoot({ isGlobal: true }),
-  AcervoModule,
+  PessoasModule,
 ],
 </pre>
-    <pre class="code sm in" id="as" data-title="acervo.service.ts">
+    <pre class="code sm in" id="as" data-title="pessoas.service.ts">
 constructor(private readonly config: ConfigService) {}
 
-nomeDaBiblioteca(): string {
-  return this.config.get&lt;string>("NOME_BIBLIOTECA")
+nomeDaOrganizacao(): string {
+  return this.config.get&lt;string>("NOME_ORGANIZACAO")
     ?? "sem nome";
 }
 </pre>
@@ -756,9 +756,9 @@ import { z } from "zod";
 
 export const esquemaEnv = z.object({
   PORT: z.coerce.number().default(3000),
-  NOME_BIBLIOTECA: z
-    .string("NOME_BIBLIOTECA é obrigatória")
-    .min(1, "NOME_BIBLIOTECA não pode ficar vazia"),
+  NOME_ORGANIZACAO: z
+    .string("NOME_ORGANIZACAO é obrigatória")
+    .min(1, "NOME_ORGANIZACAO não pode ficar vazia"),
 });
 </pre>
   <div class="captions">
@@ -783,7 +783,7 @@ export function validarEnv(bruto: Record&lt;string, unknown>) {
 </pre>
   <pre class="code f" style="margin-top:14px" data-lang="text">
 Error: Variáveis de ambiente inválidas:
-  - ⟦NOME_BIBLIOTECA é obrigatória⟧
+  - ⟦NOME_ORGANIZACAO é obrigatória⟧
 </pre>
   <div class="captions">
     <p class="f" data-hl="2"><b>safeParse</b> devolve sucesso ou erro em vez de lançar. <b>Você</b> decide o que fazer.</p>
@@ -824,10 +824,10 @@ await app.listen(process.env.PORT ?? 3000);
 
 <section class="slide">
   <div class="eyebrow in">O mapa que você percorreu</div>
-  <h2 class="in">Caminho de <code>GET /api/obras/42</code></h2>
+  <h2 class="in">Caminho de <code>GET /api/pessoas/42</code></h2>
   <div class="stack fill-v">
     <div class="flow">
-      <div class="node mono f">GET /api/obras/42</div><div class="arrow f"></div>
+      <div class="node mono f">GET /api/pessoas/42</div><div class="arrow f"></div>
       <div class="node ghost f">Middleware<small>M08 · M09</small></div><div class="arrow f"></div>
       <div class="node ghost f">Guard<small>M08</small></div><div class="arrow f"></div>
       <div class="node g f">Pipe<small>ParseIntPipe</small></div>
@@ -847,7 +847,7 @@ await app.listen(process.env.PORT ?? 3000);
   <div class="eyebrow in" style="color:var(--red)">Pegadinha de mercado</div>
   <h2 class="in"><code>new</code> dentro da classe</h2>
   <pre class="code lg red in">
-private acervo = new AcervoService();
+private pessoas = new PessoasService();
 </pre>
   <ul class="clean mt focus-list">
     <li class="f" data-hl="1">Funciona hoje — e amarra o controller àquela implementação.</li>
@@ -869,12 +869,12 @@ private acervo = new AcervoService();
 
 <section class="slide">
   <div class="eyebrow in">Desafio de fixação</div>
-  <h2 class="in"><code>GET /api/obras/sorteio</code></h2>
-  <p class="lead in">Uma obra aleatória para a vitrine "leia isto hoje". <b>Antes de escrever código</b>, responda:</p>
+  <h2 class="in"><code>GET /api/pessoas/aniversariantes</code></h2>
+  <p class="lead in">Quem faz aniversário hoje, para o mural da recepção. <b>Antes de escrever código</b>, responda:</p>
   <ol class="steps mt">
-    <li class="f">O sorteio fica no controller ou no service? Por quê?</li>
+    <li class="f">O filtro "aniversário hoje" fica no controller ou no service? Por quê?</li>
     <li class="f">Em que <b>posição</b> do controller a rota precisa ser declarada?</li>
-    <li class="f">Que status ela devolve se o acervo estiver vazio?</li>
+    <li class="f">Que status ela devolve se ninguém fizer aniversário hoje?</li>
   </ol>
 </section>
 
@@ -882,9 +882,9 @@ private acervo = new AcervoService();
   <div class="eyebrow in">Checklist de saída</div>
   <h2 class="in">Você terminou o M03 se…</h2>
   <ul class="checks two">
-    <li class="f fade"><code>GET /api/obras</code> responde 200</li>
-    <li class="f fade"><code>/api/obras/abc</code> responde 400 do pipe</li>
-    <li class="f fade"><code>/api/obras/999</code> responde 404 sem você escrever 404</li>
+    <li class="f fade"><code>GET /api/pessoas</code> responde 200</li>
+    <li class="f fade"><code>/api/pessoas/abc</code> responde 400 do pipe</li>
+    <li class="f fade"><code>/api/pessoas/999</code> responde 404 sem você escrever 404</li>
     <li class="f fade">O controller não tem dados nem regra</li>
     <li class="f fade"><code>.env</code> fora do Git, <code>.env.example</code> dentro</li>
     <li class="f fade">A app não sobe sem variável obrigatória</li>
@@ -901,7 +901,7 @@ private acervo = new AcervoService();
   <div class="title-body">
     <div class="eyebrow in">Próximo</div>
     <h1 class="in">M04 · Entidades:<br><span class="hl">classes que geram o banco</span></h1>
-    <p class="lead in">Roteiro completo e exercícios em <code>modulos/03-nestjs-primeiros-passos/</code>.</p>
+    <p class="lead in">Roteiro completo, com a aplicação no projeto, em <code>modulos/03-nestjs-primeiros-passos/</code>.</p>
   </div>
   <div class="meta in">Instale o Docker antes da próxima aula.</div>
 </section>

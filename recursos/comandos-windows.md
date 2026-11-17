@@ -40,7 +40,7 @@ Depois, dentro do Ubuntu, siga os roteiros **exatamente como estão escritos**. 
 integra com a extensão *WSL*, e o Docker Desktop usa o WSL2 como backend.
 
 > ⚠️ **Se usar WSL2, mantenha o projeto no sistema de arquivos do Linux**
-> (`~/projetos/bibliocom`), **não** em `/mnt/c/...`. Acessar o disco do Windows a partir do
+> (`~/dev/projeto`), **não** em `/mnt/c/...`. Acessar o disco do Windows a partir do
 > WSL é muito lento — `npm install` pode levar minutos em vez de segundos.
 
 ---
@@ -64,8 +64,8 @@ No PowerShell, `curl` é **apelido de `Invoke-WebRequest`**, que tem outros par�
 Comandos do material como `curl -X POST -d '...'` falham com erro confuso.
 
 ```powershell
-curl -X POST http://localhost:3000/api/obras     # ❌ erro de parâmetro
-curl.exe -X POST http://localhost:3000/api/obras # ✅ o curl de verdade
+curl -X POST http://localhost:3000/api/pessoas     # ❌ erro de parâmetro
+curl.exe -X POST http://localhost:3000/api/pessoas # ✅ o curl de verdade
 ```
 
 **Regra:** no PowerShell, escreva sempre **`curl.exe`**. O binário existe em todo Windows
@@ -74,10 +74,10 @@ curl.exe -X POST http://localhost:3000/api/obras # ✅ o curl de verdade
 Alternativa nativa, se preferir:
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Get
-Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Post `
+Invoke-RestMethod -Uri "http://localhost:3000/api/pessoas" -Method Get
+Invoke-RestMethod -Uri "http://localhost:3000/api/pessoas" -Method Post `
   -ContentType "application/json" `
-  -Body '{"titulo":"Dom Casmurro","autorId":1}'
+  -Body '{"nome":"Ana Souza"}'
 ```
 
 `Invoke-RestMethod` já converte o JSON em objeto — bom para inspecionar, ruim para ver a
@@ -271,16 +271,16 @@ taskkill /PID <pid> /F
 
 ```bash
 # Linux/macOS: barra invertida
-curl -X POST http://localhost:3000/api/obras \
+curl -X POST http://localhost:3000/api/pessoas \
      -H "Content-Type: application/json" \
-     -d '{"titulo":"X"}'
+     -d '{"nome":"X"}'
 ```
 
 ```powershell
 # PowerShell: crase (backtick)
-curl.exe -X POST http://localhost:3000/api/obras `
+curl.exe -X POST http://localhost:3000/api/pessoas `
      -H "Content-Type: application/json" `
-     -d '{\"titulo\":\"X\"}'
+     -d '{\"nome\":\"X\"}'
 ```
 
 > ⚠️ **Aspas em JSON no PowerShell.** O PowerShell processa aspas duplas antes de passar ao
@@ -288,13 +288,13 @@ curl.exe -X POST http://localhost:3000/api/obras `
 >
 > ```powershell
 > # 1. aspas simples por fora, escapando as duplas (PowerShell 5.1; no 7, sem as barras)
-> curl.exe -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d '{\"titulo\":\"X\"}'
+> curl.exe -X POST http://localhost:3000/api/pessoas -H "Content-Type: application/json" -d '{\"nome\":\"X\"}'
 >
 > # 2. arquivo (melhor para corpos grandes — e é o que o material recomenda)
-> curl.exe -X POST http://localhost:3000/api/obras -H "Content-Type: application/json" -d "@obra.json"
+> curl.exe -X POST http://localhost:3000/api/pessoas -H "Content-Type: application/json" -d "@pessoa.json"
 >
 > # 3. Invoke-RestMethod, sem sofrimento com aspas
-> Invoke-RestMethod -Uri "http://localhost:3000/api/obras" -Method Post -ContentType "application/json" -Body '{"titulo":"X"}'
+> Invoke-RestMethod -Uri "http://localhost:3000/api/pessoas" -Method Post -ContentType "application/json" -Body '{"nome":"X"}'
 > ```
 
 ### Scripts

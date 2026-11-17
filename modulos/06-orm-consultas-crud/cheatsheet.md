@@ -1,10 +1,13 @@
 # Cola — Repository e QueryBuilder
 
+Exemplos com `Pessoa` e `Atendimento` (um atendimento pertence a uma pessoa e inclui vários
+serviços). Troque pelas entidades do projeto.
+
 ## Injetar
 
 ```ts
 constructor(
-  @InjectRepository(Obra) private readonly obras: Repository<Obra>,
+  @InjectRepository(Atendimento) private readonly atendimentos: Repository<Atendimento>,
   private readonly dataSource: DataSource,          // para transações
 ) {}
 ```
@@ -13,40 +16,40 @@ constructor(
 
 ```ts
 // ler
-await this.obras.find();
-await this.obras.findOneBy({ id });                 // Obra | null
-await this.obras.findAndCount({ skip: 0, take: 20 }); // [itens, total]
-await this.obras.existsBy({ isbn });                // boolean
+await this.atendimentos.find();
+await this.atendimentos.findOneBy({ id });                   // Atendimento | null
+await this.atendimentos.findAndCount({ skip: 0, take: 20 }); // [itens, total]
+await this.atendimentos.existsBy({ pessoaId, concluidoEm: IsNull() }); // boolean
 
 // criar — create() monta, save() grava
-const obra = this.obras.create({ titulo: "X", autor });
-await this.obras.save(obra);
+const a = this.atendimentos.create({ descricao: "Orientação", pessoa });
+await this.atendimentos.save(a);
 
 // atualizar
-await this.obras.update(id, { titulo: "Y" });       // rápido, sem hooks
-const o = await this.obras.findOneBy({ id });       // com hooks e validação
-Object.assign(o, dados);
-await this.obras.save(o);
+await this.atendimentos.update(id, { descricao: "Y" });      // rápido, sem hooks
+const b = await this.atendimentos.findOneBy({ id });         // com hooks e checagem de existência
+Object.assign(b, dados);
+await this.atendimentos.save(b);
 
 // remover
-await this.obras.delete(id);                        // { affected: 0 | 1 }
-await this.obras.softDelete(id);                    // precisa de @DeleteDateColumn
+await this.atendimentos.delete(id);                          // { affected: 0 | 1 }
+await this.atendimentos.softDelete(id);                      // precisa de @DeleteDateColumn
 ```
 
 ## Filtros do `Repository`
 
 ```ts
-import { In, LessThan, MoreThan, Like, ILike, IsNull, Not, Between } from "typeorm";
+import { In, LessThan, MoreThan, ILike, IsNull, Not, Between } from "typeorm";
 
-await this.obras.find({
+await this.atendimentos.find({
   where: {
-    anoPublicacao: LessThan(1900),
-    autor: { nome: ILike("%machado%") },      // filtra por relação
-    isbn: Not(IsNull()),
+    criadoEm: Between(inicio, fim),
+    pessoa: { nome: ILike("%silva%") },      // filtra por relação
+    concluidoEm: Not(IsNull()),
     id: In([1, 2, 3]),
   },
-  relations: { autor: true, categorias: true },
-  order: { titulo: "ASC" },
+  relations: { pessoa: true, servicos: true },
+  order: { criadoEm: "DESC" },
   skip: 0,
   take: 20,
 });
@@ -55,63 +58,63 @@ await this.obras.find({
 `where` como **array** vira `OR`:
 
 ```ts
-where: [{ titulo: ILike("%x%") }, { isbn: "978..." }]
+where: [{ descricao: ILike("%x%") }, { pessoaId: 7 }]
 ```
 
 ## QueryBuilder
 
 ```ts
-const qb = this.obras.createQueryBuilder("obra")
-  .leftJoinAndSelect("obra.autor", "autor")   // JOIN + traz colunas
-  .leftJoin("obra.categorias", "cat")         // JOIN só para filtrar
-  .where("obra.anoPublicacao < :ano", { ano: 1900 })
-  .andWhere("cat.id = :id", { id })
-  .orderBy("obra.titulo", "ASC")
+const qb = this.atendimentos.createQueryBuilder("a")
+  .leftJoinAndSelect("a.pessoa", "pessoa")   // JOIN + traz colunas
+  .leftJoin("a.servicos", "serv")            // JOIN só para filtrar
+  .where("a.criadoEm >= :desde", { desde })
+  .andWhere("serv.id = :id", { id })
+  .orderBy("a.criadoEm", "DESC")
   .skip(0).take(20);
 
-await qb.getMany();        // Obra[]
-await qb.getManyAndCount(); // [Obra[], number]
-await qb.getOne();         // Obra | null
-await qb.getRawMany();     // linhas cruas — para agregação
+await qb.getMany();         // Atendimento[]
+await qb.getManyAndCount(); // [Atendimento[], number]
+await qb.getOne();          // Atendimento | null
+await qb.getRawMany();      // linhas cruas — para agregação
 ```
 
 ### Filtro opcional
 
 ```ts
-if (termo) qb.andWhere("obra.titulo ILIKE :termo", { termo: `%${termo}%` });
+if (termo) qb.andWhere("pessoa.nome ILIKE :termo", { termo: `%${termo}%` });
 ```
 
 ### Agregação
 
 ```ts
-await this.obras.createQueryBuilder("obra")
-  .select("autor.nome", "autor")
-  .addSelect("COUNT(obra.id)", "total")
-  .innerJoin("obra.autor", "autor")
-  .groupBy("autor.nome")
-  .having("COUNT(obra.id) > :min", { min: 3 })
+await this.atendimentos.createQueryBuilder("a")
+  .select("serv.nome", "servico")
+  .addSelect("COUNT(a.id)", "total")
+  .innerJoin("a.servicos", "serv")
+  .groupBy("serv.nome")
+  .having("COUNT(a.id) > :min", { min: 3 })
   .getRawMany();
 ```
 
 ## ⚠️ Parâmetros, nunca concatenação
 
 ```ts
-.where(`obra.titulo = '${entrada}'`)                  // ❌ injeção de SQL
-.where("obra.titulo = :titulo", { titulo: entrada })  // ✅
+.where(`pessoa.nome = '${entrada}'`)                 // ❌ injeção de SQL
+.where("pessoa.nome = :nome", { nome: entrada })     // ✅
 ```
 
 ## N+1
 
 ```ts
 // ❌ N+1: com take 50 são 51 consultas; com 200, são 201
-const obras = await this.obras.find({ take: 50 });
-for (const o of obras) {
-  const autor = await this.autores.findOneBy({ id: o.autorId });
-  if (autor) o.autor = autor;
+const lista = await this.atendimentos.find({ take: 50 });
+for (const a of lista) {
+  const p = await this.pessoas.findOneBy({ id: a.pessoaId });
+  if (p) a.pessoa = p;
 }
 
 // ✅ 2 consultas, e continuam 2 com take 200
-await this.obras.find({ take: 50, relations: { autor: true } });
+await this.atendimentos.find({ take: 50, relations: { pessoa: true } });
 ```
 
 São 2 e não 1 porque, com `take` + relação, o TypeORM busca primeiro os ids da página e
@@ -124,7 +127,7 @@ depois os dados. O que importa não é 1 ou 2: é que **2 não cresce**.
 ```ts
 await this.dataSource.transaction(async (manager) => {
   await manager.save(emprestimo);
-  await manager.update(Exemplar, id, { disponivel: false });
+  await manager.update(Item, itemId, { disponivel: false });
 });
 ```
 
@@ -133,7 +136,7 @@ Use o `manager` de dentro — usar `this.repo` escapa da transação.
 ## Ver o SQL
 
 ```ts
-logging: true            // no DataSource
+logging: true             // no DataSource
 console.log(qb.getSql()); // consulta específica
 ```
 

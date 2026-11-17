@@ -1,8 +1,8 @@
 # Plano de Teste
 
-> Etapa 3 · Salve em `docs/plano-de-teste.md`.
+> P3 · Salve em `docs/plano-de-teste.md`.
 >
-> 📌 **Cobrado em:** Etapa 3 — testes automatizados (E1), matriz de acesso (E2) e teste com usuário real (E4). Seções marcadas ➕ não são avaliadas.
+> 📌 **Cobrado em:** P3, critério 4 — testes automatizados, matriz de acesso e teste com usuário. Seções marcadas ➕ não são avaliadas.
 
 **Projeto:** `<nome>` · **Versão testada:** `<commit/tag>` · **Data:** `<AAAA-MM-DD>`
 
@@ -16,7 +16,7 @@
 | Integração | Controller + banco | Vitest + Supertest | |
 | Permissões | Matriz papel × rota | Vitest com `it.each` | |
 | Manual | Fluxos principais | Roteiro humano | |
-| Cliente real | Uso da API pelo parceiro (Swagger ou cliente dele) | Observação | |
+| Teste com usuário | Alguém de fora da equipe faz o cenário principal (Swagger ou cliente simples) | Observação | |
 | Carga simples | Desempenho com volume | `logging: true` do TypeORM + `curl -w` | |
 
 **Ambiente de teste:** `<PostgreSQL 16 no Docker, Node 24, dados gerados por src/semear.ts>`
@@ -58,11 +58,11 @@ Todas as células cobertas por teste automatizado? `<sim/não>` · Arquivo: `<..
 |---|---|---|---|:---:|
 | 1 | | | | |
 
-## 5. Teste com usuário real ⭐
+## 5. Teste com usuário ⭐
 
 | Campo | Conteúdo |
 |---|---|
-| Participante | `<função na organização — sem nome completo>` |
+| Participante | `<quem é, em relação à persona — sem nome completo>` |
 | Data e local | |
 | Tarefa solicitada | `<uma frase, sem dizer COMO fazer>` |
 | Tempo até concluir | |
@@ -128,7 +128,7 @@ uma funcionalidade) · Média (contorna-se) · Baixa (cosmético).
 | Todos os fluxos principais manuais aprovados | |
 | Bugs críticos e altos corrigidos | |
 | Verificações de segurança aprovadas | |
-| Teste com usuário real realizado e incorporado | |
+| Teste com usuário realizado e incorporado | |
 
 **Bugs conhecidos não corrigidos** (e por quê):
 

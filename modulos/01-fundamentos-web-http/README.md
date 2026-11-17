@@ -1,532 +1,265 @@
 # M01 — Fundamentos da web e protocolo HTTP
 
-> **Pré-requisito:** M00 · **Duração:** longa
+> **Pré-requisito:** M00 · **Duração:** longa · **Semana:** 2
 > **Ementa:** *Introdução a aplicações web: Como funcionam; Protocolo HTTP: métodos POST e GET.*
+> **No projeto:** dá a linguagem do contrato da API · usado na P1 (critério 5)
 
-Este é o módulo mais importante da disciplina. Tudo que vem depois — models, views,
-interfaces, segurança, deploy — é uma resposta a alguma característica do HTTP. Quem pula
-este módulo decora o framework; quem entende este módulo aprende a web.
+## Por que este módulo existe no projeto
 
-> Numa arquitetura desacoplada (M02), o HTTP deixa de ser detalhe de infraestrutura e vira
-> **a interface entre a API e quem a usa**. Qualquer cliente — navegador, aplicativo, outro
-> sistema — conversa com o backend por requisições que você mesmo vai projetar. Cada erro de
-> integração que a turma encontrar daqui em diante se explica com o que está neste módulo.
+O sistema que a equipe vai construir é uma **API**: um programa que recebe mensagens HTTP e
+responde mensagens HTTP. A organização, um aplicativo ou outro sistema só conversam com ele
+por aí. Toda decisão dos próximos módulos — que rota criar, que status devolver, onde validar,
+como saber quem está logado — é uma resposta a alguma regra do HTTP.
 
-## 📌 O que a avaliação cobra
+Nesta semana a equipe também **pesquisa o problema** que escolheu (P1). Ao fim do módulo,
+vocês conseguem olhar para o cenário principal das personas e dizer quais requisições ele
+vai gerar.
 
-| Onde | O quê |
-| --- | --- |
-| [Portfólio](../../avaliacao/rubrica-portfolio.md) | entrega **E0** — ver [📦 Entrega E0](#-entrega-e0--relatório-de-inspeção-http) no fim |
-| [Projeto](../../avaliacao/) | Base da avaliação teórica. |
-| Etapas ➕ opcionais | a seção 6 da teoria e a Prática 1 |
+## 🎯 Ao final do módulo
 
-## 🎯 Objetivos
-
-1. Descrever o ciclo requisição–resposta, do clique ao pixel na tela.
-2. Ler e escrever mensagens HTTP cruas (linha de requisição, cabeçalhos, corpo).
-3. Escolher corretamente entre GET e POST, justificando pela semântica do protocolo.
-4. Interpretar códigos de status e usar o DevTools/`curl` para diagnosticar problemas.
-5. Explicar como cookies e sessões contornam a ausência de estado do HTTP.
-
-## 🧭 Por que este módulo é a base da disciplina
-
-O M01 é o primeiro momento em que o aluno deixa de ver a web como "um navegador que mostra
-uma página" e passa a ver a web como um conjunto de mensagens, regras e estados. É aqui que a
-disciplina muda de ferramenta para arquitetura.
-
-Antes de construir a API, o estudante precisa perceber que:
-
-- o navegador não é o sistema, é apenas um cliente;
-- cada click gera uma nova mensagem, e essa mensagem pode ser observada;
-- o estado da aplicação não existe por milagres, e sim por protocolo;
-- a falha mais comum do backend não é de sintaxe, e sim de entender mal o HTTP.
-
-> Se o aluno entende este módulo, ele não apenas usa o framework: ele compreende o que o
-> framework está escondendo por conveniência.
-
-O M01 prepara a mente para o resto da trilha. Os módulos seguintes vão abstrair o protocolo,
-mas sem esse entendimento a abstração vira caixa-preta.
+1. Descrever o caminho de uma requisição, da URL à resposta.
+2. Ler uma mensagem HTTP crua: linha inicial, cabeçalhos e corpo.
+3. Escolher o método pela semântica (seguro, idempotente), não pelo "aparece na URL".
+4. Escolher o status certo e diagnosticar com `curl` e DevTools.
+5. Explicar como o servidor "lembra" de alguém, se o HTTP não tem memória.
 
 ---
 
-## 📖 Teoria
+## 📖 Conceitos
 
-### 1. O que acontece quando você digita uma URL
+### 1. O caminho de uma requisição
 
-```
-https://biblioteca.exemplo.org.br/acervo/obra/42?formato=resumo#autor
-└─┬──┘ └───────────┬──────────┘ └──────┬──────┘ └──────┬──────┘└─┬──┘
-esquema          host              caminho         query string  fragmento
-                                                                (só no cliente)
-```
-
-Sequência completa:
-
-1. **Resolução DNS** — o navegador pergunta ao resolvedor qual o IP de
-   `biblioteca.exemplo.org.br`. Resposta: `203.0.113.10`.
-2. **Conexão TCP** — handshake com `203.0.113.10:443`.
-3. **Handshake TLS** — o servidor apresenta o certificado; a partir daqui tudo é
-   criptografado.
-4. **Requisição HTTP** — o navegador envia texto (ver seção 2).
-5. **Processamento no servidor** — o proxy reverso repassa ao servidor de aplicação, que
-   roteia para o código responsável (o *controller*, no M03), que consulta o banco e monta a
-   resposta (HTML, num site tradicional; JSON, na API que construiremos a partir do M03).
-6. **Resposta HTTP** — status, cabeçalhos e corpo (o HTML).
-7. **Renderização** — o navegador constrói o DOM e, ao encontrar `<link>`, `<script>` e
-   `<img>`, dispara **novas requisições** para cada recurso.
-8. **Fim.** O servidor esquece tudo. A próxima requisição começa do zero.
-
-> **Consequência prática de (8):** uma página aparentemente simples pode gerar 40
-> requisições. E o servidor não sabe que são "da mesma pessoa" — a menos que haja cookie.
-
-```mermaid
-sequenceDiagram
-    participant N as Navegador
-    participant D as DNS
-    participant S as Servidor
-    N->>D: qual o IP de biblioteca.exemplo.org.br?
-    D-->>N: 203.0.113.10
-    N->>S: conexão TCP + handshake TLS (porta 443)
-    N->>S: GET /acervo/obra/42 (requisição HTTP)
-    S-->>N: 200 OK + corpo
-    Note over S: e esquece tudo
+```text
+https://api.exemplo.org.br/agendamentos/42?formato=resumo
+└─┬──┘ └───────┬─────────┘└──────┬──────┘ └─────┬──────┘
+esquema       host            caminho       query string
 ```
 
-HTTP funciona como uma troca de **cartas**: cada requisição é um envelope com endereço e
-instruções na frente (os cabeçalhos) e o conteúdo dentro (o corpo); a resposta é outra carta.
-E o destinatário não guarda cópia de nada: cada carta precisa se explicar sozinha.
+1. **DNS** descobre o IP do host.
+2. **TCP + TLS** abrem uma conexão criptografada (porta 443).
+3. O cliente envia a **requisição** (texto).
+4. O servidor encaminha para o código responsável (o *controller*, no M03), que consulta o
+   banco e monta a **resposta** — JSON, no caso de uma API.
+5. **O servidor esquece tudo.** A próxima requisição começa do zero.
 
-#### Onde roda o quê
+HTTP funciona como troca de **cartas**: cada carta tem endereço e instruções na frente (os
+cabeçalhos) e conteúdo dentro (o corpo). O destinatário não guarda cópia: cada carta precisa
+se explicar sozinha.
 
-| Camada | Executa | Exemplos |
-| --- | --- | --- |
-| Cliente | Navegador | HTML, CSS, JavaScript, validação de UX |
-| Rede | Infraestrutura | DNS, TLS, CDN, proxy reverso |
-| Servidor | Sua aplicação | Roteamento, regras de negócio, acesso a dados, **validação de verdade** |
-| Dados | Banco | Persistência, integridade, transações |
+> **Validação no cliente é conveniência; validação no servidor é segurança.** Tudo que chega
+> pode ter sido forjado com um `curl`. **No projeto:** toda regra da organização é conferida
+> na API (M07), nunca só na tela de quem a usa.
 
-Regra que vale para o resto da vida: **validação no cliente é conveniência; validação no
-servidor é segurança**. Tudo que vem do cliente pode ter sido forjado.
-
-### 2. Anatomia de uma mensagem HTTP
-
-**Requisição:**
+### 2. Anatomia de uma mensagem
 
 ```http
-GET /acervo/obra/42 HTTP/1.1
-Host: biblioteca.exemplo.org.br
-User-Agent: Mozilla/5.0 (X11; Linux x86_64) Firefox/128.0
-Accept: text/html,application/xhtml+xml
-Accept-Language: pt-BR,pt;q=0.9
-Cookie: bibliocom.sid=s%3A8f3b2a...
-Connection: keep-alive
+POST /api/agendamentos HTTP/1.1
+Host: api.exemplo.org.br
+Content-Type: application/json
+Cookie: sid=8f3b2a...
 
-(corpo vazio — GET normalmente não tem corpo)
+{"pessoaId": 7, "data": "2026-09-14T10:00"}
 ```
 
-Estrutura: `MÉTODO CAMINHO VERSÃO` → cabeçalhos (um por linha) → **linha em branco** →
-corpo.
-
-**Resposta:**
+`MÉTODO CAMINHO VERSÃO` → cabeçalhos → **linha em branco** → corpo.
 
 ```http
-HTTP/1.1 200 OK
-Content-Type: text/html; charset=utf-8
-Content-Length: 4821
-Set-Cookie: bibliocom.sid=s%3A8f3b2a...; HttpOnly; Secure; SameSite=Lax
-X-Frame-Options: DENY
-Cache-Control: no-store
+HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Location: /api/agendamentos/42
 
-<!DOCTYPE html>
-<html lang="pt-br">...
+{"id": 42, "pessoaId": 7, "data": "2026-09-14T10:00:00.000Z"}
 ```
 
-Estrutura: `VERSÃO STATUS RAZÃO` → cabeçalhos → **linha em branco** → corpo.
+`VERSÃO STATUS RAZÃO` → cabeçalhos → linha em branco → corpo.
 
-**Cabeçalhos que você usará com frequência:**
-
-| Cabeçalho | Direção | Para quê |
+| Cabeçalho | Para quê | Onde aparece no curso |
 | --- | --- | --- |
-| `Host` | → | Qual site, quando um IP hospeda vários |
-| `Content-Type` | ↔ | Formato do corpo (`text/html`, `application/json`, `multipart/form-data`) |
-| `Accept` | → | Formatos que o cliente entende |
-| `Cookie` / `Set-Cookie` | ↔ | Estado entre requisições |
-| `Authorization` | → | Credencial (`Bearer <token>`) |
-| `Location` | ← | Destino do redirecionamento (com 3xx) |
-| `Cache-Control` | ↔ | Política de cache |
-| `X-Frame-Options`, `Content-Security-Policy` | ← | Segurança do navegador (M09) |
+| `Content-Type` | Formato do corpo | Toda resposta da API |
+| `Cookie` / `Set-Cookie` | Estado entre requisições | Login (M08) |
+| `Authorization` | Credencial | Alternativa ao cookie (M08) |
+| `Location` | Onde está o recurso criado | Respostas 201 (M07) |
+| `Access-Control-*` | Quem pode chamar a API pelo navegador | CORS (M09) |
 
-### 3. Métodos: GET e POST em profundidade
+### 3. Métodos: a pergunta é "o que acontece se repetir?"
 
-A ementa destaca GET e POST porque são os **únicos** que um formulário HTML consegue
-enviar nativamente — e porque confundi-los é a origem de uma classe inteira de bugs e
-vulnerabilidades.
+Duas propriedades definem tudo:
 
-#### Duas propriedades que definem tudo
+- **Seguro** — não altera nada no servidor.
+- **Idempotente** — repetir N vezes tem o mesmo efeito de fazer uma.
 
-- **Seguro (*safe*)** — não altera estado no servidor.
-- **Idempotente** — repetir N vezes tem o mesmo efeito de fazer 1 vez.
-
-| Método | Seguro | Idempotente | Corpo | Uso |
+| Método | Seguro | Idempotente | Corpo | Uso na API |
 | --- | :---: | :---: | :---: | --- |
-| `GET` | ✅ | ✅ | não | Obter representação de um recurso |
-| `HEAD` | ✅ | ✅ | não | Só os cabeçalhos (checar existência/tamanho) |
-| `POST` | ❌ | ❌ | sim | Criar recurso / processar dados |
-| `PUT` | ❌ | ✅ | sim | Substituir recurso por inteiro |
-| `PATCH` | ❌ | ❌ | sim | Atualizar parcialmente |
-| `DELETE` | ❌ | ✅ | opcional | Remover recurso |
-| `OPTIONS` | ✅ | ✅ | não | Descobrir capacidades (usado em CORS) |
+| `GET` | ✅ | ✅ | não | Ler (listar, buscar, detalhar) |
+| `POST` | ❌ | ❌ | sim | Criar |
+| `PUT` | ❌ | ✅ | sim | Substituir inteiro |
+| `PATCH` | ❌ | ❌ | sim | Alterar parte |
+| `DELETE` | ❌ | ✅ | não | Remover |
 
-#### GET
+**GET** pode ser repetido por qualquer um — navegador, cache, robô de busca. Por isso
+**nunca altera dados**: uma aplicação que usou `GET /excluir?id=42` num link teve o banco
+apagado pelo robô que seguiu todos os links. Os parâmetros vão na URL, então aparecem em
+logs e histórico: ótimo para filtro e paginação, péssimo para senha.
 
-```http
-GET /acervo/busca?q=machado+de+assis&pagina=2 HTTP/1.1
-Host: biblioteca.exemplo.org.br
-```
+**POST** não é idempotente: enviar duas vezes cria dois registros. Clique duplo ou nova
+tentativa após falha de rede causam duplicata. **No projeto:** a API recusa a duplicata com
+uma regra de negócio e o status `409` (M07).
 
-Características e consequências:
-
-| Característica | Consequência prática |
-| --- | --- |
-| Dados vão na URL | Aparecem no histórico, nos logs do servidor, no `Referer` e em prints |
-| Pode ser marcado como favorito | Bom para busca, filtro, paginação — o link reproduz o estado |
-| É cacheável | Navegador e CDN podem servir sem tocar no servidor |
-| Limite prático de ~2.000 caracteres | Não serve para textos longos |
-| É repetido livremente (F5, pré-carregamento, bot) | **Nunca** use GET para alterar dados |
-
-> ⚠️ O caso clássico: uma aplicação usou `GET /excluir?id=42` em um link. O pré-carregador
-> de links do navegador e o crawler de indexação seguiram todos os links da página e
-> apagaram o banco inteiro. Não é lenda urbana — é um erro que se repete até hoje.
-
-#### POST
-
-```http
-POST /acervo/obra/nova HTTP/1.1
-Host: biblioteca.exemplo.org.br
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 63
-
-titulo=Dom+Casmurro&autor=1&ano=1899
-```
-
-| Característica | Consequência prática |
-| --- | --- |
-| Dados no corpo | Não vão para o histórico nem para a URL (mas **não** são criptografados por isso — só o HTTPS criptografa) |
-| Não idempotente | F5 depois de um POST reenvia o formulário → duplicação. Solução: **PRG** |
-| Não cacheável por padrão | Sempre chega ao servidor |
-| Sem limite prático de tamanho | Serve para upload e textos longos |
-| Requer proteção CSRF | Ver M09 |
-
-**Formatos de corpo em POST:**
-
-| `Content-Type` | Quando |
-| --- | --- |
-| `application/x-www-form-urlencoded` | Formulário HTML comum |
-| `multipart/form-data` | Formulário com upload de arquivo (`enctype`) |
-| `application/json` | Chamadas de API / JavaScript |
-
-#### O padrão Post/Redirect/Get (PRG)
-
-```mermaid
-sequenceDiagram
-    participant N as Navegador
-    participant S as Servidor
-    N->>S: POST /emprestimo/novo
-    Note over S: processa, grava no banco
-    S-->>N: 302 Found + Location: /emprestimo/17
-    N->>S: GET /emprestimo/17
-    S-->>N: 200 OK (página de confirmação)
-```
-
-Sem PRG, o F5 do usuário cria um segundo empréstimo. Com PRG, o F5 apenas recarrega uma
-página de leitura. Em sites com formulário HTML, **toda** rota que processa POST com sucesso
-deve redirecionar.
-
-> **E numa API?** Quem chama uma API não é um navegador apertando F5: é um programa, e ele
-> recebe `201 Created` com o recurso criado (M07). O problema do envio duplicado continua
-> existindo — clique duplo, nova tentativa automática depois de falha de rede — e se resolve
-> de outro jeito, com regras de negócio que recusam a duplicata (o `409` do M07).
-
-#### Escolhendo o método: árvore de decisão
-
-```
-A requisição altera algum dado no servidor?
-├── NÃO  ──▶ GET
-└── SIM
-     ├── Cria um recurso novo? ────────────────▶ POST
-     ├── Substitui um recurso inteiro? ────────▶ PUT
-     ├── Altera parte de um recurso? ──────────▶ PATCH
-     └── Remove um recurso? ───────────────────▶ DELETE
-
-Em formulário HTML puro só existem GET e POST:
-    busca/filtro/paginação ─▶ GET
-    qualquer alteração ────▶ POST
-```
+> POST **não** é "mais seguro" porque esconde os dados da URL. Sem HTTPS, o corpo trafega em
+> texto puro. Só o HTTPS protege (M12).
 
 ### 4. Códigos de status
 
-| Faixa | Significado | Principais |
+| Faixa | Quem errou | Os que a API vai usar |
 | --- | --- | --- |
-| **1xx** | Informativo | `101 Switching Protocols` (WebSocket) |
-| **2xx** | Sucesso | `200 OK`, `201 Created`, `204 No Content` |
-| **3xx** | Redirecionamento | `301 Moved Permanently`, `302 Found`, `304 Not Modified` |
-| **4xx** | Erro do **cliente** | `400`, `401`, `403`, `404`, `405`, `409`, `422`, `429` |
-| **5xx** | Erro do **servidor** | `500`, `502`, `503`, `504` |
+| **2xx** | ninguém | `200 OK`, `201 Created`, `204 No Content` |
+| **4xx** | o **cliente** | `400` inválido, `401` não autenticado, `403` sem permissão, `404` não existe, `409` conflito, `429` excesso de tentativas |
+| **5xx** | **você** | `500` exceção não tratada, `502` a API caiu atrás do proxy |
 
-Distinções que caem em prova e em code review:
+- **401 × 403:** 401 é *não sei quem você é*; 403 é *sei, e você não pode*.
+- **404 em recurso de outra pessoa:** devolver 404 em vez de 403 esconde que o recurso existe
+  (M09).
+- **Nunca `200` com `{"erro": ...}`.** Caches, monitores e bibliotecas decidem pelo status.
 
-- **401 vs 403** — 401: *não sei quem você é* (não autenticado). 403: *sei quem você é e
-  você não pode* (não autorizado).
-- **301 vs 302** — 301 é permanente e fica em cache do navegador (difícil de reverter);
-  302/303 é temporário. Em PRG, use 302/303.
-- **404 vs 403 em recurso privado** — devolver 404 para recurso que existe mas não é seu
-  evita revelar a existência dele (ver IDOR, M09).
-- **500 vs 502** — 500: sua aplicação lançou exceção. 502: o proxy não conseguiu falar com
-  sua aplicação (ela caiu, ou não subiu).
+**No projeto:** o contrato inicial (M02) lista, para cada rota, o status de sucesso e os
+erros possíveis. É daqui que vem esse vocabulário.
 
 ### 5. HTTP não tem memória: cookies e sessões
 
-O protocolo é **stateless**: cada requisição é independente. Mas aplicações precisam saber
-quem está logado. Solução em duas partes:
-
-Pense no **número de protocolo** de um atendimento por telefone. A atendente não lembra de
-você na ligação seguinte — mas, se você disser o protocolo, ela encontra a sua conversa
-anterior no sistema. O cookie de sessão é esse protocolo: um número que o navegador repete a
-cada requisição.
+Como a API sabe quem está logado, se cada requisição começa do zero? Como o **número de
+protocolo** de um atendimento por telefone: a atendente não lembra de você, mas encontra a
+conversa anterior pelo número.
 
 ```mermaid
 sequenceDiagram
-    participant N as Navegador
-    participant S as Servidor
-    participant A as Armazenamento de sessões
-    N->>S: POST /api/sessao (e-mail e senha)
-    S->>A: cria sessão 8f3b2a… → {usuarioId: 17}
-    S-->>N: 200 + Set-Cookie: bibliocom.sid=8f3b2a… (HttpOnly, Secure, SameSite=Lax)
-    N->>S: GET /api/sessao (Cookie: bibliocom.sid=8f3b2a…)
-    S->>A: busca a sessão 8f3b2a…
-    A-->>S: {usuarioId: 17}
-    S-->>N: 200 + dados da usuária 17
+    participant C as Cliente
+    participant A as API
+    participant B as Sessões (banco)
+    C->>A: POST /api/sessao (e-mail e senha)
+    A->>B: cria sessão 8f3b2a… → usuário 17
+    A-->>C: 200 + Set-Cookie: sid=8f3b2a… (HttpOnly, Secure)
+    C->>A: GET /api/agendamentos (Cookie: sid=8f3b2a…)
+    A->>B: de quem é 8f3b2a…?
+    B-->>A: usuário 17
+    A-->>C: 200 + só os agendamentos do usuário 17
 ```
 
-**Atributos de cookie que importam para segurança:**
-
-| Atributo | Efeito |
+| Atributo do cookie | Efeito |
 | --- | --- |
-| `HttpOnly` | JavaScript não lê o cookie → mitiga roubo de sessão por XSS |
+| `HttpOnly` | JavaScript não lê o cookie (protege contra roubo por XSS) |
 | `Secure` | Só trafega em HTTPS |
-| `SameSite=Lax/Strict` | Não é enviado (ou só em navegação de topo) em requisições de outros sites → mitiga CSRF |
-| `Max-Age` / `Expires` | Tempo de vida |
-| `Domain` / `Path` | Escopo |
+| `SameSite=Lax` | Não vai em requisições disparadas por outros sites (protege contra CSRF) |
 
-Alternativa comum: **token** (JWT) no cabeçalho `Authorization`, frequente em aplicativos
-móveis e integrações entre sistemas. A comparação, e a escolha do curso, estão no M08.
-
-### 6. HTTP/1.1, HTTP/2, HTTP/3
-
-> ➕ **Opcional.** Nenhuma rubrica cobra esta seção — faça se houver tempo.
-
-| Versão | Mudança principal | Impacto no seu código |
-| --- | --- | --- |
-| HTTP/1.1 | Texto, uma requisição por vez na conexão | Truques como *sprite* e concatenação de CSS |
-| HTTP/2 | Binário, multiplexado numa conexão | Aqueles truques deixam de ser necessários |
-| HTTP/3 | Sobre QUIC/UDP, sem *head-of-line blocking* | Ganho em redes móveis |
-
-A semântica (métodos, status, cabeçalhos) é **a mesma** nas três. Você programa contra a
-semântica; a versão é responsabilidade da infraestrutura.
+**No projeto:** é exatamente isto que vocês implementam no M08.
 
 ---
 
-## 🛠️ Roteiro prático
+## 🛠️ Prática em aula
 
-### Prática 1 — Inspecionar o tráfego real
+### Prática 1 — Falar HTTP com `curl`
 
-> ➕ **Opcional.** Nenhuma rubrica cobra esta seção — faça se houver tempo.
-
-1. Abra o DevTools (F12) → aba **Network** → marque *Preserve log* e *Disable cache*.
-2. Acesse um site que exija login (use uma conta de teste, nunca a sua conta real de banco).
-3. Registre, numa tabela:
-
-| Item | Sua observação |
-| --- | --- |
-| Quantas requisições a primeira página gerou? | |
-| Qual o método e o status da requisição do documento HTML? | |
-| Qual o `Content-Type` da resposta principal? | |
-| O login usou GET ou POST? Qual o status da resposta? | |
-| Houve `Set-Cookie`? Com quais atributos? | |
-| Após o login, qual cabeçalho identifica você nas requisições seguintes? | |
-| Alguma resposta veio com 304? O que isso significa? | |
-
-1. Filtre por **Doc**, **XHR** e **Img** e observe a diferença de volume.
-
-### Prática 2 — Falar HTTP na mão com `curl`
-
-> 🪟 **Windows (PowerShell): escreva `curl.exe`, não `curl`.** No PowerShell, `curl` é
-> apelido de `Invoke-WebRequest`, que tem outros parâmetros — os comandos abaixo falham com
-> erro confuso. O `curl.exe` já vem no Windows 10/11. No Git Bash e no WSL, `curl` funciona
-> normalmente. Ver
-> [`../../recursos/comandos-windows.md`](../../recursos/comandos-windows.md#21-curl-no-powershell-não-é-o-curl-).
-
-> No PowerShell, troque `curl` por **`curl.exe`** em todos os comandos abaixo e use a crase
-> (`` ` ``) no lugar da barra invertida para quebrar linha. No Git Bash e no WSL, cole como
-> está.
+> 🪟 **No PowerShell, escreva `curl.exe`**, não `curl` (que é apelido de outro programa), e use
+> a crase (`` ` ``) para quebrar linha. No Git Bash e no WSL, cole como está.
 
 ```bash
-# 1. Só os cabeçalhos
-curl -I https://nodejs.org/
-
-# 2. Requisição completa, mostrando o que foi enviado e recebido
-curl -v https://httpbin.org/get
-
-# 3. GET com query string
-curl "https://httpbin.org/get?q=nestjs&pagina=2"
-
-# 4. POST com formulário
-curl -X POST https://httpbin.org/post \
-     -d "titulo=Dom Casmurro" -d "ano=1899"
-
-# 5. POST com JSON
+curl -I https://nodejs.org/                       # só os cabeçalhos
+curl -v https://httpbin.org/get                   # o que foi enviado e recebido
+curl "https://httpbin.org/get?q=nest&pagina=2"    # GET com query string
 curl -X POST https://httpbin.org/post \
      -H "Content-Type: application/json" \
-     -d '{"titulo": "Dom Casmurro", "ano": 1899}'
-
-# 6. Seguir redirecionamento e ver a cadeia
-curl -v -L http://httpbin.org/redirect/2
-
-# 7. Enviar cabeçalho customizado
-curl https://httpbin.org/headers -H "Authorization: Bearer token-de-teste"
-
-# 8. Guardar e reenviar cookies
-curl -c cookies.txt https://httpbin.org/cookies/set/sessao/abc123
-curl -b cookies.txt https://httpbin.org/cookies
+     -d '{"nome": "Ana", "vagas": 3}'             # POST com JSON
+curl -c c.txt https://httpbin.org/cookies/set/sid/abc123
+curl -b c.txt https://httpbin.org/cookies         # o cookie voltando
 ```
 
-Para cada comando, responda: **qual método, qual status, onde foram os dados** (URL ou
-corpo) e **qual `Content-Type`**.
+Para cada um: **qual método, qual status, onde foram os dados** (URL ou corpo) e qual
+`Content-Type`.
 
-### Prática 3 — Servidor HTTP mínimo, sem framework
+### Prática 2 — Um servidor sem framework
 
-Entender o framework exige ver o que ele esconde. Este servidor faz, em ~80 linhas, o que o
-NestJS faz em milhares:
-
-O código está em
-[`../../recursos/codigo/servidor-minimo.mjs`](../../recursos/codigo/servidor-minimo.mjs).
-Copie-o para uma pasta qualquer e rode:
+[`recursos/codigo/servidor-minimo.mjs`](../../recursos/codigo/servidor-minimo.mjs) faz, em
+~80 linhas, o que o NestJS faz por vocês. Copie para uma pasta qualquer e rode:
 
 ```bash
 node servidor-minimo.mjs
 ```
 
-Explore com o que você aprendeu nas práticas 1 e 2:
-
 ```bash
 # Linux / macOS / WSL / Git Bash
-curl -i http://localhost:8000/
-curl -i http://localhost:8000/obras
+curl -i http://localhost:8000/itens
 curl -i http://localhost:8000/nao-existe
-curl -i -X POST http://localhost:8000/eco -d '{"titulo":"teste"}'
+curl -i -X POST http://localhost:8000/eco -d '{"nome":"teste"}'
+curl -i -X POST http://localhost:8000/eco -d 'isto não é json'
 ```
 
 ```powershell
 # Windows PowerShell
-curl.exe -i http://localhost:8000/
-curl.exe -i http://localhost:8000/obras
+curl.exe -i http://localhost:8000/itens
 curl.exe -i http://localhost:8000/nao-existe
-curl.exe -i -X POST http://localhost:8000/eco -d '{\"titulo\":\"teste\"}'
+curl.exe -i -X POST http://localhost:8000/eco -d '{\"nome\":\"teste\"}'
+curl.exe -i -X POST http://localhost:8000/eco -d 'isto não é json'
 ```
 
-Os pontos a observar — todos comentados no arquivo:
+Abra o arquivo e encontre cada responsabilidade que o framework vai assumir:
 
-| Trecho do código | O que o framework fará por você |
+| No servidor mínimo | No NestJS (onde aparece) |
 | --- | --- |
-| `new URL(req.url, ...)` + a tabela `rotas` | **Roteamento.** No M03 vira `@Get(":id")` |
-| `req.on("data", ...)` juntando pedaços | **Ler o corpo.** Vira `@Body()` |
-| `JSON.parse` dentro de `try` | **Validação.** Vira o `ValidationPipe` (M07) |
-| `responder(res, 404, ...)` escrito à mão | **Status HTTP.** Vira `NotFoundException` |
-| `X-Content-Type-Options` digitado | **Cabeçalhos de segurança.** Vira `helmet` (M09) |
+| `new URL(req.url)` + a tabela `rotas` | Roteamento: `@Get(':id')` (M03) |
+| `req.on("data")` juntando pedaços | Leitura do corpo: `@Body()` (M07) |
+| `JSON.parse` dentro de `try` | Validação: `ValidationPipe` (M07) |
+| `responder(res, 404, …)` à mão | `NotFoundException` (M03) |
+| `X-Content-Type-Options` digitado | `helmet` (M09) |
 
-⚠️ Repare no que **não** existe aqui: nada valida a entrada, nada trata erro de forma
-uniforme, nada impede uma rota de derrubar o processo. Cada uma dessas ausências é uma
-linha de código que você escreveria — e é exatamente isso que o M03 mostra o framework
-fazendo.
-
-**Experimentos obrigatórios** (anote a resposta de cada um):
-
-1. Envie o formulário GET. Onde aparece o nome? Dê F5 — algo é reenviado?
-2. Envie um recado (POST) e dê F5. O recado duplica? Por quê **não**?
-3. Comente as três linhas do redirecionamento em `do_POST` e responda o POST com
-   `self._responder(200, "ok")`. Envie um recado e dê F5. **Agora duplica?**
-   Este é o motivo de existir o padrão PRG.
-4. Acesse `/qualquer-coisa`. Qual status? Onde no código ele é definido?
-5. Acesse `/recado` no navegador (que faz GET). Qual status? Por quê?
-6. Compare com o NestJS: quem faz o roteamento? Quem lê a query string? Quem monta a
-   resposta? Liste as três responsabilidades que o framework vai assumir por você.
+Repare no que **não** existe: nada valida os campos, nada impede uma rota de derrubar o
+processo. Cada ausência é uma linha que vocês escreveriam sem framework.
 
 ---
+
+## 🧩 No projeto da equipe
+
+Com a pesquisa do problema em mãos, peguem o **cenário principal** das personas e, juntos,
+escrevam em `docs/cenario-http.md`:
+
+1. Cada passo do cenário, e a **requisição** que ele gera (método + caminho).
+2. Para cada uma: é segura? É idempotente? O que acontece se o usuário enviar duas vezes?
+3. O status de sucesso e pelo menos um status de erro (com o motivo, em linguagem de quem
+   usa: *"a ferramenta já está emprestada"* → `409`).
+
+Exemplo, num cenário de agendamento:
+
+| Passo do cenário | Requisição | Sucesso | Erro possível |
+| --- | --- | --- | --- |
+| Ver horários livres do dia | `GET /api/horarios?data=2026-09-14` | 200 | 400 data inválida |
+| Marcar um horário | `POST /api/agendamentos` | 201 | 409 horário já ocupado |
+| Cancelar | `DELETE /api/agendamentos/42` | 204 | 404 não existe |
+
+Este rascunho é o ponto de partida do contrato da API no M02 e entra no critério 5 da P1.
 
 ## ⚠️ Erros comuns
 
 | Erro | Por que é errado |
 | --- | --- |
-| Usar GET para excluir/alterar | Bots, pré-carregamento e cache disparam a ação sem intenção do usuário |
-| "POST é seguro porque não mostra os dados" | Só o HTTPS protege; o corpo do POST trafega em texto puro em HTTP |
-| Confiar em validação de JavaScript | Qualquer pessoa desabilita JS ou usa `curl` |
-| Responder 200 com "erro" no corpo | Status é contrato de máquina; clientes e monitoramento leem o status |
-| Usar 301 em redirecionamento temporário | Fica em cache do navegador e é difícil de desfazer |
-| Guardar senha/token na query string | Vai para histórico, logs e `Referer` |
+| GET que altera ou exclui | Robôs, cache e pré-carregamento disparam a ação |
+| "POST é seguro porque não mostra os dados" | Sem HTTPS, o corpo trafega em texto puro |
+| Confiar na validação da tela | Qualquer um chama a API com `curl` |
+| `200` com erro no corpo | Clientes e monitores leem o status |
+| Senha ou token na query string | Vai para logs, histórico e `Referer` |
 
 ## 🤖 IA no fluxo
 
-Cole uma resposta HTTP inteira — linha de status, cabeçalhos e corpo — num assistente de IA e
-peça para ele explicar cada cabeçalho. É um ótimo jeito de estudar o relatório da entrega E0.
+Cole uma resposta HTTP inteira num assistente e peça para explicar cada cabeçalho. O que ele
+não faz é **observar**: o `curl -i` mostra o que está acontecendo de fato. Quando os dois
+discordarem, a resposta real tem razão.
 
-O que ele não faz por você: **observar**. O assistente descreve como o HTTP deveria
-funcionar; o DevTools e o `curl -i` mostram como ele **está** funcionando no seu caso. Quando
-os dois discordarem, quem tem razão é a resposta real.
+## ✅ Marco do módulo
 
-## 💣 Pegadinha de mercado
-
-**Responder `200 OK` com `{"erro": "…"}` no corpo.** Parece prático — "o cliente lê o
-corpo e vê o erro". Mas todo o resto do ecossistema decide pelo status: caches guardam a
-resposta como sucesso, monitores contam como disponível, bibliotecas de cliente não lançam
-exceção, e os logs mostram uma API saudável enquanto ela falha. O status é parte do
-contrato; mentir nele quebra quem confia nele.
-
-## 🧩 Desafio de fixação
-
-Uma página do catálogo da biblioteca demora 4 segundos para abrir. Usando só o DevTools
-(aba Rede), como você descobre se o tempo está no DNS, na conexão, no servidor ou no
-download? Que coluna olharia primeiro, e o que cada resposta indicaria?
-
-## ✅ Checklist de saída
-
-- [ ] Sei desenhar o ciclo requisição–resposta de memória
-- [ ] Sei ler uma mensagem HTTP crua e apontar linha de requisição, cabeçalhos e corpo
-- [ ] Sei justificar GET vs POST por *safe* e *idempotente*, não por "aparece na URL"
-- [ ] Sei explicar o padrão PRG e o problema que ele resolve
-- [ ] Sei a diferença entre 401 e 403, 301 e 302, 500 e 502
-- [ ] Sei explicar como o servidor "lembra" de mim entre requisições
-- [ ] Rodei os 3 roteiros práticos e registrei as observações
-
-## 📦 Entrega E0 — Relatório de inspeção HTTP
-
-**Essencial** — exatamente o que a [rubrica do portfólio](../../avaliacao/rubrica-portfolio.md) verifica:
-
-- [ ] 5+ comandos `curl` com a saída comentada (métodos, status, cabeçalhos) — Prática 2
-- [ ] O servidor mínimo no seu repositório — Prática 3
-- [ ] Um parágrafo: *qual característica do HTTP mais influencia o design de APIs, e por quê?*
-
-**➕ Para ir além** — conta para o nível Excelente, não é obrigatório:
-
-- A tabela da Prática 1 com prints do DevTools
-- As respostas aos 6 experimentos da Prática 3
-
-**Prazo:** ver o [plano de ensino](../../docs/plano-de-ensino.md#9-cronograma-semanal).
+- [ ] Cada integrante rodou as duas práticas e sabe explicar o que viu
+- [ ] `docs/cenario-http.md` no repositório, via PR: requisições do cenário principal, com método e status
+- [ ] A equipe sabe justificar cada método por "seguro" e "idempotente"
 
 ## 📚 Para aprofundar
 
-- [MDN — Visão geral do HTTP (pt-BR)](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Overview)
-- [MDN — Métodos de requisição HTTP](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Methods)
-- [MDN — Códigos de status](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status)
-- [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html) (referência normativa)
-- [High Performance Browser Networking](https://hpbn.co/) — Ilya Grigorik, livre online
+- [MDN — Visão geral do HTTP](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Overview)
+- [MDN — Métodos](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Methods) · [Status](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status)
+- [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html)
 - [httpbin.org](https://httpbin.org) — serviço de eco para testar requisições

@@ -6,7 +6,7 @@
  *
  * São 10 falhas. Para cada uma, entregue:
  *   1. o nome OWASP (A01, A03, …)
- *   2. o impacto de negócio, na linguagem da biblioteca
+ *   2. o impacto de negócio, na linguagem da organização
  *   3. a exploração concreta (payload, URL ou comando)
  *   4. a correção
  *   5. por que a correção funciona
@@ -21,26 +21,26 @@ import { join } from "node:path";
 @Controller("inseguro")
 export class InseguroController {
   constructor(
-    private readonly obras: Repository<Obra>,
+    private readonly pessoas: Repository<Pessoa>,
     private readonly usuarios: Repository<Usuario>,
-    private readonly emprestimos: Repository<Emprestimo>,
+    private readonly atendimentos: Repository<Atendimento>,
   ) { }
 
   // ---------------------------------------------------------------- (1)
   @Get("buscar")
   async buscar(@Query("q") termo: string) {
-    return this.obras
-      .createQueryBuilder("obra")
-      .where(`obra.titulo LIKE '%${termo}%'`)
+    return this.pessoas
+      .createQueryBuilder("pessoa")
+      .where(`pessoa.nome LIKE '%${termo}%'`)
       .getMany();
   }
 
   // ---------------------------------------------------------------- (2)
-  @Get("emprestimos/:id")
-  async verEmprestimo(@Param("id") id: number) {
-    return this.emprestimos.findOne({
+  @Get("atendimentos/:id")
+  async verAtendimento(@Param("id") id: number) {
+    return this.atendimentos.findOne({
       where: { id },
-      relations: { associado: true, exemplar: true },
+      relations: { pessoa: true, responsavel: true },
     });
   }
 
@@ -58,16 +58,16 @@ export class InseguroController {
   }
 
   // ---------------------------------------------------------------- (5)
-  @Delete("obras/:id")
-  async removerObra(@Param("id") id: number) {
-    await this.obras.delete(id);
+  @Delete("pessoas/:id")
+  async removerPessoa(@Param("id") id: number) {
+    await this.pessoas.delete(id);
     return { removido: true };
   }
 
   // ---------------------------------------------------------------- (6)
-  @Get("capa")
-  baixarCapa(@Query("arquivo") arquivo: string, @Res() res: Response) {
-    return res.sendFile(join("/var/bibliocom/midia", arquivo));
+  @Get("anexo")
+  baixarAnexo(@Query("arquivo") arquivo: string, @Res() res: Response) {
+    return res.sendFile(join("/var/app/midia", arquivo));
   }
 
   // ---------------------------------------------------------------- (7)
@@ -96,14 +96,14 @@ export class InseguroController {
   // ---------------------------------------------------------------- (9)
   @Get("relatorio")
   async relatorio(@Query("tamanho") tamanho: number) {
-    return this.obras.find({ take: tamanho });
+    return this.pessoas.find({ take: tamanho });
   }
 
   // ---------------------------------------------------------------- (10)
   @Get("erro")
   async comErro(@Query("id") id: number) {
     try {
-      return await this.obras.findOneByOrFail({ id });
+      return await this.pessoas.findOneByOrFail({ id });
     } catch (err) {
       return { mensagem: err.message, stack: err.stack, sql: err.query };
     }
@@ -116,14 +116,14 @@ GABARITO — não leia antes de tentar.
 ================================================================================
 
 (1) A03 — Injeção de SQL.
-    O termo é concatenado na consulta. `?q=%' OR 1=1 --` devolve o acervo
+    O termo é concatenado na consulta. `?q=%' OR 1=1 --` devolve o cadastro
     inteiro; `UNION SELECT` alcança outras tabelas.
-    Correção: `.where("obra.titulo LIKE :termo", { termo: `%${termo}%` })`.
+    Correção: `.where("pessoa.nome LIKE :termo", { termo: `%${termo}%` })`.
     Funciona porque o driver envia comando e parâmetro separados: o banco nunca
     interpreta o dado como SQL.
 
 (2) A01 — IDOR (referência direta insegura).
-    Qualquer pessoa lê o empréstimo de qualquer outra trocando o `:id`.
+    Qualquer pessoa lê o atendimento de qualquer outra trocando o `:id`.
     Correção: filtrar pela sessão dentro da consulta — quem não pode ver recebe
     404 e não descobre nem que o registro existe.
 
@@ -139,7 +139,7 @@ GABARITO — não leia antes de tentar.
     definido no servidor.
 
 (5) A01 — Falta de autorização.
-    Exclusão sem checar quem chama. Um `curl` apaga o acervo.
+    Exclusão sem checar quem chama. Um `curl` apaga o cadastro.
     Correção: `@UseGuards` + `@Papeis(Papel.COORDENACAO)`.
 
 (6) A01 — Path traversal.

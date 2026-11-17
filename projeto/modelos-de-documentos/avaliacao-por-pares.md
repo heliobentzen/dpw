@@ -1,8 +1,8 @@
 # Avaliação por Pares e Autoavaliação
 
-> Etapa 4 · Preenchimento **individual e confidencial**, entregue diretamente ao docente.
+> P4 · Formulário **confidencial**, entregue diretamente ao docente. Não é uma entrega e não recebe nota: serve para o docente enxergar como a equipe trabalhou.
 >
-> 📌 **Cobrado em:** Etapa 4, pré-requisito — entregue por todos; compõe o fator individual. Seções marcadas ➕ não são avaliadas.
+> 📌 **Usado em:** P4, pré-requisito — preenchido por todos; é uma das fontes do fator de participação. Seções marcadas ➕ não são avaliadas.
 > Compõe o fator de participação individual (0,7 a 1,1) aplicado à nota do projeto.
 
 **Quem responde:** `<seu nome>` · **Equipe:** `<...>` · **Data:** `<AAAA-MM-DD>`

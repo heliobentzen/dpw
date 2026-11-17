@@ -37,7 +37,7 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 ## Depois de cada deploy
 
 - [ ] `GET /api/health` responde 200
-- [ ] `GET /api/obras` responde JSON
+- [ ] `GET /api/<recurso principal>` responde JSON
 - [ ] HTTPS ativo; HTTP redireciona
 - [ ] Login funcionando
 - [ ] Uma operação de escrita funcionando de ponta a ponta
@@ -52,16 +52,16 @@ Percorra antes de cada implantação. O bloco "primeiro deploy" só na primeira 
 ```powershell
 # Windows PowerShell (no Git Bash/Linux, troque curl.exe por curl e NUL por /dev/null)
 curl.exe -i https://SEU-DOMINIO/api/health
-curl.exe -I https://SEU-DOMINIO/api/obras
-curl.exe -s -o NUL -w "%{http_code} %{time_total}s`n" https://SEU-DOMINIO/api/obras
-curl.exe -I http://SEU-DOMINIO/api/obras        # deve redirecionar para https
+curl.exe -I https://SEU-DOMINIO/api/<recurso>
+curl.exe -s -o NUL -w "%{http_code} %{time_total}s`n" https://SEU-DOMINIO/api/<recurso>
+curl.exe -I http://SEU-DOMINIO/api/<recurso>        # deve redirecionar para https
 curl.exe -i https://SEU-DOMINIO/api/nao-existe  # 404 em JSON
 ```
 
 | Comando | O que você está conferindo |
 | --- | --- |
 | `-i .../health` | A API subiu e alcança o banco |
-| `-I .../obras` | Cabeçalhos: `strict-transport-security`, `x-content-type-options`, sem `x-powered-by` |
+| `-I .../<recurso>` | Cabeçalhos: `strict-transport-security`, `x-content-type-options`, sem `x-powered-by` |
 | `-w "%{http_code} %{time_total}s"` | Status e tempo, sem despejar o corpo na tela |
 | `http://` | O redirecionamento para HTTPS existe |
 | `nao-existe` | O erro segue o formato do contrato (M02), e não uma página do servidor |

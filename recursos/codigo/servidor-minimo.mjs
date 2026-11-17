@@ -20,11 +20,11 @@ const PORTA = 8000;
 const rotas = {
   "GET /": () => [200, { mensagem: "Olá! Este servidor não usa framework nenhum." }],
 
-  "GET /obras": () => [
+  "GET /itens": () => [
     200,
     [
-      { id: 1, titulo: "Dom Casmurro", ano: 1899 },
-      { id: 2, titulo: "Grande Sertão: Veredas", ano: 1956 },
+      { id: 1, nome: "Furadeira", disponivel: true },
+      { id: 2, nome: "Escada de alumínio", disponivel: false },
     ],
   ],
 

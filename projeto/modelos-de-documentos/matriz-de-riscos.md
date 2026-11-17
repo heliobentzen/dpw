@@ -1,8 +1,8 @@
 # Matriz de Riscos
 
-> Etapa 1 · Revisar em toda retrospectiva de sprint.
+> P1 · Revisar em toda retrospectiva de sprint.
 >
-> 📌 **Cobrado em:** Etapa 1, critério 6 — 3 a 5 riscos específicos, cada um com plano B. Seções marcadas ➕ não são avaliadas.
+> 📌 **Cobrado em:** P1, critério 6 — 3 a 5 riscos específicos, cada um com plano B. Seções marcadas ➕ não são avaliadas.
 
 ## Como usar
 
@@ -44,16 +44,16 @@ Use como ponto de partida — adapte ao seu contexto, não copie.
 
 | Risco | Prob. típica | Imp. | Mitigação | Plano B |
 | --- | :---: | :---: | --- | --- |
-| Organização parceira fica indisponível | M | A | Reuniões agendadas com antecedência; 2ª pessoa de contato | Validar com usuários finais; docente aciona parceiro reserva |
+| ➕ (trilha opcional) Organização parceira fica indisponível | M | A | Reuniões agendadas com antecedência; 2ª pessoa de contato | Validar com usuários finais; docente aciona parceiro reserva |
 | Integrante com sobrecarga (trabalho, saúde) | A | M | Disponibilidade real declarada; tarefas pequenas | Redistribuir na retrospectiva; renegociar escopo |
 | Escopo cresce durante o projeto | A | A | Escopo declarado por escrito; troca 1 por 1 | Cortar Should e Could |
-| Equipe começa a programar tarde | M | A | Sprints desde a semana 12; marcos semanais | Reduzir MVP a 3 funcionalidades |
-| Deploy falha na reta final | M | A | Deploy do BiblioCom na semana 16; ambiente de staging | Plataforma alternativa testada |
+| Equipe começa a programar tarde | M | A | Módulos aplicados no projeto desde a semana 4; marcos semanais | Reduzir MVP a 3 funcionalidades |
+| Deploy falha na reta final | M | A | Deploy do projeto na semana 14, junto com o M12 | Plataforma alternativa testada |
 | Plano gratuito da PaaS muda de política | B | A | Deploy testado em 2 plataformas | Migrar; docker-compose local para a apresentação |
-| Conflitos de Git e migrações | A | B | Uma pessoa por vez em `models.py`; PR pequeno; pull antes | `makemigrations --merge` |
+| Conflitos de Git e migrações | A | B | Uma migração por PR; PR pequeno; `git pull` antes de gerar | Apagar a migração local e gerá-la de novo sobre a `main` atualizada |
 | Local de uso sem internet | M | A | **Verificar presencialmente** na semana 14 | Repensar o modo de uso (offline-first ou uso administrativo) |
 | Perda de dados / código | B | A | Push diário; backup automático do banco | Restaurar do remoto/backup |
-| Usuários não adotam o sistema | M | A | Protótipo validado; teste com usuário real; capacitação | Ajustar fluxo; simplificar |
+| Usuários não adotam o sistema | M | A | Protótipo validado; teste com usuário; capacitação | Ajustar fluxo; simplificar |
 | Vazamento de dados pessoais | B | A | Mapa de dados; minimização; controle de acesso testado | Plano de resposta a incidente (M09) |
 | Apresentação sem internet no auditório | M | M | Vídeo de demonstração gravado | Rodar local com dados de exemplo |
 

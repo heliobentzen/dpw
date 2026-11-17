@@ -89,7 +89,7 @@ Imprima e percorra item a item. Todo item marcado precisa de **evidência**
 cd backend
 npm audit --audit-level=high
 npx @secretlint/quick-start "**/*"
-curl.exe -I https://SEU-DOMINIO/api/obras
+curl.exe -I https://SEU-DOMINIO/api/<recurso>
 ```
 
 Na saída do último comando, procure `strict-transport-security`, `x-content-type-options`

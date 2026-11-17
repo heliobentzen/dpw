@@ -155,7 +155,7 @@ O **npm vem junto com o Node**: não há nada mais a instalar.
 > `npm install -g npm@11`.
 
 > **Por que npm, e não pnpm ou yarn?** Já vem instalado, todo tutorial usa e, no Windows, não
-> depende de links simbólicos. Ver [ADR-15](decisoes-tecnicas.md#adr-15--npm-como-gerenciador-de-pacotes).
+> depende de links simbólicos. Ver [ADR-05](decisoes-tecnicas.md#adr-05--npm-como-gerenciador-de-pacotes).
 
 🪟 **Exclua `C:\dev` do antivírus.** O Windows Defender inspeciona cada arquivo do
 `npm install`, e a instalação leva minutos em vez de segundos: *Segurança do Windows →
@@ -247,15 +247,15 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: bibliocom
-      POSTGRES_USER: bibliocom
+      POSTGRES_DB: app
+      POSTGRES_USER: app
       POSTGRES_PASSWORD: devpassword
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bibliocom"]
+      test: ["CMD-SHELL", "pg_isready -U app"]
       interval: 5s
       retries: 10
 
@@ -325,7 +325,7 @@ A partir do M04:
 
 | 🪟 Windows | 🐧 Linux e macOS |
 | --- | --- |
-| `Set-Location C:\dev\bibliocom`<br>`docker compose up -d`<br>`Set-Location backend`<br>`npm run start:dev` | `cd ~/dev/bibliocom`<br>`docker compose up -d`<br>`cd backend`<br>`npm run start:dev` |
+| `Set-Location C:\dev\projeto`<br>`docker compose up -d`<br>`Set-Location backend`<br>`npm run start:dev` | `cd ~/dev/projeto`<br>`docker compose up -d`<br>`cd backend`<br>`npm run start:dev` |
 
 **Deu certo se:** <http://localhost:3000/api/docs> abre o Swagger. O `docker compose up -d`
 não faz nada se o banco já estiver no ar, então pode rodá-lo sempre.

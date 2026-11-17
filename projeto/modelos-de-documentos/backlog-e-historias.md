@@ -1,8 +1,8 @@
 # Backlog e Histórias de Usuário
 
-> Etapa 1 · Mantenha o backlog no GitHub Projects (issues) e este arquivo como espelho
+> P1 · Mantenha o backlog no GitHub Projects (issues) e este arquivo como espelho
 >
-> 📌 **Cobrado em:** Etapa 1, critério 4 — histórias com critérios de aceite, estimadas e priorizadas (MoSCoW). O histórico de mudanças conta na Etapa 3 (G3). Seções marcadas ➕ não são avaliadas.
+> 📌 **Cobrado em:** P1, critério 4 — histórias com critérios de aceite, estimadas e priorizadas (MoSCoW). O histórico de mudanças conta na P3 (critério 6). Seções marcadas ➕ não são avaliadas.
 > versionado. Se divergirem, vale o quadro.
 
 ## Visão geral
@@ -37,7 +37,7 @@ mas o sistema funciona sem · *Could* = desejável · *Won't* = fora desta vers�
 **para** <benefício real>.
 
 **Contexto**
-<1-3 linhas: por que isso importa; o que a organização parceira disse a respeito>
+<1-3 linhas: por que isso importa; de onde veio (pesquisa, persona, organização parceira)>
 
 **Critérios de aceite**
 - [ ] <condição verificável 1>
@@ -103,10 +103,13 @@ H05 (cadastro de moradores)
 
 | Sprint | Semanas | Capacidade (pontos) | Comprometido | Entregue |
 | --- | --- | ---: | ---: | ---: |
-| S1 | 12–13 | | | |
-| S2 | 14–15 | | | |
-| S3 | 16–17 | | | |
-| S4 | 18 | | | |
+| S1 | 5–6 | | | |
+| S2 | 7–8 | | | |
+| S3 | 9–10 (P2) | | | |
+| S4 | 11–12 | | | |
+| S5 | 13–14 (deploy) | | | |
+| S6 | 15–16 | | | |
+| S7 | 17–18 (P3) | | | |
 
 Estime a capacidade da S1 pelo palpite; a partir da S2, use o que foi **realmente**
 entregue na anterior. Velocidade medida vence velocidade desejada.
@@ -118,4 +121,4 @@ entregue na anterior. Velocidade medida vence velocidade desejada.
 | | | | | |
 
 > A última coluna é obrigatória: escopo entra trocando por algo que sai. Sem ela, o
-> backlog cresce e a Etapa 3 não fecha.
+> backlog cresce e a P3 não fecha.

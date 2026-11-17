@@ -1,9 +1,10 @@
 # Carta de Anuência
 
-> Etapa 1 · Documento em papel timbrado da organização parceira, assinado por representante
+> P1 · Documento em papel timbrado da organização parceira, assinado por representante
 >
-> 📌 **Cobrado em:** Etapa 1, pré-requisito — aceite da organização por escrito (este modelo ou e-mail). Seções marcadas ➕ não são avaliadas.
-> legal. Adapte ao padrão exigido pela sua instituição — este é um modelo de referência.
+> 📌 **Usado em:** só na trilha opcional de parceria — pré-requisito do bônus. Seções marcadas ➕ não são avaliadas.
+>
+> É um modelo de referência: confira com a coordenação de extensão do campus se há formato próprio do IFPE.
 
 ---
 
@@ -11,7 +12,7 @@
 
 `<Cidade>`, `<dia>` de `<mês>` de `<ano>`.
 
-Ao(À) `<nome da instituição de ensino>`
+Ao Instituto Federal de Pernambuco (IFPE) — Campus `<campus>`
 Curso de `<curso>`
 Disciplina de Desenvolvimento de Projeto Web
 
@@ -72,4 +73,4 @@ Telefone: `<...>` · E-mail: `<...>`
 - [ ] Data preenchida
 - [ ] Demanda escrita pela organização, não pela equipe
 - [ ] Cópia digitalizada anexada ao relatório
-- [ ] Original entregue à coordenação, conforme norma da instituição
+- [ ] Original entregue à coordenação do curso

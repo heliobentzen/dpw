@@ -1,8 +1,8 @@
 # Contrato de Equipe
 
-> Etapa 1 · Acordo interno, assinado por todos. Revisar ao fim de cada sprint.
+> P1 · Acordo interno, assinado por todos. Revisar ao fim de cada sprint.
 >
-> 📌 **Cobrado em:** Etapa 1, pré-requisito — integrantes, papéis e *Definition of Done*, assinados por todos. Seções marcadas ➕ não são avaliadas.
+> 📌 **Cobrado em:** P1, pré-requisito — integrantes, papéis e *Definition of Done*, assinados por todos. Seções marcadas ➕ não são avaliadas.
 > **Regra:** nada de frases genéricas. Cada resposta precisa ser verificável.
 
 **Equipe:** `<nome>` · **Data:** `<AAAA-MM-DD>` · **Revisão nº:** `<1>`
